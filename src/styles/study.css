@@ -1,0 +1,38 @@
+/* Ampliación de la ficha: esquema, flashcards y preguntas de práctica (mismo lenguaje que el prototipo). */
+.ab.e{background:var(--c)}.ab.f{background:var(--v)}.ab.p{background:var(--b)}
+.pn.e{background:#06201f;border:1px solid #3ddbd955}
+.pn.f{background:#160f2b;border:1px solid #a78bfa55}
+.pn.p{background:#0b1a2e;border:1px solid #60a5fa55}
+.pn.e .md b{color:var(--c)}.pn.f .md b{color:var(--v)}
+.fc-n{font-size:.85rem;color:var(--mut);font-variant-numeric:tabular-nums}
+
+/* Esquema: cadena de elementos (de DATA) y árbol desplegable (de los apuntes). */
+.esq-cadena{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 0;padding:12px 14px;list-style:none;background:#000;border-radius:12px;border:1px dashed #3ddbd966}
+.esq-nodo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.02rem;background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:5px 10px}
+.esq-flecha{display:flex;flex-direction:column;align-items:center;color:var(--c);font-weight:800;line-height:1}
+.esq-flecha small{font-size:.7rem;color:var(--mut)}
+.esq-arbol{margin-top:14px}
+.esq-arbol h5{margin:0 0 6px;font-family:"Bricolage Grotesque",sans-serif;font-size:1rem;color:var(--c)}
+.esq-arbol h5 small{font-weight:400;color:var(--mut);font-size:.8rem}
+.esq-arbol ul{list-style:none;margin:0;padding-left:18px;border-left:1px solid #3ddbd955}
+.esq-arbol>ul{padding-left:0;border-left:0}
+.esq-arbol li{margin:4px 0;font-size:.98rem;line-height:1.4}
+.esq-arbol li:not(:has(details))::before{content:"· ";color:var(--c)}
+.esq-arbol summary{cursor:pointer;font-weight:700}
+.esq-arbol summary::marker{color:var(--c)}
+
+/* Flashcards: tarjeta que gira. */
+.fc{display:grid;width:100%;min-height:150px;margin-top:6px;padding:0;border:0;background:none;cursor:pointer;perspective:900px;font:inherit;color:inherit;text-align:center}
+.fc-cara{grid-area:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 22px;border-radius:16px;backface-visibility:hidden;transition:transform .5s cubic-bezier(.3,.7,.2,1)}
+.fc-anverso{background:#000;border:2px solid #a78bfa88;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.3rem;line-height:1.2}
+.fc-anverso small{font-family:"Atkinson Hyperlegible",sans-serif;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--v)}
+.fc-anverso em{font-family:"Atkinson Hyperlegible",sans-serif;font-style:normal;font-weight:400;font-size:.8rem;color:var(--mut)}
+.fc-reverso{background:var(--v);color:#000;font-size:1.08rem;font-weight:700;line-height:1.4;transform:rotateY(180deg)}
+.fc.girada .fc-anverso{transform:rotateY(-180deg)}
+.fc.girada .fc-reverso{transform:rotateY(0)}
+@media (prefers-reduced-motion:reduce){.fc-cara{backface-visibility:visible}.fc:not(.girada) .fc-reverso,.fc.girada .fc-anverso{visibility:hidden}}
+.fc-ctrl,.pq-pie{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+.pq-pie span{font-size:.82rem;color:var(--mut)}
+.fc-btn{cursor:pointer;border:1px solid var(--line);background:var(--bg3);color:#fff;border-radius:999px;padding:6px 14px;font-weight:700;font-size:.9rem}
+.fc-btn:hover:not(:disabled){border-color:#fff}
+.fc-btn:disabled{opacity:.4;cursor:default}

@@ -98,10 +98,70 @@ describe('app en el navegador', () => {
     expect($('.sl.on .bar i').getAttribute('style')).toContain('width:18.75%');
   });
 
+  it('Esquema: la cadena de DATA y el árbol desplegable de los apuntes', () => {
+    navegar('#s/4.2A');
+    const ficha = $('#c-ico');
+    $<HTMLButtonElement>('.ab.e', ficha).click();
+    const panel = $('.pn.e', ficha);
+    expect(panel.hidden).toBe(false);
+    expect($('.esq-arbol h5', panel).textContent).toContain('Las dos vías del ICO');
+    expect($$('details', panel).length).toBeGreaterThan(0);
+  });
+
+  it('Flashcards: se gira y se pasa a la siguiente', () => {
+    const ficha = $('#c-fgd');
+    $<HTMLButtonElement>('.ab.f', ficha).click();
+    const panel = $('.pn.f', ficha);
+    expect($('.fc-anverso', panel).textContent).toContain('Fondo de Garantía');
+    $<HTMLButtonElement>('[data-fc="girar"]', panel).click();
+    expect($('.fc', panel).classList.contains('girada')).toBe(true);
+    $<HTMLButtonElement>('[data-fc="siguiente"]', panel).click();
+    expect($('.fc-n', panel).textContent).toBe('2 / 2');
+    expect($('.fc', panel).classList.contains('girada')).toBe(false);
+  });
+
+  it('Más preguntas: práctica que no cambia el dominio', () => {
+    const ficha = $('#c-ico');
+    const antes = localStorage.getItem(CLAVE_PROGRESO);
+    $<HTMLButtonElement>('.ab.p', ficha).click();
+    const panel = $('.pn.p', ficha);
+    const pregunta = tema01.ampliacion!.preguntas.filter((p) => p.conceptoId === 'ico')[0]!;
+    expect($('p b', panel).textContent).toBe(pregunta.enunciado);
+    ($$('.opt', panel) as HTMLButtonElement[])[pregunta.indiceCorrecta]!.click();
+    expect($('.fb', panel).textContent).toContain('Correcto');
+    expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
+    $<HTMLButtonElement>('[data-pq="siguiente"]', panel).click();
+    expect($('.pq-pie span', panel).textContent).toContain('Práctica 2 / 3');
+  });
+
   it('#c/<id> abre la sección del concepto y lo muestra', () => {
     navegar('#c/bce');
     expect($('[data-sec]').dataset.sec).toBe('4.1');
     expect($('#c-bce').classList.contains('in')).toBe(true);
+  });
+
+  it('#examen: predicción con los 5 bloques ordenados, gráficos, tabla y simulacro', () => {
+    navegar('#examen');
+    expect($('#mt').textContent).toBe('Predicción de examen');
+    expect($('.sl.on').getAttribute('href')).toBe('#examen');
+    expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
+    // Cada concepto del tema aparece una vez en el mapa.
+    expect($$('.ex-chip')).toHaveLength(tema01.conceptos.length);
+    expect($$('.ex-barra.prob')).toHaveLength(5);
+    expect($$('.ex-tabla tbody tr')).toHaveLength(5);
+
+    const antes = localStorage.getItem(CLAVE_PROGRESO);
+    const ficha = $('#ex-activos');
+    $<HTMLButtonElement>('[data-sim="abrir"]', ficha).click();
+    const panel = $('.pn.p', ficha);
+    expect(panel.hidden).toBe(false);
+    // Primero la pregunta oficial de "instrumento".
+    const correcta = tema01.conceptos.find((c) => c.id === 'instrumento')!.pregunta.indiceCorrecta;
+    $<HTMLButtonElement>(`.opt[data-k="${correcta}"]`, panel).click();
+    expect($('.fb', panel).textContent).toContain('Correcto');
+    expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
+    $<HTMLButtonElement>('[data-sim="siguiente"]', panel).click();
+    expect($('.pq-pie', panel).textContent).toContain('Simulacro 2 /');
   });
 
   it('un id desconocido vuelve a la portada', () => {

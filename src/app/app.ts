@@ -4,6 +4,7 @@ import { almacenNavegador } from '../persistence/storage.ts';
 import { pintarRail } from '../ui/components/rail.ts';
 import { activarAparicion, conectarFichas, conectarMenuMovil } from '../ui/interactions.ts';
 import type { ContextoVista } from '../ui/views/context.ts';
+import { pintarExamen } from '../ui/views/examView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
@@ -31,7 +32,11 @@ export function iniciarApp(tema: Tema): void {
     document.body.classList.remove('menu');
     const ruta = resolverRuta(location.hash, tema);
     let seccionActual: string | null = null;
-    if (ruta.vista === 'seccion') {
+    if (ruta.vista === 'examen') {
+      seccionActual = 'examen';
+      mundo.desmontar();
+      pintarExamen(ctx, estado);
+    } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;
       mundo.desmontar();
       // Al volver a la portada, el mapa se abre donde se estaba estudiando.

@@ -1,5 +1,5 @@
 import type { EstadoEstudio } from '../../app/store.ts';
-import { hrefInicio, hrefSeccion } from '../../app/router.ts';
+import { hrefExamen, hrefInicio, hrefSeccion } from '../../app/router.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { anilloDominio } from './ring.ts';
@@ -20,5 +20,8 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
       return `<div class="grp">${g.titulo}</div>${secciones}`;
     })
     .join('');
-  rail.innerHTML = cabecera + grupos;
+  const examen = tema.ampliacion?.bloques.length
+    ? `<a class="sl exn${seccionActual === 'examen' ? ' on' : ''}" href="${hrefExamen()}"><div class="top"><span class="id">📊</span><span>Predicción de examen</span></div><small class="ex-sub">Qué es más probable que caiga</small></a>`
+    : '';
+  rail.innerHTML = cabecera + examen + grupos;
 }

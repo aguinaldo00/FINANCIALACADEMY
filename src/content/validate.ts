@@ -34,5 +34,23 @@ export function validarTema(tema: Tema): string[] {
     if (!conceptos.has(e.conceptoId)) errores.push(`Edificio: concepto inexistente ${e.conceptoId}`);
   }
 
+  const a = tema.ampliacion;
+  if (a) {
+    const suma = a.bloques.reduce((t, b) => t + b.probabilidad, 0);
+    if (suma !== 100) errores.push(`Bloques de examen: las probabilidades suman ${suma}, no 100`);
+    const enBloques = a.bloques.flatMap((b) => b.conceptoIds);
+    for (const id of duplicados(enBloques)) errores.push(`Concepto en dos bloques: ${id}`);
+    for (const c of tema.conceptos) if (!enBloques.includes(c.id)) errores.push(`Concepto sin bloque de examen: ${c.id}`);
+    for (const id of enBloques) if (!conceptos.has(id)) errores.push(`Bloque: concepto inexistente ${id}`);
+    for (const id of duplicados(a.preguntas.map((p) => p.id))) errores.push(`Pregunta duplicada: ${id}`);
+    for (const p of a.preguntas) {
+      if (!conceptos.has(p.conceptoId)) errores.push(`Pregunta ${p.id}: concepto inexistente`);
+      if (!Number.isInteger(p.indiceCorrecta) || p.indiceCorrecta < 0 || p.indiceCorrecta >= p.opciones.length) errores.push(`Pregunta ${p.id}: respuesta fuera de rango`);
+      if (new Set(p.opciones).size !== p.opciones.length) errores.push(`Pregunta ${p.id}: opciones repetidas`);
+    }
+    for (const f of a.flashcards) if (!conceptos.has(f.conceptoId)) errores.push(`Flashcard ${f.id}: concepto inexistente`);
+    for (const e of a.esquemas) if (!conceptos.has(e.conceptoId)) errores.push(`Esquema ${e.titulo}: concepto inexistente`);
+  }
+
   return errores;
 }

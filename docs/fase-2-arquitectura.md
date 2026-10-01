@@ -293,6 +293,30 @@ una ruta de lugares con tres acciones de texto. La ficha contextual sigue el ord
 qué es → cuánto pesa → qué sé → dónde entrar. El Atlas es un índice con clave, nombre y estado, peso
 con barra fina y dominio alineados a la derecha. La leyenda tiene cuatro claves.
 
+## Ampliación del tema y predicción de examen
+
+- **Origen:** `src/content/temas/tema-01/ampliacion.ts` recoge los apuntes del alumno (resumen de
+  la Unidad 1 y predicción de examen). Vive aparte de DATA, que sigue intacta; los tests de paridad
+  no cambian. `validarTema` comprueba la ampliación:
+  - las probabilidades suman 100;
+  - cada concepto pertenece a un solo bloque;
+  - los ids existen;
+  - las preguntas están bien formadas.
+- **Ficha del concepto:** tres acciones nuevas.
+  - 🗺️ **Esquema:** la cadena de la historia del concepto y árboles desplegables de los apuntes.
+  - 🃏 **Flashcards:** la frase de examen de DATA y las tarjetas de los apuntes.
+  - 🧠 **Más preguntas:** práctica.
+- **Dominio:** la práctica y los simulacros **no cambian el dominio**, que solo mide "Compruébalo".
+- **Ruta nueva `#examen`** (solo si el tema tiene ampliación) con enlace en el índice. Contiene:
+  - "Por dónde empezar": probabilidad × lo que falta por dominar;
+  - el mapa de bloques y conceptos, coloreado por dominio;
+  - dos gráficos de barras: probabilidad estimada y preguntas disponibles (Compruébalo + práctica);
+  - una tabla alternativa;
+  - un simulacro por bloque.
+  - Paleta del gráfico apilado validada para el daltonismo sobre `#111`.
+- **Portada 2D:** los iconos de la skyline flotan sobre el tejado, sin recuadro negro.
+  `ciudadPixel(..., { iconosSobreTejado: true })`; sin opciones sigue idéntica al prototipo.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

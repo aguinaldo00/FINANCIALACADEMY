@@ -4,6 +4,8 @@ import './styles/section.css';
 import './styles/home.css';
 import './styles/glyphs.css';
 import './styles/world.css';
+import './styles/study.css';
+import './styles/exam.css';
 import './styles/responsive.css';
 import { iniciarApp } from './app/app.ts';
 import { temaActivo } from './content/temas/index.ts';

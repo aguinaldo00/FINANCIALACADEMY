@@ -64,4 +64,57 @@ export interface Tema {
   modos: ModoExplicacion[];
   conceptos: Concepto[];
   ciudad: { edificios: EdificioCiudad[] };
+  /** Material añadido a partir de los apuntes (opcional; no forma parte de DATA). */
+  ampliacion?: AmpliacionTema;
+}
+
+/*
+ * Ampliación del tema: material de estudio añadido a partir de los apuntes del alumno. Vive aparte
+ * de DATA (que conserva la paridad literal con el prototipo) y no altera el cálculo del dominio:
+ * las preguntas extra son de práctica.
+ */
+
+/** Bloque temático del examen con su probabilidad estimada (dato de los apuntes, no de DATA). */
+export interface BloqueExamen {
+  id: string;
+  titulo: string;
+  /** Probabilidad estimada de aparecer en el examen, en %. Los bloques suman 100. */
+  probabilidad: number;
+  /** Cómo suele preguntarse. */
+  formato: string;
+  conceptoIds: string[];
+  /** "Qué te preguntarán con total seguridad". */
+  claves: string[];
+}
+
+export interface PreguntaExtra extends Pregunta {
+  id: string;
+  conceptoId: string;
+}
+
+export interface Flashcard {
+  id: string;
+  conceptoId: string;
+  anverso: string;
+  reverso: string;
+}
+
+/** Esquema desplegable: un árbol de nodos con texto breve. */
+export interface NodoEsquema {
+  texto: string;
+  hijos?: NodoEsquema[];
+}
+
+export interface EsquemaConcepto {
+  conceptoId: string;
+  titulo: string;
+  raiz: NodoEsquema;
+}
+
+export interface AmpliacionTema {
+  fuente: string;
+  bloques: BloqueExamen[];
+  preguntas: PreguntaExtra[];
+  flashcards: Flashcard[];
+  esquemas: EsquemaConcepto[];
 }
