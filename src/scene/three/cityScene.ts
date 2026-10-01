@@ -37,6 +37,15 @@ import {
   liberar,
 } from './builders.ts';
 import { unir } from './materials.ts';
+import { animarAvatar, construirAvatar, type PartesAvatar } from './avatar.ts';
+import {
+  avanzarPaseo,
+  edificioCercano,
+  type EntradaPaseo,
+  type EstadoPaseo,
+  obstaculosDe,
+  puntoDeSalida,
+} from '../../world/paseo.ts';
 import { NIVEL, PALETA } from './palette.ts';
 
 /*
@@ -54,6 +63,8 @@ export interface OpcionesMundo3D {
   /** Tras cada fotograma en el que algo se ha movido (para recolocar etiquetas HTML). */
   alFotograma(): void;
   alPerderContexto(): void;
+  /** Paseo: el personaje se acerca a un edificio (o se aleja de todos: null). */
+  alAcercarse?(conceptoId: string | null): void;
 }
 
 export interface PuntoPantalla {
@@ -137,6 +148,13 @@ export class Mundo3D {
   /** Edificios retirados para no tapar el edificio enfocado (vista en corte). */
   private ocultos = new Set<Object3D>();
   private sombrasSucias = true;
+  /** Paseo con el personaje (null si no se está paseando). */
+  private paseo: EstadoPaseo | null = null;
+  private avatar: PartesAvatar | null = null;
+  private entradaPaseo: EntradaPaseo = { x: 0, y: 0 };
+  private ultimoPaseo = 0;
+  private cercano: string | null = null;
+  private posicionPaseo: { x: number; z: number } | null = null;
   /** El usuario ya ha girado la cámara: se respeta su orientación. */
   private girado = false;
   private contenedor: HTMLElement | null = null;
@@ -413,12 +431,18 @@ export class Mundo3D {
   private despejarVista(): void {
     const nuevos = new Set<Object3D>();
     const foco = this.focoActual;
-    if (foco.nivel === 'edificio') {
-      const objetivo = this.dinamica.edificios.get(foco.conceptoId);
+    let objetivo: Object3D | undefined;
+    let puntos: Vector3[] = [];
+    if (this.paseo) {
+      // Paseando: nada tapa al personaje.
+      const { x, z } = this.paseo.posicion;
+      puntos = [new Vector3(x, 0.9, z), new Vector3(x, 1.6, z), new Vector3(x, 0.3, z)];
+    } else if (foco.nivel === 'edificio') {
+      objetivo = this.dinamica.edificios.get(foco.conceptoId);
       const e = buscarEdificio(this.modelo, foco.conceptoId);
       if (objetivo && e) {
         const cima = this.cimaEdificio(e.conceptoId);
-        const puntos = [
+        puntos = [
           new Vector3(e.posicion.x, cima * 0.5, e.posicion.z),
           new Vector3(e.posicion.x, cima * 0.15, e.posicion.z),
           new Vector3(e.lote.x, cima * 0.4, e.lote.z),
@@ -426,24 +450,26 @@ export class Mundo3D {
           new Vector3(e.lote.x + e.lote.ancho, cima * 0.4, e.lote.z),
           new Vector3(e.lote.x, cima * 0.4, e.lote.z + e.lote.fondo),
         ];
-        const origen = this.camara.position;
-        const candidatos = [...this.dinamica.edificios.values()].filter((g) => g !== objetivo);
-        for (const p of puntos) {
-          const dir = p.clone().sub(origen);
-          const distancia = dir.length();
-          this.raycaster.set(origen, dir.normalize());
-          this.raycaster.far = distancia - 0.5;
-          for (const impacto of this.raycaster.intersectObjects(candidatos, true)) {
-            for (let o: Object3D | null = impacto.object; o; o = o.parent) {
-              if (o.userData.tipo === 'edificio') {
-                nuevos.add(o);
-                break;
-              }
+      }
+    }
+    if (puntos.length) {
+      const origen = this.camara.position;
+      const candidatos = [...this.dinamica.edificios.values()].filter((g) => g !== objetivo);
+      for (const p of puntos) {
+        const dir = p.clone().sub(origen);
+        const distancia = dir.length();
+        this.raycaster.set(origen, dir.normalize());
+        this.raycaster.far = distancia - 0.5;
+        for (const impacto of this.raycaster.intersectObjects(candidatos, true)) {
+          for (let o: Object3D | null = impacto.object; o; o = o.parent) {
+            if (o.userData.tipo === 'edificio') {
+              nuevos.add(o);
+              break;
             }
           }
         }
-        this.raycaster.far = Infinity;
       }
+      this.raycaster.far = Infinity;
     }
     const cambia = nuevos.size !== this.ocultos.size || [...nuevos].some((g) => !this.ocultos.has(g));
     for (const g of this.ocultos) if (!nuevos.has(g)) g.visible = true;
@@ -476,12 +502,114 @@ export class Mundo3D {
   }
 
   enfocar(foco: Foco, vista: VistaMundo, animar: boolean): void {
+    if (this.paseo) {
+      this.posicionPaseo = { ...this.paseo.posicion };
+      this.paseo = null;
+      if (this.avatar) this.escena.remove(this.avatar.raiz);
+      Object.assign(this.controles, { enablePan: true, minDistance: 5, maxDistance: 600, maxPolarAngle: 1.3 });
+      this.sombrasSucias = true;
+    }
     this.vista = vista;
     this.focoActual = foco;
     this.ajustarSenales();
     this.aplicarEncuadre(foco, animar && !this.reducido);
     this.marcarContorno(foco);
     this.sucio = true;
+  }
+
+  /* ------------------------------------------------------------ paseo */
+
+  get paseando(): boolean {
+    return this.paseo !== null;
+  }
+
+  /**
+   * Paseo en tercera persona: aparece el personaje (donde se dejó, o en una plaza) y la cámara lo
+   * sigue. El usuario puede girarla alrededor de él; el teclado lo mueve (ver `fijarEntradaPaseo`).
+   */
+  iniciarPaseo(): void {
+    if (this.paseo) return;
+    this.avatar ??= construirAvatar();
+    const inicio = this.posicionPaseo ?? puntoDeSalida(this.modelo);
+    const giro = this.girado ? new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target)).theta : 0.35;
+    // Al aparecer mira a la cámara: se presenta antes de echar a andar.
+    this.paseo = { posicion: { ...inicio }, rumbo: giro, velocidad: 0 };
+    this.avatar.raiz.position.set(inicio.x, this.sueloEn(inicio.x, inicio.z), inicio.z);
+    this.avatar.raiz.rotation.y = this.paseo.rumbo;
+    this.escena.add(this.avatar.raiz);
+    this.contorno.visible = false;
+    this.vista = 'maqueta';
+    Object.assign(this.controles, { enablePan: false, minDistance: 4, maxDistance: 40, maxPolarAngle: 1.35 });
+    this.exploracion = true;
+    const objetivo = new Vector3(inicio.x, 1.1, inicio.z);
+    const hacia = new Spherical(11, 1.1, giro);
+    this.camara.fov = 42;
+    this.fijarDesplazamiento(0);
+    this.transicion = null;
+    this.colocarCamara(objetivo, hacia);
+    this.ultimoPaseo = performance.now();
+    this.cercano = null;
+    this.sombrasSucias = true;
+  }
+
+  terminarPaseo(): void {
+    if (!this.paseo) return;
+    this.posicionPaseo = { ...this.paseo.posicion };
+    this.paseo = null;
+    this.entradaPaseo = { x: 0, y: 0 };
+    if (this.avatar) this.escena.remove(this.avatar.raiz);
+    Object.assign(this.controles, { enablePan: true, minDistance: 5, maxDistance: 600, maxPolarAngle: 1.3 });
+    this.cercano = null;
+    this.opciones.alAcercarse?.(null);
+    this.sombrasSucias = true;
+    this.aplicarEncuadre(this.focoActual, !this.reducido);
+  }
+
+  /** Dirección pedida por el teclado: x = derecha, y = adelante (cada una −1, 0 o 1). */
+  fijarEntradaPaseo(entrada: EntradaPaseo): void {
+    this.entradaPaseo = entrada;
+    if (entrada.x || entrada.y) this.arrancar();
+  }
+
+  /** Altura del suelo: aceras y manzanas están algo por encima de la calzada. */
+  private sueloEn(x: number, z: number): number {
+    return this.modelo.zonas.some((zona) => {
+      const r = zona.parcela;
+      return x >= r.x && x <= r.x + r.ancho && z >= r.z && z <= r.z + r.fondo;
+    })
+      ? NIVEL.lote
+      : NIVEL.calle;
+  }
+
+  private avanzarPaseoFotograma(ahora: number): boolean {
+    const paseo = this.paseo;
+    const avatar = this.avatar;
+    if (!paseo || !avatar) return false;
+    const dt = Math.min(0.05, (ahora - this.ultimoPaseo) / 1000);
+    this.ultimoPaseo = ahora;
+    if (!paseo.velocidad && !this.entradaPaseo.x && !this.entradaPaseo.y) return false;
+    const angulo = new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target)).theta;
+    const lado = this.modelo.lado;
+    const nuevo = avanzarPaseo(paseo, this.entradaPaseo, angulo, dt, obstaculosDe(this.modelo), { x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado });
+    const dx = nuevo.posicion.x - paseo.posicion.x;
+    const dz = nuevo.posicion.z - paseo.posicion.z;
+    this.paseo = nuevo;
+    // La cámara acompaña al personaje conservando su giro.
+    this.camara.position.x += dx;
+    this.camara.position.z += dz;
+    this.controles.target.x += dx;
+    this.controles.target.z += dz;
+    const y = this.sueloEn(nuevo.posicion.x, nuevo.posicion.z);
+    avatar.raiz.position.set(nuevo.posicion.x, avatar.raiz.position.y + (y - avatar.raiz.position.y) * Math.min(1, dt * 14), nuevo.posicion.z);
+    avatar.raiz.rotation.y = nuevo.rumbo;
+    animarAvatar(avatar, ahora / 1000, nuevo.velocidad, this.reducido);
+    const cerca = edificioCercano(nuevo.posicion, obstaculosDe(this.modelo));
+    if (cerca !== this.cercano) {
+      this.cercano = cerca;
+      this.opciones.alAcercarse?.(cerca);
+    }
+    this.sombrasSucias = true;
+    return true;
   }
 
   /** 0 = maqueta, 1 = lectura de mapa (vista cenital o cámara muy alejada). */
@@ -736,6 +864,7 @@ export class Mundo3D {
   private fotograma = (ahora: number): void => {
     this.raf = requestAnimationFrame(this.fotograma);
     let cambio = this.avanzarTransicion(ahora);
+    cambio = this.avanzarPaseoFotograma(ahora) || cambio;
     cambio = this.controles.update() || cambio;
     cambio = this.animarCrecimientos(ahora) || cambio;
     cambio = this.animarApariciones(ahora) || cambio;

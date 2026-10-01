@@ -56,6 +56,11 @@ export class ControladorMundo {
    * el scroll revela el bloque del tema y la barra lateral.
    */
   private enPortada = false;
+  /** Paseo con el personaje (teclado). */
+  private paseando = false;
+  private cercano: string | null = null;
+  private teclas = new Set<string>();
+  private alTecladoPaseo: ((e: KeyboardEvent) => void) | null = null;
   private observadorPortada: IntersectionObserver | null = null;
 
   constructor(
@@ -83,6 +88,7 @@ export class ControladorMundo {
     raiz.innerHTML = esqueletoMundo();
     raiz.addEventListener('click', (e) => this.alPulsar(e));
     raiz.addEventListener('keydown', (e) => {
+      if (this.paseando) return;
       if (e.key === 'Escape' && this.subir()) e.preventDefault();
     });
     this.pintarPanel();
@@ -92,6 +98,7 @@ export class ControladorMundo {
   desmontar(): void {
     // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
     this.cerrarEntrada?.();
+    this.detenerPaseo(false);
     this.observadorPortada?.disconnect();
     this.observadorPortada = null;
     document.body.classList.remove('portada-inmersiva');
@@ -190,6 +197,10 @@ export class ControladorMundo {
       alSeleccionar: (s) => this.alSeleccionar(s),
       alSobrevolar: (s) => this.alSobrevolar(s),
       alFotograma: () => this.colocarEtiquetas(),
+      alAcercarse: (id) => {
+        this.cercano = id;
+        this.pintarFicha();
+      },
       alPerderContexto: () => {
         this.disponible3d = false;
         this.mundo?.destruir();
@@ -226,6 +237,70 @@ export class ControladorMundo {
     return Boolean(this.mundo && this.modo3d && this.disponible3d && this.raiz);
   }
 
+  /* ------------------------------------------------------------ paseo */
+
+  private empezarPaseo(): void {
+    if (!this.activo3d || this.paseando) return;
+    if (this.enPortada) this.fijarPortada(false);
+    this.vistaAtlas = false;
+    this.paseando = true;
+    this.mundo!.iniciarPaseo();
+    this.raiz?.classList.add('paseando');
+    const direccion = () => {
+      const t = this.teclas;
+      const x = (t.has('d') || t.has('arrowright') ? 1 : 0) - (t.has('a') || t.has('arrowleft') ? 1 : 0);
+      const y = (t.has('w') || t.has('arrowup') ? 1 : 0) - (t.has('s') || t.has('arrowdown') ? 1 : 0);
+      this.mundo?.fijarEntradaPaseo({ x, y });
+    };
+    const MOVER = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright']);
+    this.alTecladoPaseo = (e: KeyboardEvent) => {
+      const destino = e.target as Element | null;
+      if (destino?.closest('input, textarea, select, [contenteditable="true"]')) return;
+      const tecla = e.key.toLowerCase();
+      if (e.type === 'keydown' && tecla === 'escape') {
+        e.preventDefault();
+        this.detenerPaseo(true);
+        return;
+      }
+      if (e.type === 'keydown' && (tecla === 'e' || tecla === 'enter') && this.cercano) {
+        e.preventDefault();
+        location.hash = hrefConcepto(this.cercano);
+        return;
+      }
+      if (!MOVER.has(tecla)) return;
+      e.preventDefault();
+      if (e.type === 'keydown') this.teclas.add(tecla);
+      else this.teclas.delete(tecla);
+      direccion();
+    };
+    window.addEventListener('keydown', this.alTecladoPaseo);
+    window.addEventListener('keyup', this.alTecladoPaseo);
+    window.addEventListener('blur', this.soltarTeclas);
+    this.pintarPanel();
+  }
+
+  private soltarTeclas = () => {
+    this.teclas.clear();
+    this.mundo?.fijarEntradaPaseo({ x: 0, y: 0 });
+  };
+
+  /** Termina el paseo; `reencuadrar` devuelve la cámara al foco (no hace falta si se va a enfocar otro). */
+  private detenerPaseo(reencuadrar: boolean): void {
+    if (!this.paseando) return;
+    this.paseando = false;
+    this.cercano = null;
+    this.soltarTeclas();
+    if (this.alTecladoPaseo) {
+      window.removeEventListener('keydown', this.alTecladoPaseo);
+      window.removeEventListener('keyup', this.alTecladoPaseo);
+      this.alTecladoPaseo = null;
+    }
+    window.removeEventListener('blur', this.soltarTeclas);
+    this.raiz?.classList.remove('paseando');
+    if (reencuadrar) this.mundo?.terminarPaseo();
+    if (this.raiz) this.pintarPanel();
+  }
+
   private fijarPortada(activa: boolean): void {
     this.enPortada = activa;
     this.raiz?.classList.toggle('portada', activa);
@@ -258,6 +333,7 @@ export class ControladorMundo {
 
   private enfocar(foco: Foco): void {
     if (this.enPortada) this.fijarPortada(false);
+    if (this.paseando) this.detenerPaseo(false);
     if (!igualFoco(foco, this.foco)) this.pasoHistoria = 0;
     this.foco = foco;
     this.pintarPanel();
@@ -305,6 +381,14 @@ export class ControladorMundo {
   private pintarFicha(): void {
     const el = this.raiz?.querySelector<HTMLElement>('[data-mundo-ficha]');
     if (!el) return;
+    if (this.paseando) {
+      const html = this.cercano ? fichaContextual(this.modelo, { nivel: 'edificio', conceptoId: this.cercano }, 'seleccion') + '<p class="ficha-pista">Pulsa E para entrar</p>' : '';
+      el.innerHTML = html;
+      el.hidden = !html;
+      el.classList.remove('vistazo');
+      el.removeAttribute('aria-hidden');
+      return;
+    }
     const vistazo = this.vistazo && !igualFoco(this.vistazo, this.foco) ? this.vistazo : null;
     const html = vistazo
       ? fichaContextual(this.modelo, vistazo, 'vistazo')
@@ -331,6 +415,9 @@ export class ControladorMundo {
       this.vistaAtlas = !this.vistaAtlas;
       this.pintarPanel();
       if (this.activo3d) this.mundo!.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', true);
+    } else if ('mundoPaseo' in dataset) {
+      if (this.paseando) this.detenerPaseo(true);
+      else this.empezarPaseo();
     } else if ('mundoModo' in dataset) {
       this.modo3d = !this.modo3d;
       escribirJson(this.almacen, CLAVE_VISTA, this.modo3d ? '3d' : '2d');
@@ -369,6 +456,7 @@ export class ControladorMundo {
       modo3d: this.modo3d,
       disponible3d: this.disponible3d,
       vistaAtlas: this.vistaAtlas,
+      paseando: this.paseando,
     });
 
     let historia = '';

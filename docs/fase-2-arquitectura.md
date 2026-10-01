@@ -247,6 +247,25 @@ Con la ciudad 3D activa, el mapa es lo primero de la portada y ocupa la pantalla
 Al volver de estudiar (foco en una zona o un edificio) se entra directamente en exploración. Sin
 WebGL, o en 2D, la portada conserva su orden original: primero el bloque del tema.
 
+### Paseo con el personaje
+
+Petición del usuario: su personaje en 3D y peludo, jugable con el teclado. Es una versión
+procedural de su dibujo (`scene/three/avatar.ts`): cuerpo redondeado azul petróleo cubierto de 1.700
+mechones instanciados, oreja negra y oreja azul, cinta roja con el lazo y las colas a un lado, ojos
+grandes y dos patas.
+
+- **"Pasear"** (en la ruta del mundo, solo con puntero fino): aparece en una plaza mirando a la
+  cámara. La cámara pasa a tercera persona y se puede girar alrededor del personaje.
+- **Controles:** WASD o flechas para moverse (relativo a la cámara), E o Intro para entrar en el
+  edificio cercano y Esc para salir.
+- **Modelo puro** en `world/paseo.ts`: aceleración, frenada, colisiones por ejes con los lotes de
+  los edificios (permiten deslizarse por una fachada), límites de la ciudad y edificio cercano.
+- **Edificio cercano:** a menos de 2,2 unidades de un edificio aparece su ficha con "Estudiar el
+  concepto": pasear también es una forma de llegar a estudiar.
+- **Movimiento:** con movimiento reducido el personaje se desplaza sin balanceo de patas ni colas.
+  La vista en corte retira los edificios que lo tapan.
+- **Pendiente:** controles táctiles (joystick) para móvil (ver `decisiones-pendientes.md`).
+
 ### Interfaz editorial
 
 Sin tarjetas ni pills: filetes finos, tipografía protagonista y números grandes. La navegación es

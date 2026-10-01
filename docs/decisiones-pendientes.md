@@ -15,3 +15,7 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
    coincide con la del proyecto actual. No se ha tocado.
 6. **"Dominio alto → pregunta difícil" en las microexperiencias.** DATA tiene una sola pregunta por
    concepto; en dominio alto se propone la misma pregunta en versión abreviada.
+7. **Paseo en móvil.** El personaje se mueve con teclado; en pantallas táctiles el botón "Pasear"
+   está oculto. ¿Añadimos un joystick táctil o tocar el suelo para ir a ese punto?
+8. **Colisiones del paseo.** Hoy solo chocan los edificios; el personaje atraviesa fuentes, árboles
+   y bancos. ¿Merece la pena añadirlos como obstáculos?

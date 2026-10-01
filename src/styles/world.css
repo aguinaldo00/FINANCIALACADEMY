@@ -174,3 +174,10 @@ body.portada-inmersiva .mundo{width:100vw;margin-left:calc(50% - 50vw)}
 @media (max-width:600px){.mundo.portada .portada-pista{flex-direction:column;align-items:center;gap:6px}}
 .page>.mundo:first-child{margin-top:0;border-top:0}
 body.portada-inmersiva .mundo>:not(.mundo-vista){padding-inline:max(16px,calc(50vw - 450px))}
+
+/* Paseo con el personaje. */
+.paseo-pista{display:none}
+.mundo.paseando .paseo-pista{display:flex;position:absolute;top:14px;left:0;right:0;justify-content:center;gap:22px;margin:0;pointer-events:none;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2);text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.paseo-pista b{color:var(--m-tinta);letter-spacing:.06em}
+.mundo.paseando .mundo-etiquetas{display:none}
+@media (pointer:coarse){[data-mundo-paseo]{display:none}}

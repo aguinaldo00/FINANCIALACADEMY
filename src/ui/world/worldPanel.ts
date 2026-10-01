@@ -40,12 +40,13 @@ export interface EstadoBarra {
   /** null mientras se comprueba o se carga. */
   disponible3d: boolean | null;
   vistaAtlas: boolean;
+  paseando?: boolean;
 }
 
 /** Contenedor estable del mundo; la barra y el Atlas se repintan dentro. */
 export function esqueletoMundo(): string {
   return `<div class="mundo-barra" data-mundo-barra></div>
- <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla</span><span>Desliza para ver el tema</span></p></div>
+ <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="paseo-pista" aria-hidden="true"><span><b>WASD</b> o flechas para moverte</span><span><b>E</b> para entrar</span><span><b>Esc</b> para salir</span></p><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla</span><span>Desliza para ver el tema</span></p></div>
  <p class="mundo-aviso" data-mundo-aviso role="status"></p>
  <div class="atlas" data-atlas></div>
  <dl class="mundo-leyenda">
@@ -65,6 +66,9 @@ export function barraMundo(e: EstadoBarra): string {
     .join('');
   const acciones = [
     e.puedeSubir ? '<button type="button" class="mb-btn" data-mundo-subir>Subir de nivel</button>' : '',
+    e.modo3d && e.disponible3d
+      ? `<button type="button" class="mb-btn" data-mundo-paseo aria-pressed="${Boolean(e.paseando)}">${e.paseando ? 'Dejar de pasear' : 'Pasear'}</button>`
+      : '',
     e.modo3d && e.disponible3d
       ? `<button type="button" class="mb-btn" data-mundo-atlas aria-pressed="${e.vistaAtlas}">${e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas'}</button>`
       : '',
