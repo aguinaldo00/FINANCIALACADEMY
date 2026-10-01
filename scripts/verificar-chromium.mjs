@@ -38,6 +38,9 @@ const progreso = () => {
   ok('escritorio: sin porcentajes ni pines en el mundo', !rotulos.join('').includes('%') && !(await p.locator('.mundo-vista').textContent()).includes('📌'));
   ok('portada: el mapa es lo primero y ocupa la pantalla', await p.locator('.page > .mundo.portada:first-child').count() === 1 && (await p.locator('[data-mundo-vista]').boundingBox()).height >= 880);
   ok('portada: barra lateral retirada', (await p.locator('.rail').boundingBox()).x < 0);
+  ok('portada: botón flotante del índice', await p.locator('#ib').isVisible());
+  ok('portada: título de marca sobre el mapa', (await p.locator('.portada-marca .marca').getAttribute('aria-label')) === 'Gestión financiera: La ciudad del dinero');
+  ok('índice: la predicción de examen va al final', (await p.locator('#rail a').last().getAttribute('href')) === '#examen');
   await p.mouse.move(700, 500);
   await p.mouse.wheel(0, 800);
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
@@ -49,15 +52,24 @@ const progreso = () => {
   await p.mouse.click(caja.x + caja.width / 2, caja.y + caja.height / 2);
   await p.waitForTimeout(800);
   ok('portada: un clic entra en la exploración', await p.locator('.mundo.portada').count() === 0 && await p.locator('.mundo-barra').isVisible());
+  // El clic abre la pantalla completa; al salir, el índice vuelve y el Atlas está disponible.
+  const enCompleta = await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')));
+  ok('portada: el clic abre la pantalla completa', enCompleta);
+  if (enCompleta) await p.click('[data-mundo-completa]');
+  await p.waitForFunction(() => !document.fullscreenElement && !document.querySelector('.mundo.en-pantalla-completa'), null, { timeout: 8000 }).catch(() => {});
+  await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
+  ok('explorando: el índice vuelve a verse', (await p.locator('.rail').boundingBox()).x >= 0 && !(await p.locator('#ib').isVisible()));
   // Navegación: barrio → zona → edificio por el Atlas, y migas para volver.
   await p.click('.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(1600);
   ok('navegación: barrio con ficha', (await p.locator('.ficha:not([hidden])').textContent()).includes('Barrio 4'));
   await p.click('.atlas-item[data-foco="zona:4.2A"]');
   await p.waitForTimeout(1600);
-  ok('navegación: zona sin rótulos permanentes', await p.locator('.m-etq').count() === 0);
+  const nombres = await p.locator('.m-etq.edificio').allTextContents();
+  ok('navegación: la zona rotula sus edificios', nombres.length === 8, nombres.join(' | '));
   await p.click('.atlas-item[data-foco="edificio:cajas"]');
   await p.waitForTimeout(1600);
+  ok('navegación: edificio rotulado y destacado', (await p.locator('.m-etq.edificio:not(.tenue)').first().textContent()) === 'Cajas de ahorro');
   ok('navegación: edificio con acción de estudio', (await p.locator('.ficha .ficha-accion').getAttribute('href')) === '#c/cajas');
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-edificio.png` });
   // Estudiar: entrar al concepto, acertar a la primera y volver al mapa.
@@ -78,7 +90,7 @@ const progreso = () => {
   // Subir al mapa con Escape y migas.
   await p.locator('.migas button').first().click();
   await p.waitForTimeout(1500);
-  ok('navegación: migas devuelven a la ciudad', (await p.locator('.migas [aria-current]').textContent()) === 'La Ciudad del Dinero');
+  ok('navegación: migas devuelven a la ciudad', (await p.locator('.migas [aria-current]').textContent()) === 'La ciudad del dinero');
   await p.click('[data-mundo-atlas]');
   await p.waitForTimeout(1800);
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
@@ -123,6 +135,9 @@ const progreso = () => {
   await p.waitForTimeout(3000);
   const b = await p.evaluate(() => window.__dibujos());
   ok('reduced motion: 0 redibujados en reposo', b - a === 0, `${b - a} en 3 s`);
+  // El clic abrió la pantalla completa: se sale para usar el Atlas de debajo.
+  if (await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')))) await p.click('[data-mundo-completa]');
+  await p.waitForTimeout(500);
   await p.click('.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(300);
   ok('reduced motion: el cambio de nivel es inmediato', (await p.locator('.migas [aria-current]').textContent()).includes('Estructura'));

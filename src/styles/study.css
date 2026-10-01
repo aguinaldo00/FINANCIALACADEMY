@@ -6,20 +6,51 @@
 .pn.e .md b{color:var(--c)}.pn.f .md b{color:var(--v)}
 .fc-n{font-size:.85rem;color:var(--mut);font-variant-numeric:tabular-nums}
 
-/* Esquema: cadena de elementos (de DATA) y árbol desplegable (de los apuntes). */
-.esq-cadena{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 0;padding:12px 14px;list-style:none;background:#000;border-radius:12px;border:1px dashed #3ddbd966}
-.esq-nodo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.02rem;background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:5px 10px}
-.esq-flecha{display:flex;flex-direction:column;align-items:center;color:var(--c);font-weight:800;line-height:1}
-.esq-flecha small{font-size:.7rem;color:var(--mut)}
-.esq-arbol{margin-top:14px}
-.esq-arbol h5{margin:0 0 6px;font-family:"Bricolage Grotesque",sans-serif;font-size:1rem;color:var(--c)}
+/* Esquema: diagrama de flujo (cajas y conectores con etiqueta) y árbol desplegable de los apuntes. */
+.flujo{display:grid;gap:12px;margin-top:4px;padding:18px 16px;background:#000;border-radius:14px;border:1px solid #3ddbd933;background-image:radial-gradient(#3ddbd91c 1px,transparent 1px);background-size:16px 16px}
+.flujo-fila{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;row-gap:10px}
+.flujo-fila.lista{gap:8px}
+.f-nodo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1rem;line-height:1.25;text-align:center;background:var(--bg2);border:1.5px solid #3ddbd9aa;border-radius:12px;padding:8px 12px;box-shadow:0 3px 0 #3ddbd933;max-width:16em}
+.flujo-fila.lista .f-nodo{border-style:dashed;font-size:.92rem}
+.f-con{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;padding:0 4px;color:var(--c)}
+.f-con small{font-size:.74rem;font-weight:700;color:#cfeeed;background:#06201f;border:1px solid #3ddbd955;border-radius:999px;padding:0 8px;margin-bottom:2px;white-space:nowrap}
+.f-con i{position:relative;display:block;width:100%;min-width:48px;height:2px;background:var(--c);font-style:normal;font-size:0}
+.f-con i::after{content:"";position:absolute;top:50%;width:0;height:0;border:6px solid transparent;transform:translateY(-50%)}
+.f-con.der i::after,.f-con.contiene i::after{right:-2px;border-left:9px solid var(--c);border-right:0}
+.f-con.izq i::after,.f-con.contenido i::after{left:-2px;border-right:9px solid var(--c);border-left:0}
+.f-con.doble i::after{right:-2px;border-left:9px solid var(--c);border-right:0}
+.f-con.doble i::before{content:"";position:absolute;top:50%;left:-2px;border:6px solid transparent;border-right:9px solid var(--c);border-left:0;transform:translateY(-50%)}
+.flujo-aviso{margin:8px 0 0;font-size:.9rem}
+
+.esq-arbol{margin-top:16px;padding:14px 16px;background:#000;border:1px solid #3ddbd933;border-radius:14px}
+.esq-arbol-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.esq-arbol h5{margin:0;font-family:"Bricolage Grotesque",sans-serif;font-size:1.02rem;color:var(--c)}
 .esq-arbol h5 small{font-weight:400;color:var(--mut);font-size:.8rem}
-.esq-arbol ul{list-style:none;margin:0;padding-left:18px;border-left:1px solid #3ddbd955}
-.esq-arbol>ul{padding-left:0;border-left:0}
-.esq-arbol li{margin:4px 0;font-size:.98rem;line-height:1.4}
-.esq-arbol li:not(:has(details))::before{content:"· ";color:var(--c)}
-.esq-arbol summary{cursor:pointer;font-weight:700}
-.esq-arbol summary::marker{color:var(--c)}
+.esq-ctrl{display:flex;gap:6px}
+.esq-ctrl button{cursor:pointer;border:1px solid #3ddbd955;background:none;color:#cfeeed;border-radius:999px;padding:2px 10px;font-size:.75rem;font-weight:700}
+.esq-ctrl button:hover{background:#06201f}
+/* Ramas con líneas reales en "L". */
+.esq-arbol ul{list-style:none;margin:0;padding-left:22px}
+.esq-arbol ul.esq-raiz{padding-left:0}
+.esq-arbol li{position:relative;margin:0;padding:4px 0 4px 2px;font-size:.98rem;line-height:1.4}
+.esq-arbol ul:not(.esq-raiz)>li::before{content:"";position:absolute;left:-14px;top:0;bottom:0;width:1.5px;background:#3ddbd955}
+.esq-arbol ul:not(.esq-raiz)>li:last-child::before{bottom:auto;height:17px}
+.esq-arbol ul:not(.esq-raiz)>li::after{content:"";position:absolute;left:-14px;top:16px;width:11px;height:1.5px;background:#3ddbd955}
+.esq-arbol summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.esq-arbol summary::-webkit-details-marker{display:none}
+.esq-arbol summary::before{content:"▸";color:var(--c);transition:transform .2s}
+.esq-arbol details[open]>summary::before{transform:rotate(90deg)}
+.esq-raiz>li>details>summary{font-family:"Bricolage Grotesque",sans-serif;font-size:1.06rem;background:#06201f;border:1px solid #3ddbd955;border-radius:10px;padding:4px 10px}
+.esq-n{font-size:.68rem;font-weight:700;color:#000;background:var(--c);border-radius:999px;padding:0 6px;line-height:1.5}
+.esq-hoja{color:#e8e8e8}
+
+@media (max-width:600px){
+  .flujo-fila:not(.lista){flex-direction:column}
+  .f-con{min-height:44px;min-width:0}
+  .f-con i{width:2px;height:22px;min-width:0}
+  .f-con.der i::after,.f-con.contiene i::after,.f-con.doble i::after{right:auto;left:50%;top:auto;bottom:-2px;border:6px solid transparent;border-top:9px solid var(--c);border-bottom:0;transform:translateX(-50%)}
+  .f-con.izq i::after,.f-con.contenido i::after,.f-con.doble i::before{left:50%;top:-2px;border:6px solid transparent;border-bottom:9px solid var(--c);border-top:0;transform:translateX(-50%)}
+}
 
 /* Flashcards: tarjeta que gira. */
 .fc{display:grid;width:100%;min-height:150px;margin-top:6px;padding:0;border:0;background:none;cursor:pointer;perspective:900px;font:inherit;color:inherit;text-align:center}

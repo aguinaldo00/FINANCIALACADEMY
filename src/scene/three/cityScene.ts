@@ -143,6 +143,10 @@ export class Mundo3D {
   private estatica: Group;
   private dinamica: CapaDinamica;
   private transicion: Transicion | null = null;
+  /** El tamaño cambió durante una transición: al terminarla se reencuadra. */
+  private reencuadrePendiente = false;
+  /** El usuario explora (fuera de la portada): solo entonces la ciudad puede leerse como mapa. */
+  private explorando = false;
   private crecimientos: { datos: DatosArquitectura; desde: number; inicio: number }[] = [];
   /** Edificios que se levantan durante la entrada cinematográfica. */
   private apariciones: { grupo: Object3D; inicio: number }[] = [];
@@ -319,6 +323,7 @@ export class Mundo3D {
    * desplazan la página (hacia el bloque del tema) en lugar de mover la cámara.
    */
   set exploracion(activa: boolean) {
+    this.explorando = activa;
     this.controles.enabled = activa;
     this.lienzo.style.touchAction = activa ? 'none' : 'pan-y';
   }
@@ -363,7 +368,16 @@ export class Mundo3D {
     this.distanciaCiudad = 0;
     // Al cambiar el tamaño (girar el móvil, redimensionar) se reencuadra lo que se estaba viendo.
     // Paseando, la cámara sigue al personaje: solo cambia el aspecto.
-    if (!this.transicion && !this.paseo) this.aplicarEncuadre(this.focoActual, false);
+    if (this.paseo) {
+      // Solo cambia el aspecto.
+    } else if (this.transicion) {
+      // Se termina la transición y después se encuadra con el tamaño nuevo (p. ej. al retirarse
+      // la barra lateral durante la entrada); si no, la cámara quedaba lejos y la ciudad pasaba a
+      // leerse como mapa con las placas de calor flotando.
+      this.reencuadrePendiente = true;
+    } else {
+      this.aplicarEncuadre(this.focoActual, false);
+    }
     this.sucio = true;
   }
 
@@ -852,7 +866,13 @@ export class Mundo3D {
     this.camara.fov = tr.fovDesde + (tr.fovHacia - tr.fovDesde) * k;
     this.fijarDesplazamiento(tr.desplazamientoDesde + (tr.desplazamientoHacia - tr.desplazamientoDesde) * k);
     this.colocarCamara(objetivo, s);
-    if (t >= 1) this.transicion = null;
+    if (t >= 1) {
+      this.transicion = null;
+      if (this.reencuadrePendiente) {
+        this.reencuadrePendiente = false;
+        this.aplicarEncuadre(this.focoActual, true, 500);
+      }
+    }
     return true;
   }
 
@@ -890,7 +910,8 @@ export class Mundo3D {
     const optica = Math.abs(this.camara.fov - OPTICA.ciudad.fov) < 1;
     const porDistancia = optica ? escalon(this.distanciaCiudad * 1.15, this.distanciaCiudad * 1.5, s.radius) : 0;
     const porAltura = escalon(0.45, 0.15, s.phi);
-    this.atlas = Math.max(porDistancia, porAltura);
+    // En la portada (sin explorar) la ciudad siempre es maqueta.
+    this.atlas = this.explorando || this.vista === 'atlas' ? Math.max(porDistancia, porAltura) : 0;
     for (const plano of this.dinamica.calor) {
       plano.visible = this.atlas > 0.01;
       (plano.material as MeshBasicMaterial).opacity = this.atlas * 0.62;
@@ -904,9 +925,10 @@ export class Mundo3D {
   private ajustarProfundidad(): void {
     const d = this.camara.position.distanceTo(this.controles.target);
     if (this.escena.fog instanceof Fog) {
-      // Distancia de visión: la niebla empieza lejos del sujeto (de cerca, toda la ciudad se ve).
-      this.escena.fog.near = this.paseo ? 60 : d * 0.95 + 45;
-      this.escena.fog.far = this.paseo ? 240 : d * 2.8 + 170;
+      // Maqueta: niebla ceñida a la distancia de la cámara (atmósfera de maqueta). Paseando, la
+      // distancia de visión es larga para ver la ciudad a lo lejos.
+      this.escena.fog.near = this.paseo ? 60 : d * 0.95;
+      this.escena.fog.far = this.paseo ? 240 : d * 2.8;
     }
     const near = Math.min(40, Math.max(0.2, d * 0.04));
     const far = Math.max(d * 3 + this.modelo.lado * 2, 400);

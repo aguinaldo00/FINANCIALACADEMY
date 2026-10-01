@@ -1,3 +1,4 @@
+import { MARCA, tituloMarca } from '../components/brandTitle.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
@@ -69,6 +70,8 @@ export class ControladorMundo {
   private zoomRueda: boolean;
   private pistaZoomMostrada = false;
   private observadorPortada: IntersectionObserver | null = null;
+  /** El mapa ocupa la mayor parte de la pantalla (≥ 55 % visible). */
+  private mapaDomina = false;
 
   constructor(
     private readonly estado: EstadoEstudio,
@@ -120,6 +123,7 @@ export class ControladorMundo {
     if (this.pantallaCompleta) void this.salirPantallaCompleta();
     this.observadorPortada?.disconnect();
     this.observadorPortada = null;
+    this.mapaDomina = false;
     document.body.classList.remove('portada-inmersiva');
     this.mundo?.desmontar();
     this.raiz = null;
@@ -153,7 +157,7 @@ export class ControladorMundo {
     const vista = this.el('[data-mundo-vista]');
     vista.hidden = false;
     this.alternarCiudad2d(false);
-    mundo.lienzo.setAttribute('aria-label', `Maqueta 3D de ${this.estado.tema.meta.ciudad}. El Atlas de abajo ofrece la misma navegación en texto.`);
+    mundo.lienzo.setAttribute('aria-label', `Maqueta 3D de ${MARCA.ciudad}. El Atlas de abajo ofrece la misma navegación en texto.`);
     // Con la ciudad 3D funcionando, el mundo pasa a ser lo primero de la portada. Se vuelve a la
     // portada (landing) cuando se llega a la vista general; desde un lugar estudiado, a explorar.
     raiz.parentElement?.prepend(raiz);
@@ -176,7 +180,7 @@ export class ControladorMundo {
   private iniciarEntrada(vista: HTMLElement, mundo: Mundo3D): void {
     const capa = document.createElement('div');
     capa.className = 'entrada';
-    capa.innerHTML = `<p class="entrada-marca"><span>La Ciudad</span><span>del Dinero</span></p><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
+    capa.innerHTML = `<div class="entrada-marca">${tituloMarca('entrada')}</div><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
     vista.append(capa);
     vista.classList.add('en-entrada');
     let cerrada = false;
@@ -387,6 +391,17 @@ export class ControladorMundo {
     this.enPortada = activa;
     this.raiz?.classList.toggle('portada', activa);
     if (this.mundo) this.mundo.exploracion = !activa;
+    this.actualizarInmersion();
+  }
+
+  /**
+   * Regla única del índice lateral: solo se retira en la portada (sin explorar) mientras el mapa
+   * domina la pantalla. Explorando, al bajar por la página o fuera de la portada, siempre se ve.
+   */
+  private actualizarInmersion(): void {
+    const retirar = Boolean(this.raiz) && this.enPortada && this.mapaDomina;
+    document.body.classList.toggle('portada-inmersiva', retirar);
+    if (!retirar) document.body.classList.remove('menu');
   }
 
   /** Mientras el mapa domina la pantalla, la barra lateral se retira y el mundo ocupa todo el ancho. */
@@ -425,7 +440,10 @@ export class ControladorMundo {
     }
     this.observadorPortada?.disconnect();
     this.observadorPortada = new IntersectionObserver(
-      ([e]) => document.body.classList.toggle('portada-inmersiva', Boolean(e && e.intersectionRatio >= 0.55)),
+      ([e]) => {
+        this.mapaDomina = Boolean(e && e.intersectionRatio >= 0.55);
+        this.actualizarInmersion();
+      },
       { threshold: [0, 0.55, 1] },
     );
     this.observadorPortada.observe(vista);
@@ -479,6 +497,7 @@ export class ControladorMundo {
     if ((foco && this.vistazo && igualFoco(foco, this.vistazo)) || (!foco && !this.vistazo)) return;
     this.vistazo = foco;
     this.pintarFicha();
+    if (!this.paseando) this.pintarEtiquetas();
   }
 
   /**
@@ -550,7 +569,7 @@ export class ControladorMundo {
   private etiquetaFoco(f: Foco): string {
     switch (f.nivel) {
       case 'ciudad':
-        return this.estado.tema.meta.ciudad;
+        return MARCA.ciudad;
       case 'barrio':
         return buscarBarrio(this.modelo, f.grupoId)?.titulo ?? '';
       case 'zona': {
@@ -596,7 +615,11 @@ export class ControladorMundo {
     const f = this.foco;
     this.modoMapa = this.vistaAtlas || (this.mundo?.factorAtlas ?? 0) > 0.5;
     capa.innerHTML = '';
-    this.etiquetas = etiquetasDelNivel(this.modelo, f, this.modoMapa).map((foco) => {
+    const focos = etiquetasDelNivel(this.modelo, f, this.modoMapa);
+    // El edificio que señala el puntero lleva siempre su nombre, en cualquier nivel.
+    const v = this.vistazo;
+    if (v?.nivel === 'edificio' && !focos.some((x) => igualFoco(x, v))) focos.push(v);
+    this.etiquetas = focos.map((foco) => {
       const el = document.createElement('button');
       el.type = 'button';
       el.tabIndex = -1;
@@ -614,6 +637,9 @@ export class ControladorMundo {
         el.innerHTML = `<span class="m-num">${z.seccionId}</span><span class="m-largo">${z.titulo}</span>`;
       } else if (foco.nivel === 'edificio') {
         el.textContent = buscarEdificio(this.modelo, foco.conceptoId)!.nombre;
+        el.classList.add('edificio');
+        if (f.nivel === 'edificio') el.classList.toggle('tenue', !igualFoco(foco, f));
+        if (v && igualFoco(foco, v)) el.classList.add('sobrevuelo');
       }
       capa.append(el);
       return { foco, el };

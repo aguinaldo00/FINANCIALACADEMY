@@ -6,7 +6,8 @@ import type { Foco } from './focus.ts';
  * jerarquía y la ficha contextual da los datos cuando se piden.
  * - Ciudad: solo los barrios, discretos (en lectura de mapa, las zonas).
  * - Barrio: sus zonas.
- * - Zona y edificio: nada permanente; el nombre está en la ficha.
+ * - Zona: el nombre de cada uno de sus edificios.
+ * - Edificio: el edificio enfocado y, atenuados por la vista, los demás de su zona.
  */
 export function etiquetasDelNivel(m: ModeloCiudad, foco: Foco, modoMapa: boolean): Foco[] {
   switch (foco.nivel) {
@@ -17,7 +18,18 @@ export function etiquetasDelNivel(m: ModeloCiudad, foco: Foco, modoMapa: boolean
     case 'barrio':
       return m.zonas.filter((z) => z.grupoId === foco.grupoId).map((z): Foco => ({ nivel: 'zona', seccionId: z.seccionId }));
     case 'zona':
-    case 'edificio':
-      return [];
+      return edificiosDeZona(m, foco.seccionId);
+    case 'edificio': {
+      const zona = m.zonas.find((z) => z.conceptoIds.includes(foco.conceptoId));
+      const resto = zona ? edificiosDeZona(m, zona.seccionId).filter((f) => f.nivel === 'edificio' && f.conceptoId !== foco.conceptoId) : [];
+      return [{ nivel: 'edificio', conceptoId: foco.conceptoId }, ...resto];
+    }
   }
+}
+
+function edificiosDeZona(m: ModeloCiudad, seccionId: string): Foco[] {
+  const zona = m.zonas.find((z) => z.seccionId === seccionId);
+  return (zona?.conceptoIds ?? [])
+    .filter((id) => m.edificios.some((e) => e.conceptoId === id))
+    .map((conceptoId): Foco => ({ nivel: 'edificio', conceptoId }));
 }

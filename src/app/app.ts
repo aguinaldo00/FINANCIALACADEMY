@@ -53,7 +53,8 @@ export function iniciarApp(tema: Tema): void {
   }
 
   conectarFichas(ctx, estado);
-  conectarMenuMovil(elemento('#mb'), ctx.rail);
+  const flotante = document.querySelector<HTMLElement>('#ib');
+  conectarMenuMovil(flotante ? [elemento('#mb'), flotante] : [elemento('#mb')], ctx.rail);
   addEventListener('hashchange', pintar);
   pintar();
 }

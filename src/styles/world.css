@@ -42,7 +42,6 @@
 .entrada{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:#0b0a09;transition:background 1.6s ease}
 .entrada.abierta{background:rgba(11,10,9,0)}
 .entrada-marca{margin:0;display:grid;justify-items:center;font-family:var(--m-display);font-weight:800;font-size:clamp(2.4rem,6vw,4.4rem);line-height:.92;letter-spacing:-.035em;color:var(--m-tinta);animation:entrada-marca 1s ease both;transition:opacity .9s ease,transform 1.2s ease}
-.entrada-marca span+span{color:var(--m-oro)}
 .entrada.abierta .entrada-marca{opacity:0;transform:translateY(-14px)}
 @keyframes entrada-marca{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .entrada-lema{position:absolute;left:0;right:0;bottom:14%;margin:0;text-align:center;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.32em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:0;transition:opacity 1s ease}
@@ -57,6 +56,11 @@
 .m-etq .m-num{font-family:var(--m-display);font-weight:800;letter-spacing:0;font-size:1.05em}
 .m-etq.barrio{font-size:.8rem}
 .m-etq.barrio .m-num{font-size:1.6em;line-height:1}
+.m-etq.edificio{font-size:.68rem;letter-spacing:.08em;text-transform:none;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(14,13,12,.62);text-shadow:none}
+.m-etq.edificio.tenue{opacity:.55;font-size:.62rem}
+.m-etq.edificio.sobrevuelo{opacity:1;background:var(--m-tinta);color:var(--m-noche)}
+.m-etq.edificio:hover{background:rgba(14,13,12,.85);opacity:1}
+@media (max-width:600px){.m-etq.edificio{font-size:.6rem;max-width:9.5em;white-space:normal;line-height:1.15;text-align:center}.m-etq.edificio.tenue{display:none}}
 .m-etq:hover .m-largo{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--m-oro)}
 
 /* Ficha contextual: fuera del mundo, en la esquina; aparece al señalar o seleccionar. */
@@ -165,6 +169,9 @@
   .rail{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
   main{transition:margin-left .5s cubic-bezier(.2,.8,.2,1)}
   body.portada-inmersiva .rail{transform:translateX(-102%)}
+  /* Con la barra retirada, el botón flotante la abre como capa. */
+  body.portada-inmersiva.menu .rail{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.6)}
+  body.portada-inmersiva .indice-flotante{display:inline-flex}
   body.portada-inmersiva main{margin-left:0}
 }
 body.portada-inmersiva{overflow-x:clip}
@@ -192,3 +199,15 @@ body:has(.mundo.pantalla-completa){overflow:hidden}
 
 /* Pista de zoom (aparece una vez al usar la rueda sobre el mapa con el zoom desactivado). */
 .pista-zoom{position:absolute;left:50%;top:14px;transform:translateX(-50%);margin:0;padding:6px 14px;background:rgba(14,13,12,.88);border-radius:3px;font-size:.78rem;font-weight:700;color:var(--m-tinta);pointer-events:none;white-space:nowrap}
+
+/* Botón flotante del índice (escritorio, portada inmersiva). */
+.indice-flotante{display:none;position:fixed;left:16px;top:calc(14px + env(safe-area-inset-top,0px));z-index:35;align-items:center;gap:6px;cursor:pointer;border:1px solid var(--m-linea);border-radius:999px;padding:6px 14px;background:rgba(14,13,12,.78);color:var(--m-tinta);font:inherit;font-size:.8rem;font-weight:700;letter-spacing:.04em;backdrop-filter:blur(6px)}
+.indice-flotante:hover{background:rgba(14,13,12,.95)}
+body.menu .indice-flotante{display:none!important}
+
+/* Título de marca sobre el mapa de la portada (letras de moneda, ver brand.css). */
+.portada-marca{display:none}
+.mundo.portada .portada-marca{display:flex;justify-content:center;position:absolute;left:16px;right:16px;top:7%;z-index:2;pointer-events:none;filter:drop-shadow(0 4px 18px rgba(0,0,0,.65))}
+.en-entrada .portada-marca{opacity:0}
+.entrada-marca .marca{color:inherit}
+.brand .brand-ante{display:block;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y)}

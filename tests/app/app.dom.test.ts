@@ -37,7 +37,8 @@ describe('app en el navegador', () => {
     // 4.2A tiene 8 conceptos y fgd está dominado: 1/8 → 13 %.
     const tile = $$('.tile').find((t) => t.getAttribute('href') === '#s/4.2A')!;
     expect(tile.textContent).toContain('dominio 13 %');
-    expect($('#mt').textContent).toBe('La Ciudad del Dinero');
+    expect($('#mt').textContent).toBe('Gestión financiera · La ciudad del dinero');
+    expect($('.hero h1').getAttribute('aria-label')).toBe('Gestión financiera: La ciudad del dinero');
   });
 
   it('abre una sección por hash y marca el índice', () => {
@@ -106,6 +107,11 @@ describe('app en el navegador', () => {
     expect(panel.hidden).toBe(false);
     expect($('.esq-arbol h5', panel).textContent).toContain('Las dos vías del ICO');
     expect($$('details', panel).length).toBeGreaterThan(0);
+    expect($$('.flujo .f-nodo', panel).length).toBeGreaterThan(1);
+    $<HTMLButtonElement>('[data-arbol="cerrar"]', panel).click();
+    expect($$('details', panel).every((d) => !(d as HTMLDetailsElement).open)).toBe(true);
+    $<HTMLButtonElement>('[data-arbol="abrir"]', panel).click();
+    expect($$('details', panel).every((d) => (d as HTMLDetailsElement).open)).toBe(true);
   });
 
   it('Flashcards: se gira y se pasa a la siguiente', () => {
@@ -144,6 +150,8 @@ describe('app en el navegador', () => {
     navegar('#examen');
     expect($('#mt').textContent).toBe('Predicción de examen');
     expect($('.sl.on').getAttribute('href')).toBe('#examen');
+    // La predicción va al final del índice.
+    expect($$('#rail a').at(-1)!.getAttribute('href')).toBe('#examen');
     expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
     // Cada concepto del tema aparece una vez en el mapa.
     expect($$('.ex-chip')).toHaveLength(tema01.conceptos.length);

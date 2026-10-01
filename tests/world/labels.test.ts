@@ -13,10 +13,15 @@ describe('jerarquía de etiquetas sobre la maqueta', () => {
     expect(etiquetasDelNivel(m, { nivel: 'ciudad' }, true)).toHaveLength(12);
   });
 
-  it('el barrio identifica sus zonas; zona y edificio no tienen rótulos permanentes', () => {
+  it('el barrio identifica sus zonas; la zona y el edificio rotulan los edificios', () => {
     expect(etiquetasDelNivel(m, { nivel: 'barrio', grupoId: '4' }, false)).toHaveLength(3);
-    expect(etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, false)).toEqual([]);
-    expect(etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, true)).toEqual([]);
-    expect(etiquetasDelNivel(m, { nivel: 'edificio', conceptoId: 'bde' }, false)).toEqual([]);
+    const zona = etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, false);
+    expect(zona).toHaveLength(8);
+    expect(zona.every((f) => f.nivel === 'edificio')).toBe(true);
+    const edificio = etiquetasDelNivel(m, { nivel: 'edificio', conceptoId: 'fgd' }, false);
+    // Primero el enfocado, después el resto de su zona (sin repetirlo).
+    expect(edificio[0]).toEqual({ nivel: 'edificio', conceptoId: 'fgd' });
+    expect(edificio).toHaveLength(8);
+    expect(new Set(edificio.map((f) => (f.nivel === 'edificio' ? f.conceptoId : ''))).size).toBe(8);
   });
 });

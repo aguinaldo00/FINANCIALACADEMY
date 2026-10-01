@@ -1,3 +1,4 @@
+import { tituloMarca } from '../components/brandTitle.ts';
 import { hrefConcepto, hrefSeccion } from '../../app/router.ts';
 import type { ModoExplicacion } from '../../content/schema.ts';
 import type { NivelDominio } from '../../domain/mastery.ts';
@@ -48,7 +49,7 @@ export interface EstadoBarra {
 /** Contenedor estable del mundo; la barra y el Atlas se repintan dentro. */
 export function esqueletoMundo(): string {
   return `<div class="mundo-barra" data-mundo-barra></div>
- <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="paseo-pista" aria-hidden="true"><span><b>WASD</b> o flechas para moverte</span><span><b>Espacio</b> saltar · <b>doble</b> dash</span><span><b>E</b> para entrar</span><span><b>Esc</b> para salir</span></p><p class="pista-zoom" data-pista-zoom aria-hidden="true" hidden>Ctrl + rueda para acercar · o activa «Zoom con rueda»</p><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla a pantalla completa</span><span>Desliza para ver el tema</span></p></div>
+ <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="paseo-pista" aria-hidden="true"><span><b>WASD</b> o flechas para moverte</span><span><b>Espacio</b> saltar · <b>doble</b> dash</span><span><b>E</b> para entrar</span><span><b>Esc</b> para salir</span></p><p class="pista-zoom" data-pista-zoom aria-hidden="true" hidden>Ctrl + rueda para acercar · o activa «Zoom con rueda»</p><div class="portada-marca">${tituloMarca('portada')}</div><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla a pantalla completa</span><span>Desliza para ver el tema</span></p></div>
  <p class="mundo-aviso" data-mundo-aviso role="status"></p>
  <div class="atlas" data-atlas></div>
  <dl class="mundo-leyenda">

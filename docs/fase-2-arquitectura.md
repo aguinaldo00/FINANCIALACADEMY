@@ -317,6 +317,36 @@ con barra fina y dominio alineados a la derecha. La leyenda tiene cuatro claves.
 - **Portada 2D:** los iconos de la skyline flotan sobre el tejado, sin recuadro negro.
   `ciudadPixel(..., { iconosSobreTejado: true })`; sin opciones sigue idéntica al prototipo.
 
+## Correcciones tras la versión 6 y marca "Gestión financiera"
+
+- **Mapa 3D:**
+  - En la portada la ciudad es siempre maqueta: la lectura de mapa (placas de calor y rótulos de
+    zona) solo aparece explorando o en el Atlas.
+  - Si el lienzo cambia de tamaño durante una transición (la barra lateral se retira en la entrada),
+    se reencuadra al terminarla.
+  - Vuelve la niebla de maqueta; la niebla larga queda solo para el paseo.
+- **Rótulos:**
+  - **Zona:** el nombre de cada edificio.
+  - **Edificio:** el enfocado, destacado, y los de su zona, atenuados.
+  - **Al pasar el ratón**, el nombre del edificio en cualquier nivel.
+- **Índice:**
+  - Se retira solo en la portada con el mapa a pantalla; hay un botón flotante "☰ Índice" para
+    abrirlo.
+  - La predicción de examen va al final del índice, y hay una tarjeta al final de la portada.
+- **Marca:**
+  - "GESTIÓN FINANCIERA · La ciudad del dinero" con letras de moneda (CSS, `brandTitle.ts` y
+    `brand.css`), en la entrada, sobre el mapa de la portada y en el hero.
+  - `tema.meta.ciudad` (DATA) no cambia.
+- **Predicción:**
+  - reparto 100 % apilado;
+  - treemap de bloques, con un ladrillo por concepto coloreado por dominio (`world/treemap.ts`);
+  - tres gráficos de barras y tabla;
+  - fichas con claves, conceptos y simulacro con marcador.
+- **Esquemas de la ficha:**
+  - El texto de DATA se lee como diagrama de flujo (`leerEsquema`), solo como presentación; un test
+    comprueba que no se pierde texto.
+  - Árbol con ramas y "Desplegar / Plegar todo".
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

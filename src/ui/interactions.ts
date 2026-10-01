@@ -112,12 +112,17 @@ export function activarAparicion(): void {
   document.querySelectorAll('.rev:not(.in)').forEach((el) => observador?.observe(el));
 }
 
-/** Menú lateral en móvil: se abre con el botón y se cierra al pulsar fuera o en un enlace. */
-export function conectarMenuMovil(botonMenu: HTMLElement, rail: HTMLElement): void {
-  botonMenu.onclick = (e) => {
-    e.stopPropagation();
-    document.body.classList.toggle('menu');
-  };
+/**
+ * Índice como capa: en móvil (botón de la barra superior) y en la portada inmersiva de escritorio
+ * (botón flotante). Se cierra al pulsar fuera o en un enlace.
+ */
+export function conectarMenuMovil(botones: HTMLElement[], rail: HTMLElement): void {
+  for (const boton of botones) {
+    boton.onclick = (e) => {
+      e.stopPropagation();
+      document.body.classList.toggle('menu');
+    };
+  }
   document.addEventListener('click', (e) => {
     const destino = e.target as Element;
     if (document.body.classList.contains('menu') && (!rail.contains(destino) || destino.closest('a'))) {

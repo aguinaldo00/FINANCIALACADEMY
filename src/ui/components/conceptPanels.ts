@@ -52,33 +52,95 @@ export function pintarPreguntaEn(
 
 /* ------------------------------------------------------------ ampliación */
 
-function arbol(n: NodoEsquema, abierto: boolean): string {
-  if (!n.hijos?.length) return `<li>${n.texto}</li>`;
-  return `<li><details${abierto ? ' open' : ''}><summary>${n.texto}</summary><ul>${n.hijos.map((h) => arbol(h, true)).join('')}</ul></details></li>`;
+function arbol(n: NodoEsquema, nivel: number): string {
+  if (!n.hijos?.length) return `<li class="esq-hoja">${n.texto}</li>`;
+  return `<li><details open><summary><span>${n.texto}</span><small class="esq-n">${n.hijos.length}</small></summary><ul>${n.hijos.map((h) => arbol(h, nivel + 1)).join('')}</ul></details></li>`;
+}
+
+/** Pieza de un diagrama de flujo: una caja o un conector (con su etiqueta y sentido). */
+type PiezaFlujo = { tipo: 'nodo'; texto: string } | { tipo: 'con'; etiqueta: string; sentido: 'der' | 'izq' | 'doble' | 'contiene' | 'contenido' };
+
+/**
+ * Lee el esquema de texto de DATA ("A ──x──▶ B", "A → B", "A ⇄ B", varias filas separadas por
+ * "   ·   " o " | ") como filas de un diagrama de flujo. Solo cambia la presentación: los textos son los
+ * de DATA tal cual. Si una fila no tiene conectores, es una lista ("A · B · C").
+ */
+export function leerEsquema(texto: string): PiezaFlujo[][] {
+  const conector = /──(.+?)──▶|◀──(.+?)──|→|⇄|▶/g;
+  return texto
+    .split(/\s{2,}·\s{2,}|\s\|\s/)
+    .map((fila) => {
+      const piezas: PiezaFlujo[] = [];
+      let ultimo = 0;
+      for (const m of fila.matchAll(conector)) {
+        const antes = fila.slice(ultimo, m.index).trim();
+        if (antes) piezas.push({ tipo: 'nodo', texto: antes });
+        if (m[1] !== undefined) piezas.push({ tipo: 'con', etiqueta: m[1].trim(), sentido: 'der' });
+        else if (m[2] !== undefined) piezas.push({ tipo: 'con', etiqueta: m[2].trim(), sentido: 'izq' });
+        else piezas.push({ tipo: 'con', etiqueta: '', sentido: m[0] === '⇄' ? 'doble' : 'der' });
+        ultimo = (m.index ?? 0) + m[0].length;
+      }
+      const resto = fila.slice(ultimo).trim();
+      if (resto) piezas.push({ tipo: 'nodo', texto: resto });
+      // Sin conectores: es una lista de elementos.
+      if (!piezas.some((p) => p.tipo === 'con')) return resto.split(/\s·\s/).map((t): PiezaFlujo => ({ tipo: 'nodo', texto: t.trim() }));
+      return piezas;
+    })
+    .filter((f) => f.length);
+}
+
+const FLECHA: Record<Extract<PiezaFlujo, { tipo: 'con' }>['sentido'], string> = { der: '→', izq: '←', doble: '⇄', contiene: '⊃', contenido: '⊂' };
+
+function diagramaFlujo(filas: PiezaFlujo[][]): string {
+  return `<div class="flujo">${filas
+    .map((fila) => {
+      const lista = !fila.some((p) => p.tipo === 'con');
+      return `<div class="flujo-fila${lista ? ' lista' : ''}">${fila
+        .map((p) =>
+          p.tipo === 'nodo'
+            ? `<span class="f-nodo">${p.texto}</span>`
+            : `<span class="f-con ${p.sentido}" aria-label="${p.etiqueta || FLECHA[p.sentido]}">${p.etiqueta ? `<small>${p.etiqueta}</small>` : ''}<i aria-hidden="true">${FLECHA[p.sentido]}</i></span>`,
+        )
+        .join('')}</div>`;
+    })
+    .join('')}</div>`;
 }
 
 /**
- * Panel "Esquema": el esquema visual de DATA (como cadena de elementos si se puede leer como
- * flujo) y, si los apuntes tienen un esquema de este concepto, un árbol desplegable.
+ * Panel "Esquema": diagrama de flujo (de la historia del concepto o del esquema de texto de DATA)
+ * y, si los apuntes tienen un esquema de este concepto, un árbol desplegable.
  */
 export function pintarEsquema(panel: HTMLElement, concepto: Concepto, tema: Tema): void {
   const indice = tema.modos.findIndex((m) => m.formato === 'esquema');
-  const texto = resaltarAviso(concepto.explicaciones[indice] ?? '');
+  const texto = concepto.explicaciones[indice] ?? '';
   const h = historiaDeConcepto(tema, concepto.id);
-  const cadena = h
-    ? `<ol class="esq-cadena">${h.entidades
-        .map((e, i) => {
-          const f = h.flujos[i];
-          const flecha = !f ? '' : f.tipo === 'contiene' ? (f.desde === e.id ? '⊃' : '⊂') : f.tipo === 'intercambio' ? '⇄' : f.desde === e.id ? '→' : '←';
-          return `<li class="esq-nodo">${e.etiqueta}</li>${f ? `<li class="esq-flecha" aria-hidden="true">${f.etiqueta ? `<small>${f.etiqueta}</small>` : ''}${flecha}</li>` : ''}`;
-        })
-        .join('')}</ol>`
-    : `<div class="esq">${texto}</div>`;
+  let filas: PiezaFlujo[][];
+  if (h) {
+    const fila: PiezaFlujo[] = [];
+    h.entidades.forEach((e, i) => {
+      fila.push({ tipo: 'nodo', texto: e.etiqueta });
+      const f = h.flujos[i];
+      if (f && i < h.entidades.length - 1) {
+        const sentido = f.tipo === 'contiene' ? (f.desde === e.id ? 'contiene' : 'contenido') : f.tipo === 'intercambio' ? 'doble' : f.desde === e.id ? 'der' : 'izq';
+        fila.push({ tipo: 'con', etiqueta: f.etiqueta ?? '', sentido });
+      }
+    });
+    filas = [fila];
+  } else {
+    filas = leerEsquema(texto.replace(/⚠.*$/, '').trim());
+  }
+  const aviso = texto.includes('⚠') ? `<p class="flujo-aviso">${resaltarAviso(texto.slice(texto.indexOf('⚠')))}</p>` : '';
   const propios = tema.ampliacion?.esquemas.filter((e) => e.conceptoId === concepto.id) ?? [];
   const desplegables = propios
-    .map((e) => `<div class="esq-arbol"><h5>${e.titulo} <small>· de tus apuntes</small></h5><ul>${arbol(e.raiz, true)}</ul></div>`)
+    .map((e) => `<div class="esq-arbol"><div class="esq-arbol-h"><h5>${e.titulo} <small>· de tus apuntes</small></h5><span class="esq-ctrl"><button type="button" data-arbol="abrir">Desplegar todo</button><button type="button" data-arbol="cerrar">Plegar todo</button></span></div><ul class="esq-raiz">${arbol(e.raiz, 0)}</ul></div>`)
     .join('');
-  panel.innerHTML = `<div class="md"><b>🗺️ Esquema visual</b></div>${cadena}${desplegables}`;
+  panel.innerHTML = `<div class="md"><b>🗺️ Esquema visual</b></div>${diagramaFlujo(filas)}${aviso}${desplegables}`;
+  for (const boton of panel.querySelectorAll<HTMLButtonElement>('[data-arbol]')) {
+    boton.onclick = () => {
+      const abrir = boton.dataset.arbol === 'abrir';
+      boton.closest('.esq-arbol')?.querySelectorAll('details').forEach((d) => (d.open = abrir));
+    };
+  }
 }
 
 export interface Tarjeta {
