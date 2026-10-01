@@ -13,7 +13,7 @@ Rutina horaria: `trig_01EsNSKvi2kqpUXensnJE3Xn` (00:25–08:25, Europe/Madrid). 
 
 - [x] 1. Terminar el vertical slice del barrio 4 con los criterios acordados: gramática urbana, landmarks, rótulos mínimos, ficha contextual, columna de luz, cámara por nivel y entrada cinematográfica. Seguir paso a paso `docs/plan-cierre-slice.md` (no borrarlo).
 - [x] 2. Verificar en Chromium: escritorio, móvil, sin WebGL, movimiento reducido, navegación y vuelta al mapa.
-- [ ] 3. Documentar la dirección de arte en `docs/fase-2-arquitectura.md`.
+- [x] 3. Documentar la dirección de arte en `docs/fase-2-arquitectura.md`.
 - [ ] 4. Actualizar la PR y republicar el artefacto en el mismo enlace.
 - [ ] 5. Escribir en `docs/esquema-del-tema.md` el análisis y la propuesta de arquitectura del Esquema del tema: datos y relaciones reales de DATA, las que no existen, integración con la barra lateral y piezas compartidas con la ciudad y el Atlas. Sin implementarlo.
 - [ ] 6. Escribir en `docs/microexperiencia-intermediacion.md` el storyboard (6–8 fotogramas) de "Intermediación indirecta" con textos literales de DATA y principios de motion. Sin implementarlo.
