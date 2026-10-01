@@ -136,6 +136,7 @@ export class Mundo3D {
   private desplazamiento = 0;
   /** Edificios retirados para no tapar el edificio enfocado (vista en corte). */
   private ocultos = new Set<Object3D>();
+  private sombrasSucias = true;
   /** El usuario ya ha girado la cámara: se respeta su orientación. */
   private girado = false;
   private contenedor: HTMLElement | null = null;
@@ -157,6 +158,9 @@ export class Mundo3D {
     this.renderer.toneMappingExposure = 0.92;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = PCFShadowMap;
+    // La luz del sol es fija: el mapa de sombras solo se recalcula cuando cambia la escena
+    // (estudio, crecimiento, entrada, vista en corte), nunca al mover la cámara.
+    this.renderer.shadowMap.autoUpdate = false;
     // Los edificios en obra se recortan con un plano por edificio.
     this.renderer.localClippingEnabled = true;
     this.lienzo = this.renderer.domElement;
@@ -325,6 +329,7 @@ export class Mundo3D {
     this.dinamica = construirCapaDinamica(modelo);
     this.escena.add(this.dinamica.raiz);
     this.ocultos = new Set();
+    this.sombrasSucias = true;
     this.ajustarSenales();
 
     if (!this.reducido) {
@@ -383,6 +388,7 @@ export class Mundo3D {
     return () => {
       for (const a of this.apariciones) a.grupo.scale.y = 1;
       this.apariciones = [];
+      this.sombrasSucias = true;
       this.transicion = null;
       this.camara.fov = OPTICA.ciudad.fov;
       this.camara.updateProjectionMatrix();
@@ -430,9 +436,11 @@ export class Mundo3D {
         this.raycaster.far = Infinity;
       }
     }
+    const cambia = nuevos.size !== this.ocultos.size || [...nuevos].some((g) => !this.ocultos.has(g));
     for (const g of this.ocultos) if (!nuevos.has(g)) g.visible = true;
     for (const g of nuevos) g.visible = false;
     this.ocultos = nuevos;
+    if (cambia) this.sombrasSucias = true;
   }
 
   /** Las columnas de luz orientan a escala de ciudad y barrio; de cerca solo queda el halo. */
@@ -454,6 +462,7 @@ export class Mundo3D {
       grupo.scale.y = Math.max(0.0001, 1 - (1 - t) ** 3);
       return t < 1;
     });
+    this.sombrasSucias = true;
     return true;
   }
 
@@ -726,6 +735,10 @@ export class Mundo3D {
     this.despejarVista();
     this.ajustarProfundidad();
     this.aplicarAtlas();
+    if (this.sombrasSucias) {
+      this.renderer.shadowMap.needsUpdate = true;
+      this.sombrasSucias = false;
+    }
     this.renderer.render(this.escena, this.camara);
     this.sucio = false;
     this.opciones.alFotograma();
@@ -739,6 +752,7 @@ export class Mundo3D {
       datos.fijarCorte(desde + (datos.corteFase - desde) * k);
       return t < 1;
     });
+    this.sombrasSucias = true;
     return true;
   }
 

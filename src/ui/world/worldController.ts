@@ -49,6 +49,8 @@ export class ControladorMundo {
   private modoMapa = false;
   /** Lo que el puntero está señalando ahora mismo (ficha de vistazo). */
   private vistazo: Foco | null = null;
+  /** Si la entrada cinematográfica está en curso, la salta y la cierra. */
+  private cerrarEntrada: (() => void) | null = null;
 
   constructor(
     private readonly estado: EstadoEstudio,
@@ -82,6 +84,8 @@ export class ControladorMundo {
   }
 
   desmontar(): void {
+    // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
+    this.cerrarEntrada?.();
     this.mundo?.desmontar();
     this.raiz = null;
     this.etiquetas = [];
@@ -142,6 +146,7 @@ export class ControladorMundo {
       capa.remove();
       vista.classList.remove('en-entrada');
       document.removeEventListener('keydown', alTeclado);
+      this.cerrarEntrada = null;
     };
     const saltar = mundo.entrada(() => {
       capa.classList.add('lema');
@@ -151,6 +156,7 @@ export class ControladorMundo {
       saltar();
       cerrar();
     };
+    this.cerrarEntrada = saltarYCerrar;
     const alTeclado = (e: KeyboardEvent) => {
       if (e.key === 'Escape') saltarYCerrar();
     };

@@ -344,7 +344,7 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
   if (rutas.length) {
     coches = new InstancedMesh(carroceria(), new MeshStandardMaterial({ roughness: 0.45, metalness: 0.2 }), rutas.length);
     rutas.forEach((_, i) => coches!.setColorAt(i, new Color(PALETA.coches[i % PALETA.coches.length]!)));
-    coches.castShadow = true;
+    // Lo que se mueve no proyecta sombra: así el mapa de sombras no se recalcula en cada fotograma.
     coches.name = 'trafico';
     colocarCoches(coches, rutas, 0);
     raiz.add(coches);
@@ -365,7 +365,6 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
     peatones = new InstancedMesh(figura, new MeshStandardMaterial({ roughness: 0.8 }), rutasPeatones.length);
     const ropa = ['#3b4656', '#7a4d3a', '#c9b9a0', '#4d5b4a', '#2d2f36', '#8b6f4e'];
     rutasPeatones.forEach((_, i) => peatones!.setColorAt(i, new Color(ropa[i % ropa.length]!)));
-    peatones.castShadow = true;
     peatones.name = 'peatones';
     colocarEnRecorrido(peatones, rutasPeatones, 0, NIVEL.acera);
     raiz.add(peatones);

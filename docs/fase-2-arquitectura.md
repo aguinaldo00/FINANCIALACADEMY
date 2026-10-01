@@ -142,6 +142,10 @@ concepto → entidades → flujos (`flujo` | `intercambio` | `contiene`) → pas
   - Cada edificio une sus piezas por material (unas 10 llamadas de dibujo por edificio).
   - Árboles, farolas, coches y peatones van instanciados.
   - Texturas de suelo procedurales de 64×64 generadas una vez (sin imágenes externas).
+  - El mapa de sombras no se recalcula al mover la cámara (`shadowMap.autoUpdate = false`): solo
+    cuando cambia la escena. Lo que se mueve (coches, peatones) no proyecta sombra. Medido al orbitar
+    en la vista general: de ~600 a 175 llamadas de dibujo y de ~140.000 a ~36.000 triángulos por
+    fotograma.
 - **Verificación:** `scripts/verificar-chromium.mjs` (19 comprobaciones en Chromium real).
 
 ## Dirección de arte (vertical slice, barrio 4)
