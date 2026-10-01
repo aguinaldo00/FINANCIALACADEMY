@@ -6,6 +6,7 @@ import { activarAparicion, conectarFichas, conectarMenuMovil } from '../ui/inter
 import type { ContextoVista } from '../ui/views/context.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
+import { ControladorMundo } from '../ui/world/worldController.ts';
 import { resolverRuta } from './router.ts';
 import { EstadoEstudio } from './store.ts';
 
@@ -22,7 +23,9 @@ export function iniciarApp(tema: Tema): void {
   }
 
   const ctx: ContextoVista = { pagina: elemento('#page'), rail: elemento('#rail'), tituloMovil: elemento('#mt') };
-  const estado = new EstadoEstudio(tema, almacenNavegador());
+  const almacen = almacenNavegador();
+  const estado = new EstadoEstudio(tema, almacen);
+  const mundo = new ControladorMundo(estado, almacen);
 
   function pintar(): void {
     document.body.classList.remove('menu');
@@ -30,9 +33,14 @@ export function iniciarApp(tema: Tema): void {
     let seccionActual: string | null = null;
     if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;
+      mundo.desmontar();
+      // Al volver a la portada, el mapa se abre donde se estaba estudiando.
+      mundo.recordar(ruta.conceptoFoco ? { nivel: 'edificio', conceptoId: ruta.conceptoFoco } : { nivel: 'zona', seccionId: ruta.seccionId });
       pintarSeccion(ctx, estado, ruta.seccionId, ruta.conceptoFoco);
     } else {
       pintarInicio(ctx, estado);
+      const raizMundo = ctx.pagina.querySelector<HTMLElement>('[data-mundo]');
+      if (raizMundo) mundo.montar(raizMundo);
     }
     pintarRail(ctx.rail, estado, seccionActual);
     if (ruta.scrollArriba) window.scrollTo(0, 0);
