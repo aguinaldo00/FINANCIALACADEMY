@@ -29,3 +29,18 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Práctica y dominio:** las preguntas de práctica y los simulacros no suben el dominio.
   - **¿Contar parcialmente?** Decidir si deberían contar en parte (p. ej. hasta 0,5).
 - **Router:** se añadió la ruta `#examen`, un cambio mínimo pedido explícitamente.
+
+## Revisión del temario del libro (02/10)
+
+- **Añadido a la ampliación** (DATA intacta): apartados 1 y 2 del temario.
+  - 15 preguntas de práctica;
+  - 8 flashcards;
+  - 2 esquemas: "Unidades económicas" y "Funciones y razón de ser".
+- **Temas cubiertos:** dinero, unidades económicas y sus tipos, ahorradores e inversores,
+  terminología (excedentaria o deficitaria), financiación, caso práctico INST, SA, razón de ser y
+  complejidad del sistema, vías bursátil y bancaria, sistema de pagos y vocabulario.
+- **No añadido:**
+  - **Actividad 2 (familia de cuatro miembros):** falta el importe del gasto de ocio en el texto, así
+    que no se puede resolver sin inventarlo.
+  - **Introducción de la Unidad 2 (cálculo financiero):** el texto incluye su portada, pero
+    pertenece a otro tema.

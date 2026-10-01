@@ -95,13 +95,20 @@ function diagramaFlujo(filas: PiezaFlujo[][]): string {
   return `<div class="flujo">${filas
     .map((fila) => {
       const lista = !fila.some((p) => p.tipo === 'con');
-      return `<div class="flujo-fila${lista ? ' lista' : ''}">${fila
-        .map((p) =>
-          p.tipo === 'nodo'
-            ? `<span class="f-nodo">${p.texto}</span>`
-            : `<span class="f-con ${p.sentido}" aria-label="${p.etiqueta || FLECHA[p.sentido]}">${p.etiqueta ? `<small>${p.etiqueta}</small>` : ''}<i aria-hidden="true">${FLECHA[p.sentido]}</i></span>`,
-        )
-        .join('')}</div>`;
+      const html = fila.map((p) =>
+        p.tipo === 'nodo'
+          ? `<span class="f-nodo">${p.texto}</span>`
+          : `<span class="f-con ${p.sentido}" aria-label="${p.etiqueta || FLECHA[p.sentido]}">${p.etiqueta ? `<small>${p.etiqueta}</small>` : ''}<i aria-hidden="true">${FLECHA[p.sentido]}</i></span>`,
+      );
+      // Cada conector va pegado a la caja que le sigue: al partir la fila no queda una flecha suelta.
+      const grupos: string[] = [];
+      for (let k = 0; k < html.length; k++) {
+        if (fila[k]!.tipo === 'con' && k + 1 < html.length) {
+          grupos.push(`<span class="f-par">${html[k]}${html[k + 1]}</span>`);
+          k++;
+        } else grupos.push(html[k]!);
+      }
+      return `<div class="flujo-fila${lista ? ' lista' : ''}">${grupos.join('')}</div>`;
     })
     .join('')}</div>`;
 }

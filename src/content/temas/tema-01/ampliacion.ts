@@ -1,6 +1,9 @@
 // Ampliación del Tema 1 a partir de los apuntes del alumno (resumen de la Unidad 1 y predicción de
 // examen que aportó el 02/10). No forma parte de DATA: el contenido del prototipo sigue intacto.
 // Las preguntas extra son de práctica y no cambian el dominio.
+// Los apartados 1 y 2 se completaron con el temario del libro (TEMA_1_GESTION_FINANC, 02/10): dinero,
+// tipos de unidades económicas, ahorradores e inversores, caso práctico INST, SA, razón de ser del
+// sistema financiero, sistema de pagos y vocabulario.
 
 import type { AmpliacionTema, BloqueExamen, EsquemaConcepto, Flashcard, NodoEsquema, PreguntaExtra } from '../../schema.ts';
 
@@ -81,6 +84,16 @@ const P = (
   explicacion: string,
 ): PreguntaExtra => ({ id, conceptoId, enunciado, opciones, indiceCorrecta, explicacion });
 
+/**
+ * Pregunta del libro escrita con la respuesta correcta primero; `giro` la cambia de posición para
+ * que no esté siempre en la misma (la explicación no cambia).
+ */
+const PL = (id: string, conceptoId: string, enunciado: string, opciones: string[], correcta: 0, explicacion: string, giro: number): PreguntaExtra => {
+  const n = opciones.length;
+  const d = ((giro % n) + n) % n;
+  return P(id, conceptoId, enunciado, [...opciones.slice(d), ...opciones.slice(0, d)], (correcta - d + n) % n, explicacion);
+};
+
 const preguntas: PreguntaExtra[] = [
   // Conceptos básicos
   P('sf-1', 'sf', '¿Qué es el sistema financiero?', ['El conjunto de bancos y cajas de un país', 'El conjunto de instituciones, medios y mercados que canalizan el ahorro hacia la inversión', 'El organismo que supervisa a los bancos'], 1, 'Instituciones, medios (activos) y mercados cuyo objetivo es canalizar el ahorro a la inversión.'),
@@ -91,6 +104,22 @@ const preguntas: PreguntaExtra[] = [
   P('directa-1', 'directa', 'En la intermediación directa, el riesgo de que el emisor no pague lo asume…', ['La entidad que intermedia', 'El ahorrador que compra el título', 'El Banco de España'], 1, 'El ahorrador adquiere directamente acciones o bonos: la entidad no asume el riesgo entre ellos.'),
   P('indirecta-1', 'indirecta', 'En la intermediación indirecta, ¿quién asume el riesgo de crédito?', ['El ahorrador', 'El banco', 'La empresa que pide el préstamo'], 1, 'El banco presta con el dinero depositado y asume el riesgo crediticio.'),
   P('indirecta-2', 'indirecta', 'El beneficio que obtiene el banco en la intermediación indirecta se llama…', ['Margen de intermediación', 'Prima', 'Valor liquidativo'], 0, 'Margen de intermediación: diferencia entre el tipo cobrado al prestatario y el pagado al ahorrador.'),
+  // Del temario del libro (apartados 1 y 2)
+  PL('libro-dinero', 'sf', 'Al desaparecer el trueque apareció el dinero, que es…', ['Todo medio de cambio y pago generalmente aceptado por la sociedad', 'Solo las monedas y billetes emitidos por el Banco de España', 'Cualquier activo financiero con rentabilidad'], 0, 'El dinero es todo medio de cambio y pago generalmente aceptado por la sociedad; sustituyó al trueque.', 1),
+  PL('libro-unidades', 'sf', 'Las unidades económicas son…', ['Los individuos y organizaciones cuyo comportamiento analiza la economía', 'Solo las empresas que cotizan en Bolsa', 'Las monedas en las que se mide la economía'], 0, 'Se llama unidades económicas a los individuos y organizaciones cuyo comportamiento es analizado por la economía; cuentan con unos ingresos y unos gastos.', 2),
+  PL('libro-tipos', 'sf', '¿Cuáles son los tres tipos de unidades económicas?', ['Economías domésticas (familias), empresas y sector público', 'Bancos, cajas y cooperativas', 'Ahorradores, inversores e intermediarios'], 0, 'Distinguimos tres tipos: economías domésticas o familias, empresas y sector público.', 0),
+  PL('libro-caso', 'sf', 'Caso práctico: INST, SA tiene unos gastos anuales de 320.000 € y unos ingresos anuales de 450.000 €. ¿Qué tipo de unidad económica es?', ['Con superávit', 'Con déficit', 'No se puede saber'], 0, 'Ingresos > gastos (450.000 > 320.000): es una unidad económica con superávit.', 1),
+  PL('libro-excedentaria', 'sf', 'Una unidad económica con superávit también se llama…', ['Excedentaria o con capacidad de financiación', 'Deficitaria o con necesidad de financiación', 'Intermediaria o con margen de intermediación'], 0, 'Superávit: ingresos > gastos; situación excedentaria o con capacidad de financiación. Déficit: deficitaria o con necesidad de financiación.', 2),
+  PL('libro-ahorradores', 'sf', '¿Cómo se llama a las personas y empresas con necesidad de dinero?', ['Inversores', 'Ahorradores', 'Intermediarios'], 0, 'Ahorradores: con excedentes de dinero. Inversores: con necesidad de dinero.', 0),
+  PL('libro-financiacion', 'sf', 'Se entiende por financiación…', ['Los recursos, tanto propios como ajenos, que se utilizan para hacer frente a una actividad', 'Solo los préstamos bancarios', 'Solo el dinero que aportan los socios'], 0, 'La financiación son los recursos propios y ajenos que se utilizan para hacer frente a una actividad.', 2),
+  PL('libro-familias', 'funciones', 'Las familias son las unidades ahorradoras por excelencia. Su objetivo es…', ['Aportar su ahorro al sistema financiero a cambio de una rentabilidad en forma de intereses', 'Pedir préstamos para crecer', 'Supervisar a las entidades bancarias'], 0, 'Las familias aportan el ahorro a cambio de intereses; las empresas y el sector público necesitan financiación para sus proyectos.', 1),
+  PL('libro-razon', 'funciones', '¿Por qué existe el sistema financiero?', ['Para garantizar la asignación eficaz de los recursos financieros y contribuir a la estabilidad monetaria y financiera', 'Para fijar los precios de todos los bienes', 'Para recaudar impuestos'], 0, 'Su existencia se debe a la necesidad de garantizar la asignación eficaz de los recursos financieros, contribuyendo a la estabilidad monetaria y financiera y permitiendo una política monetaria activa.', 0),
+  PL('libro-complejidad', 'funciones', 'La mayor o menor complejidad de un sistema financiero depende de…', ['El número de instituciones que lo forman y la diversidad de instrumentos financieros', 'El tamaño de la población del país', 'El número de sucursales del banco central'], 0, 'Depende del número de instituciones y de la diversidad de instrumentos para atender a las unidades económicas.', 2),
+  PL('libro-viabilidad', 'funciones', 'La viabilidad de un proyecto es…', ['El análisis que permite decidir si un proyecto se puede llevar a cabo con éxito', 'El dinero que cuesta el proyecto', 'El plazo de devolución de un préstamo'], 0, 'Vocabulario del tema: viabilidad de un proyecto = análisis que permite decidir si se puede llevar a cabo con éxito.', 1),
+  PL('libro-via-directa', 'directa', 'Según el libro, la intermediación directa se realiza mediante…', ['Las instituciones bursátiles', 'Las instituciones bancarias', 'El Fondo de Garantía de Depósitos'], 0, 'Directa: a través de las instituciones bursátiles (los agentes con déficit emiten, p. ej., bonos y los agentes con superávit los compran). Indirecta: a través de las instituciones bancarias.', 2),
+  PL('libro-sin-contacto', 'indirecta', 'En la intermediación indirecta, el ahorrador y el agente con déficit…', ['No tienen ningún contacto entre ellos', 'Firman un contrato entre ellos', 'Se reúnen en la Bolsa'], 0, 'El ahorrador ingresa su excedente en el banco (p. ej. un depósito) y el banco se lo hace llegar al agente con déficit: ambos agentes no tienen contacto.', 1),
+  PL('libro-sistema-pagos', 'pagos', 'Un sistema de pagos es…', ['Un conjunto de recursos mediante los cuales se transfiere dinero entre instituciones financieras y desde estas a los particulares', 'La oficina donde se pagan los impuestos', 'El conjunto de tarjetas de crédito de un banco'], 0, 'Sus transacciones deben ser transparentes para que funcione correctamente.', 0),
+  PL('libro-sustentar', 'pagos', 'Sustentar el sistema de pagos consiste en…', ['Garantizar que las transacciones entre unidades económicas se realicen de forma segura y eficiente', 'Pagar las deudas del Estado', 'Imprimir billetes'], 0, 'Vocabulario del tema: garantizar que las transacciones financieras se puedan realizar de forma segura y eficiente.', 2),
   P('pagos-1', 'pagos', 'Sustentar el sistema de pagos significa canalizar los fondos de forma…', ['Lenta pero segura', 'Rápida, segura y eficaz', 'Solo en efectivo'], 1, 'El sistema financiero hace que los fondos circulen de forma rápida, segura y eficaz.'),
 
   // Activos y trinomio
@@ -177,6 +206,14 @@ const F = (id: string, conceptoId: string, anverso: string, reverso: string): Fl
 const flashcards: Flashcard[] = [
   F('f-sf', 'sf', 'Unidad con superávit', 'Sus ingresos superan a sus gastos: tiene capacidad de financiación (familias).'),
   F('f-sf2', 'sf', 'Unidad con déficit', 'Sus gastos superan a sus ingresos: necesita financiación (empresas y sector público).'),
+  F('f-dinero', 'sf', 'Dinero', 'Todo medio de cambio y pago generalmente aceptado por la sociedad (sustituyó al trueque).'),
+  F('f-unidad', 'sf', 'Unidad económica', 'Individuo u organización cuyo comportamiento analiza la economía: familias, empresas y sector público.'),
+  F('f-ahorr-inv', 'sf', 'Ahorradores e inversores', 'Ahorradores: con excedentes de dinero. Inversores: con necesidad de dinero.'),
+  F('f-financiacion', 'sf', 'Financiación', 'Recursos propios y ajenos que se utilizan para hacer frente a una actividad.'),
+  F('f-razon', 'funciones', '¿Por qué existe el sistema financiero?', 'Para garantizar la asignación eficaz de los recursos financieros y contribuir a la estabilidad monetaria y financiera.'),
+  F('f-viabilidad', 'funciones', 'Viabilidad de un proyecto', 'Análisis que permite decidir si un proyecto se puede llevar a cabo con éxito.'),
+  F('f-sistema-pagos', 'pagos', 'Sistema de pagos', 'Conjunto de recursos para transferir dinero entre instituciones financieras y de estas a los particulares. Debe ser transparente.'),
+  F('f-sustentar', 'pagos', 'Sustentar el sistema de pagos', 'Garantizar que las transacciones entre unidades económicas sean seguras y eficientes.'),
   F('f-margen', 'indirecta', 'Margen de intermediación', 'Diferencia entre el tipo cobrado al prestatario y el pagado al ahorrador.'),
   F('f-activo', 'instrumento', 'Activo financiero', 'Derecho para quien lo adquiere, obligación para quien lo emite.'),
   F('f-letras', 'instrumento', 'Letras del Tesoro', 'Renta fija pública a 3, 6, 9 o 12 meses, emitida al descuento.'),
@@ -219,6 +256,16 @@ const esquemas: EsquemaConcepto[] = [
     conceptoId: 'sf',
     titulo: 'Flujo del dinero',
     raiz: N('Sistema financiero', N('Unidades con superávit', 'Ingresos > gastos', 'Familias'), N('Unidades con déficit', 'Gastos > ingresos', 'Empresas y sector público'), N('Vías', 'Directa: el ahorrador asume el riesgo', 'Indirecta: el banco asume el riesgo y cobra el margen')),
+  },
+  {
+    conceptoId: 'sf',
+    titulo: 'Unidades económicas (del libro)',
+    raiz: N('Unidades económicas', N('Tipos', 'Economías domésticas o familias', 'Empresas', 'Sector público'), N('Con superávit', 'Ingresos > gastos', 'Excedentaria o con capacidad de financiación', 'Ahorradores'), N('Con déficit', 'Ingresos < gastos', 'Deficitaria o con necesidad de financiación', 'Inversores'), N('Caso INST, SA', 'Ingresos 450.000 € > gastos 320.000 €', 'Unidad con superávit')),
+  },
+  {
+    conceptoId: 'funciones',
+    titulo: 'Funciones y razón de ser (del libro)',
+    raiz: N('Sistema financiero', N('Funciones', 'Analizar la viabilidad de los proyectos y financiar los rentables', 'Fomentar el ahorro de las unidades con superávit', 'Sustentar el sistema de pagos: fondos rápidos, seguros y eficaces', 'Asignación eficiente de los recursos financieros', 'Contribuir a la estabilidad monetaria y financiera', 'Velar por el buen funcionamiento de las instituciones'), N('Por qué existe', 'Asignación eficaz de los recursos financieros', 'Estabilidad monetaria y financiera', 'Política monetaria activa'), N('Su complejidad depende de', 'El número de instituciones', 'La diversidad de instrumentos financieros')),
   },
   {
     conceptoId: 'rrl',
@@ -278,7 +325,7 @@ const esquemas: EsquemaConcepto[] = [
 ];
 
 export const ampliacion: AmpliacionTema = {
-  fuente: 'Tus apuntes de la Unidad 1 (resumen y predicción de examen)',
+  fuente: 'Tus apuntes de la Unidad 1 (resumen y predicción de examen) y el temario del libro',
   bloques,
   preguntas,
   flashcards,
