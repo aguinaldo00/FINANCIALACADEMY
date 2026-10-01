@@ -15,7 +15,7 @@ Rutina horaria: `trig_01EsNSKvi2kqpUXensnJE3Xn` (00:25–08:25, Europe/Madrid). 
 - [x] 2. Verificar en Chromium: escritorio, móvil, sin WebGL, movimiento reducido, navegación y vuelta al mapa.
 - [x] 3. Documentar la dirección de arte en `docs/fase-2-arquitectura.md`.
 - [x] 4. Actualizar la PR y republicar el artefacto en el mismo enlace.
-- [ ] 5. Escribir en `docs/esquema-del-tema.md` el análisis y la propuesta de arquitectura del Esquema del tema: datos y relaciones reales de DATA, las que no existen, integración con la barra lateral y piezas compartidas con la ciudad y el Atlas. Sin implementarlo.
+- [x] 5. Escribir en `docs/esquema-del-tema.md` el análisis y la propuesta de arquitectura del Esquema del tema: datos y relaciones reales de DATA, las que no existen, integración con la barra lateral y piezas compartidas con la ciudad y el Atlas. Sin implementarlo.
 - [ ] 6. Escribir en `docs/microexperiencia-intermediacion.md` el storyboard (6–8 fotogramas) de "Intermediación indirecta" con textos literales de DATA y principios de motion. Sin implementarlo.
 - [ ] 7. Rendimiento, revisión de errores y ampliar tests donde falten.
 - [ ] 8. (Opcional, solo con aprobación del usuario) Extender la gramática urbana a los demás barrios.
