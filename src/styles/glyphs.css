@@ -1,0 +1,14 @@
+/* Copiado literal del prototipo (legacy, lineas 137-149). */
+/* glyph motion (subtle) */
+.blink{animation:blink 4.5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.water{animation:water 1.2s linear infinite}
+@keyframes water{to{stroke-dashoffset:-18}}
+.flick{animation:flick .5s infinite alternate;transform-box:fill-box;transform-origin:center bottom}
+@keyframes flick{to{transform:scale(.88,1.08)}}
+.flagw{animation:flagw 1.3s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:left center}
+@keyframes flagw{to{transform:skewY(-10deg) scaleX(.88)}}
+.sway{animation:sway 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes sway{50%{transform:rotate(-5deg)}}
+.cc:hover .ico svg,.tile:hover svg{animation:nudge .5s}
+@keyframes nudge{40%{transform:rotate(-6deg) scale(1.05)}}

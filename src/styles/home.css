@@ -1,0 +1,33 @@
+/* Copiado literal del prototipo (legacy, lineas 104-135). */
+/* home */
+.hero h1{font-size:clamp(2.8rem,8.5vw,5.8rem);font-weight:800;line-height:.92;letter-spacing:-.04em;margin:10px 0 14px}
+.hero h1 span{color:var(--y)}
+.hero p{color:var(--mut);font-size:1.2rem;max-width:52ch;margin:0}
+.skyline{margin:26px 0 8px;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:linear-gradient(#04060d,#000)}
+.skyline>svg{display:block;width:100%;height:auto}
+.px svg{image-rendering:pixelated}
+.skyline a{cursor:pointer}.skyline a:hover rect[stroke]{stroke:#fff}
+.tw{animation:tw 2.4s steps(1) infinite}@keyframes tw{50%{opacity:.15}}
+.wf{animation:wf 6s steps(1) infinite}@keyframes wf{0%,80%{opacity:1}82%{opacity:.3}85%,100%{opacity:1}}
+.fl{animation:fl .8s steps(2) infinite}@keyframes fl{50%{transform:translateY(1px)}}
+.legend{color:var(--mut);font-size:.92rem;margin:4px 0 0}
+
+@keyframes win{50%{opacity:.2}}
+.dash{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;margin:26px 0;background:var(--bg2);border:1px solid var(--line);border-radius:24px;padding:22px}
+.dash .big{width:130px;height:130px}
+.dash h3{font-size:1.25rem;margin-bottom:8px}
+.ya{display:grid;gap:8px}
+.ya a{display:flex;gap:10px;align-items:center;text-decoration:none;color:#fff;background:var(--bg3);border-radius:14px;padding:10px 14px}
+.ya a:hover{background:#262626}
+.ya a .w{margin-left:auto;font-size:.82rem;color:var(--mut);white-space:nowrap}
+.h2{font-size:1.5rem;margin:34px 0 12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.tile{display:block;text-decoration:none;color:#fff;border-radius:20px;padding:16px;background:var(--bg2);border:2px solid #262626;transition:transform .2s,border-color .2s}
+.tile:hover{transform:translateY(-3px);border-color:#fff}
+.tile .i{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.5rem}
+.tile .n{display:block;font-weight:700;line-height:1.25;margin:2px 0 8px}
+.tile .w{font-size:.82rem;color:var(--mut)}
+.gram{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gram div{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px 10px;font-size:.92rem;line-height:1.2}
+.gram svg{width:40px;height:40px;flex:none}
+.next{margin-top:30px;color:var(--mut);font-size:.95rem;border-top:1px solid var(--line);padding-top:14px}
