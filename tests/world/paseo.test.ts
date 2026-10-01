@@ -5,7 +5,11 @@ import { animarAvatar, construirAvatar } from '../../src/scene/three/avatar.ts';
 import { modeloCiudad } from '../../src/world/cityModel.ts';
 import {
   avanzarPaseo,
+  dashear,
   distanciaARect,
+  ENFRIAMIENTO_DASH,
+  enMovimiento,
+  saltar,
   edificioCercano,
   type EstadoPaseo,
   obstaculosDe,
@@ -67,15 +71,43 @@ describe('paseo con el personaje', () => {
     expect(edificioCercano({ x: 999, z: 999 }, obstaculos)).toBeNull();
   });
 
+  it('salta con espacio y vuelve al suelo; en el aire no se puede volver a saltar', () => {
+    let e = saltar(quieto(0, 0));
+    expect(e.vy).toBeGreaterThan(0);
+    let maxima = 0;
+    for (let t = 0; t < 0.3; t += 1 / 60) {
+      e = avanzarPaseo(e, { x: 0, y: 0 }, 0, 1 / 60, [], LIMITES);
+      maxima = Math.max(maxima, e.altura ?? 0);
+    }
+    expect(maxima).toBeGreaterThan(1);
+    expect(saltar(e)).toBe(e); // en el aire
+    e = caminar(e, { x: 0, y: 0 }, 1, []);
+    expect(e.altura).toBe(0);
+    expect(enMovimiento(e)).toBe(false);
+  });
+
+  it('el dash (doble espacio) recorre más que caminar, choca con edificios y tiene enfriamiento', () => {
+    const caminando = caminar(quieto(0, 0), { x: 0, y: 1 }, 0.25, []);
+    const conDash = caminar(dashear({ ...quieto(0, 0), rumbo: Math.PI }), { x: 0, y: 0 }, 0.25, []);
+    expect(Math.abs(conDash.posicion.z)).toBeGreaterThan(Math.abs(caminando.posicion.z) * 2);
+    const repetido = dashear(dashear(quieto(0, 0)));
+    expect(repetido.enfriamiento).toBe(ENFRIAMIENTO_DASH);
+    const muro = { conceptoId: 'x', rect: { x: -5, z: -3, ancho: 10, fondo: 1 } };
+    const contraMuro = caminar(dashear({ ...quieto(0, 0), rumbo: Math.PI }), { x: 0, y: 0 }, 0.3, [muro]);
+    expect(contraMuro.posicion.z).toBeGreaterThanOrEqual(-2 + RADIO_PERSONAJE - 1e-6);
+  });
+
   it('el personaje: cuerpo peludo, orejas, cinta con lazo, ojos y patas, a escala de la ciudad', () => {
     const a = construirAvatar();
     const caja = new Box3().setFromObject(a.raiz);
     expect(caja.max.y - caja.min.y).toBeGreaterThan(1.4);
     expect(caja.max.y - caja.min.y).toBeLessThan(2.2);
     expect(a.raiz.getObjectByName('pelaje')).toBeDefined();
-    animarAvatar(a, 1, VELOCIDAD_MAXIMA, false);
+    expect(a.raiz.getObjectByName('avatar-oreja-izquierda')).toBeDefined();
+    expect(a.raiz.getObjectByName('avatar-oreja-derecha')).toBeDefined();
+    animarAvatar(a, 1, { velocidad: VELOCIDAD_MAXIMA, altura: 0, dash: false, aterrizaje: 0 }, false);
     expect(a.pataIzquierda.rotation.x).not.toBe(0);
-    animarAvatar(a, 1, VELOCIDAD_MAXIMA, true);
+    animarAvatar(a, 1, { velocidad: VELOCIDAD_MAXIMA, altura: 0, dash: false, aterrizaje: 0 }, true);
     expect(Math.abs(a.pataIzquierda.rotation.x)).toBe(0);
   });
 });

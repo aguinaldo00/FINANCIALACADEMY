@@ -239,13 +239,21 @@ Con la ciudad 3D activa, el mapa es lo primero de la portada y ocupa la pantalla
    "Pulsa la ciudad para explorarla · Desliza para ver el tema". Sin ruta, ficha ni Atlas. La barra
    lateral se retira y el mundo va a sangre. El mapa no captura la rueda ni el gesto táctil: desplazan
    la página.
-2. **Clic en la ciudad:** se pasa a la exploración. Aparecen la ruta, la ficha contextual y el
-   Atlas, y la cámara vuelve a responder a la rueda y al arrastre.
+2. **Clic en la ciudad:** el mapa pasa a **pantalla completa** (API nativa; si el navegador la
+   rechaza, una capa fija) y empieza la exploración. Se sale con Esc o con "Salir de pantalla
+   completa".
 3. **Scroll:** cuando el mapa deja de dominar la pantalla (menos del 55 % visible), vuelve la barra
    lateral y aparece con animación el bloque del tema (título, "La Ciudad del Dinero", párrafo).
 
 Al volver de estudiar (foco en una zona o un edificio) se entra directamente en exploración. Sin
 WebGL, o en 2D, la portada conserva su orden original: primero el bloque del tema.
+
+### Zoom con la rueda
+
+- **En pantalla completa:** la rueda acerca y aleja.
+- **Fuera de pantalla completa:** la rueda desplaza la página. Para ver la ciudad de cerca desde
+  fuera hay dos opciones: el interruptor "Zoom con rueda" (se recuerda en
+  `financial-academy:zoom-rueda`) o Ctrl/⌘ + rueda. Una pista lo recuerda la primera vez.
 
 ### Paseo con el personaje
 
@@ -256,8 +264,20 @@ grandes y dos patas.
 
 - **"Pasear"** (en la ruta del mundo, solo con puntero fino): aparece en una plaza mirando a la
   cámara. La cámara pasa a tercera persona y se puede girar alrededor del personaje.
-- **Controles:** WASD o flechas para moverse (relativo a la cámara), E o Intro para entrar en el
-  edificio cercano y Esc para salir.
+- **Controles:** WASD o flechas para moverse (relativo a la cámara), **espacio para saltar**,
+  **doble espacio para el dash** (0,22 s a 26 u/s, con enfriamiento de 0,7 s; también en el aire), E o
+  Intro para entrar en el edificio cercano y Esc para salir.
+- **Orejas de gato:** triángulos de punta suave con el interior rosado y un mechón en la base.
+- **Visión:** durante el paseo la niebla empieza a 60 unidades y termina a 240; la cámara se sitúa a
+  15 unidades con un campo de visión de 48°.
+- **Fallos corregidos** tras la primera prueba:
+  - la niebla seguía a la cámara y tapaba la ciudad a ~30 unidades;
+  - el personaje se quedaba a mitad de zancada al parar;
+  - el espacio volvía a pulsar "Pasear";
+  - un clic sacaba del paseo;
+  - redimensionar (o entrar en pantalla completa) rompía la persecución;
+  - el personaje flotaba o se hundía (ahora se usa la altura real de calzada, mediana, acera,
+    pasaje, manzana y plaza).
 - **Modelo puro** en `world/paseo.ts`: aceleración, frenada, colisiones por ejes con los lotes de
   los edificios (permiten deslizarse por una fachada), límites de la ciudad y edificio cercano.
 - **Edificio cercano:** a menos de 2,2 unidades de un edificio aparece su ficha con "Estudiar el

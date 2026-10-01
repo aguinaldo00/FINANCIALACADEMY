@@ -27,6 +27,8 @@ import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separar
 
 /** Preferencia de vista de cada usuario (comodidad local, no es progreso). */
 export const CLAVE_VISTA = 'financial-academy:vista';
+/** Zoom con la rueda fuera de pantalla completa (comodidad local). */
+export const CLAVE_ZOOM = 'financial-academy:zoom-rueda';
 /** La entrada cinematográfica solo se muestra completa la primera vez. */
 export const CLAVE_ENTRADA = 'financial-academy:entrada';
 
@@ -61,6 +63,11 @@ export class ControladorMundo {
   private cercano: string | null = null;
   private teclas = new Set<string>();
   private alTecladoPaseo: ((e: KeyboardEvent) => void) | null = null;
+  private ultimoEspacio = 0;
+  /** El mapa está en pantalla completa (API nativa o capa de reserva). */
+  private pantallaCompleta = false;
+  private zoomRueda: boolean;
+  private pistaZoomMostrada = false;
   private observadorPortada: IntersectionObserver | null = null;
 
   constructor(
@@ -68,6 +75,11 @@ export class ControladorMundo {
     private readonly almacen: AlmacenClaveValor | null,
   ) {
     this.modo3d = leerJson(almacen, CLAVE_VISTA) !== '2d';
+    this.zoomRueda = leerJson(almacen, CLAVE_ZOOM) === true;
+    document.addEventListener('fullscreenchange', () => {
+      const nativa = Boolean(this.raiz && document.fullscreenElement === this.raiz);
+      if (!nativa && !this.raiz?.classList.contains('pantalla-completa')) this.fijarPantallaCompleta(false);
+    });
     this.modelo = modeloCiudad(estado.tema, estado.progreso);
     alCambiarMovimiento((reducido) => {
       this.reducido = reducido;
@@ -88,6 +100,12 @@ export class ControladorMundo {
     raiz.innerHTML = esqueletoMundo();
     raiz.addEventListener('click', (e) => this.alPulsar(e));
     raiz.addEventListener('keydown', (e) => {
+      // Capa de reserva (sin API nativa): Esc sale de la pantalla completa.
+      if (e.key === 'Escape' && raiz.classList.contains('pantalla-completa') && !this.paseando) {
+        e.preventDefault();
+        void this.salirPantallaCompleta();
+        return;
+      }
       if (this.paseando) return;
       if (e.key === 'Escape' && this.subir()) e.preventDefault();
     });
@@ -99,6 +117,7 @@ export class ControladorMundo {
     // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
     this.cerrarEntrada?.();
     this.detenerPaseo(false);
+    if (this.pantallaCompleta) void this.salirPantallaCompleta();
     this.observadorPortada?.disconnect();
     this.observadorPortada = null;
     document.body.classList.remove('portada-inmersiva');
@@ -140,6 +159,7 @@ export class ControladorMundo {
     raiz.parentElement?.prepend(raiz);
     this.fijarPortada(this.foco.nivel === 'ciudad' && !this.vistaAtlas);
     this.vigilarInmersion(vista);
+    this.aplicarZoom();
     mundo.montarEn(vista);
     mundo.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', false);
     this.aviso('');
@@ -246,6 +266,8 @@ export class ControladorMundo {
     this.paseando = true;
     this.mundo!.iniciarPaseo();
     this.raiz?.classList.add('paseando');
+    // El foco no puede quedarse en el botón: el espacio lo volvería a pulsar.
+    (document.activeElement as HTMLElement | null)?.blur?.();
     const direccion = () => {
       const t = this.teclas;
       const x = (t.has('d') || t.has('arrowright') ? 1 : 0) - (t.has('a') || t.has('arrowleft') ? 1 : 0);
@@ -265,6 +287,21 @@ export class ControladorMundo {
       if (e.type === 'keydown' && (tecla === 'e' || tecla === 'enter') && this.cercano) {
         e.preventDefault();
         location.hash = hrefConcepto(this.cercano);
+        return;
+      }
+      if (tecla === ' ' || e.code === 'Space') {
+        // Espacio salta; dos espacios seguidos (menos de 280 ms), dash.
+        e.preventDefault();
+        if (e.type === 'keydown' && !e.repeat) {
+          const ahora = performance.now();
+          if (ahora - this.ultimoEspacio < 280) {
+            this.mundo?.dashear();
+            this.ultimoEspacio = 0;
+          } else {
+            this.mundo?.saltar();
+            this.ultimoEspacio = ahora;
+          }
+        }
         return;
       }
       if (!MOVER.has(tecla)) return;
@@ -301,6 +338,51 @@ export class ControladorMundo {
     if (this.raiz) this.pintarPanel();
   }
 
+  /* ------------------------------------------------------------ pantalla completa y zoom */
+
+  /** Pantalla completa del mapa: API nativa si el navegador la permite; si no, capa fija. */
+  private async entrarPantallaCompleta(): Promise<void> {
+    const raiz = this.raiz;
+    if (!raiz || !this.activo3d) return;
+    if (this.enPortada) this.fijarPortada(false);
+    let nativa = false;
+    try {
+      if (raiz.requestFullscreen) {
+        await raiz.requestFullscreen();
+        nativa = document.fullscreenElement === raiz;
+      }
+    } catch {
+      nativa = false;
+    }
+    if (!nativa) raiz.classList.add('pantalla-completa');
+    this.fijarPantallaCompleta(true);
+  }
+
+  private async salirPantallaCompleta(): Promise<void> {
+    this.raiz?.classList.remove('pantalla-completa');
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch {
+        /* ya no estaba en pantalla completa */
+      }
+    }
+    this.fijarPantallaCompleta(false);
+  }
+
+  private fijarPantallaCompleta(activa: boolean): void {
+    if (this.pantallaCompleta === activa) return;
+    this.pantallaCompleta = activa;
+    this.raiz?.classList.toggle('en-pantalla-completa', activa);
+    this.aplicarZoom();
+    if (this.raiz) this.pintarPanel();
+  }
+
+  /** La rueda hace zoom en pantalla completa o con el interruptor; si no, desplaza la página. */
+  private aplicarZoom(): void {
+    if (this.mundo) this.mundo.zoom = this.pantallaCompleta || this.zoomRueda;
+  }
+
   private fijarPortada(activa: boolean): void {
     this.enPortada = activa;
     this.raiz?.classList.toggle('portada', activa);
@@ -314,9 +396,29 @@ export class ControladorMundo {
       vista.dataset.portadaLista = '1';
       let inicio: { x: number; y: number } | null = null;
       vista.addEventListener('pointerdown', (e) => (inicio = { x: e.clientX, y: e.clientY }));
+      // Zoom puntual con Ctrl/⌘ + rueda cuando el zoom libre está desactivado.
+      vista.addEventListener(
+        'wheel',
+        (e) => {
+          if (this.enPortada || !this.activo3d || this.pantallaCompleta || this.zoomRueda) return;
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            this.mundo!.zoomPuntual(e.deltaY);
+          } else if (!this.pistaZoomMostrada) {
+            this.pistaZoomMostrada = true;
+            const pista = this.raiz?.querySelector<HTMLElement>('[data-pista-zoom]');
+            if (pista) {
+              pista.hidden = false;
+              setTimeout(() => (pista.hidden = true), 2600);
+            }
+          }
+        },
+        { passive: false },
+      );
       vista.addEventListener('pointerup', (e) => {
         if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.entrada')) {
-          this.fijarPortada(false);
+          // Clic en el mapa de la portada: pantalla completa y exploración.
+          void this.entrarPantallaCompleta();
         }
         inicio = null;
       });
@@ -348,9 +450,14 @@ export class ControladorMundo {
   }
 
   private alSeleccionar(s: DatosSeleccionables): void {
-    // En la portada, el primer clic solo entra en la ciudad: empieza la exploración.
-    if (this.enPortada) {
-      this.fijarPortada(false);
+    // En la portada, el primer clic solo entra en la ciudad (lo gestiona `vigilarInmersion`).
+    if (this.enPortada) return;
+    // Paseando, un clic en un edificio muestra su ficha sin sacar del paseo.
+    if (this.paseando) {
+      if (s.tipo === 'edificio') {
+        this.cercano = s.conceptoId;
+        this.pintarFicha();
+      }
       return;
     }
     if (s.tipo === 'edificio') {
@@ -415,6 +522,14 @@ export class ControladorMundo {
       this.vistaAtlas = !this.vistaAtlas;
       this.pintarPanel();
       if (this.activo3d) this.mundo!.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', true);
+    } else if ('mundoCompleta' in dataset) {
+      if (this.pantallaCompleta) void this.salirPantallaCompleta();
+      else void this.entrarPantallaCompleta();
+    } else if ('mundoZoom' in dataset) {
+      this.zoomRueda = !this.zoomRueda;
+      escribirJson(this.almacen, CLAVE_ZOOM, this.zoomRueda);
+      this.aplicarZoom();
+      this.pintarPanel();
     } else if ('mundoPaseo' in dataset) {
       if (this.paseando) this.detenerPaseo(true);
       else this.empezarPaseo();
@@ -457,6 +572,8 @@ export class ControladorMundo {
       disponible3d: this.disponible3d,
       vistaAtlas: this.vistaAtlas,
       paseando: this.paseando,
+      pantallaCompleta: this.pantallaCompleta,
+      zoomRueda: this.zoomRueda,
     });
 
     let historia = '';

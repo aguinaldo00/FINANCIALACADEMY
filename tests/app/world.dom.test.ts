@@ -36,6 +36,10 @@ describe('mundo de la portada sin WebGL', () => {
     expect($$('.skyline a')).toHaveLength(12);
     expect($$('.atlas-item')).toHaveLength(tema01.grupos.length);
     expect($('[data-mundo-modo]')).toBeNull();
+    // Sin 3D no hay pantalla completa, zoom ni paseo.
+    expect($('[data-mundo-completa]')).toBeNull();
+    expect($('[data-mundo-zoom]')).toBeNull();
+    expect($('[data-mundo-paseo]')).toBeNull();
   });
 
   it('zoom conceptual: ciudad → barrio → zona → edificio', () => {

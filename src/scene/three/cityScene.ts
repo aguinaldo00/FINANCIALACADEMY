@@ -40,12 +40,17 @@ import { unir } from './materials.ts';
 import { animarAvatar, construirAvatar, type PartesAvatar } from './avatar.ts';
 import {
   avanzarPaseo,
+  dashear,
   edificioCercano,
+  enMovimiento,
   type EntradaPaseo,
   type EstadoPaseo,
   obstaculosDe,
   puntoDeSalida,
+  saltar,
 } from '../../world/paseo.ts';
+import { encoger as encogerRect } from '../../world/geometry.ts';
+import { NIVEL_PASAJE } from './urbanGround.ts';
 import { NIVEL, PALETA } from './palette.ts';
 
 /*
@@ -155,6 +160,8 @@ export class Mundo3D {
   private ultimoPaseo = 0;
   private cercano: string | null = null;
   private posicionPaseo: { x: number; z: number } | null = null;
+  private obstaculos: ReturnType<typeof obstaculosDe> = [];
+  private aterrizaje = 0;
   /** El usuario ya ha girado la cámara: se respeta su orientación. */
   private girado = false;
   private contenedor: HTMLElement | null = null;
@@ -192,6 +199,7 @@ export class Mundo3D {
     this.iluminar(modelo.lado);
     this.estatica = construirCapaEstatica(modelo);
     this.dinamica = construirCapaDinamica(modelo);
+    this.obstaculos = obstaculosDe(modelo);
     this.escena.add(this.estatica, this.dinamica.raiz);
     this.sombraDeContacto(modelo.lado + MARGEN_PEANA * 2);
 
@@ -315,6 +323,19 @@ export class Mundo3D {
     this.lienzo.style.touchAction = activa ? 'none' : 'pan-y';
   }
 
+  /** Zoom con la rueda (y pellizco). Desactivado, la rueda desplaza la página. */
+  set zoom(activo: boolean) {
+    this.controles.enableZoom = activo;
+  }
+
+  /** Acercar o alejar a petición (Ctrl + rueda con el zoom libre desactivado). */
+  zoomPuntual(deltaY: number): void {
+    const s = new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target));
+    s.radius = Math.min(this.controles.maxDistance, Math.max(this.controles.minDistance, s.radius * Math.exp(deltaY * 0.0015)));
+    this.transicion = null;
+    this.colocarCamara(this.controles.target.clone(), s);
+  }
+
   set movimientoReducido(valor: boolean) {
     this.reducido = valor;
     this.sucio = true;
@@ -341,7 +362,8 @@ export class Mundo3D {
     this.camara.updateProjectionMatrix();
     this.distanciaCiudad = 0;
     // Al cambiar el tamaño (girar el móvil, redimensionar) se reencuadra lo que se estaba viendo.
-    if (!this.transicion) this.aplicarEncuadre(this.focoActual, false);
+    // Paseando, la cámara sigue al personaje: solo cambia el aspecto.
+    if (!this.transicion && !this.paseo) this.aplicarEncuadre(this.focoActual, false);
     this.sucio = true;
   }
 
@@ -351,6 +373,7 @@ export class Mundo3D {
   actualizar(modelo: ModeloCiudad): void {
     const anteriores = new Map(this.modelo.edificios.map((e) => [e.conceptoId, e.fase]));
     this.modelo = modelo;
+    this.obstaculos = obstaculosDe(modelo);
     this.escena.remove(this.dinamica.raiz);
     liberar(this.dinamica.raiz);
     this.dinamica = construirCapaDinamica(modelo);
@@ -539,11 +562,11 @@ export class Mundo3D {
     this.escena.add(this.avatar.raiz);
     this.contorno.visible = false;
     this.vista = 'maqueta';
-    Object.assign(this.controles, { enablePan: false, minDistance: 4, maxDistance: 40, maxPolarAngle: 1.35 });
+    Object.assign(this.controles, { enablePan: false, minDistance: 4, maxDistance: 60, maxPolarAngle: 1.35 });
     this.exploracion = true;
     const objetivo = new Vector3(inicio.x, 1.1, inicio.z);
-    const hacia = new Spherical(11, 1.1, giro);
-    this.camara.fov = 42;
+    const hacia = new Spherical(15, 1.1, giro);
+    this.camara.fov = 48;
     this.fijarDesplazamiento(0);
     this.transicion = null;
     this.colocarCamara(objetivo, hacia);
@@ -571,14 +594,37 @@ export class Mundo3D {
     if (entrada.x || entrada.y) this.arrancar();
   }
 
-  /** Altura del suelo: aceras y manzanas están algo por encima de la calzada. */
+  saltar(): void {
+    if (!this.paseo) return;
+    this.paseo = saltar(this.paseo);
+    this.arrancar();
+  }
+
+  dashear(): void {
+    if (!this.paseo) return;
+    this.paseo = dashear(this.paseo);
+    this.arrancar();
+  }
+
+  /** Altura real del suelo bajo el personaje: calzada, mediana, acera, manzana, pasaje o plaza. */
   private sueloEn(x: number, z: number): number {
-    return this.modelo.zonas.some((zona) => {
-      const r = zona.parcela;
-      return x >= r.x && x <= r.x + r.ancho && z >= r.z && z <= r.z + r.fondo;
-    })
-      ? NIVEL.lote
-      : NIVEL.calle;
+    const en = (r: { x: number; z: number; ancho: number; fondo: number }) => x >= r.x && x <= r.x + r.ancho && z >= r.z && z <= r.z + r.fondo;
+    for (const zona of this.modelo.zonas) {
+      if (!en(zona.parcela)) continue;
+      if (zona.plaza && en(zona.plaza)) return NIVEL.plaza;
+      if (zona.patios.some((p) => en(encogerRect(p, 0.45)))) return NIVEL.plaza;
+      if (zona.pasajes.some(en)) return NIVEL_PASAJE;
+      if (zona.manzanas.some(en)) return NIVEL.lote;
+      return NIVEL.acera;
+    }
+    // Medianas de los bulevares.
+    const enMediana = this.modelo.avenidas.some((a) => {
+      const horizontal = Math.abs(a.a.z - a.b.z) < 1e-9;
+      return horizontal
+        ? Math.abs(z - a.a.z) < 0.6 && x >= Math.min(a.a.x, a.b.x) && x <= Math.max(a.a.x, a.b.x)
+        : Math.abs(x - a.a.x) < 0.6 && z >= Math.min(a.a.z, a.b.z) && z <= Math.max(a.a.z, a.b.z);
+    });
+    return enMediana ? NIVEL.mediana : NIVEL.calle;
   }
 
   private avanzarPaseoFotograma(ahora: number): boolean {
@@ -587,23 +633,34 @@ export class Mundo3D {
     if (!paseo || !avatar) return false;
     const dt = Math.min(0.05, (ahora - this.ultimoPaseo) / 1000);
     this.ultimoPaseo = ahora;
-    if (!paseo.velocidad && !this.entradaPaseo.x && !this.entradaPaseo.y) return false;
+    const pide = Boolean(this.entradaPaseo.x || this.entradaPaseo.y);
+    if (!pide && !enMovimiento(paseo) && this.aterrizaje <= 0) return false;
     const angulo = new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target)).theta;
     const lado = this.modelo.lado;
-    const nuevo = avanzarPaseo(paseo, this.entradaPaseo, angulo, dt, obstaculosDe(this.modelo), { x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado });
+    const nuevo = avanzarPaseo(paseo, this.entradaPaseo, angulo, dt, this.obstaculos, { x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado });
+    if ((paseo.altura ?? 0) > 0 && (nuevo.altura ?? 0) === 0) this.aterrizaje = 1;
+    this.aterrizaje = Math.max(0, this.aterrizaje - dt * 6);
     const dx = nuevo.posicion.x - paseo.posicion.x;
     const dz = nuevo.posicion.z - paseo.posicion.z;
     this.paseo = nuevo;
-    // La cámara acompaña al personaje conservando su giro.
+    // La cámara acompaña al personaje conservando su giro y su distancia.
     this.camara.position.x += dx;
     this.camara.position.z += dz;
     this.controles.target.x += dx;
     this.controles.target.z += dz;
-    const y = this.sueloEn(nuevo.posicion.x, nuevo.posicion.z);
-    avatar.raiz.position.set(nuevo.posicion.x, avatar.raiz.position.y + (y - avatar.raiz.position.y) * Math.min(1, dt * 14), nuevo.posicion.z);
+    const suelo = this.sueloEn(nuevo.posicion.x, nuevo.posicion.z);
+    const base = avatar.raiz.position.y - (paseo.altura ?? 0);
+    const y = base + (suelo - base) * Math.min(1, dt * 14);
+    avatar.raiz.position.set(nuevo.posicion.x, y + (nuevo.altura ?? 0), nuevo.posicion.z);
     avatar.raiz.rotation.y = nuevo.rumbo;
-    animarAvatar(avatar, ahora / 1000, nuevo.velocidad, this.reducido);
-    const cerca = edificioCercano(nuevo.posicion, obstaculosDe(this.modelo));
+    // Se anima también el fotograma en que se detiene: así vuelve a la pose de reposo.
+    animarAvatar(
+      avatar,
+      ahora / 1000,
+      { velocidad: nuevo.velocidad, altura: nuevo.altura ?? 0, dash: (nuevo.dash ?? 0) > 0, aterrizaje: this.aterrizaje },
+      this.reducido,
+    );
+    const cerca = edificioCercano(nuevo.posicion, this.obstaculos);
     if (cerca !== this.cercano) {
       this.cercano = cerca;
       this.opciones.alAcercarse?.(cerca);
@@ -847,11 +904,12 @@ export class Mundo3D {
   private ajustarProfundidad(): void {
     const d = this.camara.position.distanceTo(this.controles.target);
     if (this.escena.fog instanceof Fog) {
-      this.escena.fog.near = d * 0.95;
-      this.escena.fog.far = d * 2.8;
+      // Distancia de visión: la niebla empieza lejos del sujeto (de cerca, toda la ciudad se ve).
+      this.escena.fog.near = this.paseo ? 60 : d * 0.95 + 45;
+      this.escena.fog.far = this.paseo ? 240 : d * 2.8 + 170;
     }
     const near = Math.min(40, Math.max(0.2, d * 0.04));
-    const far = d * 3 + this.modelo.lado * 2;
+    const far = Math.max(d * 3 + this.modelo.lado * 2, 400);
     if (Math.abs(near - this.camara.near) / this.camara.near > 0.05 || Math.abs(far - this.camara.far) / this.camara.far > 0.05) {
       this.camara.near = near;
       this.camara.far = far;

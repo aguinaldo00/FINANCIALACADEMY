@@ -2,12 +2,14 @@ import {
   BoxGeometry,
   Color,
   ConeGeometry,
+  ExtrudeGeometry,
   Group,
   InstancedMesh,
   Matrix4,
   Mesh,
   MeshStandardMaterial,
   Quaternion,
+  Shape,
   SphereGeometry,
   Vector3,
 } from 'three';
@@ -28,6 +30,7 @@ const PALETA_AVATAR = {
   lazo: '#a50f2f',
   ojo: '#f7f4ee',
   pupila: '#0c2633',
+  orejaInterior: '#e3a0aa',
 } as const;
 
 export interface PartesAvatar {
@@ -94,15 +97,40 @@ export function construirAvatar(): PartesAvatar {
   nucleo.castShadow = true;
   cuerpo.add(nucleo, pelaje(W, H, D, 1700));
 
-  // Orejas: la izquierda negra, la derecha azul (como en el dibujo).
-  const oreja = (color: string, x: number, inclinacion: number) => {
-    const o = new Mesh(new ConeGeometry(0.17, 0.42, 4), mat(color));
-    o.position.set(x, H / 2 + 0.16, -0.05);
-    o.rotation.set(0, Math.PI / 4, inclinacion);
-    o.castShadow = true;
-    return o;
+  // Orejas de gato: triángulos de punta suave con el interior rosado y un mechón en la base.
+  // La izquierda negra y la derecha azul, como en el dibujo.
+  const oreja = (color: string, lado: number) => {
+    const g = new Group();
+    g.name = lado < 0 ? 'avatar-oreja-izquierda' : 'avatar-oreja-derecha';
+    const triangulo = (ancho: number, alto: number) => {
+      const f = new Shape();
+      f.moveTo(-ancho / 2, 0);
+      f.lineTo(ancho / 2, 0);
+      f.quadraticCurveTo(ancho * 0.12, alto * 0.7, 0, alto);
+      f.quadraticCurveTo(-ancho * 0.12, alto * 0.7, -ancho / 2, 0);
+      return f;
+    };
+    const exterior = new Mesh(
+      new ExtrudeGeometry(triangulo(0.44, 0.46), { depth: 0.1, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 }).translate(0, 0, -0.05),
+      mat(color),
+    );
+    exterior.castShadow = true;
+    const interior = new Mesh(new ExtrudeGeometry(triangulo(0.26, 0.3), { depth: 0.02, bevelEnabled: false }), mat(PALETA_AVATAR.orejaInterior, 0.8));
+    interior.position.set(0, 0.04, 0.07);
+    g.add(exterior, interior);
+    // Mechón de pelo en la base, para que la oreja "salga" del pelaje.
+    for (let k = -1; k <= 1; k++) {
+      const mechon = new Mesh(new ConeGeometry(0.06, 0.16, 5), mat(PALETA_AVATAR.peloClaro, 1));
+      mechon.position.set(k * 0.1, 0.06, 0.09);
+      mechon.rotation.set(-0.3, 0, k * 0.4);
+      g.add(mechon);
+    }
+    g.position.set(lado * 0.3, H / 2 - 0.02, -0.02);
+    // Abiertas hacia fuera e inclinadas un poco hacia delante.
+    g.rotation.set(-0.12, lado * -0.25, lado * -0.26);
+    return g;
   };
-  cuerpo.add(oreja(PALETA_AVATAR.negro, -0.3, 0.12), oreja(PALETA_AVATAR.pelo, 0.32, -0.12));
+  cuerpo.add(oreja(PALETA_AVATAR.negro, -1), oreja(PALETA_AVATAR.pelo, 1));
 
   // Cinta roja alrededor de la cabeza, por encima del pelo.
   const cinta = new Mesh(new RoundedBoxGeometry(W + 0.32, 0.22, D + 0.32, 2, 0.1), mat(PALETA_AVATAR.cinta, 0.7));
@@ -153,12 +181,28 @@ export function construirAvatar(): PartesAvatar {
  * Animación del personaje: balanceo al caminar (proporcional a la velocidad) y colas de la cinta
  * que se quedan atrás. Con movimiento reducido solo se desplaza, sin balanceo.
  */
-export function animarAvatar(p: PartesAvatar, t: number, velocidad: number, reducido: boolean): void {
-  const k = reducido ? 0 : Math.min(1, velocidad / 6);
+export interface PoseAvatar {
+  velocidad: number;
+  /** Altura del salto (0 en el suelo). */
+  altura: number;
+  /** En pleno dash. */
+  dash: boolean;
+  /** 0–1: aplastamiento al aterrizar. */
+  aterrizaje: number;
+}
+
+export function animarAvatar(p: PartesAvatar, t: number, pose: PoseAvatar, reducido: boolean): void {
+  const enElAire = pose.altura > 0.01;
+  const k = reducido || enElAire ? 0 : Math.min(1, pose.velocidad / 6);
   const fase = t * 11;
-  p.pataIzquierda.rotation.x = Math.sin(fase) * 0.7 * k;
-  p.pataDerecha.rotation.x = -Math.sin(fase) * 0.7 * k;
+  p.pataIzquierda.rotation.x = Math.sin(fase) * 0.7 * k + (enElAire && !reducido ? 0.5 : 0);
+  p.pataDerecha.rotation.x = -Math.sin(fase) * 0.7 * k + (enElAire && !reducido ? -0.3 : 0);
   p.cuerpo.position.y = 0.42 + 0.5 + Math.abs(Math.sin(fase)) * 0.09 * k;
   p.cuerpo.rotation.z = Math.sin(fase) * 0.06 * k;
-  p.colas.rotation.x = reducido ? 0 : -0.6 * k + Math.sin(t * 6) * 0.15 * k;
+  // Dash: el cuerpo se inclina hacia delante y las colas de la cinta se tensan detrás.
+  p.cuerpo.rotation.x = reducido ? 0 : pose.dash ? 0.35 : 0;
+  // Aterrizaje: aplastamiento breve.
+  const aplastar = reducido ? 0 : pose.aterrizaje * 0.18;
+  p.cuerpo.scale.set(1 + aplastar * 0.6, 1 - aplastar, 1 + aplastar * 0.6);
+  p.colas.rotation.x = reducido ? 0 : pose.dash ? -1.3 : -0.6 * k + Math.sin(t * 6) * 0.15 * k + (enElAire ? -0.4 : 0);
 }

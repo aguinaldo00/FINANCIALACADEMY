@@ -41,12 +41,14 @@ export interface EstadoBarra {
   disponible3d: boolean | null;
   vistaAtlas: boolean;
   paseando?: boolean;
+  pantallaCompleta?: boolean;
+  zoomRueda?: boolean;
 }
 
 /** Contenedor estable del mundo; la barra y el Atlas se repintan dentro. */
 export function esqueletoMundo(): string {
   return `<div class="mundo-barra" data-mundo-barra></div>
- <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="paseo-pista" aria-hidden="true"><span><b>WASD</b> o flechas para moverte</span><span><b>E</b> para entrar</span><span><b>Esc</b> para salir</span></p><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla</span><span>Desliza para ver el tema</span></p></div>
+ <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside><p class="paseo-pista" aria-hidden="true"><span><b>WASD</b> o flechas para moverte</span><span><b>Espacio</b> saltar · <b>doble</b> dash</span><span><b>E</b> para entrar</span><span><b>Esc</b> para salir</span></p><p class="pista-zoom" data-pista-zoom aria-hidden="true" hidden>Ctrl + rueda para acercar · o activa «Zoom con rueda»</p><p class="portada-pista" aria-hidden="true"><span>Pulsa la ciudad para explorarla a pantalla completa</span><span>Desliza para ver el tema</span></p></div>
  <p class="mundo-aviso" data-mundo-aviso role="status"></p>
  <div class="atlas" data-atlas></div>
  <dl class="mundo-leyenda">
@@ -66,6 +68,12 @@ export function barraMundo(e: EstadoBarra): string {
     .join('');
   const acciones = [
     e.puedeSubir ? '<button type="button" class="mb-btn" data-mundo-subir>Subir de nivel</button>' : '',
+    e.modo3d && e.disponible3d
+      ? `<button type="button" class="mb-btn" data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}">${e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'}</button>`
+      : '',
+    e.modo3d && e.disponible3d && !e.pantallaCompleta
+      ? `<button type="button" class="mb-btn" data-mundo-zoom aria-pressed="${Boolean(e.zoomRueda)}">Zoom con rueda</button>`
+      : '',
     e.modo3d && e.disponible3d
       ? `<button type="button" class="mb-btn" data-mundo-paseo aria-pressed="${Boolean(e.paseando)}">${e.paseando ? 'Dejar de pasear' : 'Pasear'}</button>`
       : '',

@@ -11,6 +11,12 @@ export interface EstadoPaseo {
   /** Hacia dónde mira, en radianes (0 = +z, hacia el sur). */
   rumbo: number;
   velocidad: number;
+  /** Altura sobre el suelo (salto) y velocidad vertical. */
+  altura?: number;
+  vy?: number;
+  /** Segundos de dash restantes y de enfriamiento hasta poder repetirlo. */
+  dash?: number;
+  enfriamiento?: number;
 }
 
 /** Dirección pedida por el teclado en el plano de la cámara: x = derecha, y = adelante (−1…1). */
@@ -23,6 +29,28 @@ export const RADIO_PERSONAJE = 0.55;
 export const VELOCIDAD_MAXIMA = 9;
 const ACELERACION = 30;
 const FRENADA = 24;
+export const IMPULSO_SALTO = 8;
+export const GRAVEDAD = 24;
+export const VELOCIDAD_DASH = 26;
+export const DURACION_DASH = 0.22;
+export const ENFRIAMIENTO_DASH = 0.7;
+
+export const enElSuelo = (e: EstadoPaseo): boolean => (e.altura ?? 0) <= 0 && (e.vy ?? 0) <= 0;
+
+/** Salta si está en el suelo; en el aire no hace nada. */
+export function saltar(e: EstadoPaseo): EstadoPaseo {
+  return enElSuelo(e) ? { ...e, vy: IMPULSO_SALTO } : e;
+}
+
+/** Impulso breve en la dirección en que mira (también en el aire), con enfriamiento. */
+export function dashear(e: EstadoPaseo): EstadoPaseo {
+  return (e.enfriamiento ?? 0) > 0 ? e : { ...e, dash: DURACION_DASH, enfriamiento: ENFRIAMIENTO_DASH };
+}
+
+/** ¿Hay algo que animar aunque no se pulse ninguna tecla? */
+export const enMovimiento = (e: EstadoPaseo): boolean =>
+  e.velocidad > 0 || !enElSuelo(e) || (e.dash ?? 0) > 0 || (e.enfriamiento ?? 0) > 0;
+
 /** Distancia (desde el borde del lote) a la que un edificio "se nota" al pasar. */
 export const DISTANCIA_CERCANIA = 2.2;
 
@@ -77,9 +105,26 @@ export function avanzarPaseo(
   } else {
     velocidad = Math.max(0, velocidad - FRENADA * dt);
   }
-  if (velocidad === 0) return { ...estado, velocidad, rumbo };
 
-  const paso = velocidad * dt;
+  // Salto: integración vertical con gravedad; al tocar el suelo se detiene.
+  let altura = estado.altura ?? 0;
+  let vy = estado.vy ?? 0;
+  if (altura > 0 || vy > 0) {
+    vy -= GRAVEDAD * dt;
+    altura += vy * dt;
+    if (altura <= 0) {
+      altura = 0;
+      vy = 0;
+    }
+  }
+  const dash = Math.max(0, (estado.dash ?? 0) - dt);
+  const enfriamiento = Math.max(0, (estado.enfriamiento ?? 0) - dt);
+  const enDash = (estado.dash ?? 0) > 0;
+  const rapidez = enDash ? VELOCIDAD_DASH : velocidad;
+  const base = { rumbo, velocidad, altura, vy, dash, enfriamiento };
+  if (rapidez === 0) return { ...estado, ...base };
+
+  const paso = rapidez * dt;
   const libres = encoger(limites, RADIO_PERSONAJE);
   const choca = (p: Punto) => obstaculos.some((o) => dentro(p, o.rect, RADIO_PERSONAJE));
   let { x, z } = estado.posicion;
@@ -87,7 +132,7 @@ export function avanzarPaseo(
   if (!choca({ x: nx, z })) x = nx;
   const nz = Math.min(libres.z + libres.fondo, Math.max(libres.z, z + Math.cos(rumbo) * paso));
   if (!choca({ x, z: nz })) z = nz;
-  return { posicion: { x, z }, rumbo, velocidad };
+  return { posicion: { x, z }, ...base };
 }
 
 /** El edificio más cercano al personaje, si está a menos de `DISTANCIA_CERCANIA`. */

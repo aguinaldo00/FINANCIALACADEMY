@@ -181,3 +181,14 @@ body.portada-inmersiva .mundo>:not(.mundo-vista){padding-inline:max(16px,calc(50
 .paseo-pista b{color:var(--m-tinta);letter-spacing:.06em}
 .mundo.paseando .mundo-etiquetas{display:none}
 @media (pointer:coarse){[data-mundo-paseo]{display:none}}
+
+/* Pantalla completa del mapa (API nativa o capa de reserva). */
+.mundo:fullscreen,.mundo.pantalla-completa{display:flex;flex-direction:column;width:100vw!important;height:100vh;margin:0!important;border:0;background:var(--m-noche)}
+.mundo.pantalla-completa{position:fixed;inset:0;z-index:100}
+.mundo.en-pantalla-completa>:not(.mundo-barra):not(.mundo-vista){display:none!important}
+.mundo.en-pantalla-completa .mundo-barra{padding-inline:20px}
+.mundo.en-pantalla-completa .mundo-vista{flex:1;height:auto!important;min-height:0}
+body:has(.mundo.pantalla-completa){overflow:hidden}
+
+/* Pista de zoom (aparece una vez al usar la rueda sobre el mapa con el zoom desactivado). */
+.pista-zoom{position:absolute;left:50%;top:14px;transform:translateX(-50%);margin:0;padding:6px 14px;background:rgba(14,13,12,.88);border-radius:3px;font-size:.78rem;font-weight:700;color:var(--m-tinta);pointer-events:none;white-space:nowrap}
