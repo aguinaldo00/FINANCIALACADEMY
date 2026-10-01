@@ -1,14 +1,11 @@
 import {
   BoxGeometry,
   BufferGeometry,
-  CylinderGeometry,
-  Float32BufferAttribute,
   Group,
   type Material,
   Mesh,
   Plane,
   PlaneGeometry,
-  SphereGeometry,
   Vector3,
 } from 'three';
 import type { TipoTejado } from '../../content/schema.ts';
@@ -17,6 +14,8 @@ import type { EdificioVisual, Frente } from '../../world/cityModel.ts';
 import { pseudoAleatorio } from '../../world/geometry.ts';
 import type { Tipologia } from '../../world/typology.ts';
 import { emisivo, mate, mezclar, unir } from './materials.ts';
+import { type Rol, remate, SOLO_ACABADO, Taller, type Volumen } from './taller.ts';
+import { CONSTRUCTORES_URBANOS, materialUrbano } from './urbanArchitecture.ts';
 import { NIVEL, PALETA } from './palette.ts';
 
 /*
@@ -28,114 +27,6 @@ import { NIVEL, PALETA } from './palette.ts';
  * Un plano de corte por edificio decide qué parte está construida: 0 (solar), la mitad (en
  * obra) o todo (construido). Animar ese corte hace "crecer" el edificio.
  */
-
-type Rol =
-  | 'base' | 'muro' | 'acento' | 'tejado' | 'vidrio' | 'metal' | 'verde'
-  | 'luz' | 'oscuro' | 'pantalla' | 'baliza' | 'bandera';
-
-/** Roles que solo existen en el acabado (detalles que no lleva una maqueta blanca). */
-const SOLO_ACABADO: ReadonlySet<Rol> = new Set(['luz', 'oscuro', 'pantalla', 'baliza', 'bandera']);
-
-interface Volumen {
-  w: number;
-  d: number;
-  h: number;
-  x: number;
-  z: number;
-}
-
-/** Acumula piezas en coordenadas locales del lote (suelo en y = 0, fachada principal hacia +z). */
-class Taller {
-  readonly piezas = new Map<Rol, BufferGeometry[]>();
-  principal: Volumen = { w: 1, d: 1, h: 1, x: 0, z: 0 };
-  cima = 0;
-
-  anadir(rol: Rol, g: BufferGeometry): void {
-    const lista = this.piezas.get(rol) ?? [];
-    lista.push(g);
-    this.piezas.set(rol, lista);
-    g.computeBoundingBox();
-    this.cima = Math.max(this.cima, g.boundingBox!.max.y);
-  }
-
-  caja(rol: Rol, w: number, h: number, d: number, x: number, y: number, z: number, giro = 0): void {
-    const g = new BoxGeometry(w, h, d);
-    if (giro) g.rotateY(giro);
-    this.anadir(rol, g.translate(x, y + h / 2, z));
-  }
-
-  cilindro(rol: Rol, r: number, h: number, x: number, y: number, z: number, lados = 16): void {
-    this.anadir(rol, new CylinderGeometry(r, r, h, lados).translate(x, y + h / 2, z));
-  }
-
-  esfera(rol: Rol, r: number, x: number, y: number, z: number, media = false): void {
-    const g = new SphereGeometry(r, 20, media ? 8 : 12, 0, Math.PI * 2, 0, media ? Math.PI / 2 : Math.PI);
-    this.anadir(rol, g.translate(x, y, z));
-  }
-
-  /** Cubierta a dos aguas; la cumbrera va a lo largo de `cumbrera`. */
-  prisma(rol: Rol, w: number, h: number, d: number, x: number, y: number, z: number, cumbrera: 'x' | 'z'): void {
-    const [a, b] = cumbrera === 'x' ? [w / 2, d / 2] : [d / 2, w / 2];
-    // Perfil triangular en el plano (b, y), extruido a lo largo de a.
-    const v = [
-      [-a, 0, -b], [a, 0, -b], [a, h, 0], [-a, h, 0], // faldón 1
-      [-a, 0, b], [-a, h, 0], [a, h, 0], [a, 0, b], // faldón 2
-    ];
-    const tri = (p: number[], q: number[], r: number[]) => [...p, ...q, ...r];
-    const pos = [
-      ...tri(v[0]!, v[2]!, v[1]!), ...tri(v[0]!, v[3]!, v[2]!),
-      ...tri(v[4]!, v[6]!, v[5]!), ...tri(v[4]!, v[7]!, v[6]!),
-      ...tri([-a, 0, -b], [-a, 0, b], [-a, h, 0]), ...tri([a, 0, b], [a, 0, -b], [a, h, 0]),
-    ];
-    const g = new BufferGeometry();
-    g.setAttribute('position', new Float32BufferAttribute(pos, 3));
-    g.setAttribute('uv', new Float32BufferAttribute(new Array((pos.length / 3) * 2).fill(0), 2));
-    if (cumbrera === 'z') g.rotateY(Math.PI / 2);
-    g.computeVertexNormals();
-    this.anadir(rol, g.translate(x, y, z));
-  }
-
-  /** Bóveda de cañón (media caña) a lo largo de x. */
-  boveda(rol: Rol, largo: number, radio: number, x: number, y: number, z: number): void {
-    const g = new CylinderGeometry(radio, radio, largo, 18, 1, false, 0, Math.PI).rotateZ(Math.PI / 2);
-    this.anadir(rol, g.translate(x, y, z));
-  }
-
-  /** Cerco perimetral (pretil, marco de luces…). */
-  marco(rol: Rol, w: number, d: number, x: number, y: number, z: number, alto: number, grosor: number): void {
-    this.caja(rol, w, alto, grosor, x, y, z + d / 2 - grosor / 2);
-    this.caja(rol, w, alto, grosor, x, y, z - d / 2 + grosor / 2);
-    this.caja(rol, grosor, alto, d - 2 * grosor, x + w / 2 - grosor / 2, y, z);
-    this.caja(rol, grosor, alto, d - 2 * grosor, x - w / 2 + grosor / 2, y, z);
-  }
-
-  /** Huecos de fachada en las cuatro caras de un volumen. */
-  ventanas(v: Volumen, y0: number, y1: number, estilo: 'perforada' | 'banda', encendidas: number, semilla: number, planta = 1.45): void {
-    const filas = Math.floor((y1 - y0 - 0.3) / planta);
-    if (filas <= 0) return;
-    const caras: { largo: number; giro: number; dx: number; dz: number }[] = [
-      { largo: v.w, giro: 0, dx: 0, dz: v.d / 2 + 0.03 },
-      { largo: v.w, giro: Math.PI, dx: 0, dz: -v.d / 2 - 0.03 },
-      { largo: v.d, giro: Math.PI / 2, dx: v.w / 2 + 0.03, dz: 0 },
-      { largo: v.d, giro: -Math.PI / 2, dx: -v.w / 2 - 0.03, dz: 0 },
-    ];
-    caras.forEach((cara, c) => {
-      for (let f = 0; f < filas; f++) {
-        const y = y0 + 0.35 + planta * (f + 0.5);
-        const n = Math.max(1, Math.floor((cara.largo - 0.5) / 1.05));
-        const huecos = estilo === 'banda'
-          ? [{ ancho: Math.max(0.4, cara.largo - 0.6), offset: 0 }]
-          : Array.from({ length: n }, (_, k) => ({ ancho: 0.5, offset: (k - (n - 1) / 2) * 1.05 }));
-        huecos.forEach((h, k) => {
-          const alto = estilo === 'banda' ? planta * 0.42 : planta * 0.5;
-          const g = new PlaneGeometry(h.ancho, alto).translate(h.offset, 0, 0).rotateY(cara.giro);
-          g.translate(v.x + cara.dx, y, v.z + cara.dz);
-          this.anadir(pseudoAleatorio(semilla + f * 13 + c * 5, k) < encendidas ? 'luz' : 'oscuro', g);
-        });
-      }
-    });
-  }
-}
 
 /* ------------------------------------------------------------------ tipologías */
 
@@ -270,42 +161,6 @@ const CONSTRUCTORES: Record<Tipologia, Constructor> = {
   institucional, banco, supervisor, aseguradora, lonja, tecnologica, oficina,
 };
 
-/** Remate de cubierta: mismas convenciones de tejado que la portada original. */
-function remate(t: Taller, tejado: TipoTejado, w: number, d: number, y: number, x: number, z: number, cumbrera: 'x' | 'z'): void {
-  const m = Math.min(w, d);
-  switch (tejado) {
-    case 'fronton':
-      t.prisma('tejado', w + 0.3, m * 0.3, d + 0.3, x, y, z, cumbrera);
-      break;
-    case 'granero':
-      t.prisma('tejado', w + 0.4, m * 0.45, d + 0.4, x, y, z, 'x');
-      break;
-    case 'cupula':
-      t.cilindro('muro', m * 0.33, 0.6, x, y, z, 20);
-      t.esfera('tejado', m * 0.33, x, y + 0.6, z, true);
-      break;
-    case 'antena':
-      t.caja('metal', m * 0.35, 0.5, m * 0.35, x, y, z);
-      t.cilindro('metal', 0.07, 3.2, x, y + 0.5, z, 6);
-      t.esfera('baliza', 0.17, x, y + 3.75, z);
-      break;
-    case 'bandera':
-      t.marco('muro', w, d, x, y, z, 0.3, 0.18);
-      t.cilindro('metal', 0.06, 2.6, x + w * 0.25, y, z + d * 0.2, 6);
-      t.caja('bandera', 1.15, 0.68, 0.05, x + w * 0.25 + 0.6, y + 1.85, z + d * 0.2);
-      break;
-    case 'ruina':
-      // La portada dibuja la caja "mordida": coronación rota en una esquina.
-      t.caja('muro', w * 0.55, 0.9, d * 0.5, x - w * 0.22, y, z - d * 0.25);
-      t.caja('muro', w * 0.3, 0.45, d * 0.35, x + w * 0.2, y, z - d * 0.3);
-      break;
-    case 'plano':
-      t.marco('muro', w, d, x, y, z, 0.3, 0.18);
-      t.caja('metal', w * 0.3, 0.6, d * 0.26, x + w * 0.12, y, z - d * 0.12);
-      break;
-  }
-}
-
 /* ------------------------------------------------------------------ montaje */
 
 const MURO_TIPOLOGIA: Record<Tipologia, string> = {
@@ -342,6 +197,10 @@ function materialAcabado(rol: Rol, e: EdificioVisual): Material {
     case 'pantalla': return emisivo(e.color, true);
     case 'baliza': return emisivo('#ff6a5a');
     case 'bandera': return mate(e.color, { rugosidad: 0.7 });
+    case 'moldura': return mate(PALETA.piedra, { rugosidad: 0.8 });
+    case 'junta': return mate(PALETA.granito, { rugosidad: 0.85 });
+    case 'bronce': return mate(PALETA.metal, { rugosidad: 0.45, metal: 0.5 });
+    case 'entorno': return mate(PALETA.cesped, { rugosidad: 1 });
   }
 }
 
@@ -368,22 +227,25 @@ export function construirArquitectura(e: EdificioVisual): Group {
   grupo.position.set(e.posicion.x, NIVEL.lote, e.posicion.z);
   grupo.userData = { tipo: 'edificio', conceptoId: e.conceptoId };
 
-  // Lote con bordillo en el color de dominio (mismo código que la ciudad 2D). Si el edificio deja
-  // espacio libre en su lote, ese espacio es jardín; si no, pavimento.
-  const holgado = e.lote.ancho * e.lote.fondo > 90;
-  const lote = new Mesh(
-    new BoxGeometry(e.lote.ancho, NIVEL.lote - NIVEL.acera, e.lote.fondo),
-    mate(holgado ? PALETA.cesped : PALETA.pavimentoLote, { rugosidad: 0.95 }),
-  );
-  lote.position.y = -(NIVEL.lote - NIVEL.acera) / 2;
-  lote.receiveShadow = true;
-  lote.name = 'lote';
-  const colorBordillo = e.dominio > 0 ? colorDominio(e.dominio) : PALETA.sinEstudiar;
-  const bordillo = new Taller();
-  bordillo.marco('acento', e.lote.ancho, e.lote.fondo, 0, 0, 0, 0.07, 0.22);
-  const mallaBordillo = new Mesh(unir(bordillo.piezas.get('acento')!)!, mate(colorBordillo, { rugosidad: 0.6 }));
-  mallaBordillo.name = 'bordillo-dominio';
-  grupo.add(lote, mallaBordillo);
+  // Gramática de parcelas: lote con bordillo en el color de dominio (mismo código que la ciudad
+  // 2D). En la gramática urbana el edificio ocupa toda su huella y el estado se lee en el propio
+  // edificio (materiales, luz, obra), sin marcas de color en el suelo.
+  if (e.composicion === 'parcelas') {
+    const holgado = e.lote.ancho * e.lote.fondo > 90;
+    const lote = new Mesh(
+      new BoxGeometry(e.lote.ancho, NIVEL.lote - NIVEL.acera, e.lote.fondo),
+      mate(holgado ? PALETA.cesped : PALETA.pavimentoLote, { rugosidad: 0.95 }),
+    );
+    lote.position.y = -(NIVEL.lote - NIVEL.acera) / 2;
+    lote.receiveShadow = true;
+    lote.name = 'lote';
+    const colorBordillo = e.dominio > 0 ? colorDominio(e.dominio) : PALETA.sinEstudiar;
+    const bordillo = new Taller();
+    bordillo.marco('acento', e.lote.ancho, e.lote.fondo, 0, 0, 0, 0.07, 0.22);
+    const mallaBordillo = new Mesh(unir(bordillo.piezas.get('acento')!)!, mate(colorBordillo, { rugosidad: 0.6 }));
+    mallaBordillo.name = 'bordillo-dominio';
+    grupo.add(lote, mallaBordillo);
+  }
 
   // La arquitectura se gira para que la fachada principal mire a la calle.
   const cuerpo = new Group();
@@ -393,7 +255,14 @@ export function construirArquitectura(e: EdificioVisual): Group {
   const D = girado ? e.lote.ancho : e.lote.fondo;
   const taller = new Taller();
   const semilla = [...e.conceptoId].reduce((s, c) => s + c.charCodeAt(0), 0);
-  CONSTRUCTORES[e.tipologia](taller, W, D, e.alturaCompleta, e.tejado, semilla);
+  if (e.composicion === 'urbana') {
+    CONSTRUCTORES_URBANOS[e.tipologia](taller, {
+      W, D, H: e.alturaCompleta, tejado: e.tejado, glifos: new Set(e.iconos), emblematico: e.emblematico, semilla, antepatio: Boolean(e.antepatio),
+    });
+  } else {
+    CONSTRUCTORES[e.tipologia](taller, W, D, e.alturaCompleta, e.tejado, semilla);
+  }
+  const material = (rol: Rol) => (e.composicion === 'urbana' ? materialUrbano(rol, e, semilla) : materialAcabado(rol, e));
 
   const cimaMundo = NIVEL.lote + taller.cima;
   const corteFase = e.fase === 'completo' ? cimaMundo + 1 : NIVEL.lote + taller.principal.h * CONSTRUIDO_POR_FASE[e.fase];
@@ -405,11 +274,12 @@ export function construirArquitectura(e: EdificioVisual): Group {
   for (const [rol, piezas] of taller.piezas) {
     if (!SOLO_ACABADO.has(rol)) proyectoPiezas.push(...piezas.map((g) => g.clone()));
     if (rol === 'luz' || rol === 'oscuro') proyectoHuecos.push(...piezas.map((g) => g.clone()));
-    const material = materialAcabado(rol, e).clone();
-    Object.assign(material, { clippingPlanes: [planoAcabado], clipShadows: true });
-    const malla = new Mesh(unir(piezas)!, material);
+    const propio = material(rol).clone();
+    // El entorno del lote no se recorta: el mundo está construido aunque el concepto no.
+    if (rol !== 'entorno') Object.assign(propio, { clippingPlanes: [planoAcabado], clipShadows: true });
+    const malla = new Mesh(unir(piezas)!, propio);
     malla.name = `acabado-${rol}`;
-    malla.castShadow = !SOLO_ACABADO.has(rol);
+    malla.castShadow = !SOLO_ACABADO.has(rol) || rol === 'entorno';
     malla.receiveShadow = true;
     cuerpo.add(malla);
   }
@@ -475,7 +345,7 @@ function obras(v: Volumen, W: number, D: number, cima: number, corte: number): G
   const alto = cima + 2.6;
   const g = new Taller();
   g.caja('metal', 0.32, alto, 0.32, gx, 0, gz);
-  const pluma = Math.max(4, v.w * 1.1);
+  const pluma = Math.min(5.5, Math.max(3.5, v.w * 0.9));
   g.caja('metal', pluma, 0.22, 0.22, gx - pluma / 2 + 0.3, alto, gz);
   g.caja('metal', 1.8, 0.22, 0.22, gx + 1.1, alto, gz);
   g.caja('metal', 0.6, 0.5, 0.5, gx + 1.7, alto - 0.3, gz); // contrapeso

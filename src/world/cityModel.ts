@@ -13,6 +13,8 @@ import {
   segmentosInteriores,
 } from './geometry.ts';
 import { ALTURA_TIPOLOGIA, TEJADO_TIPOLOGIA, type Tipologia, tipologiaDe } from './typology.ts';
+import type { GlyphName } from '../icons/glyphs.ts';
+import { componerZonaUrbana, type ComposicionUrbana } from './urban.ts';
 
 /*
  * Modelo visual derivado: traduce contenido + progreso a una ciudad. Es puro (sin Three.js ni DOM)
@@ -68,6 +70,12 @@ export interface ZonaVisual {
   interior: Rect;
   /** Plaza pública de la zona (si la manzana tiene espacio para ella). */
   plaza: Rect | null;
+  /** Gramática visual de la zona (ver GRAMATICA_URBANA). */
+  composicion: Composicion;
+  /** Solo en la gramática urbana: manzanas, pasajes peatonales y patios interiores. */
+  manzanas: Rect[];
+  pasajes: Rect[];
+  patios: Rect[];
   pesoExamen: number;
   dominio: number;
   nivel: NivelDominio;
@@ -87,6 +95,11 @@ export interface EdificioVisual {
   nombre: string;
   color: string;
   tipologia: Tipologia;
+  /** Glifos del concepto en DATA: dan rasgos arquitectónicos (ver architecture). */
+  iconos: readonly GlyphName[];
+  composicion: Composicion;
+  /** Explanada delante de la fachada de un emblemático (gramática urbana). */
+  antepatio: Rect | null;
   /** Lote del edificio dentro de la manzana. */
   lote: Rect;
   frente: Frente;
@@ -103,7 +116,18 @@ export interface EdificioVisual {
   fase: FaseObra;
 }
 
-export type MotivoArbol = 'bulevar' | 'plaza';
+export type MotivoArbol = 'bulevar' | 'plaza' | 'patio' | 'paseo';
+
+/**
+ * - `parcelas`: lotes en retícula (gramática de c30a940).
+ * - `urbana`: manzanas de Ensanche con patio, fachada continua y antepatios (vertical slice).
+ */
+export type Composicion = 'parcelas' | 'urbana';
+
+/** Barrios que ya usan la gramática urbana. Se amplía cuando el lenguaje visual esté validado. */
+export const GRAMATICA_URBANA: ReadonlySet<string> = new Set(['4']);
+/** Acera entre la calle y las manzanas en la gramática urbana. */
+export const ACERA_URBANA = 1.5;
 
 export interface ArbolVisual {
   posicion: Punto;
@@ -182,20 +206,29 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
     for (const s of secciones) {
       const lote = lotes.get(s.id)!;
       const manzana = encoger(lote, CALLE / 2);
-      const interior = encoger(manzana, ACERA);
+      const composicion: Composicion = GRAMATICA_URBANA.has(g.id) ? 'urbana' : 'parcelas';
+      const interior = encoger(manzana, composicion === 'urbana' ? ACERA_URBANA : ACERA);
       const conceptos = tema.conceptos.filter((c) => c.seccionId === s.id);
-      const conPlaza = conceptos.length > 0 && (interior.ancho * interior.fondo) / conceptos.length >= SUPERFICIE_PLAZA;
-      const celdas = repartirLotes(interior, conceptos.length + (conPlaza ? 1 : 0));
-      const indicePlaza = conPlaza ? Math.floor(celdas.length / 2) : -1;
-      const plaza = conPlaza ? encoger(celdas[indicePlaza]!, PASAJE / 2) : null;
-      const lotesEdificio = celdas.filter((_, i) => i !== indicePlaza);
+      let plaza: Rect | null = null;
+      let urbana: ComposicionUrbana | null = null;
+      let lotesEdificio: Rect[] = [];
+      if (composicion === 'urbana') {
+        urbana = componerZonaUrbana(interior, conceptos.map((c) => ({ conceptoId: c.id, emblematico: emblematicos.has(c.id) })));
+      } else {
+        const conPlaza = conceptos.length > 0 && (interior.ancho * interior.fondo) / conceptos.length >= SUPERFICIE_PLAZA;
+        const celdas = repartirLotes(interior, conceptos.length + (conPlaza ? 1 : 0));
+        const indicePlaza = conPlaza ? Math.floor(celdas.length / 2) : -1;
+        plaza = conPlaza ? encoger(celdas[indicePlaza]!, PASAJE / 2) : null;
+        lotesEdificio = celdas.filter((_, i) => i !== indicePlaza).map((c) => encoger(c, PASAJE / 2));
+      }
 
       conceptos.forEach((c, k) => {
         const d = dominioConcepto(progreso, c.id);
         const nivel = nivelDominio(d);
         const emblema = emblematicos.get(c.id);
         const tipologia = tipologiaDe(c.iconos);
-        const loteEdificio = encoger(lotesEdificio[k]!, PASAJE / 2);
+        const hueco = urbana?.huecos.find((h) => h.conceptoId === c.id);
+        const loteEdificio = hueco ? hueco.huella : lotesEdificio[k]!;
         edificios.push({
           conceptoId: c.id,
           seccionId: s.id,
@@ -203,8 +236,11 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
           nombre: c.nombre,
           color: c.color,
           tipologia,
+          iconos: c.iconos,
+          composicion,
+          antepatio: hueco?.antepatio ?? null,
           lote: loteEdificio,
-          frente: frenteHaciaCalle(loteEdificio, manzana),
+          frente: hueco ? hueco.frente : frenteHaciaCalle(loteEdificio, manzana),
           posicion: centroRect(loteEdificio),
           huella: Math.min(loteEdificio.ancho, loteEdificio.fondo),
           alturaCompleta: emblema ? emblema.altura / PIXELES_POR_UNIDAD : ALTURA_TIPOLOGIA[tipologia],
@@ -225,6 +261,10 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
         parcela: manzana,
         interior,
         plaza,
+        composicion,
+        manzanas: urbana?.manzanas ?? [],
+        pasajes: urbana?.pasajes ?? [],
+        patios: urbana?.patios ?? [],
         pesoExamen: s.pesoExamen,
         dominio: dominioZona(tema, progreso, s.id),
         nivel: nivelDominio(dominioZona(tema, progreso, s.id)),
@@ -238,7 +278,7 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
   });
 
   const avenidas = segmentosInteriores([...rectsBarrio.values()], ciudad);
-  const arboles = [...arbolesDeBulevar(avenidas, [...avenidas, ...calles]), ...arbolesDePlaza(zonas)];
+  const arboles = [...arbolesDeBulevar(avenidas, [...avenidas, ...calles]), ...arbolesDePlaza(zonas), ...arbolesUrbanos(zonas)];
   const farolas = farolasDeAvenida(avenidas, [...avenidas, ...calles]);
 
   return { lado, barrios, zonas, edificios, avenidas, calles, arboles, farolas };
@@ -369,6 +409,43 @@ function arbolesDePlaza(zonas: ZonaVisual[]): ArbolVisual[] {
       { x: r.x + r.ancho, z: r.z + r.fondo },
     ]) {
       arboles.push({ posicion: p, escala: 1.05, motivo: 'plaza' });
+    }
+  }
+  return arboles;
+}
+
+/**
+ * Gramática urbana: arbolado de patio de manzana (jardín interior) y de paseo (en el eje de los
+ * pasajes peatonales). Nunca dentro de una huella de edificio.
+ */
+function arbolesUrbanos(zonas: ZonaVisual[]): ArbolVisual[] {
+  const arboles: ArbolVisual[] = [];
+  for (const z of zonas) {
+    if (z.composicion !== 'urbana') continue;
+    for (const p of z.patios) {
+      const r = encoger(p, 1.6);
+      if (r.ancho < 1 || r.fondo < 1) continue;
+      const nx = Math.max(1, Math.floor(r.ancho / 3.4));
+      const nz = Math.max(1, Math.floor(r.fondo / 3.4));
+      for (let i = 0; i <= nx; i++) {
+        for (let j = 0; j <= nz; j++) {
+          // Solo el contorno del patio: el centro queda libre como jardín.
+          if (i > 0 && i < nx && j > 0 && j < nz) continue;
+          arboles.push({ posicion: { x: r.x + (r.ancho * i) / nx, z: r.z + (r.fondo * j) / nz }, escala: 0.95, motivo: 'patio' });
+        }
+      }
+    }
+    for (const p of z.pasajes) {
+      const largo = Math.max(p.ancho, p.fondo);
+      const n = Math.floor(largo / 4.2);
+      for (let i = 1; i < n; i++) {
+        const t = (largo * i) / n;
+        arboles.push({
+          posicion: p.ancho >= p.fondo ? { x: p.x + t, z: p.z + p.fondo / 2 } : { x: p.x + p.ancho / 2, z: p.z + t },
+          escala: 0.8,
+          motivo: 'paseo',
+        });
+      }
     }
   }
   return arboles;

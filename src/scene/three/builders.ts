@@ -1,8 +1,11 @@
 import {
+  AdditiveBlending,
   BoxGeometry,
+  CircleGeometry,
+  DoubleSide,
+  Float32BufferAttribute,
   BufferGeometry,
   Color,
-  ConeGeometry,
   CylinderGeometry,
   Group,
   IcosahedronGeometry,
@@ -18,10 +21,12 @@ import {
 } from 'three';
 import { colorDominio } from '../../ui/format.ts';
 import { AVENIDA, CALLE, type ModeloCiudad, tramosEntreCruces, type ZonaVisual } from '../../world/cityModel.ts';
-import { centroRect, encoger, longitudSegmento, type Rect, type Segmento } from '../../world/geometry.ts';
+import { centroRect, encoger, longitudSegmento, pseudoAleatorio, type Rect, type Segmento } from '../../world/geometry.ts';
 import { construirArquitectura, type DatosArquitectura } from './architecture.ts';
 import { emisivo, esCompartido, mate, unir } from './materials.ts';
 import { NIVEL, PALETA } from './palette.ts';
+import { texturaAsfalto } from './textures.ts';
+import { construirManzanaUrbana, esSueloCompartido, losaPlanta, NIVEL_PASAJE, suelo } from './urbanGround.ts';
 
 /*
  * Construcción de la maqueta a partir del modelo visual. Solo crea objetos Three.js
@@ -71,7 +76,7 @@ export function construirCapaEstatica(m: ModeloCiudad): Group {
     madera, madera, mate(PALETA.peanaCanto, { rugosidad: 0.9 }), madera, madera, madera,
   ]);
   peana.name = 'peana';
-  const asfalto = losa(ciudad, NIVEL.peana, NIVEL.calle, mate(PALETA.asfalto, { rugosidad: 0.95 }));
+  const asfalto = losaPlanta(ciudad, NIVEL.peana, NIVEL.calle, suelo('#8f8a86', texturaAsfalto, 0.95));
   asfalto.name = 'asfalto';
   capa.add(peana, asfalto);
 
@@ -112,7 +117,8 @@ export function construirCapaEstatica(m: ModeloCiudad): Group {
     capa.add(malla);
   }
 
-  for (const z of m.zonas) capa.add(construirManzana(z, m));
+  for (const z of m.zonas) capa.add(z.composicion === 'urbana' ? construirManzanaUrbana(z, m) : construirManzana(z, m));
+  capa.add(construirAparcados(m));
   capa.add(construirArbolado(m), construirFarolas(m));
   return capa;
 }
@@ -175,10 +181,10 @@ function construirArbolado(m: ModeloCiudad): Group {
   const color = new Color();
   m.arboles.forEach((a, i) => {
     const e = a.escala;
-    const suelo = a.motivo === 'plaza' ? NIVEL.plaza : NIVEL.mediana;
-    matriz.makeScale(e, e * 1.3, e).setPosition(a.posicion.x, suelo + 0.65 * e, a.posicion.z);
+    const base = a.motivo === 'plaza' || a.motivo === 'patio' ? NIVEL.plaza : a.motivo === 'paseo' ? NIVEL_PASAJE : NIVEL.mediana;
+    matriz.makeScale(e, e * 1.3, e).setPosition(a.posicion.x, base + 0.65 * e, a.posicion.z);
     troncos.setMatrixAt(i, matriz);
-    matriz.makeScale(e, e * 1.12, e).setPosition(a.posicion.x, suelo + 1.75 * e, a.posicion.z);
+    matriz.makeScale(e, e * 1.12, e).setPosition(a.posicion.x, base + 1.75 * e, a.posicion.z);
     copas.setMatrixAt(i, matriz);
     copas.setColorAt(i, color.set(PALETA.copas[i % PALETA.copas.length]!));
   });
@@ -215,14 +221,62 @@ export interface RutaCoche {
   velocidad: number;
 }
 
+const carroceria = () =>
+  unir([new BoxGeometry(1.0, 0.36, 0.5).translate(0, 0.26, 0), new BoxGeometry(0.55, 0.26, 0.44).translate(-0.06, 0.57, 0)])!;
+
+/**
+ * Gramática urbana: coches aparcados junto a las aceras. Son estáticos (el barrio está habitado
+ * aunque no se haya estudiado); el tráfico en movimiento sigue reservado al estudio.
+ */
+function construirAparcados(m: ModeloCiudad): Group {
+  const grupo = new Group();
+  grupo.name = 'aparcados';
+  const plazas: { x: number; z: number; giro: number }[] = [];
+  m.zonas.forEach((z, k) => {
+    if (z.composicion !== 'urbana') return;
+    const r = z.parcela;
+    const lados = [
+      { a: { x: r.x, z: r.z - 0.75 }, b: { x: r.x + r.ancho, z: r.z - 0.75 }, giro: 0 },
+      { a: { x: r.x, z: r.z + r.fondo + 0.75 }, b: { x: r.x + r.ancho, z: r.z + r.fondo + 0.75 }, giro: 0 },
+      { a: { x: r.x - 0.75, z: r.z }, b: { x: r.x - 0.75, z: r.z + r.fondo }, giro: Math.PI / 2 },
+      { a: { x: r.x + r.ancho + 0.75, z: r.z }, b: { x: r.x + r.ancho + 0.75, z: r.z + r.fondo }, giro: Math.PI / 2 },
+    ];
+    lados.forEach((l, j) => {
+      const largo = Math.hypot(l.b.x - l.a.x, l.b.z - l.a.z);
+      for (let d = 3.5, i = 0; d < largo - 3.5; d += 1.45, i++) {
+        if (pseudoAleatorio(k * 31 + j * 7 + i, 11) < 0.55) continue;
+        const t = d / largo;
+        plazas.push({ x: l.a.x + (l.b.x - l.a.x) * t, z: l.a.z + (l.b.z - l.a.z) * t, giro: l.giro });
+      }
+    });
+  });
+  if (!plazas.length) return grupo;
+  const malla = new InstancedMesh(carroceria(), new MeshStandardMaterial({ roughness: 0.5, metalness: 0.2 }), plazas.length);
+  const matriz = new Matrix4();
+  const giro = new Matrix4();
+  const tonos = ['#8a8f96', '#3f4a57', '#b7b0a4', '#6b3b33', '#2c2e33', '#c9c4ba'];
+  plazas.forEach((p, i) => {
+    malla.setMatrixAt(i, matriz.makeTranslation(p.x, NIVEL.calle, p.z).multiply(giro.makeRotationY(p.giro)));
+    malla.setColorAt(i, new Color(tonos[i % tonos.length]!));
+  });
+  malla.castShadow = true;
+  malla.name = 'coches-aparcados';
+  grupo.add(malla);
+  return grupo;
+}
+
 export interface CapaDinamica {
   raiz: Group;
   edificios: Map<string, Group>;
   /** Lámina de color por zona para la lectura de Atlas. */
   calor: Mesh[];
-  marcadores: Group[];
+  /** Columnas de luz de "Estudia ya". */
+  senales: Group[];
   coches: InstancedMesh | null;
   rutas: RutaCoche[];
+  /** Peatones de las zonas en estudio (gramática urbana): más dominio, más vida en la acera. */
+  peatones: InstancedMesh | null;
+  rutasPeatones: RutaCoche[];
 }
 
 /** Altura de la lámina del Atlas: por encima de todos los edificios. */
@@ -260,28 +314,19 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
     return plano;
   });
 
-  // "Estudia ya": un hito sobre la plaza (o el centro) de las zonas prioritarias.
-  const material = new MeshStandardMaterial({ color: PALETA.marcador, emissive: PALETA.marcador, emissiveIntensity: 0.3, roughness: 0.4 });
-  const marcadores = m.zonas
+  // "Estudia ya": una columna de luz cálida que sale del corazón de la zona recomendada. Es un
+  // fenómeno del mundo, no un pin: no se mueve ni parpadea, y su intensidad sigue el orden de la
+  // recomendación (la primera llama más).
+  const senales = m.zonas
     .filter((z) => z.prioridad !== null)
     .map((z) => {
-      const g = new Group();
-      g.name = `estudia-ya-${z.prioridad}`;
-      const punta = new Mesh(new ConeGeometry(0.55, 1.5, 16), material);
-      punta.rotation.x = Math.PI;
-      const cabeza = new Mesh(new SphereGeometry(0.62, 20, 14), material);
-      cabeza.position.y = 1.0;
-      punta.castShadow = cabeza.castShadow = true;
-      g.add(punta, cabeza);
-      const c = centroRect(z.plaza ?? z.parcela);
-      const cima = Math.max(
-        0,
-        ...m.edificios
-          .filter((e) => e.seccionId === z.seccionId)
-          .map((e) => datosArquitectura(edificios.get(e.conceptoId)!)?.cima ?? 0),
-      );
-      g.position.set(c.x, (z.plaza ? NIVEL.plaza + 2.2 : cima + 2.2) + 0.75, c.z);
-      g.userData = { baseY: g.position.y, seccionId: z.seccionId };
+      const g = columnaDeLuz(1 - (z.prioridad! - 1) * 0.3);
+      g.name = `senal-estudia-ya-${z.prioridad}`;
+      const corazon = z.patios.reduce<Rect | null>((mayor, p) => (!mayor || p.ancho * p.fondo > mayor.ancho * mayor.fondo ? p : mayor), null)
+        ?? z.plaza ?? z.parcela;
+      const c = centroRect(corazon);
+      g.position.set(c.x, z.patios.length || z.plaza ? NIVEL.plaza : NIVEL.acera, c.z);
+      g.userData = { seccionId: z.seccionId };
       raiz.add(g);
       return g;
     });
@@ -297,8 +342,7 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
   });
   let coches: InstancedMesh | null = null;
   if (rutas.length) {
-    const carroceria = unir([new BoxGeometry(1.0, 0.36, 0.5).translate(0, 0.26, 0), new BoxGeometry(0.55, 0.26, 0.44).translate(-0.06, 0.57, 0)])!;
-    coches = new InstancedMesh(carroceria, new MeshStandardMaterial({ roughness: 0.45, metalness: 0.2 }), rutas.length);
+    coches = new InstancedMesh(carroceria(), new MeshStandardMaterial({ roughness: 0.45, metalness: 0.2 }), rutas.length);
     rutas.forEach((_, i) => coches!.setColorAt(i, new Color(PALETA.coches[i % PALETA.coches.length]!)));
     coches.castShadow = true;
     coches.name = 'trafico';
@@ -306,7 +350,61 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
     raiz.add(coches);
   }
 
-  return { raiz, edificios, calor, marcadores, coches, rutas };
+  const rutasPeatones: RutaCoche[] = [];
+  m.zonas.forEach((z, k) => {
+    if (z.composicion !== 'urbana' || z.dominio <= 0) return;
+    const cantidad = Math.round(z.dominio * 10);
+    for (let i = 0; i < cantidad; i++) {
+      const sentido = i % 2 ? 1 : -1;
+      rutasPeatones.push({ rect: encoger(z.parcela, 0.5 + (i % 3) * 0.25), inicio: (i * 0.173 + k * 0.31) % 1, velocidad: sentido * (0.0025 + (i % 4) * 0.0006) });
+    }
+  });
+  let peatones: InstancedMesh | null = null;
+  if (rutasPeatones.length) {
+    const figura = unir([new CylinderGeometry(0.13, 0.15, 0.62, 8).translate(0, 0.31, 0), new SphereGeometry(0.12, 10, 8).translate(0, 0.76, 0)])!;
+    peatones = new InstancedMesh(figura, new MeshStandardMaterial({ roughness: 0.8 }), rutasPeatones.length);
+    const ropa = ['#3b4656', '#7a4d3a', '#c9b9a0', '#4d5b4a', '#2d2f36', '#8b6f4e'];
+    rutasPeatones.forEach((_, i) => peatones!.setColorAt(i, new Color(ropa[i % ropa.length]!)));
+    peatones.castShadow = true;
+    peatones.name = 'peatones';
+    colocarEnRecorrido(peatones, rutasPeatones, 0, NIVEL.acera);
+    raiz.add(peatones);
+  }
+
+  return { raiz, edificios, calor, senales, coches, rutas, peatones, rutasPeatones };
+}
+
+/** Columna de luz aditiva con degradado vertical (en los vértices) y un halo en el suelo. */
+function columnaDeLuz(intensidad: number): Group {
+  const g = new Group();
+  const oro = new Color('#ffb84a').multiplyScalar(0.3 * intensidad);
+  const fuste = new CylinderGeometry(0.75, 0.42, 24, 24, 12, true).translate(0, 12, 0);
+  const colores: number[] = [];
+  const pos = fuste.getAttribute('position');
+  for (let i = 0; i < pos.count; i++) {
+    const t = pos.getY(i) / 24;
+    const k = (1 - t) ** 2.2;
+    colores.push(oro.r * k, oro.g * k, oro.b * k);
+  }
+  fuste.setAttribute('color', new Float32BufferAttribute(colores, 3));
+  const luz = new MeshBasicMaterial({ vertexColors: true, blending: AdditiveBlending, transparent: true, depthWrite: false, side: DoubleSide });
+  const columna = new Mesh(fuste, luz);
+  columna.name = 'senal-columna';
+  columna.renderOrder = 5;
+  const halo = new CircleGeometry(3.4, 40).rotateX(-Math.PI / 2).translate(0, 0.04, 0);
+  const hpos = halo.getAttribute('position');
+  const hcol: number[] = [];
+  for (let i = 0; i < hpos.count; i++) {
+    const r = Math.hypot(hpos.getX(i), hpos.getZ(i)) / 3.4;
+    const k = (1 - r) ** 2 * 1.4;
+    hcol.push(oro.r * k, oro.g * k, oro.b * k);
+  }
+  halo.setAttribute('color', new Float32BufferAttribute(hcol, 3));
+  const suelo = new Mesh(halo, luz);
+  suelo.name = 'senal-halo';
+  suelo.renderOrder = 5;
+  g.add(columna, suelo);
+  return g;
 }
 
 const matrizCoche = new Matrix4();
@@ -314,6 +412,12 @@ const giroCoche = new Matrix4();
 
 /** Coloca cada coche en su recorrido alrededor de la manzana en el instante `t` (segundos). */
 export function colocarCoches(coches: InstancedMesh, rutas: RutaCoche[], t: number): void {
+  colocarEnRecorrido(coches, rutas, t, NIVEL.calle);
+}
+
+/** Recorrido rectangular genérico (coches por la calzada, peatones por la acera). */
+export function colocarEnRecorrido(malla: InstancedMesh, rutas: RutaCoche[], t: number, y: number): void {
+  const coches = malla;
   rutas.forEach((ruta, i) => {
     const { rect } = ruta;
     const perimetro = 2 * (rect.ancho + rect.fondo);
@@ -330,7 +434,7 @@ export function colocarCoches(coches: InstancedMesh, rutas: RutaCoche[], t: numb
       x = rect.x; z = rect.z + rect.fondo - d; angulo = Math.PI / 2;
     }
     giroCoche.makeRotationY(angulo);
-    matrizCoche.makeTranslation(x, NIVEL.calle, z).multiply(giroCoche);
+    matrizCoche.makeTranslation(x, y, z).multiply(giroCoche);
     coches.setMatrixAt(i, matrizCoche);
   });
   coches.instanceMatrix.needsUpdate = true;
@@ -342,6 +446,6 @@ export function liberar(objeto: Object3D): void {
     const malla = o as Partial<Mesh>;
     if (malla.geometry instanceof BufferGeometry) malla.geometry.dispose();
     const lista = Array.isArray(malla.material) ? malla.material : malla.material ? [malla.material] : [];
-    for (const mat of lista) if (!esCompartido(mat)) mat.dispose();
+    for (const mat of lista) if (!esCompartido(mat) && !esSueloCompartido(mat)) mat.dispose();
   });
 }

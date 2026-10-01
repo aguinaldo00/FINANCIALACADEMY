@@ -31,11 +31,11 @@ export const PALETA = {
   ventanaEncendida: '#ffd59a',
   ventanaApagada: '#40505f',
   /** Maqueta blanca: el proyecto de lo que se construirá al estudiar. */
-  proyecto: '#e9e4db',
+  proyecto: '#dedbd5',
   /** Huecos grabados en la maqueta blanca: dan escala sin color. */
-  proyectoHueco: '#cfc8bc',
+  proyectoHueco: '#b2b1ad',
   andamio: '#c98a3a',
-  grua: '#e9b43a',
+  grua: '#d2a03c',
   sinEstudiar: '#a49e93',
   tronco: '#6f5038',
   copas: ['#6e9a55', '#7aa65d', '#628e4c', '#86ad66'],

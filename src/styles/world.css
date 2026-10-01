@@ -1,71 +1,145 @@
-/* Fase 2: mundo explorable de la portada (maqueta 3D + Atlas). */
-.mundo{margin:26px 0 8px;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:#0c0d11}
+/*
+ * La Ciudad del Dinero · mundo de la portada (maqueta 3D, ficha contextual y Atlas).
+ * Composición: el mundo es el protagonista, a sangre dentro de la columna; la navegación es una
+ * línea fina encima; el Atlas, un índice editorial debajo. Sin tarjetas: filetes y tipografía.
+ * El oro solo señala (recomendación, acción, luz); los colores de dominio conservan su significado.
+ */
+.mundo{
+  --m-noche:#0e0d0c;
+  --m-tinta:#f3eee4;
+  --m-tinta2:#b9b1a3;
+  --m-tinta3:#7d766b;
+  --m-linea:rgba(243,238,228,.14);
+  --m-oro:#e8b84a;
+  --m-display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+  margin:26px 0 8px;
+  background:var(--m-noche);
+  color:var(--m-tinta);
+  border-top:1px solid var(--m-linea);
+  border-bottom:1px solid var(--m-linea);
+}
 .mundo [hidden]{display:none!important}
 .skyline[hidden],.legend[hidden]{display:none}
 
-.mundo-barra{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
-.migas{display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin:0;padding:0;list-style:none;font-size:.9rem}
-.migas li+li::before{content:"›";color:var(--mut);margin:0 4px}
-.migas button{cursor:pointer;border:0;background:none;padding:4px 6px;border-radius:8px;color:var(--mut);font-weight:700}
-.migas button:hover{color:#fff;background:var(--bg3)}
-.migas [aria-current]{color:#fff}
-.mundo-acciones{display:flex;flex-wrap:wrap;gap:8px}
-.mb-btn{cursor:pointer;border:1px solid var(--line);background:var(--bg3);border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:700;line-height:1.2}
-.mb-btn:hover:not(:disabled){border-color:#fff}
+/* Navegación: ruta de lugares y tres acciones de texto. */
+.mundo-barra{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between;padding:12px 2px}
+.migas{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;margin:0;padding:0;list-style:none;font-size:.86rem}
+.migas li+li::before{content:"/";color:var(--m-tinta3);margin:0 8px}
+.migas button{cursor:pointer;border:0;background:none;padding:2px 0;color:var(--m-tinta2);font:inherit;font-weight:700}
+.migas button:hover{color:var(--m-tinta)}
+.migas [aria-current]{color:var(--m-tinta)}
+.mundo-acciones{display:flex;flex-wrap:wrap;gap:18px}
+.mb-btn{cursor:pointer;border:0;background:none;color:var(--m-tinta2);padding:2px 0;font:inherit;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid transparent}
+.mb-btn:hover:not(:disabled){color:var(--m-tinta);border-bottom-color:var(--m-tinta3)}
 .mb-btn:disabled{opacity:.4;cursor:default}
-.mb-btn[aria-pressed="true"]{background:#fff;color:#000}
+.mb-btn[aria-pressed="true"]{color:var(--m-tinta);border-bottom-color:var(--m-oro)}
 
-.mundo-vista{position:relative;height:clamp(360px,70vh,720px);background:radial-gradient(ellipse 80% 70% at 50% 42%,#4a4440 0%,#2a2624 52%,#121012 100%);overflow:hidden}
+/* El mundo. */
+.mundo-vista{position:relative;height:clamp(380px,72vh,760px);background:radial-gradient(ellipse 85% 75% at 50% 45%,#3b3530 0%,#221e1b 55%,#100e0d 100%);overflow:hidden}
 .mundo-lienzo{display:block;width:100%;height:100%;touch-action:none;outline:none}
+
+/* Entrada cinematográfica (primera visita). */
+.entrada{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:#0b0a09;transition:background 1.6s ease}
+.entrada.abierta{background:rgba(11,10,9,0)}
+.entrada-marca{margin:0;display:grid;justify-items:center;font-family:var(--m-display);font-weight:800;font-size:clamp(2.4rem,6vw,4.4rem);line-height:.92;letter-spacing:-.035em;color:var(--m-tinta);animation:entrada-marca 1s ease both;transition:opacity .9s ease,transform 1.2s ease}
+.entrada-marca span+span{color:var(--m-oro)}
+.entrada.abierta .entrada-marca{opacity:0;transform:translateY(-14px)}
+@keyframes entrada-marca{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.entrada-lema{position:absolute;left:0;right:0;bottom:14%;margin:0;text-align:center;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.32em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:0;transition:opacity 1s ease}
+.entrada.lema .entrada-lema{opacity:1}
+.entrada-saltar{position:absolute;right:18px;bottom:16px;cursor:pointer;border:0;background:none;color:var(--m-tinta2);font:inherit;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-bottom:1px solid var(--m-tinta3);padding:2px 0}
+.entrada-saltar:hover{color:var(--m-tinta)}
+.en-entrada .mundo-etiquetas,.en-entrada .ficha{opacity:0;pointer-events:none}
+
+/* Rótulos: texto de plano, sin caja ni cifras. Sombra solo para que se lea sobre la ciudad. */
 .mundo-etiquetas{position:absolute;inset:0;pointer-events:none}
-.m-etq{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;display:flex;gap:6px;align-items:baseline;white-space:nowrap;font-size:.78rem;line-height:1.3;color:#fff;background:rgba(14,15,19,.84);border:1px solid rgba(255,255,255,.18);border-left:4px solid var(--c,#9b958b);border-radius:10px;padding:3px 9px;margin-top:-6px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-.m-etq small{opacity:.72}
-.m-etq.barrio{font-size:.9rem;font-weight:800;font-family:"Bricolage Grotesque",sans-serif;padding:5px 12px;background:rgba(14,15,19,.9);flex-direction:column;align-items:flex-start;gap:0;line-height:1.15}
-.m-etq.barrio small{font-family:"Atkinson Hyperlegible",sans-serif;font-weight:400;font-size:.72rem}
-.m-etq.prioridad{border-color:var(--p);border-left-color:var(--c,#9b958b)}
-.m-etq:hover{border-color:#fff}
-.mundo-sobre{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 24px);font-size:.85rem;background:rgba(14,15,19,.86);border:1px solid var(--line);border-radius:12px;padding:5px 12px;pointer-events:none}
-.mundo-aviso{margin:0;padding:10px 18px;color:var(--mut);font-size:.92rem;border-bottom:1px solid var(--line)}
+.m-etq{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;display:flex;gap:7px;align-items:baseline;white-space:nowrap;border:0;background:none;padding:2px 0;color:var(--m-tinta);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6)}
+.m-etq .m-num{font-family:var(--m-display);font-weight:800;letter-spacing:0;font-size:1.05em}
+.m-etq.barrio{font-size:.8rem}
+.m-etq.barrio .m-num{font-size:1.6em;line-height:1}
+.m-etq:hover .m-largo{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--m-oro)}
 
-.atlas{padding:16px 18px}
-.atlas-cab{margin-bottom:12px}
-.atlas-tit{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
-.atlas-tit h3{font-size:1.35rem}
-.atlas-datos{margin:6px 0 0;color:var(--mut);font-size:.95rem}
-.atlas-ires{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.atlas-ir{display:inline-block;text-decoration:none;font-weight:800;font-family:"Bricolage Grotesque",sans-serif;background:var(--g);color:#000;border-radius:999px;padding:6px 14px}
-.atlas-ir.sec{background:var(--bg3);color:#fff;border:1px solid var(--line)}
-.atlas-estado{display:inline-flex;gap:6px;align-items:center;font-size:.82rem;font-weight:700;color:#ddd}
-.atlas-estado i{width:10px;height:10px;border-radius:50%;flex:none}
-.atlas-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:0;padding:0;list-style:none}
-.atlas-item{cursor:pointer;width:100%;height:100%;display:grid;gap:6px;align-content:start;text-align:left;background:var(--bg3);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:16px;padding:11px 13px;font-size:.92rem;line-height:1.3}
-.atlas-item:hover{border-color:#fff;border-left-color:var(--c)}
-.atlas-nombre{font-weight:700}
-.atlas-clave{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;margin-right:8px}
-.atlas-peso{display:block;height:6px;border-radius:3px;background:#262626;overflow:hidden}
-.atlas-peso i{display:block;height:100%;background:var(--b);border-radius:3px}
-.atlas-cifras{font-size:.8rem;color:var(--mut)}
-.atlas-prio{justify-self:start;font-size:.78rem;font-weight:800;color:#000;background:var(--p);border-radius:999px;padding:1px 9px}
+/* Ficha contextual: fuera del mundo, en la esquina; aparece al señalar o seleccionar. */
+.ficha{position:absolute;left:20px;bottom:20px;width:min(360px,calc(100% - 40px));padding:16px 20px 18px;background:rgba(14,13,12,.9);border-radius:3px;display:grid;gap:10px}
+.ficha.vistazo{pointer-events:none;background:rgba(14,13,12,.8)}
+.ficha-antetitulo{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2)}
+.ficha-antetitulo.llamada{color:var(--m-oro)}
+.ficha-titulo{margin:0;font-family:var(--m-display);font-weight:800;font-size:1.45rem;line-height:1.05;letter-spacing:-.01em;text-wrap:balance}
+.ficha-titulo.grande{font-size:1.9rem}
+.ficha-datos{display:flex;flex-wrap:wrap;gap:6px 22px;padding-top:10px;border-top:1px solid var(--m-linea)}
+.ficha-cifra{display:grid;gap:2px}
+.ficha-cifra b{font-family:var(--m-display);font-weight:800;font-size:1.7rem;line-height:1;font-variant-numeric:tabular-nums}
+.ficha-cifra b small{font-size:.55em;margin-left:1px}
+.ficha-cifra span{display:flex;gap:6px;align-items:center;font-size:.74rem;color:var(--m-tinta2)}
+.ficha-muestra{width:8px;height:8px;flex:none;box-shadow:inset 0 0 0 1px var(--m-tinta3)}
+.ficha-accion{justify-self:start;color:var(--m-tinta);font-weight:700;text-decoration:none;border-bottom:2px solid var(--m-oro);padding-bottom:2px}
+.ficha-accion::after{content:" →"}
+.ficha-accion:hover{color:var(--m-oro)}
+.ficha-pista{margin:0;font-size:.74rem;color:var(--m-tinta3)}
 
-.historia{margin-top:16px;background:#000;border:1px dashed #ffd23f66;border-radius:16px;padding:14px 16px}
-.historia h4{color:var(--y);font-size:1rem;margin-bottom:10px}
-.h-cadena{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;padding:0;list-style:none}
-.h-ent{border:2px solid var(--line);background:var(--bg3);border-radius:12px;padding:6px 10px;font-weight:700;font-size:.92rem;transition:border-color .3s,background .3s}
-.h-ent.on{border-color:var(--y);background:#1f1a05}
-.h-flu{display:flex;flex-direction:column;align-items:center;color:var(--mut);font-weight:800;font-size:1.1rem;line-height:1}
-.h-flu small{font-size:.7rem;font-weight:700}
-.h-flu.on{color:var(--y)}
-.h-paso{margin:12px 0 10px;font-size:.98rem}
-.h-paso a{color:var(--g);font-weight:700}
-.h-ctrl{display:flex;gap:8px}
+.mundo-aviso{margin:0;padding:12px 2px;color:var(--m-tinta2);font-size:.92rem;border-bottom:1px solid var(--m-linea)}
 
-.mundo-leyenda{margin:0;padding:0 18px 16px;color:var(--mut);font-size:.85rem;line-height:1.5}
+/* Atlas: índice editorial del nivel actual. */
+.atlas{padding:28px 2px 8px}
+.atlas-cab{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px 32px;align-items:end;padding-bottom:18px;border-bottom:1px solid var(--m-linea)}
+.atlas-tit{min-width:0;display:grid;gap:6px}
+.atlas-nivel{margin:0;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2)}
+.atlas-tit h3{font-family:var(--m-display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1;letter-spacing:-.02em;text-wrap:balance}
+.atlas-cifras{display:flex;gap:28px}
+.atlas-cifras div{display:grid;gap:4px;max-width:9em}
+.atlas-cifras b{font-family:var(--m-display);font-weight:800;font-size:2.3rem;line-height:.9;font-variant-numeric:tabular-nums}
+.atlas-cifras span{font-size:.74rem;color:var(--m-tinta2);line-height:1.3}
+.atlas-ires{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:22px}
+.atlas-ir{color:var(--m-tinta);font-weight:700;text-decoration:none;border-bottom:2px solid var(--m-oro);padding-bottom:2px}
+.atlas-ir::after{content:" →"}
+.atlas-ir:hover{color:var(--m-oro)}
+.atlas-ir.sec{border-bottom-color:var(--m-tinta3)}
+.atlas-estado{display:inline-flex;gap:7px;align-items:center;font-size:.78rem;font-weight:700;color:var(--m-tinta2)}
+.atlas-estado i{width:9px;height:9px;flex:none;box-shadow:inset 0 0 0 1px var(--m-tinta3)}
 
+.atlas-lista{list-style:none;margin:0;padding:0}
+.atlas-item{cursor:pointer;width:100%;display:grid;grid-template-columns:4.2rem minmax(0,1fr) 8.5rem 6.5rem;gap:4px 18px;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid var(--m-linea);color:var(--m-tinta);padding:14px 2px;font:inherit}
+.atlas-item:hover{background:rgba(243,238,228,.04)}
+.atlas-item:hover .atlas-nombre{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--m-oro);text-decoration-thickness:2px}
+.atlas-clave{font-family:var(--m-display);font-weight:800;font-size:1.35rem;color:var(--m-tinta2);font-variant-numeric:tabular-nums}
+.atlas-nombre{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;font-weight:700;font-size:1rem;line-height:1.3;min-width:0}
+.atlas-prio{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--m-oro)}
+.atlas-peso,.atlas-dominio{display:grid;grid-template-columns:auto 1fr;column-gap:5px;align-items:baseline}
+.atlas-peso b,.atlas-dominio b{font-family:var(--m-display);font-weight:800;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.atlas-peso small,.atlas-dominio small{font-size:.7rem;color:var(--m-tinta2)}
+.atlas-dominio small+small{grid-column:1/-1}
+.atlas-peso>i{grid-column:1/-1;display:block;height:2px;background:var(--m-linea);margin-top:5px}
+.atlas-peso>i>i{display:block;height:100%;background:var(--m-tinta2)}
+
+/* Historia visual (microexperiencia HTML). */
+.historia{margin-top:22px;padding:18px 0;border-top:1px solid var(--m-linea)}
+.historia h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2);margin-bottom:12px}
+.h-cadena{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:0;list-style:none}
+.h-ent{border-bottom:2px solid var(--m-linea);padding:4px 2px;font-family:var(--m-display);font-weight:800;font-size:1.1rem;color:var(--m-tinta2);transition:color .3s,border-color .3s}
+.h-ent.on{color:var(--m-tinta);border-bottom-color:var(--m-oro)}
+.h-flu{display:flex;flex-direction:column;align-items:center;color:var(--m-tinta3);font-weight:800;font-size:1.1rem;line-height:1}
+.h-flu small{font-size:.68rem;font-weight:700}
+.h-flu.on{color:var(--m-oro)}
+.h-paso{margin:14px 0 12px;font-size:1rem;color:var(--m-tinta)}
+.h-paso a{color:var(--m-tinta);font-weight:700;border-bottom:2px solid var(--m-oro);text-decoration:none}
+.h-ctrl{display:flex;gap:18px}
+
+/* Cómo leer la ciudad: cuatro claves en columnas. */
+.mundo-leyenda{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px 26px;margin:0;padding:22px 2px 24px;border-top:1px solid var(--m-linea)}
+.mundo-leyenda div{display:grid;gap:3px;min-width:0}
+.mundo-leyenda dt{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2)}
+.mundo-leyenda dd{margin:0;font-size:.86rem;line-height:1.45;color:var(--m-tinta)}
+
+@media (max-width:700px){
+  .atlas-cab{grid-template-columns:1fr}
+  .atlas-cifras{gap:20px}
+  .atlas-item{grid-template-columns:3rem minmax(0,1fr) 5.5rem;padding:12px 0}
+  .atlas-peso{display:none}
+}
 @media (max-width:600px){
-  .mundo-vista{height:52vh}
+  .mundo-vista{height:56vh}
   .m-largo{display:none}
-  .m-etq{font-size:.72rem;padding:2px 7px}
-  .m-etq.barrio{font-size:.8rem;padding:3px 9px}
-  .atlas{padding:14px}
-  .atlas-lista{grid-template-columns:1fr}
+  .ficha{left:10px;right:10px;bottom:10px;width:auto;padding:12px 14px 14px;gap:8px}
+  .ficha-titulo,.ficha-titulo.grande{font-size:1.25rem}
+  .ficha-cifra b{font-size:1.35rem}
 }

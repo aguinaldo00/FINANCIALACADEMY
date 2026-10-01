@@ -21,12 +21,14 @@ import {
   focoValido,
   igualFoco,
 } from '../../world/focus.ts';
-import { colorDominio } from '../format.ts';
 import { alCambiarMovimiento, movimientoReducido } from '../motion.ts';
-import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, TEXTO_FASE } from './worldPanel.ts';
+import { fichaContextual } from './contextCard.ts';
+import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separarTitulo } from './worldPanel.ts';
 
 /** Preferencia de vista de cada usuario (comodidad local, no es progreso). */
 export const CLAVE_VISTA = 'financial-academy:vista';
+/** La entrada cinematográfica solo se muestra completa la primera vez. */
+export const CLAVE_ENTRADA = 'financial-academy:entrada';
 
 /**
  * Orquesta el mundo de la portada: un único foco compartido por la cámara 3D, las etiquetas
@@ -45,6 +47,8 @@ export class ControladorMundo {
   private reducido = movimientoReducido();
   private etiquetas: { foco: Foco; el: HTMLElement }[] = [];
   private modoMapa = false;
+  /** Lo que el puntero está señalando ahora mismo (ficha de vistazo). */
+  private vistazo: Foco | null = null;
 
   constructor(
     private readonly estado: EstadoEstudio,
@@ -115,6 +119,47 @@ export class ControladorMundo {
     mundo.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', false);
     this.aviso('');
     this.pintarPanel();
+    if (this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
+      this.iniciarEntrada(vista, mundo);
+    }
+  }
+
+  /**
+   * Primera visita: negro → identidad → la ciudad aparece y la cámara desciende → los barrios se
+   * levantan → "Estudiar es construirla" → navegación. Se salta con el botón, Escape o un toque.
+   */
+  private iniciarEntrada(vista: HTMLElement, mundo: Mundo3D): void {
+    const capa = document.createElement('div');
+    capa.className = 'entrada';
+    capa.innerHTML = `<p class="entrada-marca"><span>La Ciudad</span><span>del Dinero</span></p><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
+    vista.append(capa);
+    vista.classList.add('en-entrada');
+    let cerrada = false;
+    const cerrar = () => {
+      if (cerrada) return;
+      cerrada = true;
+      escribirJson(this.almacen, CLAVE_ENTRADA, 'vista');
+      capa.remove();
+      vista.classList.remove('en-entrada');
+      document.removeEventListener('keydown', alTeclado);
+    };
+    const saltar = mundo.entrada(() => {
+      capa.classList.add('lema');
+      setTimeout(cerrar, 2600);
+    });
+    const saltarYCerrar = () => {
+      saltar();
+      cerrar();
+    };
+    const alTeclado = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') saltarYCerrar();
+    };
+    document.addEventListener('keydown', alTeclado);
+    capa.querySelector('button')!.addEventListener('click', saltarYCerrar);
+    capa.addEventListener('pointerdown', (e) => {
+      if (!(e.target as Element).closest('button')) saltarYCerrar();
+    });
+    setTimeout(() => capa.classList.add('abierta'), 1300);
   }
 
   private async crearMundo(): Promise<Mundo3D> {
@@ -189,18 +234,34 @@ export class ControladorMundo {
   }
 
   private alSobrevolar(s: DatosSeleccionables | null): void {
-    const el = this.raiz?.querySelector<HTMLElement>('[data-mundo-sobre]');
+    const foco: Foco | null = s?.tipo === 'edificio'
+      ? { nivel: 'edificio', conceptoId: s.conceptoId }
+      : s?.tipo === 'zona'
+        ? { nivel: 'zona', seccionId: s.seccionId }
+        : null;
+    if ((foco && this.vistazo && igualFoco(foco, this.vistazo)) || (!foco && !this.vistazo)) return;
+    this.vistazo = foco;
+    this.pintarFicha();
+  }
+
+  /**
+   * Ficha contextual en una esquina del visor: lo que se señala (vistazo) o, si no, lo que está
+   * seleccionado. En la vista general sin nada señalado no hay ficha: solo la ciudad.
+   */
+  private pintarFicha(): void {
+    const el = this.raiz?.querySelector<HTMLElement>('[data-mundo-ficha]');
     if (!el) return;
-    let texto = '';
-    if (s?.tipo === 'edificio') {
-      const e = buscarEdificio(this.modelo, s.conceptoId);
-      if (e) texto = `${e.nombre} · ${TEXTO_FASE[e.fase]}`;
-    } else if (s?.tipo === 'zona') {
-      const z = buscarZona(this.modelo, s.seccionId);
-      if (z) texto = `${z.seccionId} ${z.titulo} · ${z.pesoExamen} % del examen`;
-    }
-    el.textContent = texto;
-    el.hidden = !texto;
+    const vistazo = this.vistazo && !igualFoco(this.vistazo, this.foco) ? this.vistazo : null;
+    const html = vistazo
+      ? fichaContextual(this.modelo, vistazo, 'vistazo')
+      : this.foco.nivel !== 'ciudad'
+        ? fichaContextual(this.modelo, this.foco, 'seleccion')
+        : '';
+    el.innerHTML = html;
+    el.hidden = !html;
+    el.classList.toggle('vistazo', Boolean(vistazo));
+    if (vistazo) el.setAttribute('aria-hidden', 'true');
+    else el.removeAttribute('aria-hidden');
   }
 
   private alPulsar(e: Event): void {
@@ -266,6 +327,7 @@ export class ControladorMundo {
     }
     this.el('[data-atlas]').innerHTML = atlasHtml(vistaAtlas(this.modelo, this.foco), historia);
     this.pintarEtiquetas();
+    this.pintarFicha();
   }
 
   /** Etiquetas flotantes del nivel actual (ver `etiquetasDelNivel`). */
@@ -282,25 +344,17 @@ export class ControladorMundo {
       el.className = 'm-etq';
       el.dataset.foco = codificarFoco(foco);
       if (foco.nivel === 'barrio') {
+        // Rótulo de barrio: discreto, como el nombre de un distrito en un plano. Sin cifras.
         const b = buscarBarrio(this.modelo, foco.grupoId)!;
+        const [numero, nombre] = separarTitulo(b.titulo);
         el.classList.add('barrio');
-        el.style.setProperty('--c', b.dominio > 0 ? colorDominio(b.dominio) : '#9b958b');
-        // "1 · El sistema financiero": en pantallas estrechas solo se ve el número.
-        const corte = b.titulo.indexOf(' · ');
-        const [numero, resto] = corte > 0 ? [b.titulo.slice(0, corte), b.titulo.slice(corte)] : [b.titulo, ''];
-        el.innerHTML = `<span><b>${numero}</b><span class="m-largo">${resto}</span></span><small>${b.pesoExamen} %<span class="m-largo"> del examen</span></small>`;
+        el.innerHTML = `<span class="m-num">${numero}</span><span class="m-largo">${nombre}</span>`;
         el.setAttribute('aria-label', b.titulo);
       } else if (foco.nivel === 'zona') {
         const z = buscarZona(this.modelo, foco.seccionId)!;
-        el.style.setProperty('--c', z.dominio > 0 ? colorDominio(z.dominio) : '#9b958b');
-        const titulo = f.nivel === 'barrio' ? ` ${z.titulo}` : '';
-        const prioridad = z.prioridad ? '📌 ' : '';
-        el.innerHTML = `${prioridad}<b>${z.seccionId}</b>${titulo}<small>${z.pesoExamen} %</small>`;
-        if (z.prioridad) el.classList.add('prioridad');
+        el.innerHTML = `<span class="m-num">${z.seccionId}</span><span class="m-largo">${z.titulo}</span>`;
       } else if (foco.nivel === 'edificio') {
-        const e = buscarEdificio(this.modelo, foco.conceptoId)!;
-        el.style.setProperty('--c', e.dominio > 0 ? colorDominio(e.dominio) : '#9b958b');
-        el.innerHTML = `${e.nombre}<small>${TEXTO_FASE[e.fase]}</small>`;
+        el.textContent = buscarEdificio(this.modelo, foco.conceptoId)!.nombre;
       }
       capa.append(el);
       return { foco, el };

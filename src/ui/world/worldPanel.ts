@@ -5,7 +5,7 @@ import type { Historia, PasoHistoria } from '../../experiences/schema.ts';
 import type { EntradaAtlas, VistaAtlas } from '../../world/atlas.ts';
 import type { FaseObra } from '../../world/cityModel.ts';
 import { codificarFoco, type Foco } from '../../world/focus.ts';
-import { colorDominio, porcentaje } from '../format.ts';
+import { colorDominio } from '../format.ts';
 
 /* Marcado HTML del mundo: barra de navegación, Atlas accesible y ficha del edificio enfocado. */
 
@@ -21,6 +21,12 @@ export const TEXTO_FASE: Record<FaseObra, string> = {
   obra: 'En obra · a medias',
   solar: 'En proyecto · sin estudiar',
 };
+
+/** "4 · Estructura del sistema español" → ["4", "Estructura del sistema español"]. */
+export function separarTitulo(titulo: string): [string, string] {
+  const corte = titulo.indexOf(' · ');
+  return corte > 0 ? [titulo.slice(0, corte), titulo.slice(corte + 3)] : ['', titulo];
+}
 
 export interface Miga {
   foco: Foco;
@@ -39,10 +45,15 @@ export interface EstadoBarra {
 /** Contenedor estable del mundo; la barra y el Atlas se repintan dentro. */
 export function esqueletoMundo(): string {
   return `<div class="mundo-barra" data-mundo-barra></div>
- <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><div class="mundo-sobre" data-mundo-sobre aria-hidden="true" hidden></div></div>
+ <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><aside class="ficha" data-mundo-ficha hidden></aside></div>
  <p class="mundo-aviso" data-mundo-aviso role="status"></p>
  <div class="atlas" data-atlas></div>
- <p class="mundo-leyenda"><b>Cómo leer la ciudad:</b> la superficie de cada zona es su peso en el examen · edificio <b>construido</b> (con color y luces) = dominado · <b>en obra</b> (grúa y andamio) = a medias · <b>maqueta blanca</b> = en proyecto, sin estudiar · el bordillo de cada parcela usa los colores de dominio · <span class="mundo-pin">📌</span> = Estudia ya · el tráfico solo circula por las zonas que ya estudias. La arquitectura de cada edificio sale de su símbolo en la gramática visual. Al alejarte, las zonas se tiñen con tu dominio (Atlas).</p>`;
+ <dl class="mundo-leyenda">
+  <div><dt>Superficie</dt><dd>Lo que pesa en el examen: cuanto mayor la zona, más pesa.</dd></div>
+  <div><dt>Edificio</dt><dd>Lo que sabes: en proyecto (maqueta clara), en obra (grúa y andamio) o construido (materiales y luces).</dd></div>
+  <div><dt>Columna de luz</dt><dd>Dónde conviene estudiar ahora.</dd></div>
+  <div><dt>Tráfico</dt><dd>Solo circula por las zonas que ya estudias.</dd></div>
+ </dl>`;
 }
 
 export function barraMundo(e: EstadoBarra): string {
@@ -53,12 +64,12 @@ export function barraMundo(e: EstadoBarra): string {
     })
     .join('');
   const acciones = [
-    e.puedeSubir ? '<button type="button" class="mb-btn" data-mundo-subir>⬆ Subir de nivel</button>' : '',
+    e.puedeSubir ? '<button type="button" class="mb-btn" data-mundo-subir>Subir de nivel</button>' : '',
     e.modo3d && e.disponible3d
-      ? `<button type="button" class="mb-btn" data-mundo-atlas aria-pressed="${e.vistaAtlas}">${e.vistaAtlas ? '🏙️ Ver maqueta' : '🗺️ Ver Atlas'}</button>`
+      ? `<button type="button" class="mb-btn" data-mundo-atlas aria-pressed="${e.vistaAtlas}">${e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas'}</button>`
       : '',
     e.disponible3d !== false
-      ? `<button type="button" class="mb-btn" data-mundo-modo>${e.modo3d ? 'Ver ciudad 2D' : 'Ver ciudad 3D'}</button>`
+      ? `<button type="button" class="mb-btn" data-mundo-modo>${e.modo3d ? 'Ver en 2D' : 'Ver en 3D'}</button>`
       : '',
   ].join('');
   return `<nav aria-label="Nivel del mapa"><ol class="migas">${migas}</ol></nav><div class="mundo-acciones">${acciones}</div>`;
@@ -66,47 +77,44 @@ export function barraMundo(e: EstadoBarra): string {
 
 function estado(nivel: NivelDominio, fase: FaseObra | null): string {
   const texto = fase ? TEXTO_FASE[fase] : TEXTO_NIVEL[nivel];
-  return `<span class="atlas-estado" data-nivel="${nivel}"><i style="background:${colorDominio(nivelValor(nivel))}"></i>${texto}</span>`;
+  return `<span class="atlas-estado" data-nivel="${nivel}"><i style="background:${nivel === 'sin-estudiar' ? 'transparent' : colorDominio(nivelValor(nivel))}"></i>${texto}</span>`;
 }
 
 /** Valor representativo de cada nivel, solo para elegir el color. */
 const nivelValor = (n: NivelDominio) => ({ dominado: 1, regular: 0.5, flojo: 0.2, 'sin-estudiar': 0 })[n];
 
-function cifras(e: { pesoExamen: number | null; dominio: number; total: number; estudiados: number }): string {
-  const partes = [];
-  if (e.pesoExamen !== null) partes.push(`${e.pesoExamen} % del examen`);
-  partes.push(`dominio ${porcentaje(e.dominio)}`);
-  if (e.total > 1) partes.push(`${e.estudiados}/${e.total} estudiados`);
-  return partes.join(' · ');
-}
-
+/** Fila del índice: clave, nombre y estado; peso (si existe en DATA) y dominio alineados a la derecha. */
 function entrada(e: EntradaAtlas, pesoMaximo: number): string {
-  const barra = e.pesoExamen !== null && pesoMaximo > 0
-    ? `<span class="atlas-peso" aria-hidden="true"><i style="width:${((e.pesoExamen / pesoMaximo) * 100).toFixed(1)}%"></i></span>`
+  const peso = e.pesoExamen !== null
+    ? `<span class="atlas-peso"><b>${e.pesoExamen}</b><small>% examen</small>${pesoMaximo > 0 ? `<i aria-hidden="true"><i style="width:${((e.pesoExamen / pesoMaximo) * 100).toFixed(1)}%"></i></i>` : ''}</span>`
     : '';
-  const prioridad = e.prioridad ? `<span class="atlas-prio">📌 Estudia ya ${e.prioridad}</span>` : '';
-  const clave = e.clave ? `<span class="atlas-clave">${e.clave}</span>` : '';
-  return `<li><button type="button" class="atlas-item" data-foco="${codificarFoco(e.foco)}" style="--c:${e.dominio > 0 ? colorDominio(e.dominio) : '#3a3a3a'}">
- <span class="atlas-nombre">${clave}${e.etiqueta}</span>${barra}
- <span class="atlas-cifras">${cifras(e)}</span>${estado(e.nivel, e.fase)}${prioridad}</button></li>`;
+  const recomendada = e.prioridad ? `<span class="atlas-prio">${e.prioridad === 1 ? 'Siguiente recomendación' : `Recomendación ${e.prioridad}`}</span>` : '';
+  const progreso = e.total > 1 ? `<small>${e.estudiados}/${e.total} estudiados</small>` : '';
+  // Los barrios llevan su número dentro del título de DATA ("4 · …"): se lleva a la columna de clave.
+  const [numero, nombre] = e.clave ? [e.clave, e.etiqueta] : e.foco.nivel === 'barrio' ? separarTitulo(e.etiqueta) : ['', e.etiqueta];
+  return `<li><button type="button" class="atlas-item" data-foco="${codificarFoco(e.foco)}">
+ <span class="atlas-clave">${numero}</span>
+ <span class="atlas-nombre">${nombre}${estado(e.nivel, e.fase)}${recomendada}</span>
+ ${peso}<span class="atlas-dominio"><b>${Math.round(e.dominio * 100)}</b><small>% dominio</small>${progreso}</span></button></li>`;
 }
 
 export function atlasHtml(v: VistaAtlas, historia: string): string {
   const pendientes = v.total - v.dominados;
-  const resumen = [
-    v.pesoExamen !== null ? `Peso en examen: <b>${v.pesoExamen} %</b>` : '',
-    `Dominio: <b>${porcentaje(v.dominio)}</b>`,
-    v.total > 1 ? `<b>${v.estudiados}</b> de ${v.total} conceptos estudiados · <b>${pendientes}</b> por dominar` : '',
-  ].filter(Boolean).join(' · ');
-  const ir = v.estudiarAhora ? `<a class="atlas-ir" href="${v.estudiarAhora.href}">${v.estudiarAhora.texto} →</a>` : '';
+  const nivel = { ciudad: 'Índice del tema', barrio: 'Barrio', zona: 'Zona', edificio: 'Concepto' }[v.foco.nivel];
+  const cifras = [
+    v.pesoExamen !== null ? `<div><b>${v.pesoExamen}</b><span>% del examen</span></div>` : '',
+    `<div><b>${Math.round(v.dominio * 100)}</b><span>% de dominio</span></div>`,
+    v.total > 1 ? `<div><b>${pendientes}</b><span>de ${v.total} conceptos por dominar</span></div>` : '',
+  ].join('');
+  const ir = v.estudiarAhora ? `<a class="atlas-ir" href="${v.estudiarAhora.href}">${v.estudiarAhora.texto}</a>` : '';
   const seccion = v.foco.nivel === 'edificio' && v.clave
     ? `<a class="atlas-ir sec" href="${hrefSeccion(v.clave)}">Ver la sección ${v.clave}</a>`
     : '';
   const lista = v.entradas.length
-    ? `<ul class="atlas-lista">${v.entradas.map((e) => entrada(e, v.pesoMaximo)).join('')}</ul>`
+    ? `<ol class="atlas-lista">${v.entradas.map((e) => entrada(e, v.pesoMaximo)).join('')}</ol>`
     : '';
-  return `<header class="atlas-cab"><div class="atlas-tit">${v.clave ? `<span class="pill k">${v.clave}</span>` : ''}<h3>${v.titulo}</h3>${estado(v.nivel, v.fase)}</div>
- <p class="atlas-datos">${resumen}</p><div class="atlas-ires">${ir}${seccion}</div></header>${lista}${historia}`;
+  return `<header class="atlas-cab"><div class="atlas-tit"><p class="atlas-nivel">${nivel}${v.clave ? ` · ${v.clave}` : ''}</p><h3>${v.titulo}</h3>${estado(v.nivel, v.fase)}</div>
+ <div class="atlas-cifras">${cifras}</div><div class="atlas-ires">${ir}${seccion}</div></header>${lista}${historia}`;
 }
 
 /* ------------------------------------------------------------ microexperiencia */

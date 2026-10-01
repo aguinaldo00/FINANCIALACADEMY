@@ -70,6 +70,15 @@ describe('mundo de la portada sin WebGL', () => {
     expect($<HTMLButtonElement>('[data-historia="1"]').disabled).toBe(true);
   });
 
+  it('interfaz editorial: leyenda en cuatro claves y recomendación sin pines', () => {
+    expect($$('.mundo-leyenda dt').map((d) => d.textContent)).toEqual(['Superficie', 'Edificio', 'Columna de luz', 'Tráfico']);
+    expect($('.mundo').textContent).not.toContain('📌');
+    pulsar('ciudad');
+    expect($('.atlas-ir').textContent).toContain('Siguiente recomendación');
+    // La ficha vive en el visor 3D: sin WebGL no se muestra.
+    expect($('[data-mundo-ficha]').hidden).toBe(true);
+  });
+
   it('al volver del estudio, el mapa se abre donde se estaba', () => {
     navegar('#c/mur');
     navegar('#inicio');

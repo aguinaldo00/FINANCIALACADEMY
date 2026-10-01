@@ -6,16 +6,17 @@ import { etiquetasDelNivel } from '../../src/world/labels.ts';
 const m = modeloCiudad(tema01, { dominio: {}, intentos: {} });
 
 describe('jerarquía de etiquetas sobre la maqueta', () => {
-  it('la ciudad rotula barrios e hitos "Estudia ya", no las 12 zonas', () => {
+  it('la vista general solo rotula los barrios: sin zonas, cifras ni pines', () => {
     const f = etiquetasDelNivel(m, { nivel: 'ciudad' }, false);
-    expect(f.filter((x) => x.nivel === 'barrio')).toHaveLength(4);
-    expect(f.filter((x) => x.nivel === 'zona')).toHaveLength(3);
+    expect(f.map((x) => x.nivel)).toEqual(['barrio', 'barrio', 'barrio', 'barrio']);
+    // En lectura de mapa (Atlas) se identifican las zonas.
     expect(etiquetasDelNivel(m, { nivel: 'ciudad' }, true)).toHaveLength(12);
   });
 
-  it('una zona no rotula sus edificios salvo en lectura de mapa', () => {
+  it('el barrio identifica sus zonas; zona y edificio no tienen rótulos permanentes', () => {
+    expect(etiquetasDelNivel(m, { nivel: 'barrio', grupoId: '4' }, false)).toHaveLength(3);
     expect(etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, false)).toEqual([]);
-    expect(etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, true)).toHaveLength(8);
-    expect(etiquetasDelNivel(m, { nivel: 'edificio', conceptoId: 'bde' }, false)).toEqual([{ nivel: 'edificio', conceptoId: 'bde' }]);
+    expect(etiquetasDelNivel(m, { nivel: 'zona', seccionId: '4.2A' }, true)).toEqual([]);
+    expect(etiquetasDelNivel(m, { nivel: 'edificio', conceptoId: 'bde' }, false)).toEqual([]);
   });
 });

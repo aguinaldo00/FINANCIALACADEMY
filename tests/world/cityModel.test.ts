@@ -69,8 +69,8 @@ describe('modelo visual de la ciudad', () => {
     }
   });
 
-  it('los lotes llenan la manzana: cada edificio en su lote', () => {
-    for (const z of m.zonas) {
+  it('gramática de parcelas: los lotes llenan la manzana', () => {
+    for (const z of m.zonas.filter((x) => x.composicion === 'parcelas')) {
       const lotes = m.edificios.filter((e) => e.seccionId === z.seccionId).map((e) => e.lote);
       const ocupado = lotes.reduce((s, r) => s + areaRect(r), 0) + (z.plaza ? areaRect(z.plaza) : 0);
       // Solo quedan libres los pasajes entre lotes.
@@ -88,11 +88,11 @@ describe('modelo visual de la ciudad', () => {
     expect(m.calles.length).toBeGreaterThan(0);
     // Las zonas con mucho espacio por concepto tienen plaza; las densas, no.
     expect(m.zonas.find((z) => z.seccionId === '2')!.plaza).not.toBeNull();
-    expect(m.zonas.find((z) => z.seccionId === '4.1')!.plaza).toBeNull();
+    expect(m.zonas.find((z) => z.seccionId === '4.2A')!.plaza).toBeNull(); // urbana: patios en vez de plaza
   });
 
   it('el arbolado tiene motivo y nunca pisa un lote', () => {
-    expect(m.arboles.every((a) => a.motivo === 'bulevar' || a.motivo === 'plaza')).toBe(true);
+    expect(m.arboles.every((a) => ['bulevar', 'plaza', 'patio', 'paseo'].includes(a.motivo))).toBe(true);
     for (const a of m.arboles) {
       for (const e of m.edificios) {
         const dentro = a.posicion.x > e.lote.x && a.posicion.x < e.lote.x + e.lote.ancho && a.posicion.z > e.lote.z && a.posicion.z < e.lote.z + e.lote.fondo;

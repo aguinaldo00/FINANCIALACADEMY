@@ -23,7 +23,7 @@ describe('maqueta Three.js (sin renderer)', () => {
 
   it('no hay wireframes ni volúmenes transparentes en los edificios', () => {
     capa.raiz.traverse((o) => {
-      if (o.name.startsWith('calor-')) return;
+      if (o.name.startsWith('calor-') || o.name.startsWith('senal-')) return;
       const malla = o as Mesh;
       expect((o as { isLine?: boolean }).isLine).toBeFalsy();
       if (malla.isMesh && !Array.isArray(malla.material)) expect(malla.material.transparent).toBe(false);
@@ -54,8 +54,10 @@ describe('maqueta Three.js (sin renderer)', () => {
     expect(roles('bde')).not.toBe(roles('cnmv'));
   });
 
-  it('hitos "Estudia ya", lámina del Atlas y tráfico solo donde hay estudio', () => {
-    expect(capa.marcadores).toHaveLength(3);
+  it('"Estudia ya" como columnas de luz, lámina del Atlas y tráfico solo donde hay estudio', () => {
+    expect(capa.senales).toHaveLength(3);
+    // Es luz del mundo, no un pin: no proyecta sombra ni se puede seleccionar.
+    for (const g of capa.senales) g.traverse((o) => expect(o.castShadow).toBe(false));
     expect(capa.calor).toHaveLength(12);
     expect(capa.rutas.length).toBeGreaterThan(0);
     expect(construirCapaDinamica(modeloCiudad(tema01, { dominio: {}, intentos: {} })).coches).toBeNull();

@@ -73,7 +73,7 @@ function zonaUrgente(zonas: ZonaVisual[]): ZonaVisual | undefined {
 }
 
 const enlaceZona = (z: ZonaVisual | undefined): Enlace | null =>
-  z ? { href: hrefSeccion(z.seccionId), texto: `Estudia ya: ${z.seccionId} ${z.titulo}` } : null;
+  z ? { href: hrefSeccion(z.seccionId), texto: `Siguiente recomendación: ${z.seccionId} ${z.titulo}` } : null;
 
 const pesoMaximo = (entradas: EntradaAtlas[]) => Math.max(0, ...entradas.map((e) => e.pesoExamen ?? 0));
 

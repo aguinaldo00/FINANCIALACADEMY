@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   CanvasTexture,
   DirectionalLight,
+  Fog,
   type Group,
   HemisphereLight,
   Mesh,
@@ -28,6 +29,7 @@ import { CONSTRUIDO_POR_FASE, type DatosArquitectura } from './architecture.ts';
 import {
   type CapaDinamica,
   colocarCoches,
+  colocarEnRecorrido,
   construirCapaDinamica,
   construirCapaEstatica,
   type DatosSeleccionables,
@@ -67,13 +69,39 @@ interface Transicion {
   haciaObjetivo: Vector3;
   desde: Spherical;
   hacia: Spherical;
+  fovDesde: number;
+  fovHacia: number;
+  desplazamientoDesde: number;
+  desplazamientoHacia: number;
+  /** Elevación extra a mitad de recorrido: la cámara "vuela" entre lugares alejados. */
+  arco: number;
 }
 
-const FOV = 32;
-const POLAR_MAQUETA: Record<Foco['nivel'], number> = { ciudad: 0.9, barrio: 0.86, zona: 0.88, edificio: 1.0 };
+/**
+ * Cámara como lenguaje: cada nivel tiene su óptica.
+ * - Ciudad: tres cuartos, objetivo normal.
+ * - Mapa (Atlas): cenital y orientado.
+ * - Barrio: isométrica de teleobjetivo (perspectiva casi plana, como un plano axonométrico).
+ * - Zona: más baja, se entra en las calles.
+ * - Edificio: cámara arquitectónica frente a la fachada principal, angular y cerca.
+ */
+const OPTICA: Record<Foco['nivel'], { phi: number; fov: number; ocupacion: number }> = {
+  ciudad: { phi: 0.9, fov: 30, ocupacion: 0.97 },
+  barrio: { phi: 0.955, fov: 17, ocupacion: 0.92 },
+  zona: { phi: 1.0, fov: 30, ocupacion: 0.9 },
+  edificio: { phi: 0.9, fov: 38, ocupacion: 0.72 },
+};
+const FOV = OPTICA.ciudad.fov;
 const POLAR_ATLAS = 0.06;
-/** Fracción del lienzo (en coordenadas normalizadas) que ocupa el foco al encuadrarlo. */
-const OCUPACION: Record<Foco['nivel'], number> = { ciudad: 0.97, barrio: 0.9, zona: 0.86, edificio: 0.78 };
+const FOV_ATLAS = 26;
+const POLAR_MAQUETA = { ciudad: OPTICA.ciudad.phi };
+/** La fachada principal mira a su calle; la cámara arquitectónica se sitúa delante, algo de lado. */
+const THETA_FACHADA: Record<string, number> = { sur: 0, este: Math.PI / 2, norte: Math.PI, oeste: -Math.PI / 2 };
+/**
+ * Composición asimétrica: con la ficha abierta en la esquina izquierda, el sujeto se desplaza a la
+ * derecha (fracción del ancho del lienzo). Solo en pantallas apaisadas.
+ */
+const DESPLAZAMIENTO: Record<Foco['nivel'], number> = { ciudad: 0, barrio: 0.1, zona: 0.13, edificio: 0.15 };
 const RANGO_FASE: Record<FaseObra, number> = { solar: 0, obra: 1, completo: 2 };
 const MARGEN_PEANA = 3;
 /** Giro inicial: tres cuartos poco diagonal, para que la ciudad llene el lienzo apaisado. */
@@ -100,8 +128,14 @@ export class Mundo3D {
   private dinamica: CapaDinamica;
   private transicion: Transicion | null = null;
   private crecimientos: { datos: DatosArquitectura; desde: number; inicio: number }[] = [];
+  /** Edificios que se levantan durante la entrada cinematográfica. */
+  private apariciones: { grupo: Object3D; inicio: number }[] = [];
+  private finEntrada: (() => void) | null = null;
   private focoActual: Foco = { nivel: 'ciudad' };
   private distanciaCiudad = 0;
+  private desplazamiento = 0;
+  /** Edificios retirados para no tapar el edificio enfocado (vista en corte). */
+  private ocultos = new Set<Object3D>();
   /** El usuario ya ha girado la cámara: se respeta su orientación. */
   private girado = false;
   private contenedor: HTMLElement | null = null;
@@ -171,6 +205,8 @@ export class Mundo3D {
     this.escena.environmentIntensity = 0.3;
     pmrem.dispose();
     this.escena.add(new HemisphereLight('#fff1dc', '#4a3c30', 0.4));
+    // Profundidad atmosférica: lo lejano se funde con el fondo del visor.
+    this.escena.fog = new Fog('#2a2521', 200, 600);
     // Sol bajo desde la izquierda de la vista inicial: fachadas con luz y sombra, sombras largas visibles.
     const sol = new DirectionalLight('#ffd9a8', 3.3);
     sol.position.set(-lado * 0.55, lado * 0.62, lado * 0.62);
@@ -288,6 +324,8 @@ export class Mundo3D {
     liberar(this.dinamica.raiz);
     this.dinamica = construirCapaDinamica(modelo);
     this.escena.add(this.dinamica.raiz);
+    this.ocultos = new Set();
+    this.ajustarSenales();
 
     if (!this.reducido) {
       const ahora = performance.now();
@@ -306,9 +344,123 @@ export class Mundo3D {
     this.sucio = true;
   }
 
+  /**
+   * Entrada de la primera visita: la cámara desciende sobre la peana mientras los barrios se
+   * levantan uno tras otro. Devuelve una función para saltarla (deja la escena en su estado final).
+   */
+  entrada(alTerminar: () => void): () => void {
+    const ahora = performance.now();
+    const foco: Foco = { nivel: 'ciudad' };
+    this.focoActual = foco;
+    this.vista = 'maqueta';
+    this.contorno.visible = false;
+    const objetivo = this.objetivoFoco(foco);
+    const theta = this.thetaInicial();
+    const final = new Spherical(this.distanciaAjustada(foco, objetivo, OPTICA.ciudad.phi, theta, OPTICA.ciudad.fov), OPTICA.ciudad.phi, theta);
+    const inicio = new Spherical(final.radius * 2.3, 0.2, theta - 0.85);
+    this.camara.fov = 24;
+    this.fijarDesplazamiento(0);
+    this.colocarCamara(objetivo, inicio);
+    this.transicion = {
+      inicio: ahora + 700, duracion: 5600, desdeObjetivo: objetivo.clone(), haciaObjetivo: objetivo,
+      desde: inicio, hacia: final, fovDesde: 24, fovHacia: OPTICA.ciudad.fov, desplazamientoDesde: 0, desplazamientoHacia: 0, arco: 0,
+    };
+    const orden = new Map(this.modelo.barrios.map((b, i) => [b.grupoId, i]));
+    this.apariciones = this.modelo.edificios.map((e, k) => {
+      const grupo = this.dinamica.edificios.get(e.conceptoId)!;
+      grupo.scale.y = 0.0001;
+      return { grupo, inicio: ahora + 1700 + (orden.get(e.grupoId) ?? 0) * 750 + (k % 7) * 110 };
+    });
+    let terminado = false;
+    const terminar = () => {
+      if (terminado) return;
+      terminado = true;
+      this.finEntrada = null;
+      alTerminar();
+    };
+    this.finEntrada = terminar;
+    this.sucio = true;
+    return () => {
+      for (const a of this.apariciones) a.grupo.scale.y = 1;
+      this.apariciones = [];
+      this.transicion = null;
+      this.camara.fov = OPTICA.ciudad.fov;
+      this.camara.updateProjectionMatrix();
+      this.colocarCamara(objetivo, final);
+      terminar();
+    };
+  }
+
+  /**
+   * Vista en corte: en el plano de edificio se retiran los edificios que se interponen entre la
+   * cámara y el foco (como las paredes en un juego de gestión). Se restauran al cambiar de foco.
+   */
+  private despejarVista(): void {
+    const nuevos = new Set<Object3D>();
+    const foco = this.focoActual;
+    if (foco.nivel === 'edificio') {
+      const objetivo = this.dinamica.edificios.get(foco.conceptoId);
+      const e = buscarEdificio(this.modelo, foco.conceptoId);
+      if (objetivo && e) {
+        const cima = this.cimaEdificio(e.conceptoId);
+        const puntos = [
+          new Vector3(e.posicion.x, cima * 0.5, e.posicion.z),
+          new Vector3(e.posicion.x, cima * 0.15, e.posicion.z),
+          new Vector3(e.lote.x, cima * 0.4, e.lote.z),
+          new Vector3(e.lote.x + e.lote.ancho, cima * 0.4, e.lote.z + e.lote.fondo),
+          new Vector3(e.lote.x + e.lote.ancho, cima * 0.4, e.lote.z),
+          new Vector3(e.lote.x, cima * 0.4, e.lote.z + e.lote.fondo),
+        ];
+        const origen = this.camara.position;
+        const candidatos = [...this.dinamica.edificios.values()].filter((g) => g !== objetivo);
+        for (const p of puntos) {
+          const dir = p.clone().sub(origen);
+          const distancia = dir.length();
+          this.raycaster.set(origen, dir.normalize());
+          this.raycaster.far = distancia - 0.5;
+          for (const impacto of this.raycaster.intersectObjects(candidatos, true)) {
+            for (let o: Object3D | null = impacto.object; o; o = o.parent) {
+              if (o.userData.tipo === 'edificio') {
+                nuevos.add(o);
+                break;
+              }
+            }
+          }
+        }
+        this.raycaster.far = Infinity;
+      }
+    }
+    for (const g of this.ocultos) if (!nuevos.has(g)) g.visible = true;
+    for (const g of nuevos) g.visible = false;
+    this.ocultos = nuevos;
+  }
+
+  /** Las columnas de luz orientan a escala de ciudad y barrio; de cerca solo queda el halo. */
+  private ajustarSenales(): void {
+    const lejos = this.focoActual.nivel === 'ciudad' || this.focoActual.nivel === 'barrio';
+    for (const g of this.dinamica.senales) {
+      const columna = g.getObjectByName('senal-columna');
+      if (columna) columna.visible = lejos;
+    }
+  }
+
+  private animarApariciones(ahora: number): boolean {
+    if (!this.apariciones.length) {
+      if (this.finEntrada && !this.transicion) this.finEntrada();
+      return false;
+    }
+    this.apariciones = this.apariciones.filter(({ grupo, inicio }) => {
+      const t = Math.min(1, Math.max(0, (ahora - inicio) / 950));
+      grupo.scale.y = Math.max(0.0001, 1 - (1 - t) ** 3);
+      return t < 1;
+    });
+    return true;
+  }
+
   enfocar(foco: Foco, vista: VistaMundo, animar: boolean): void {
     this.vista = vista;
     this.focoActual = foco;
+    this.ajustarSenales();
     this.aplicarEncuadre(foco, animar && !this.reducido);
     this.marcarContorno(foco);
     this.sucio = true;
@@ -346,14 +498,12 @@ export class Mundo3D {
     }
     if (foco.nivel === 'zona') {
       const z = buscarZona(this.modelo, foco.seccionId);
-      const hito = this.dinamica.marcadores.find((m) => m.userData.seccionId === foco.seccionId);
-      if (hito) return new Vector3(hito.position.x, hito.userData.baseY + 1.9, hito.position.z);
       if (z) return new Vector3(z.parcela.x + z.parcela.ancho / 2, this.cimaZona(z.seccionId) + 1.2, z.parcela.z + z.parcela.fondo / 2);
     }
     if (foco.nivel === 'barrio') {
-      // Señal de distrito en la esquina del barrio más alejada de la vista inicial.
+      // Nombre de distrito "escrito" en el centro del barrio, como en un plano.
       const b = buscarBarrio(this.modelo, foco.grupoId);
-      if (b) return new Vector3(b.parcela.x + 1.5, NIVEL.acera + 0.4, b.parcela.z + 1.5);
+      if (b) return new Vector3(b.parcela.x + b.parcela.ancho / 2, NIVEL.acera + 0.4, b.parcela.z + b.parcela.fondo / 2);
     }
     const r = rectFoco(this.modelo, foco);
     return new Vector3(r.x + r.ancho / 2, NIVEL.lote, r.z + r.fondo / 2);
@@ -374,7 +524,7 @@ export class Mundo3D {
         return { r: rectFoco(this.modelo, foco), alto: this.cimaZona(foco.seccionId) * 0.8 };
       case 'edificio': {
         const e = buscarEdificio(this.modelo, foco.conceptoId);
-        return e ? { r: encoger(e.lote, -1.2), alto: this.cimaEdificio(e.conceptoId) } : { r: rectFoco(this.modelo, foco), alto: 4 };
+        return e ? { r: encoger(e.lote, -0.6), alto: this.cimaEdificio(e.conceptoId) } : { r: rectFoco(this.modelo, foco), alto: 4 };
       }
     }
   }
@@ -384,13 +534,14 @@ export class Mundo3D {
    * proyectan sus esquinas reales en vez de usar una esfera envolvente (que dejaba la ciudad
    * pequeña y rodeada de vacío).
    */
-  private distanciaAjustada(foco: Foco, objetivo: Vector3, phi: number, theta: number): number {
+  private distanciaAjustada(foco: Foco, objetivo: Vector3, phi: number, theta: number, fov = OPTICA[foco.nivel].fov): number {
     const { r, alto } = this.volumenFoco(foco);
     const esquinas: Vector3[] = [];
     for (const x of [r.x, r.x + r.ancho]) for (const z of [r.z, r.z + r.fondo]) for (const y of [NIVEL.peana, alto]) esquinas.push(new Vector3(x, y, z));
     this.sonda.aspect = this.camara.aspect || 1;
+    this.sonda.fov = fov;
     this.sonda.updateProjectionMatrix();
-    const limite = OCUPACION[foco.nivel];
+    const limite = OPTICA[foco.nivel].ocupacion;
     const cabe = (d: number) => {
       this.sonda.position.setFromSpherical(new Spherical(d, phi, theta)).add(objetivo);
       this.sonda.lookAt(objetivo);
@@ -416,32 +567,65 @@ export class Mundo3D {
 
   private objetivoFoco(foco: Foco): Vector3 {
     const { r, alto } = this.volumenFoco(foco);
-    return new Vector3(r.x + r.ancho / 2, foco.nivel === 'ciudad' ? 0 : alto * 0.3, r.z + r.fondo / 2);
+    const y = foco.nivel === 'ciudad' ? 0 : foco.nivel === 'edificio' ? alto * 0.42 : alto * 0.3;
+    return new Vector3(r.x + r.ancho / 2, y, r.z + r.fondo / 2);
   }
 
-  private aplicarEncuadre(foco: Foco, animar: boolean): void {
+  private aplicarEncuadre(foco: Foco, animar: boolean, duracion = 1100): void {
     const actual = new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target));
-    // El Atlas se lee como un mapa orientado; la maqueta conserva el giro del usuario.
-    const theta = this.vista === 'atlas' ? 0 : this.girado ? actual.theta : this.thetaInicial();
-    // En vertical, algo más cenital: la ciudad gana altura en pantalla.
+    const optica = OPTICA[foco.nivel];
     const vertical = (this.camara.aspect || 1) < 0.9;
-    const phi = this.vista === 'atlas' ? POLAR_ATLAS : POLAR_MAQUETA[foco.nivel] * (vertical ? 0.85 : 1);
+    let theta = this.girado && actual.radius > 0 ? actual.theta : this.thetaInicial();
+    let phi = optica.phi * (vertical && foco.nivel === 'ciudad' ? 0.85 : 1);
+    let fov = optica.fov;
+    if (this.vista === 'atlas') {
+      // El Atlas se lee como un mapa orientado.
+      theta = 0;
+      phi = POLAR_ATLAS;
+      fov = FOV_ATLAS;
+    } else if (foco.nivel === 'edificio') {
+      const e = buscarEdificio(this.modelo, foco.conceptoId);
+      if (e) theta = THETA_FACHADA[e.frente]! + 0.42;
+    }
     const haciaObjetivo = this.objetivoFoco(foco);
-    const hacia = new Spherical(this.distanciaAjustada(foco, haciaObjetivo, phi, theta), phi, theta);
+    const hacia = new Spherical(this.distanciaAjustada(foco, haciaObjetivo, phi, theta, fov), phi, theta);
+    const desplazamiento = this.vista === 'atlas' || (this.camara.aspect || 1) < 1.1 ? 0 : DESPLAZAMIENTO[foco.nivel];
 
     if (!animar || actual.radius === 0) {
       this.transicion = null;
+      this.camara.fov = fov;
+      this.fijarDesplazamiento(desplazamiento);
       this.colocarCamara(haciaObjetivo, hacia);
       return;
     }
+    // Giro por el camino corto.
+    let dTheta = hacia.theta - actual.theta;
+    dTheta = Math.atan2(Math.sin(dTheta), Math.cos(dTheta));
+    hacia.theta = actual.theta + dTheta;
+    const recorrido = this.controles.target.distanceTo(haciaObjetivo);
     this.transicion = {
       inicio: performance.now(),
-      duracion: 900,
+      duracion,
       desdeObjetivo: this.controles.target.clone(),
       haciaObjetivo,
       desde: actual,
       hacia,
+      fovDesde: this.camara.fov,
+      fovHacia: fov,
+      desplazamientoDesde: this.desplazamiento,
+      desplazamientoHacia: desplazamiento,
+      arco: Math.min(70, recorrido * 0.35),
     };
+  }
+
+  /** Desplaza el centro óptico (en fracción del ancho) y actualiza la proyección. */
+  private fijarDesplazamiento(fraccion: number): void {
+    this.desplazamiento = fraccion;
+    const w = this.lienzo.clientWidth || 1;
+    const h = this.lienzo.clientHeight || 1;
+    if (fraccion) this.camara.setViewOffset(w, h, -fraccion * w, 0, w, h);
+    else this.camara.clearViewOffset();
+    this.camara.updateProjectionMatrix();
   }
 
   private colocarCamara(objetivo: Vector3, s: Spherical): void {
@@ -454,14 +638,16 @@ export class Mundo3D {
   private avanzarTransicion(ahora: number): boolean {
     const tr = this.transicion;
     if (!tr) return false;
-    const t = Math.min(1, (ahora - tr.inicio) / tr.duracion);
+    const t = Math.min(1, Math.max(0, (ahora - tr.inicio) / tr.duracion));
     const k = suavizar(t);
     const objetivo = tr.desdeObjetivo.clone().lerp(tr.haciaObjetivo, k);
     const s = new Spherical(
-      tr.desde.radius + (tr.hacia.radius - tr.desde.radius) * k,
+      tr.desde.radius + (tr.hacia.radius - tr.desde.radius) * k + Math.sin(Math.PI * k) * tr.arco,
       tr.desde.phi + (tr.hacia.phi - tr.desde.phi) * k,
       tr.desde.theta + (tr.hacia.theta - tr.desde.theta) * k,
     );
+    this.camara.fov = tr.fovDesde + (tr.fovHacia - tr.fovDesde) * k;
+    this.fijarDesplazamiento(tr.desplazamientoDesde + (tr.desplazamientoHacia - tr.desplazamientoDesde) * k);
     this.colocarCamara(objetivo, s);
     if (t >= 1) this.transicion = null;
     return true;
@@ -493,10 +679,13 @@ export class Mundo3D {
   private aplicarAtlas(): void {
     if (!this.distanciaCiudad) {
       const foco: Foco = { nivel: 'ciudad' };
-      this.distanciaCiudad = this.distanciaAjustada(foco, this.objetivoFoco(foco), POLAR_MAQUETA.ciudad, this.thetaInicial());
+      this.distanciaCiudad = this.distanciaAjustada(foco, this.objetivoFoco(foco), POLAR_MAQUETA.ciudad, this.thetaInicial(), OPTICA.ciudad.fov);
     }
     const s = new Spherical().setFromVector3(this.camara.position.clone().sub(this.controles.target));
-    const porDistancia = escalon(this.distanciaCiudad * 1.15, this.distanciaCiudad * 1.5, s.radius);
+    // Alejarse más allá de la vista general convierte la ciudad en mapa (solo con óptica normal:
+    // el teleobjetivo del barrio también aleja la cámara y no debe activarlo).
+    const optica = Math.abs(this.camara.fov - OPTICA.ciudad.fov) < 1;
+    const porDistancia = optica ? escalon(this.distanciaCiudad * 1.15, this.distanciaCiudad * 1.5, s.radius) : 0;
     const porAltura = escalon(0.45, 0.15, s.phi);
     this.atlas = Math.max(porDistancia, porAltura);
     for (const plano of this.dinamica.calor) {
@@ -511,6 +700,10 @@ export class Mundo3D {
    */
   private ajustarProfundidad(): void {
     const d = this.camara.position.distanceTo(this.controles.target);
+    if (this.escena.fog instanceof Fog) {
+      this.escena.fog.near = d * 0.95;
+      this.escena.fog.far = d * 2.8;
+    }
     const near = Math.min(40, Math.max(0.2, d * 0.04));
     const far = d * 3 + this.modelo.lado * 2;
     if (Math.abs(near - this.camara.near) / this.camara.near > 0.05 || Math.abs(far - this.camara.far) / this.camara.far > 0.05) {
@@ -527,8 +720,10 @@ export class Mundo3D {
     let cambio = this.avanzarTransicion(ahora);
     cambio = this.controles.update() || cambio;
     cambio = this.animarCrecimientos(ahora) || cambio;
+    cambio = this.animarApariciones(ahora) || cambio;
     if (!this.reducido) cambio = this.animarAmbiente(ahora / 1000) || cambio;
     if (!cambio && !this.sucio) return;
+    this.despejarVista();
     this.ajustarProfundidad();
     this.aplicarAtlas();
     this.renderer.render(this.escena, this.camara);
@@ -548,14 +743,14 @@ export class Mundo3D {
   }
 
   /**
-   * Animaciones ambientales con significado: tráfico (zonas en estudio) y el vaivén del hito
-   * "Estudia ya". Nada parpadea. Todas desaparecen con prefers-reduced-motion.
+   * Animaciones ambientales con significado: tráfico y peatones de las zonas que se estudian. La
+   * columna de "Estudia ya" es luz quieta. Nada parpadea. Todo desaparece con prefers-reduced-motion.
    */
   private animarAmbiente(t: number): boolean {
-    const { coches, rutas, marcadores } = this.dinamica;
+    const { coches, rutas, peatones, rutasPeatones } = this.dinamica;
     if (coches) colocarCoches(coches, rutas, t);
-    for (const m of marcadores) m.position.y = m.userData.baseY + Math.sin(t * 1.2) * 0.25;
-    return Boolean(coches || marcadores.length);
+    if (peatones) colocarEnRecorrido(peatones, rutasPeatones, t, NIVEL.acera);
+    return Boolean(coches || peatones);
   }
 
   /* ------------------------------------------------------------ puntero */
@@ -591,7 +786,10 @@ export class Mundo3D {
     this.raycaster.setFromCamera(ndc, this.camara);
     const impactos = this.raycaster.intersectObjects([this.dinamica.raiz, this.estatica], true);
     for (const impacto of impactos) {
-      if (!impacto.object.visible || impacto.object.name.startsWith('calor-')) continue;
+      if (!impacto.object.visible || impacto.object.name.startsWith('calor-') || impacto.object.name.startsWith('senal-')) continue;
+      let oculto = false;
+      for (let o: Object3D | null = impacto.object; o; o = o.parent) if (!o.visible) oculto = true;
+      if (oculto) continue;
       for (let o: Object3D | null = impacto.object; o; o = o.parent) {
         const datos = o.userData as Partial<DatosSeleccionables>;
         if (datos.tipo === 'edificio' || datos.tipo === 'zona') return datos as DatosSeleccionables;
