@@ -19,6 +19,7 @@ Rutina horaria: `trig_01EsNSKvi2kqpUXensnJE3Xn` (00:25–08:25, Europe/Madrid). 
 - [x] 6. Escribir en `docs/microexperiencia-intermediacion.md` el storyboard (6–8 fotogramas) de "Intermediación indirecta" con textos literales de DATA y principios de motion. Sin implementarlo.
 - [x] 7. Rendimiento, revisión de errores y ampliar tests donde falten.
 - [x] 9. Portada como landing (petición del usuario, 01/10 noche): (1) el mapa a pantalla completa es lo primero que se ve, con la entrada cinematográfica; (2) al hacer clic en el mapa se pasa a la exploración inmersiva de la ciudad; (3) al hacer scroll aparecen con animación el bloque del tema (título, "La Ciudad del Dinero", párrafo) y la barra de navegación.
+- [ ] 10. Personaje jugable (petición del usuario): versión 3D "peluda" del personaje de su imagen (cuerpo redondeado azul petróleo, orejas, cinta roja con lazo, ojos grandes, dos patas) que se mueve con WASD por el mapa.
 - [ ] 8. (Opcional, solo con aprobación del usuario) Extender la gramática urbana a los demás barrios.
 
 Al terminar: `docs/resumen-noche.md` y desactivar la rutina.
