@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Ciudad del Dinero · Tema 1 · Fase 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:dark;
+  --bg:#000;--bg2:#111;--bg3:#1b1b1b;--line:#2b2b2b;--ink:#fff;--mut:#bdbdbd;
+  --y:#ffd23f;--p:#ff4f8b;--c:#3ddbd9;--g:#4ade80;--o:#ff8a3d;--v:#a78bfa;--r:#ff5a5a;--b:#60a5fa;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000}}
+:root[data-theme="dark"]{--bg:#000}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+html,body{margin:0}
+body{background:#000;color:#fff;font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:19px;line-height:1.65}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;margin:0;line-height:1.1;letter-spacing:-.015em}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--y);outline-offset:3px}
+b{color:#fff}
+
+/* rail */
+.rail{position:fixed;inset:0 auto 0 0;width:300px;overflow:auto;background:#0a0a0a;border-right:1px solid var(--line);padding:20px 14px 40px;padding-top:calc(20px + env(safe-area-inset-top,0px));z-index:40}
+.brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:#fff;padding:4px 6px 14px}
+.brand .ring{width:58px;height:58px;flex:none}
+.brand b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.15rem;line-height:1.1}
+.brand small{color:var(--mut);font-size:.82rem}
+.grp{margin:14px 0 4px 8px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:.85rem;color:var(--mut);letter-spacing:.02em}
+.sl{display:block;text-decoration:none;color:#ddd;border-radius:12px;padding:8px 10px;margin:2px 0}
+.sl:hover{background:var(--bg3);color:#fff}
+.sl.on{background:#fff;color:#000}
+.sl .top{display:flex;gap:8px;align-items:baseline;font-size:.93rem;line-height:1.3}
+.sl .id{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;min-width:2.6em}
+.sl .pw{margin-left:auto;font-size:.75rem;opacity:.65;white-space:nowrap}
+.sl .bar{height:5px;border-radius:3px;background:#262626;margin:6px 0 0 3.1em;overflow:hidden}
+.sl.on .bar{background:#ddd}
+.sl .bar i{display:block;height:100%;border-radius:3px;transition:width .5s}
+main{margin-left:300px;min-height:100vh}
+.topbar{display:none}
+.page{max-width:900px;margin:0 auto;padding:42px 30px 90px}
+
+/* reveal */
+.rev{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .7s cubic-bezier(.2,1,.3,1)}
+.rev.in{opacity:1;transform:none}
+
+/* section header */
+.sh .kick{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:3px 12px;font-weight:700;font-size:.88rem;background:var(--bg3);border:1px solid var(--line)}
+.pill.k{background:#fff;color:#000;border:0;font-family:"Bricolage Grotesque",sans-serif;font-weight:800}
+.sh h1{font-size:clamp(2rem,5vw,3.3rem);font-weight:800;margin-bottom:10px}
+.sh p{color:var(--mut);font-size:1.15rem;margin:0 0 6px;max-width:56ch}
+
+/* concept card */
+.cc{margin-top:28px;background:var(--bg2);border:1px solid var(--line);border-radius:26px;padding:24px 26px;scroll-margin-top:90px}
+.cc-h{display:grid;grid-template-columns:104px 1fr;gap:18px;align-items:center;margin-bottom:14px}
+.ico{width:104px;height:104px}
+.ico svg{width:100%;height:100%;overflow:visible}
+.cc h2{font-size:clamp(1.4rem,3vw,1.9rem);font-weight:800}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.dm{font-size:.82rem;font-weight:700;border-radius:999px;padding:2px 10px;color:#000}
+.corta{font-size:1.12rem;margin:0 0 14px}
+.ej{background:var(--bg3);border-radius:16px;padding:12px 16px;margin:0 0 16px;font-size:1rem}
+.ej .lab{font-weight:700;color:var(--c)}
+.warn{color:#000;background:var(--y);border-radius:6px;padding:0 6px;font-weight:700;font-size:.9em;white-space:nowrap}
+.acts{display:flex;flex-wrap:wrap;gap:10px}
+.ab{cursor:pointer;border:0;border-radius:999px;padding:10px 18px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1rem;color:#000;transition:transform .15s,filter .15s}
+.ab:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.ab.o{background:var(--y)}.ab.t{background:var(--r)}.ab.q{background:var(--g)}
+.ab[aria-expanded="true"]{box-shadow:0 0 0 3px #000,0 0 0 5px currentColor}
+.pn{margin-top:14px;border-radius:18px;padding:16px 18px;animation:pin .35s ease-out}
+.pn[hidden]{display:none}
+@keyframes pin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.pn.o{background:#1f1a05;border:1px solid #ffd23f55}
+.pn.t{background:#2a0c0c;border:1px solid #ff5a5a66}
+.pn.q{background:#0b2414;border:1px solid #4ade8055}
+.pn .md{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.pn .md b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.05rem;color:var(--y)}
+.dots{display:flex;gap:5px}.dots i{width:8px;height:8px;border-radius:50%;background:#555}.dots i.on{background:var(--y)}
+.pn p{margin:0;font-size:1.06rem}
+.esq{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.08rem;line-height:1.6;background:#000;border-radius:12px;padding:12px 14px;border:1px dashed #ffd23f66}
+.pn.t h4{color:var(--r);font-size:1.05rem;margin-bottom:6px}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{cursor:pointer;text-align:left;background:#000;border:2px solid var(--line);border-radius:14px;padding:11px 14px;font-size:1rem}
+.opt:hover:not(:disabled){border-color:#fff}
+.opt.ok{border-color:var(--g);background:#0f2e1c}
+.opt.no{border-color:var(--r);background:#2e0f0f;text-decoration:line-through}
+.fb{margin-top:10px;min-height:1.3em}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:44px;padding-top:18px;border-top:1px solid var(--line)}
+.pager a{text-decoration:none;color:#fff;max-width:48%}
+.pager a:last-child{text-align:right;margin-left:auto}
+.pager small{display:block;color:var(--mut)}
+.pager b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.12rem}
+
+/* home */
+.hero h1{font-size:clamp(2.8rem,8.5vw,5.8rem);font-weight:800;line-height:.92;letter-spacing:-.04em;margin:10px 0 14px}
+.hero h1 span{color:var(--y)}
+.hero p{color:var(--mut);font-size:1.2rem;max-width:52ch;margin:0}
+.skyline{margin:26px 0 8px;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:linear-gradient(#04060d,#000)}
+.skyline>svg{display:block;width:100%;height:auto}
+.px svg{image-rendering:pixelated}
+.skyline a{cursor:pointer}.skyline a:hover rect[stroke]{stroke:#fff}
+.tw{animation:tw 2.4s steps(1) infinite}@keyframes tw{50%{opacity:.15}}
+.wf{animation:wf 6s steps(1) infinite}@keyframes wf{0%,80%{opacity:1}82%{opacity:.3}85%,100%{opacity:1}}
+.fl{animation:fl .8s steps(2) infinite}@keyframes fl{50%{transform:translateY(1px)}}
+.legend{color:var(--mut);font-size:.92rem;margin:4px 0 0}
+
+@keyframes win{50%{opacity:.2}}
+.dash{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;margin:26px 0;background:var(--bg2);border:1px solid var(--line);border-radius:24px;padding:22px}
+.dash .big{width:130px;height:130px}
+.dash h3{font-size:1.25rem;margin-bottom:8px}
+.ya{display:grid;gap:8px}
+.ya a{display:flex;gap:10px;align-items:center;text-decoration:none;color:#fff;background:var(--bg3);border-radius:14px;padding:10px 14px}
+.ya a:hover{background:#262626}
+.ya a .w{margin-left:auto;font-size:.82rem;color:var(--mut);white-space:nowrap}
+.h2{font-size:1.5rem;margin:34px 0 12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.tile{display:block;text-decoration:none;color:#fff;border-radius:20px;padding:16px;background:var(--bg2);border:2px solid #262626;transition:transform .2s,border-color .2s}
+.tile:hover{transform:translateY(-3px);border-color:#fff}
+.tile .i{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.5rem}
+.tile .n{display:block;font-weight:700;line-height:1.25;margin:2px 0 8px}
+.tile .w{font-size:.82rem;color:var(--mut)}
+.gram{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gram div{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px 10px;font-size:.92rem;line-height:1.2}
+.gram svg{width:40px;height:40px;flex:none}
+.next{margin-top:30px;color:var(--mut);font-size:.95rem;border-top:1px solid var(--line);padding-top:14px}
+
+/* glyph motion (subtle) */
+.blink{animation:blink 4.5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.water{animation:water 1.2s linear infinite}
+@keyframes water{to{stroke-dashoffset:-18}}
+.flick{animation:flick .5s infinite alternate;transform-box:fill-box;transform-origin:center bottom}
+@keyframes flick{to{transform:scale(.88,1.08)}}
+.flagw{animation:flagw 1.3s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:left center}
+@keyframes flagw{to{transform:skewY(-10deg) scaleX(.88)}}
+.sway{animation:sway 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes sway{50%{transform:rotate(-5deg)}}
+.cc:hover .ico svg,.tile:hover svg{animation:nudge .5s}
+@keyframes nudge{40%{transform:rotate(-6deg) scale(1.05)}}
+
+@media (max-width:1000px){
+  .rail{transform:translateX(-102%);transition:transform .3s;width:min(320px,88vw)}
+  body.menu .rail{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.72)}
+  main{margin-left:0}
+  .topbar{display:flex;position:sticky;top:0;z-index:30;gap:10px;align-items:center;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:#000;border-bottom:1px solid var(--line)}
+  .topbar button{cursor:pointer;border:0;background:#fff;color:#000;border-radius:999px;padding:6px 14px;font-weight:800}
+  .topbar span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .page{padding:24px 16px 80px}
+}
+@media (max-width:600px){
+  body{font-size:17.5px}
+  .cc{padding:18px}
+  .cc-h{grid-template-columns:76px 1fr;gap:12px}
+  .ico{width:76px;height:76px}
+  .ab{padding:9px 14px;font-size:.95rem}
+  .dash{grid-template-columns:1fr;justify-items:start}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rev{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<nav class="rail" id="rail" aria-label="Índice del tema"></nav>
+<main>
+  <div class="topbar"><button id="mb" aria-label="Abrir índice">Índice</button><span id="mt">La Ciudad del Dinero</span></div>
+  <div class="page" id="page"></div>
+</main>
+<script>
+/* =====================================================================
+   DATA · Contenido del tema (cambia solo este bloque para otro tema)
+   ===================================================================== */
+const DATA={
+meta:{tema:1,titulo:'El sistema financiero español',ciudad:'La Ciudad del Dinero',fuente:'Libro de texto CFGS Administración y Finanzas, Unidad 1'},
+grupos:[{id:'1',t:'1 · El sistema financiero'},{id:'2',t:'2 · Funciones'},{id:'3',t:'3 · Composición'},{id:'4',t:'4 · Estructura del sistema español'}],
+secciones:[
+ {id:'1',g:'1',t:'El sistema financiero',p:3,d:'Qué es y quién participa. Una idea simple, una línea.'},
+ {id:'2',g:'2',t:'Funciones del sistema financiero',p:10,d:'Para qué existe y por dónde viaja el dinero.'},
+ {id:'3.1',g:'3',t:'Instrumentos financieros',p:4,d:'Lo que se compra y vende, y cómo se mide.'},
+ {id:'3.2A',g:'3',t:'Mercados: concepto y funciones',p:3,d:'El punto de encuentro donde se fija el precio.'},
+ {id:'3.2B',g:'3',t:'Clasificación de los mercados',p:12,d:'Seis criterios con dos tipos cada uno, y las bolsas españolas.'},
+ {id:'3.2C',g:'3',t:'Características de los mercados',p:5,d:'Lo que hace bueno a un mercado y el mercado perfecto.'},
+ {id:'3.3A',g:'3',t:'Intermediarios: concepto, ventajas e inconvenientes',p:5,d:'Quién se pone en medio y qué gana.'},
+ {id:'3.3B',g:'3',t:'Clasificación de los intermediarios',p:4,d:'Bancarios frente a no bancarios.'},
+ {id:'3.3C',g:'3',t:'Características de los intermediarios',p:3,d:'Corto, largo, riesgo y confianza.'},
+ {id:'4.1',g:'4',t:'Instituciones de la Unión Europea',p:8,d:'El cerebro del euro, su equipo, la red europea y sus vigilantes.'},
+ {id:'4.2A',g:'4',t:'Intermediarios bancarios',p:25,d:'Los que crean dinero. Todos bajo el Banco de España.'},
+ {id:'4.2B',g:'4',t:'Intermediarios no bancarios',p:18,d:'Fondos, ESI, EFC, SGR, seguros y sus supervisores.'}
+],
+modos:['🍕 Analogía cotidiana','🧒 Para un niño de 10 años','🗺️ Esquema visual','👯 Su gemelo confuso','🎯 Frase de examen'],
+conceptos:[
+/* ---- 1 ---- */
+{id:'sf',s:'1',n:'Sistema financiero y unidades económicas',ic:['people','arrow','bank'],col:'#ffd23f',
+ c:'Conjunto de <b>instituciones, medios (activos) y mercados</b> que canaliza el ahorro de las unidades con <b>superávit</b> (les sobra: ahorradores) hacia las que tienen <b>déficit</b> (les falta: inversores). Las unidades económicas son familias, empresas y sector público.',
+ e:'Tu nómina en el banco acaba financiando la nave que construye una empresa de tu comarca.',
+ o:['La red de tuberías que lleva el agua de quien tiene de sobra a quien tiene sed.','Hay gente con dinero guardado y gente que lo necesita. El sistema financiero los junta para que el dinero no se quede parado.','Superávit (familias) → [mercados · intermediarios · instrumentos] → Déficit (empresas, sector público)','No es lo mismo que "los bancos": los bancos son solo una pieza (intermediarios). El sistema incluye también mercados e instrumentos.','Sistema financiero = instituciones, medios y mercados cuyo objetivo es canalizar el ahorro a la inversión.'],
+ t:'En el test (pregunta 1) la buena es "instituciones, medios y mercados que canalizan el ahorro a la inversión". Las trampas lo reducen a "bancos y cajas" o a "instituciones bancarias".',
+ q:['INST, SA ingresa 450.000 € y gasta 320.000 €. Es una unidad con…',['Superávit','Déficit','Financiación'],0,'Ingresos mayores que gastos: superávit (capacidad de financiación).']},
+/* ---- 2 ---- */
+{id:'funciones',s:'2',n:'Las funciones del sistema financiero',ic:['scale','eye'],col:'#3ddbd9',
+ c:'<b>Función esencial:</b> canalizar los recursos de las unidades con superávit hacia las de déficit. Además: analizar la viabilidad de los proyectos, fomentar el ahorro, sustentar el sistema de pagos, asignar eficientemente los recursos, contribuir a la estabilidad monetaria y financiera, y velar por las instituciones.',
+ e:'El banco estudia tu plan de negocio antes de prestarte (viabilidad) y tu transferencia llega al momento (sistema de pagos).',
+ o:['Es fontanero y árbitro a la vez: hace que el dinero llegue y vigila que nadie rompa las tuberías.','El sistema mira si los proyectos van a salir bien, anima a ahorrar, hace que los pagos lleguen y cuida que todo funcione sin sustos.','Viabilidad · Ahorro · Pagos · Asignación · Estabilidad · Vigilancia → "Ve A Pagar A Este Vendedor"','No confundas la función esencial (una: canalizar ahorro → inversión) con la lista de seis funciones.','Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit.'],
+ t:'Test, pregunta 9: "lograr la estabilidad mediante políticas expansivas de los mercados organizados" suena bien, pero es falso.',
+ q:['¿Cuál es la función ESENCIAL del sistema financiero?',['Emitir billetes','Canalizar recursos del superávit al déficit','Supervisar a los bancos'],1,'Las otras son funciones de organismos concretos.']},
+{id:'directa',s:'2',n:'Intermediación directa',ic:['arrow','chart'],col:'#ff4f8b',
+ c:'Los agentes con déficit <b>emiten instrumentos</b> (bonos, acciones) y los agentes con superávit <b>los compran</b>. El ahorrador sabe a quién financia y asume el riesgo.',
+ e:'Compras en bolsa los bonos que acaba de emitir una empresa.',
+ o:['Prestar dinero a un amigo cara a cara: si no te paga, pierdes tú.','Le das tu dinero directamente a quien lo necesita, a cambio de un papel que dice que te lo devolverá.','Ahorrador ──€──▶ Empresa   ·   Ahorrador ◀──bono── Empresa','Su gemela es la indirecta: allí hay un banco en medio y ahorrador e inversor no se conocen.','Directa: entre agentes con déficit, que emiten instrumentos financieros, y agentes con superávit, que los adquieren.'],
+ t:'No la confundas con el "mercado directo" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado (test, pregunta 8).',
+ q:['Compras acciones en la salida a bolsa de una empresa. Es intermediación…',['Directa','Indirecta'],0,'Compras tú el título al emisor.']},
+{id:'indirecta',s:'2',n:'Intermediación indirecta',ic:['bank','arrow'],col:'#60a5fa',
+ c:'El ahorrador <b>deposita su excedente en el banco</b> y el banco hace llegar ese dinero a quien tiene déficit. <b>Ambos agentes no tienen contacto entre ellos.</b>',
+ e:'Tus ahorros en un depósito financian el préstamo de una pyme que no conoces.',
+ o:['Dejar comida en un banco de alimentos: no sabes quién se la come.','Le das tu dinero al banco y el banco se lo presta a otra persona. Tú solo hablas con el banco.','Ahorrador ──depósito──▶ 🏦 ──préstamo──▶ Empresa','Gemela de la directa. Aquí el riesgo lo asume el banco, que cobra el margen.','Indirecta: el agente con superávit ingresa su excedente en el banco y el banco lo hace llegar al agente con déficit.'],
+ t:'La frase que buscan en la actividad 4: "ambos agentes no tienen ningún contacto entre ellos".',
+ q:['Metes tus ahorros en un depósito. Es intermediación…',['Directa','Indirecta'],1,'El banco hace de puente.']},
+{id:'pagos',s:'2',n:'Sistema de pagos',ic:['card','link'],col:'#3ddbd9',
+ c:'Conjunto de recursos mediante los cuales se <b>transfiere dinero entre las instituciones financieras</b> y de estas a los particulares. Las transacciones deben ser transparentes para que funcione.',
+ e:'Un pago con tarjeta o una transferencia que llega al instante.',
+ o:['Las carreteras por las que viaja el dinero.','Es el camino que sigue el dinero cuando pagas con tarjeta o mandas una transferencia.','Banco A ⇄ Banco B ⇄ Particulares','No es lo mismo que el medio de pago (dinero, tarjeta): el sistema es el camino, no el vehículo.','Sustentar el sistema de pagos: garantizar que las transacciones se realicen de forma segura y eficiente.'],
+ t:'Actividad 7: debe estar saneado porque, si falla, el dinero no llega y la economía se para.',
+ q:['¿Qué es un sistema de pagos?',['Los billetes y monedas','Recursos para transferir dinero entre instituciones y particulares','El conjunto de bancos'],1,'Es la infraestructura de las transferencias.']},
+/* ---- 3.1 ---- */
+{id:'instrumento',s:'3.1',n:'Instrumento financiero',ic:['invoice','scale'],col:'#ffd23f',
+ c:'Título emitido por las unidades económicas para dirigir el ahorro a la inversión. Es un <b>derecho para quien lo posee</b> y una <b>obligación para quien lo emite</b>.',
+ e:'Acciones, bonos, letras del Tesoro, depósitos bancarios, seguros.',
+ o:['Un pagaré entre amigos: uno tiene derecho a cobrar y el otro, la obligación de pagar.','Es un papel (o un registro en el ordenador) que dice "te debo dinero".','Emisor (obligación) ──título──▶ Poseedor (derecho)','No confundir instrumento (el título) con intermediario (la entidad) ni con mercado (el lugar).','Instrumentos financieros: derecho para quien los posee y obligación para quien los emite.'],
+ t:'Se suele invertir: el derecho es del poseedor; la obligación, del emisor.',
+ q:['Para quien EMITE un instrumento financiero es…',['Un derecho','Una obligación','Un medio de pago'],1,'El emisor debe pagar.']},
+{id:'rrl',s:'3.1',n:'Riesgo, liquidez y rentabilidad',ic:['scale','clock'],col:'#ff5a5a',
+ c:'<b>Riesgo:</b> probabilidad de que, al vencimiento, el emisor no pague. <b>Liquidez:</b> facilidad para convertirlo en dinero. <b>Rentabilidad:</b> capacidad de generar intereses.',
+ e:'⚠ dato del libro, puede haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.',
+ o:['Riesgo: que tu amigo no te devuelva el dinero. Liquidez: un billete frente a un piso (uno se gasta ya, el otro tarda meses en venderse). Rentabilidad: lo que te paga tu dinero por trabajar.','¿Me lo devolverán? (riesgo) ¿Puedo recuperarlo rápido? (liquidez) ¿Cuánto me da? (rentabilidad)','↑ riesgo o ↓ liquidez ⇒ ↑ rentabilidad exigida','Liquidez no es "tener mucho dinero": es lo fácil que es convertir algo en dinero.','Las características principales de los instrumentos son el riesgo, la liquidez y la rentabilidad.'],
+ t:'Actividad 12c: te piden identificar las tres en el producto que recomiendas. No te olvides de ninguna.',
+ q:['La facilidad de convertir un activo en dinero es…',['Rentabilidad','Liquidez','Riesgo'],1,'Eso es liquidez.']},
+/* ---- 3.2A ---- */
+{id:'mercado',s:'3.2A',n:'Mercado financiero',ic:['store','chart'],col:'#3ddbd9',
+ c:'Lugar o punto de encuentro, <b>físico o virtual</b>, donde quienes demandan y quienes ofrecen activos financieros se ponen en contacto para <b>intercambiarlos y fijar su precio</b>.',
+ e:'La bolsa de Madrid o el mercado interbancario, totalmente electrónico.',
+ o:['Un mercadillo, pero de acciones y bonos en lugar de fruta.','El sitio donde se compran y venden "papeles de dinero" y se decide cuánto valen.','Oferentes ⇄ 📈 precio ⇄ Demandantes','Mercado (el lugar) ≠ intermediario (quien media). En un mercado directo no hay intermediario.','Mercado financiero: lugar o punto de encuentro donde se intercambian activos financieros y se fija su precio.'],
+ t:'Test, pregunta 9: es función del mercado "poner en contacto a los agentes que intervienen en las operaciones financieras".',
+ q:['Según el test del libro, es función de un mercado financiero:',['Poner en contacto a los agentes','Emitir billetes','Estabilizar con políticas expansivas'],0,'Pregunta 9 del test de repaso.']},
+/* ---- 3.2B ---- */
+{id:'fase',s:'3.2B',n:'Primario vs secundario',ic:['chart','arrow'],col:'#ff4f8b',
+ c:'Según la fase de negociación. <b>Primario:</b> se adquieren activos de nueva creación, al emisor o mediante intermediarios. <b>Secundario:</b> se negocian activos ya emitidos, lo que les da movilidad.',
+ e:'Primario: acciones nuevas, pagarés, letras del Tesoro, ampliaciones de capital. Secundario: la bolsa de valores.',
+ o:['Primario es el estreno de la película; secundario, la tienda de segunda mano.','En el primario compras algo recién hecho; en el secundario se lo compras a otra persona que ya lo tenía.','Emisor ─(primario)─▶ Inversor A ─(secundario)─▶ Inversor B','No confundir primario/secundario (fase) con monetario/capitales (plazo del activo).','Primarios: activos de nueva creación. Secundarios: activos ya existentes; ej.: la bolsa de valores.'],
+ t:'Comprueba 14: en una emisión de letras del Tesoro los activos son nuevos → primario (y, por plazo, monetario).',
+ q:['En una emisión de letras del Tesoro, el mercado es…',['Secundario','Primario','OTC'],1,'Son activos nuevos.']},
+{id:'activo',s:'3.2B',n:'Monetario vs de capitales',ic:['clock','chart'],col:'#60a5fa',
+ c:'Según el tipo de activo. <b>Monetario:</b> vencimiento inferior a 18 meses, mucha liquidez y poco riesgo; ahí se fija el <b>euríbor</b>. <b>De capitales:</b> más de 18 meses; renta fija (AIAF) y renta variable (bolsa).',
+ e:'Monetario: el mercado interbancario. Capitales: bonos a 10 años o acciones.',
+ o:['El monetario es la caja chica (corto plazo, siempre a mano); el de capitales, la hucha del futuro.','Si el dinero vuelve en menos de año y medio, es monetario. Si tarda más, de capitales.','⏱️ menos de 18 meses → monetario   ·   🏔️ más de 18 meses → capitales (AIAF / bolsa)','El euríbor (tipo medio al que se prestan los bancos europeos) es del monetario, no del de capitales.','Monetarios: vencimiento inferior a 18 meses. De capitales: superior a 18 meses.'],
+ t:'La frontera son 18 meses, no 12. Es la cifra que más cambian en los test.',
+ q:['La frontera entre mercado monetario y de capitales es…',['12 meses','18 meses','24 meses'],1,'18 meses.']},
+{id:'estructura-m',s:'3.2B',n:'Directo vs intermediado',ic:['handshake','arrow'],col:'#ff8a3d',
+ c:'Según la estructura del mercado. <b>Directo:</b> no hay intermediarios; comprador y vendedor buscan la contrapartida. <b>Intermediado:</b> un intermediario pone en contacto a las partes a cambio de una comisión.',
+ e:'Directo: acciones que no se negocian en bolsa. Intermediado: compras a través de un bróker.',
+ o:['Directo: vendes tu moto a un vecino. Intermediado: la vendes en un concesionario que cobra comisión.','O te apañas tú solo con el otro, o alguien os junta y cobra por ello.','Directo: A ⇄ B   ·   Intermediado: A ⇄ 🤝 (comisión) ⇄ B','Se parece a la intermediación directa/indirecta del punto 2, pero aquí se clasifican mercados.','Directos: sin mediadores. Intermediados: con intermediarios que cobran comisión.'],
+ t:'Test, pregunta 8: "uno de los participantes es un intermediario que cobra comisión" describe un mercado intermediado, no directo.',
+ q:['Si un intermediario cobra comisión por poner en contacto a las partes, el mercado es…',['Directo','Intermediado','Primario'],1,'Pregunta 8 del test.']},
+{id:'formalizacion',s:'3.2B',n:'Organizados vs OTC',ic:['invoice','handshake'],col:'#a78bfa',
+ c:'Según el grado de formalización. <b>Organizados:</b> se negocia con normas y reglamentos (bolsa, deuda pública anotada). <b>No organizados u OTC:</b> las partes fijan las reglas y no hay un sitio concreto.',
+ e:'Organizado: la bolsa. OTC: préstamos o acciones de pymes.',
+ o:['Organizado: un partido con reglamento y árbitro. OTC: un partido de barrio con las reglas que pactéis.','En unos hay reglas fijas para todos; en otros, cada uno se pone de acuerdo como quiere.','📋 reglas fijas → organizado   ·   🤝 reglas pactadas → OTC (over the counter)','"Anotada" significa registrada electrónicamente, sin papel. No tiene nada que ver con "no organizado".','OTC: las partes que intervienen establecen las reglas de intercambio.'],
+ t:'En los OTC se intercambia la mayoría de los activos financieros, no en los organizados.',
+ q:['Préstamos y acciones de pymes se negocian sobre todo en mercados…',['Organizados','OTC'],1,'Las partes fijan sus reglas.']},
+{id:'regulados-plazo',s:'3.2B',n:'Regulados vs no regulados · Spot vs a plazo',ic:['scale','clock'],col:'#4ade80',
+ c:'Por intervención: en los <b>regulados</b> las autoridades intervienen en precio y número de activos; en los <b>no regulados</b> manda la oferta y la demanda (hoy la mayoría). Por plazo: <b>al contado (spot)</b>, con entrega inmediata, o <b>a plazo</b> (futuros y opciones), para una fecha futura a precio fijado.',
+ e:'A plazo: pactas hoy comprar dentro de seis meses a un precio cerrado.',
+ o:['Spot es comprar el pan y llevártelo. A plazo es encargar la tarta del cumpleaños con precio cerrado.','O el árbitro mete mano en los precios o no. Y o te lo llevas ya, o quedas para más adelante.','👮 regulado / 🌊 no regulado   ·   ⚡ spot / 📅 a plazo','"A plazo" no es "de capitales": habla de cuándo se entrega, no de cuánto dura el activo.','Al contado: entrega inmediata. A plazo: futuros y opciones.'],
+ t:'Actividad 11: en las opciones se paga una prima por el derecho a comprar o vender en el futuro.',
+ q:['Futuros y opciones son mercados…',['Al contado','A plazo','Monetarios'],1,'Se pacta para una fecha futura.']},
+{id:'bolsas',s:'3.2B',n:'Las 4 bolsas, el mercado continuo y el SIBE',ic:['metro','screen'],col:'#ffd23f',
+ c:'España tiene <b>cuatro bolsas oficiales: Madrid, Barcelona, Bilbao y Valencia</b>. El <b>mercado continuo</b> las interconecta para que funcionen como un único mercado, gracias a la plataforma electrónica <b>SIBE</b> (Sistema de Interconexión Bursátil Español).',
+ e:'Una acción cotiza a la vez en las cuatro bolsas. Bolsas internacionales: Nueva York, Tokio, Shanghái, Hong Kong, Londres, Shenzhen, NASDAQ y Euronext.',
+ o:['El mercado continuo es una línea de metro que une cuatro estaciones; el SIBE, la centralita que la hace funcionar.','Hay cuatro bolsas, pero un ordenador las conecta y funcionan como si fueran una sola.','🏛️ Madrid · 🏛️ Barcelona · 🏛️ Bilbao · 🏛️ Valencia ──▶ 🖥️ SIBE = mercado continuo','El SIBE es la plataforma; el mercado continuo, el resultado (las cuatro como una).','Mercado continuo: interconexión de las cuatro bolsas de valores mediante el SIBE.'],
+ t:'"Mi Barco Bebe Vino": Madrid, Barcelona, Bilbao, Valencia. Ni Sevilla ni Zaragoza.',
+ q:['¿Cuál NO es una bolsa oficial española?',['Bilbao','Sevilla','Valencia'],1,'Madrid, Barcelona, Bilbao y Valencia.']},
+/* ---- 3.2C ---- */
+{id:'caracteristicas-m',s:'3.2C',n:'Las 5 características de los mercados',ic:['chart','scale'],col:'#ff4f8b',
+ c:'<b>Libertad</b> (sin barreras de entrada y salida), <b>profundidad</b> (muchas órdenes de compra y venta), <b>transparencia</b> (información fácil de obtener), <b>flexibilidad</b> (precios que reaccionan rápido) y <b>amplitud</b> (muchos activos negociados).',
+ e:'Un inversor que quiere diversificar su cartera busca un mercado amplio (actividad 13).',
+ o:['Un buen supermercado: entras y sales libremente, hay mucha gente comprando, los precios están a la vista, cambian rápido y hay de todo.','Un buen mercado deja entrar a cualquiera, tiene mucha gente, no esconde nada, cambia rápido y tiene muchas cosas.','L · P · T · F · A → "Los Payasos Toman Fanta Ahora"','Profundidad (muchas órdenes para un activo) ≠ amplitud (muchos activos distintos).','Libertad, profundidad, transparencia, flexibilidad y amplitud.'],
+ t:'Profundidad y amplitud son las que más se confunden.',
+ q:['Que se negocien muchos activos distintos es…',['Profundidad','Amplitud','Flexibilidad'],1,'Amplitud = número de activos.']},
+{id:'perfecto',s:'3.2C',n:'El mercado perfecto',ic:['scale','eye'],col:'#ffd23f',
+ c:'Modelo teórico con muchísimos oferentes y demandantes (nadie influye en el precio), tipo de interés sin variaciones, impuestos, margen e inflación nulos, entrada y salida libres e información igual para todos. <b>No existe.</b>',
+ e:'Se usa como unidad de medida para comparar los mercados reales.',
+ o:['Como el 10 en un examen: casi nadie lo saca, pero sirve para medir lo cerca que estás.','Es un mercado ideal que no existe; sirve para ver cómo de bueno es uno de verdad.','Mercado real ──comparar──▶ Mercado perfecto (L, P, T, F y A al máximo)','No confundas las 5 características con las circunstancias del mercado perfecto (la lista ideal).','No existe ningún mercado financiero perfecto: aparece como unidad de medida.'],
+ t:'Caso práctico 2 y actividad 15: describirlo usando las 5 características.',
+ q:['¿Existe un mercado financiero perfecto?',['Sí, la bolsa','No, es un modelo teórico','Sí, el interbancario'],1,'Es una unidad de medida.']},
+/* ---- 3.3A ---- */
+{id:'intermediario',s:'3.3A',n:'Intermediario financiero',ic:['handshake','bank'],col:'#ff8a3d',
+ c:'Institución que <b>media entre oferentes y demandantes de dinero</b> y canaliza el ahorro hacia quien lo necesita. Ofrece garantías a ambos: al que presta, que recuperará su dinero con rentabilidad; al que pide, condiciones adaptadas.',
+ e:'Un banco, una cooperativa de crédito o una aseguradora.',
+ o:['Un agente inmobiliario del dinero: junta al que tiene con al que necesita y responde de que el trato salga bien.','Es quien se pone en medio para que el que tiene dinero y el que lo necesita se entiendan.','Oferentes ─▶ 🤝 intermediario ─▶ Demandantes','Intermediario (entidad) ≠ mercado (lugar).','Instituciones que median entre oferentes y demandantes de dinero y canalizan el ahorro.'],
+ t:'Actividad 23: oferentes buscan seguridad y rentabilidad; demandantes, condiciones adaptadas. No las cruces.',
+ q:['¿Qué buscan los oferentes de fondos en un intermediario?',['Condiciones adaptadas','Que les devuelvan su dinero con rentabilidad','Avales'],1,'Los demandantes buscan condiciones adaptadas.']},
+{id:'margen',s:'3.3A',n:'Margen, ventajas e inconvenientes',ic:['euro','scale'],col:'#4ade80',
+ c:'El <b>margen de intermediación</b> es el beneficio del intermediario: diferencia entre el tipo que cobra a los inversores y el que paga a los ahorradores. <b>Ventajas:</b> facilitan el acceso a los instrumentos y canalizan el ahorro. <b>Inconveniente:</b> encarecen las operaciones.',
+ e:'Paga un 1 % por tu depósito y cobra un 4 % por un préstamo: margen del 3 %.',
+ o:['Comprar barato y vender caro: la diferencia es su sueldo.','El banco te da un poquito por guardar tu dinero y cobra más al que se lo presta. Lo de en medio es para él.','Tipo cobrado (4 %) − tipo pagado (1 %) = margen (3 %)','Margen ≠ comisión fija: el margen sale de la diferencia entre tipos de interés.','Un margen elevado puede indicar que el sistema financiero es ineficiente.'],
+ t:'Un margen alto = sistema ineficiente, no "banco sano". Y con lo electrónico se usan cada vez menos intermediarios.',
+ q:['Un margen de intermediación muy alto indica…',['Sistema eficiente','Sistema ineficiente','Más competencia'],1,'Lo dice el libro, pág. 15.']},
+/* ---- 3.3B ---- */
+{id:'tipos-int',s:'3.3B',n:'Bancarios vs no bancarios',ic:['card','umbrella'],col:'#60a5fa',
+ c:'<b>Bancarios:</b> emiten instrumentos aceptados como medio de pago, es decir, <b>crean dinero</b> (ej.: bancos). <b>No bancarios:</b> emiten instrumentos con valor monetario que <b>no son medio de pago</b> (ej.: compañías de seguros).',
+ e:'Pagas el pan con tu saldo del banco; con tu póliza de seguro no puedes.',
+ o:['Los bancarios fabrican fichas que valen en cualquier tienda; los no bancarios, vales que no sirven para pagar.','Si con lo que te dan puedes pagar en una tienda, es bancario. Si no, no bancario.','💳 medio de pago → bancario   ·   📄 valor pero no paga → no bancario','Las aseguradoras sí son intermediarios financieros, pero no bancarios (caso práctico 3).','Solo los intermediarios bancarios pueden crear dinero.'],
+ t:'Test, pregunta 3: ¿quiénes pueden crear dinero? Los bancarios, no "todos".',
+ q:['¿Quiénes pueden crear dinero?',['Los no bancarios','Los bancarios','Ninguno'],1,'Pregunta 3 del test.']},
+{id:'transformacion',s:'3.3B',n:'Vía directa e intermediada: la transformación',ic:['arrow','bank'],col:'#a78bfa',
+ c:'<b>Vía directa:</b> las unidades con superávit aportan fondos directamente; no hay transformación de activos. <b>Vía intermediada:</b> hay transformación: lo que recibe quien pide no tiene nada que ver con lo que entregó quien ahorra.',
+ e:'Tu depósito disponible acaba convertido en una hipoteca a 30 años.',
+ o:['Entra trigo, sale pan.','El banco recoge tu dinero de una forma y lo presta de otra distinta.','Depósito (corto, a la vista) ─▶ 🏦 ─▶ Préstamo (largo)','Mediación (poner en contacto) ≠ transformación (cambiar el activo). Los bancos hacen las dos (pág. 22).','En la vía intermediada se produce transformación de los activos financieros.'],
+ t:'Pregunta típica: ¿qué doble tarea hacen hoy los bancos? Mediación y transformación.',
+ q:['¿En qué vía se transforman los activos?',['Directa','Intermediada'],1,'El intermediario cambia el activo.']},
+/* ---- 3.3C ---- */
+{id:'carac-int',s:'3.3C',n:'Características de los intermediarios',ic:['people','shield'],col:'#ff8a3d',
+ c:'Facilitan la mediación; <b>captan a corto plazo</b> (cuentas, depósitos) y <b>prestan a largo</b> (préstamos, obligaciones); <b>reducen el riesgo diversificando</b>; cobran comisión o margen; y transmiten información de confianza que agiliza las operaciones.',
+ e:'Un banco con miles de clientes reparte el riesgo entre muchos préstamos (actividad 19).',
+ o:['No poner todos los huevos en la misma cesta: el intermediario tiene muchas cestas.','Recogen dinero que puede salir pronto y lo prestan para mucho tiempo, repartiéndolo para no jugárselo todo a una carta.','Captan ⏱️ corto → prestan 🏔️ largo · reparten el riesgo 🧺','Reducen el riesgo, pero no lo eliminan: siempre está presente (pág. 17).','Permiten reducir el riesgo diversificando las carteras de inversión.'],
+ t:'"Minimizan el riesgo, pero este está permanentemente presente." Si una opción dice que lo eliminan, es falsa.',
+ q:['Los intermediarios captan a ___ y prestan a ___',['Largo / corto','Corto / largo','Corto / corto'],1,'Captan con depósitos, prestan con préstamos.']},
+/* ---- 4.1 ---- */
+{id:'bce',s:'4.1',n:'Banco Central Europeo (BCE)',ic:['brain','euro'],col:'#60a5fa',
+ c:'Banco central de los países de la UE que han adoptado el euro. Mantiene la <b>estabilidad de precios</b> (el poder adquisitivo del euro) e instrumenta la política monetaria. Da la <b>autorización final para crear nuevas entidades de crédito</b>.',
+ e:'Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. El libro dice 20 países: ⚠ dato del libro, puede haber cambiado (desde el 1-1-2026 Bulgaria usa el euro y son 21).',
+ o:['El cerebro que manda sobre el euro.','Es el jefe del euro: cuida que las cosas no se encarezcan demasiado.','🧠 BCE ⊂ Eurosistema ⊂ SEBC','BCE (una institución) ≠ Eurosistema (BCE + bancos centrales del euro).','BCE: banco central de los países de la UE que han adoptado el euro.'],
+ t:'Comprueba 2: ¿quién autoriza crear un banco nuevo? El BCE, a propuesta e informe del Banco de España.',
+ q:['¿Quién da la autorización final para crear un banco?',['Banco de España','BCE','CNMV'],1,'A propuesta e informe del Banco de España.']},
+{id:'eurosistema',s:'4.1',n:'Eurosistema',ic:['brain','bank'],col:'#60a5fa',
+ c:'Autoridad monetaria de la eurozona: <b>el BCE más los bancos centrales nacionales de los países con euro</b>. Define y diseña la política monetaria y autoriza la emisión de billetes y monedas.',
+ e:'El Banco de España forma parte del Eurosistema.',
+ o:['El cerebro (BCE) rodeado de su equipo del euro.','El jefe del euro junto con los bancos centrales de cada país que usa euros.','🧠 BCE + 🏦🇪🇸 🏦🇫🇷 🏦🇩🇪… (solo países con euro)','Eurosistema = solo países con euro. SEBC = toda la UE.','Eurosistema: BCE + bancos centrales de los Estados miembros que tienen el euro.'],
+ t:'Desde el euro, la política monetaria de España la define el Eurosistema, no el Banco de España.',
+ q:['¿Quién define hoy la política monetaria de España?',['Banco de España','Eurosistema','Gobierno'],1,'El Banco de España colabora.']},
+{id:'sebc',s:'4.1',n:'Sistema Europeo de Bancos Centrales (SEBC)',ic:['globe','link'],col:'#a78bfa',
+ c:'El BCE más los bancos centrales de <b>todos los países de la UE</b>, tengan o no el euro. Mantiene la estabilidad de precios y apoya las políticas económicas de la Comunidad.',
+ e:'El banco central de Suecia está en el SEBC, pero no en el Eurosistema.',
+ o:['Toda la plantilla europea: titulares (con euro) y suplentes (sin euro).','Es la red de todos los bancos centrales de la Unión Europea, usen euros o no.','🌍 SEBC ⊃ Eurosistema ⊃ BCE','La diferencia con el Eurosistema existe mientras haya países que conserven su moneda.','SEBC: Sistema Europeo de Bancos Centrales.'],
+ t:'Test, pregunta 7: SEBC es "Sistema Europeo de Bancos Centrales", no "del Banco Central" ni "Español".',
+ q:['¿Qué significa SEBC?',['Sistema Europeo del Banco Central','Sistema Europeo de Bancos Centrales','Sistema Español de Bancos Centrales'],1,'Pregunta 7 del test.']},
+{id:'mus',s:'4.1',n:'Mecanismo Único de Supervisión (MUS)',ic:['eye','bank'],col:'#4ade80',
+ c:'Supervisor bancario único de la zona euro, impulsado en 2012 y en funcionamiento desde el <b>4 de noviembre de 2014</b>. Vela por la seguridad y solidez de la banca europea. Cuatro elementos: <b>regulación, supervisión continuada, medidas correctoras y régimen sancionador</b>.',
+ e:'Inspecciones in situ a un gran banco español.',
+ o:['El ojo europeo sobre los bancos: reglamento, mirada, tarjeta amarilla y tarjeta roja.','Es el vigilante que mira que los bancos de Europa no hagan locuras.','👁️ MUS: Reglas → Vigilancia → Corrección → Sanción','MUS vigila; MUR resuelve. Van siempre juntos.','MUS: velar por la seguridad y solidez del sistema bancario europeo y aumentar la integración y estabilidad.'],
+ t:'Actividad 22: la finalidad del supervisor único. Fecha clave: 4-11-2014.',
+ q:['¿Desde cuándo funciona el MUS?',['1-1-1999','4-11-2014','1-11-2019'],1,'4 de noviembre de 2014.']},
+{id:'mur',s:'4.1',n:'Mecanismo Único de Resolución (MUR)',ic:['truck','fire'],col:'#ff5a5a',
+ c:'Sistema de la UE que trabaja junto al MUS para <b>gestionar las crisis de entidades que no son viables</b>. Refuerza la confianza en el sector bancario.',
+ e:'La resolución ordenada de un banco con problemas graves.',
+ o:['Los bomberos de los bancos: cuando hay incendio, intervienen.','Si un banco se pone muy malito, el MUR se encarga de solucionarlo sin que todo se hunda.','🔥🏦 ──▶ 🚒 MUR','MUS = "te vigilo". MUR = "si hay incendio, intervengo".','MUR: gestiona las crisis de entidades que no sean viables.'],
+ t:'No confundas el MUR con el Fondo de Garantía: el FGD devuelve depósitos; el MUR resuelve la entidad.',
+ q:['¿Qué hace el MUR?',['Supervisar bancos a diario','Gestionar crisis de entidades no viables','Garantizar 100.000 €'],1,'Resolución.']},
+{id:'otras-ue',s:'4.1',n:'AES, Banco Mundial y FMI',ic:['globe','shield'],col:'#ffd23f',
+ c:'<b>Autoridad Europea de Supervisión:</b> protege la estabilidad del sistema financiero europeo. <b>Banco Mundial:</b> desarrollo económico mundial y nivel de vida. <b>Fondo Monetario Internacional:</b> estabilidad del sistema monetario internacional.',
+ e:'Existen porque la política económica de un país influye en los demás.',
+ o:['Los vigilantes del vecindario: lo que hace un país salpica a los demás.','Son organismos que cuidan la economía de Europa y del mundo.','AES → Europa · BM → desarrollo mundial · FMI → estabilidad monetaria internacional','Banco Mundial (desarrollo) ≠ FMI (estabilidad monetaria).','Instituciones que controlan globalmente las economías de los países.'],
+ t:'Banco Mundial y FMI se intercambian en las opciones: desarrollo ↔ estabilidad.',
+ q:['¿Quién busca la estabilidad del sistema monetario internacional?',['Banco Mundial','FMI','AES'],1,'El FMI.']},
+/* ---- 4.2A ---- */
+{id:'bde',s:'4.2A',n:'Banco de España',ic:['vault','key'],col:'#60a5fa',
+ c:'Banco central nacional, miembro del SEBC y del Eurosistema y <b>autoridad nacional de supervisión</b> (dentro del MUS desde 2014). Es un <b>intermediario atípico</b>: financia a las Administraciones públicas, no a familias. Lo regula la <b>Ley de Autonomía del Banco de España</b>.',
+ e:'Bajo su sede de Madrid hay una cámara acorazada a 36 metros que se inundaría ante un intento de asalto.',
+ o:['Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).','Es el banco de los bancos en España: los vigila y ayuda al jefe europeo del euro.','🔑 SEBC: billetes · política monetaria · divisas · reservas · pagos   |   🔑 Nacional: supervisión · moneda metálica · tesorería · estadística · asesorar','Ya no hace la política monetaria: la define el Eurosistema y él colabora.','Test 11: máxima autoridad en política monetaria en España, con autonomía respecto al Gobierno e integrada en el SEBC: el Banco de España.'],
+ t:'Billetes = función como miembro del SEBC; moneda metálica = función nacional.',
+ q:['"Poner en circulación moneda metálica" es función del Banco de España como…',['Miembro del SEBC','Banco central nacional'],1,'Los billetes son la función europea.']},
+{id:'estructura-b',s:'4.2A',n:'Estructura del sector bancario',ic:['vault','link'],col:'#60a5fa',
+ c:'Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas), ICO, entidades de dinero electrónico y EFC. Y <b>otras entidades</b>: sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago.',
+ e:'Es el esquema de la figura 1.19, que se completa en la actividad 33.',
+ o:['Un organigrama: el Banco de España es el director; las entidades de crédito, el equipo principal; las otras, los colaboradores.','El Banco de España está arriba y vigila a todos los que tienen que ver con préstamos y depósitos.','BdE → Entidades de crédito {depósito: bancos · cajas · cooperativas · ICO · EDE · EFC} + Otras {tasación · SGR · divisa · pago}','Entidad de crédito ≠ entidad de depósito: el ICO y los EFC son de crédito pero no de depósito.','Comprueba 3: entidades de depósito = bancos, cajas de ahorro y cooperativas de crédito.'],
+ t:'El ICO es entidad de crédito (test, pregunta 5), pero no de depósito.',
+ q:['Según el test del libro, es entidad de crédito…',['El ICO','Las compañías de seguros','Las agencias de valores'],0,'Pregunta 5 del test.']},
+{id:'bancos',s:'4.2A',n:'Bancos privados',ic:['ship','people'],col:'#ff8a3d',
+ c:'<b>Sociedades anónimas con ánimo de lucro</b>: buscan el máximo beneficio y lo reparten entre sus propietarios (accionistas). Captan fondos con depósitos y emitiendo títulos de renta fija y variable, y prestan a empresas y Administraciones públicas.',
+ e:'Hacen doble tarea: mediación (poner en contacto a dos partes) y transformación (cambiar el activo).',
+ o:['Un barco pirata: el botín se reparte entre la tripulación, que son los accionistas.','Es una empresa que guarda dinero y lo presta para ganar dinero para sus dueños.','Depósitos ─▶ 🏴‍☠️ banco ─▶ préstamos   ·   beneficio ─▶ accionistas','Su gemela es la caja de ahorro: hacen lo mismo, pero la caja no tiene ánimo de lucro.','Bancos: sociedades anónimas con ánimo de lucro.'],
+ t:'La diferencia banco-caja es la pregunta más repetida del tema (actividad 30 y actividad final de la síntesis). Y ojo: a los dos los supervisa el Banco de España.',
+ q:['La principal diferencia entre bancos y cajas de ahorro es…',['Que las cajas no prestan','El ánimo de lucro','El supervisor'],1,'Bancos: lucro. Cajas: fin social.']},
+{id:'cajas',s:'4.2A',n:'Cajas de ahorro',ic:['chapel','heart'],col:'#ff4f8b',
+ c:'Entidades de crédito <b>sin ánimo de lucro</b>, con forma jurídica de <b>fundación</b> y fines sociales. Sus beneficios no se reparten: se reinvierten en <b>obra social</b>. Su ámbito no supera una comunidad autónoma o un máximo de <b>10 provincias limítrofes</b>.',
+ e:'En el año 2000 había más de 40. Hoy solo quedan dos: <b>Caixa Ontinyent</b> y <b>Colonya Caixa Pollença</b>.',
+ o:['Una capilla con cepillo de limosna: lo que se recoge va a la comunidad. Y casi en ruinas: solo quedan dos.','Funciona como un banco, pero lo que gana lo da a cosas buenas para la gente.','⛪ caja ─▶ beneficios ─▶ ❤️ obra social (nunca a dueños)','Muchas siguen llamándose "Caja" o "Caixa" y son bancos. Cajamar es una cooperativa.','Cajas de ahorro: no tienen ánimo de lucro, sus fines son sociales.'],
+ t:'¿Cuántas quedan? Dos. ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No (Comprueba 30).',
+ q:['¿Cuántas cajas de ahorro quedan en España?',['Más de 40','2','10'],1,'Caixa Ontinyent y Colonya Caixa Pollença.']},
+{id:'coop',s:'4.2A',n:'Cooperativas de crédito',ic:['hive','people'],col:'#ffd23f',
+ c:'Sociedades mercantiles privadas y cooperativas, con <b>número ilimitado de socios</b> y sin ánimo de lucro. Son entidades de depósito y sirven a las necesidades financieras de sus socios y de terceros. Deben destinar como mínimo el <b>20 % de beneficios al FRO</b> y al menos el <b>10 % al FEP</b>.',
+ e:'Tipos: cajas rurales (la mayoría), cajas populares y cajas profesionales. Patronal: UNACC (1970). Dependen del Ministerio de Trabajo y Economía Social y del de Economía (Banco de España).',
+ o:['Una colmena: el banco es de los socios que lo usan. El 20 % va al granero (reserva) y el 10 % a la escuela (educación).','Es un banco que pertenece a la gente que lo usa, como un club.','🐝 socios ilimitados · beneficios: 20 % FRO (reserva) + 10 % FEP (educación y promoción)','Cooperativa ≠ caja de ahorro: la cooperativa es de sus socios; la caja, una fundación.','Test 4: las sociedades cooperativas sirven a las necesidades financieras de sus socios mediante actividades de entidades de crédito.'],
+ t:'20 % al FRO y 10 % al FEP, no al revés.',
+ q:['Mínimo de beneficios al Fondo de Reserva Obligatorio:',['10 %','20 %','50 %'],1,'20 % FRO, 10 % FEP.']},
+{id:'ico',s:'4.2A',n:'Instituto de Crédito Oficial (ICO)',ic:['inst','people'],col:'#ff5a5a',
+ c:'Entidad pública empresarial adscrita al Ministerio de Economía, Comercio y Empresa, con consideración de <b>agencia financiera del Estado</b>. Actúa como <b>banco público</b> (financiación a pymes y autónomos) y como <b>agencia financiera del Estado</b>. Sus deudas tienen garantía explícita, irrevocable, incondicional y directa del Estado.',
+ e:'Grupo ICO: ICO, Axis (capital riesgo) y Fundación ICO. Línea del libro para comercio minorista: hasta 150.000 €, sin comisiones salvo por amortización anticipada y con un año de carencia.',
+ o:['El banquero del pueblo: el banco del Estado que echa una mano a autónomos y pymes, con dos sombreros.','Es el banco del Gobierno: presta a los pequeños negocios y ayuda cuando hay catástrofes.','Banco público: mediación (riesgo: tu banco) · directa desde 10 M (riesgo: el ICO)   |   Agencia del Estado (el ICO no arriesga)','No es banco privado ni supervisor: es una entidad de crédito pública.','Su objetivo es facilitar a las pymes el acceso a la financiación bancaria.'],
+ t:'Líneas de mediación: el riesgo lo asume la entidad de crédito, no el ICO. Financiación directa: mínimo 10 millones.',
+ q:['En las líneas de mediación del ICO, el riesgo lo asume…',['El ICO','La entidad de crédito que tramita','El Estado'],1,'El ICO solo asume riesgo en la financiación directa.']},
+{id:'ede',s:'4.2A',n:'Entidades de dinero electrónico y de pago',ic:['phone','card'],col:'#a78bfa',
+ c:'Emiten <b>dinero electrónico</b>: exigible a su emisor, almacenado en soporte electrónico y aceptado como medio de pago por entidades distintas de la emisora. <b>Ley 21/2011.</b> Las autoriza el <b>Banco de España</b>, previo informe del SEPBLAC.',
+ e:'⚠ dato del libro, puede haber cambiado: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.',
+ o:['Un monedero digital con alguien responsable detrás.','Es dinero que vive en una tarjeta o en el móvil y con el que puedes pagar en muchas tiendas.','📱 EDE ──€──▶ 🏪 otra empresa (Exigible · Electrónico · aceptado por Extraños)','No es un banco tradicional, aunque los bancos también pueden emitir dinero electrónico.','Comprueba 5: definir las EDE y poner dos ejemplos.'],
+ t:'Ley 21/2011 = dinero electrónico. RDL 19/2018 = entidades de pago. No las cruces.',
+ q:['¿Quién autoriza la creación de una EDE?',['La CNMV','El Banco de España, previo informe del SEPBLAC','La DGSFP'],1,'Pág. 25 del libro.']},
+{id:'fgd',s:'4.2A',n:'Fondo de Garantía de Depósitos',ic:['umbrella','euro'],col:'#4ade80',
+ c:'Garantiza los depósitos en dinero (y valores) de las entidades de crédito hasta <b>100.000 € por titular y entidad</b>. Con el <b>Real Decreto Ley 16/2011</b>, los tres fondos (bancos, cajas, cooperativas) se unificaron en el FGDEC.',
+ e:'Tienes 150.000 € en un banco que quiebra: recuperas 100.000 €. Para clientes de ESI y gestoras de IIC existe el FOGAIN.',
+ o:['Un paraguas gigante con el rótulo "100.000 €": lo que sobresalga, se moja.','Si tu banco se arruina, te devuelven tu dinero, pero como mucho 100.000 €.','☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · voluntario para sucursales de la UE','FGD (depósitos) ≠ FOGAIN (inversiones en ESI y gestoras de IIC).','Garantiza los depósitos en dinero con un límite de 100.000 €.'],
+ t:'Test, pregunta 10: las opciones de 120.000 € o 150.000 € son trampas.',
+ q:['Límite del FGD por titular y entidad:',['50.000 €','100.000 €','150.000 €'],1,'Pregunta 10 del test.']},
+/* ---- 4.2B ---- */
+{id:'fondo',s:'4.2B',n:'Fondos de inversión',ic:['basket','people'],col:'#3ddbd9',
+ c:'Patrimonio de varios inversores (partícipes), <b>sin personalidad jurídica</b>, dividido en participaciones. Lo administra una <b>sociedad gestora</b> y una <b>entidad depositaria</b> custodia los valores. Su precio diario es el <b>valor liquidativo = patrimonio ÷ número de participaciones</b>.',
+ e:'Caso práctico 5: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €. El fondo sube a 80.000 € → cada una vale 2.000 €.',
+ o:['Una cesta gigante donde mucha gente echa su dinero; un cocinero (gestora) decide qué comprar y un guardia (depositario) vigila la despensa.','Muchas personas juntan su dinero y un experto lo invierte por todos.','👥 partícipes ─▶ 🧺 fondo (👔 gestora · 🔐 depositario) ─▶ 📈 🏠 💶','Fondo (sin personalidad jurídica) ≠ sociedad de inversión (sociedad anónima).','Suscripción = comprar participaciones; reembolso = venderlas.'],
+ t:'El depositario puede ser un banco, una caja, una cooperativa o una sociedad de valores, siempre inscrito en la CNMV.',
+ q:['Valor liquidativo =',['Participaciones ÷ patrimonio','Patrimonio ÷ participaciones','Patrimonio × participaciones'],1,'Se publica cada día.']},
+{id:'sociedad-inv',s:'4.2B',n:'Sociedades de inversión: SICAV y SII',ic:['office','people'],col:'#a78bfa',
+ c:'IIC con forma de <b>sociedad anónima</b>: por eso <b>no necesitan sociedad gestora</b>, pero <b>sí entidad depositaria</b>. <b>SICAV:</b> invierte en activos financieros; sus socios son accionistas y sus acciones suelen cotizar en bolsa. <b>SII:</b> compra inmuebles urbanos para alquilarlos.',
+ e:'La diferencia con los fondos está en la forma jurídica (pág. 27).',
+ o:['El fondo es una cesta; la sociedad, un edificio-empresa del que los inversores son dueños.','Es como un fondo, pero convertido en empresa con nombre propio.','🏢 SA (accionistas) · gestora ✖ · depositaria ✔   ·   SICAV 📈 / SII 🏠','Fondo: gestora ✔ y depositaria ✔. Sociedad: solo depositaria.','Comprueba 21: ¿necesitan gestora? No. ¿Depositaria? Sí.'],
+ t:'Las supervisa la CNMV (actividad 20h), no el Banco de España.',
+ q:['Una SICAV necesita…',['Gestora y depositaria','Solo depositaria','Solo gestora'],1,'Es una sociedad anónima.']},
+{id:'sv',s:'4.2B',n:'Sociedades de valores (dealers)',ic:['hands2','chart'],col:'#ff4f8b',
+ c:'Empresas de servicios de inversión que operan <b>por cuenta ajena y por cuenta propia</b>: además de las órdenes de sus clientes, pueden obtener beneficios propios.',
+ e:'Ejecuta tu orden de compra y, a la vez, invierte su propio dinero.',
+ o:['Dos manos: con una trabaja para ti y con la otra para sí misma.','Compra y vende acciones para sus clientes y también para ella.','🤲 cuenta ajena + cuenta propia ─▶ 📈','Su gemela es la agencia de valores (solo cuenta ajena).','Sociedades de valores: operan tanto por cuenta ajena como por cuenta propia.'],
+ t:'"Dos manos = sociedad; una flecha = agencia."',
+ q:['¿Quién puede operar por cuenta propia?',['Agencia de valores','Sociedad de valores'],1,'El dealer.']},
+{id:'av',s:'4.2B',n:'Agencias de valores (brókeres)',ic:['arrow','envelope'],col:'#60a5fa',
+ c:'Empresas de servicios de inversión que operan <b>únicamente por cuenta ajena</b>: reciben, transmiten y ejecutan las órdenes de sus clientes.',
+ e:'Le pides comprar 100 acciones y lleva tu orden al mercado.',
+ o:['Una flecha: lleva tu orden del cliente al mercado y nada más.','Es un mensajero: lleva tus órdenes a la bolsa, pero no compra para él.','👤 cliente ─📨─▶ 📈 mercado','La sociedad de valores, además, opera por cuenta propia.','Agencias de valores: operan únicamente por cuenta ajena.'],
+ t:'Actividad 42: diferencia entre bróker y dealer, con un ejemplo de cada uno.',
+ q:['La agencia de valores opera…',['Solo por cuenta ajena','Por cuenta propia y ajena'],0,'El bróker.']},
+{id:'esi-otras',s:'4.2B',n:'Gestoras de carteras y EAF',ic:['people','eye'],col:'#ff8a3d',
+ c:'También son empresas de servicios de inversión. <b>Gestoras de carteras:</b> reciben fondos y valores del cliente y compran o venden según la filosofía que él marca. <b>Empresas de asesoramiento financiero (EAF):</b> solo asesoran en inversión, fusiones y adquisiciones, e informes de análisis.',
+ e:'La EAF te hace un informe; la gestora de carteras mueve tu cartera.',
+ o:['La gestora conduce tu coche por la ruta que tú eliges; la EAF solo te da el mapa.','Unos manejan tu dinero según tus instrucciones; otros solo te dan consejos.','ESI = sociedades de valores · agencias de valores · gestoras de carteras · EAF','Gestora de carteras ≠ sociedad gestora de un fondo de inversión.','Las ESI las supervisa la CNMV.'],
+ t:'Son cuatro tipos de ESI. Si una opción dice que captan depósitos, es falsa.',
+ q:['¿Qué ESI solo asesora?',['Gestora de carteras','EAF','Agencia de valores'],1,'Asesoramiento financiero.']},
+{id:'efc',s:'4.2B',n:'Establecimientos financieros de crédito (EFC)',ic:['store','car'],col:'#ffd23f',
+ c:'Entidades de crédito especializadas que <b>no pueden captar depósitos del público</b>. <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial: condiciones parecidas a los bancos con menos capital. Operaciones: <b>leasing, factoring, confirming</b>, consumo, hipotecas, avales y tarjetas.',
+ e:'Leasing: alquilas una furgoneta con opción de compra. Factoring: cedes tus facturas para cobrar ya.',
+ o:['Una tienda de "compra ahora, paga después" que no tiene hucha para guardar tu dinero.','Prestan dinero para cosas concretas, pero no te dejan guardar tu dinero con ellos.','🏪 EFC: 🚗 leasing · 🧾➡️💰 factoring · confirming · consumo · tarjetas   |   🚫 depósitos','EFC ≠ banco: los dos prestan, pero el EFC no capta depósitos.','Obligaciones: informar al Banco de España, coeficiente de caja del BCE, coeficiente de garantía y normas con los clientes.'],
+ t:'Test, pregunta 6: son EFC las sociedades de arrendamiento financiero (leasing). Y los supervisa el Banco de España.',
+ q:['¿Qué tienen prohibido los EFC?',['Dar créditos al consumo','Captar depósitos del público','Hacer leasing'],1,'Ley 5/2015.']},
+{id:'sgr',s:'4.2B',n:'Sociedades de garantía recíproca (SGR)',ic:['handshake','office'],col:'#4ade80',
+ c:'Sociedades mercantiles de capital variable que <b>conceden avales a sus socios, las pymes</b>, para que obtengan financiación bancaria en mejores condiciones. Están vinculadas a un territorio o sector y tienen un sistema de reaval (CERSA).',
+ e:'Una pyme no consigue el préstamo; la SGR la avala y el banco dice que sí.',
+ o:['El amigo que dice "yo te avalo" cuando el banco pregunta quién responde por ti.','Las empresas pequeñas se juntan para responder unas por otras ante el banco.','🏢 pyme ─▶ 🏦 banco ◀── 🤝 SGR "yo te avalo" ◀── CERSA (reaval)','SGR (avala) ≠ EFC (presta).','SGR: especializadas en otorgar garantías (avales) a sus socios.'],
+ t:'Sus socios son las pymes, no los bancos.',
+ q:['¿Quiénes son los socios de una SGR?',['Los bancos','Las pymes','Los ahorradores'],1,'Recíproca: se avalan entre ellas.']},
+{id:'seguros',s:'4.2B',n:'Compañías de seguros',ic:['shield','house'],col:'#ff4f8b',
+ c:'Cubren los riesgos de bienes o personas: si ocurre el <b>siniestro</b>, pagan una <b>indemnización</b> a cambio de la <b>prima</b>. Son intermediarios <b>no bancarios</b>: la póliza no es medio de pago. Elementos: aseguradora, tomador, asegurado, beneficiario, póliza y mediadores.',
+ e:'Seguro de vida de tu padre a tu favor: él es el tomador, su vida es lo asegurado y tú el beneficiario.',
+ o:['Un escudo que pagas a plazos (prima) para que te proteja si algo pasa (siniestro).','Pagas un poco cada mes y, si te pasa algo malo, te dan dinero.','Tomador ─prima─▶ 🛡️ aseguradora ─indemnización─▶ beneficiario (si hay siniestro)','Tomador (contrata y paga) ≠ asegurado (está expuesto) ≠ beneficiario (cobra).','Actividad 45: define tomador, prima e indemnización.'],
+ t:'Son intermediarios financieros no bancarios (caso práctico 3), no "otra cosa".',
+ q:['Quien contrata el seguro y paga la prima es el…',['Asegurado','Tomador','Beneficiario'],1,'Actividad 45.']},
+{id:'cnmv',s:'4.2B',n:'CNMV',ic:['lens','chart'],col:'#ffd23f',
+ c:'Comisión Nacional del Mercado de Valores: supervisa e inspecciona los <b>mercados de valores</b> (bolsa), las <b>empresas de servicios de inversión</b> y las <b>instituciones de inversión colectiva</b> (fondos y sociedades de inversión).',
+ e:'Las gestoras de fondos le informan periódicamente.',
+ o:['La gran lupa sobre la bolsa.','Es quien vigila que nadie haga trampas en la bolsa.','🔎📈 CNMV → bolsa · ESI · IIC','CNMV (valores) ≠ Banco de España (entidades de crédito) ≠ DGSFP (seguros).','La CNMV supervisa las sociedades de inversión (tabla 1.6).'],
+ t:'Actividad 20: sociedades de inversión → CNMV.',
+ q:['¿Quién supervisa las SICAV?',['Banco de España','CNMV','DGSFP'],1,'Tabla 1.6.']},
+{id:'dgsfp',s:'4.2B',n:'DGSFP',ic:['shield','elder'],col:'#ff5a5a',
+ c:'<b>Dirección General de Seguros y Fondos de Pensiones</b>, adscrita al Ministerio de Economía: supervisa las compañías aseguradoras y los fondos de pensiones.',
+ e:'Supervisa la idoneidad de los seguros que se venden en España (Comprueba 27).',
+ o:['Un escudo partido en dos: una casa (seguros) y una persona mayor (pensiones).','Vigila a las empresas de seguros y a los planes para cuando te jubiles.','🛡️ DGSFP → 🏠 seguros · 👴 pensiones','La DGSFP supervisa; la aseguradora es supervisada.','Supervisor de las compañías aseguradoras (tabla 1.6).'],
+ t:'Actividad 20a: compañías aseguradoras → DGSFP.',
+ q:['¿Quién supervisa las aseguradoras?',['CNMV','DGSFP','Banco de España'],1,'Tabla 1.6.']}
+]};
+
+/* =====================================================================
+   ICONOGRAFÍA · gramática visual (SVG original)
+   ===================================================================== */
+const G={
+ bank:'<path d="M8 24 L32 10 L56 24Z"/><path d="M14 28v20M25 28v20M39 28v20M50 28v20"/><path d="M8 52h48"/>',
+ inst:'<path d="M8 26 L32 12 L56 26Z"/><path d="M14 30v18M25 30v18M39 30v18M50 30v18"/><path d="M8 52h48"/><path d="M32 12V0"/><path class="flagw" d="M32 1h13l-4 4 4 4H32Z" fill="currentColor"/>',
+ people:'<circle cx="20" cy="20" r="8"/><circle cx="44" cy="20" r="8"/><path d="M6 54 Q6 32 20 32 Q34 32 34 54M30 54 Q30 32 44 32 Q58 32 58 54"/>',
+ arrow:'<path d="M6 32H52"/><path d="M40 18 L56 32 L40 46"/>',
+ link:'<rect x="4" y="24" width="30" height="16" rx="8"/><rect x="30" y="24" width="30" height="16" rx="8"/>',
+ euro:'<circle cx="32" cy="32" r="25"/><path d="M42 22 Q37 16 30 18 Q20 22 20 32 Q20 42 30 46 Q37 48 42 42M14 28h20M14 36h20"/>',
+ scale:'<path d="M32 8V56M18 56h28M10 18h44"/><path d="M10 18 L3 34h14Z M54 18 L47 34h14Z"/>',
+ eye:'<path d="M4 32 Q32 8 60 32 Q32 56 4 32Z"/><circle class="blink" cx="32" cy="32" r="9" fill="currentColor"/>',
+ chart:'<path d="M6 56H58M6 56V6"/><path d="M12 46 L24 32 L34 38 L54 14"/><path d="M44 14h10v10"/>',
+ card:'<rect x="5" y="14" width="54" height="36" rx="6"/><path d="M5 25h54" stroke-width="7"/><path d="M13 40h14"/>',
+ invoice:'<path d="M14 6h28l10 10v42H14Z"/><path d="M42 6v10h10"/><path d="M22 28h22M22 36h22M22 44h14"/>',
+ clock:'<circle cx="32" cy="32" r="25"/><path d="M32 16V32L43 39"/>',
+ store:'<path d="M6 24 L13 8 H51 L58 24Z"/><path d="M11 24V56H53V24"/><rect x="26" y="38" width="12" height="18"/>',
+ handshake:'<path d="M2 24 L16 18 L28 26"/><path d="M62 24 L48 18 L36 26"/><path d="M16 32 L28 44 Q32 48 36 44 L48 32 Q42 24 34 30 L28 26 Q22 24 16 32Z"/>',
+ metro:'<path d="M4 32H60"/><circle cx="9" cy="32" r="6" fill="currentColor"/><circle cx="25" cy="32" r="6" fill="currentColor"/><circle cx="41" cy="32" r="6" fill="currentColor"/><circle cx="56" cy="32" r="6" fill="currentColor"/>',
+ screen:'<rect x="5" y="8" width="54" height="36" rx="5"/><path d="M22 56h20M32 44v12"/><path d="M13 32 L23 22 L33 28 L49 16"/>',
+ shield:'<path d="M32 4 L56 13 Q56 42 32 60 Q8 42 8 13Z"/><path d="M32 4V60"/>',
+ brain:'<path d="M32 12 C20 7 9 15 12 27 C5 33 9 46 20 46 C24 55 32 53 32 49 C32 53 40 55 44 46 C55 46 59 33 52 27 C55 15 44 7 32 12Z"/><path d="M32 12V49M21 23q7 5 0 11M43 23q-7 5 0 11"/>',
+ globe:'<circle cx="32" cy="32" r="26"/><path d="M6 32h52M32 6 Q14 32 32 58 Q50 32 32 6"/>',
+ truck:'<rect x="4" y="26" width="36" height="20" rx="3"/><path d="M40 32h11l8 8v6H40"/><circle cx="16" cy="50" r="5" fill="currentColor"/><circle cx="48" cy="50" r="5" fill="currentColor"/><path d="M8 20 L36 12M12 22l2-6M20 20l2-6M28 18l2-6"/>',
+ fire:'<path class="flick" d="M32 4 C40 18 52 24 47 42 C45 52 37 58 32 58 C24 58 15 50 18 39 C20 30 28 28 27 17 C34 22 35 28 32 4Z" fill="currentColor" stroke="none"/>',
+ vault:'<rect x="6" y="6" width="52" height="52" rx="7"/><circle cx="30" cy="29" r="12"/><path d="M30 17v24M18 29h24"/><circle cx="50" cy="29" r="2.5" fill="currentColor"/><path class="water" d="M10 50 Q17 45 24 50 T38 50 T54 50" stroke-dasharray="5 4" stroke-width="3.5"/>',
+ key:'<circle cx="17" cy="32" r="11"/><path d="M28 32h30M48 32v9M56 32v7"/>',
+ ship:'<g class="sway"><path d="M5 42H59L50 57H14Z"/><path d="M32 42V5"/><path d="M33 9 L53 31H33Z"/><path d="M31 13 L13 33H31Z"/><path class="flagw" d="M32 4h12l-3 3 3 3H32Z" fill="currentColor"/></g>',
+ chapel:'<path d="M13 58V30 L32 13 L51 30V58"/><path d="M32 2V13M27 6h10"/><path d="M26 58V47 Q32 41 38 47V58"/><path d="M51 36 L45 42 L51 48 L46 53" stroke-dasharray="3 3"/>',
+ heart:'<path d="M32 55 C10 41 6 26 16 18 C24 12 32 20 32 25 C32 20 40 12 48 18 C58 26 54 41 32 55Z" fill="currentColor" stroke="none"/>',
+ hive:'<ellipse cx="32" cy="53" rx="25" ry="7"/><ellipse cx="32" cy="41" rx="22" ry="7"/><ellipse cx="32" cy="29" rx="18" ry="7"/><ellipse cx="32" cy="17" rx="12" ry="6"/><circle cx="32" cy="53" r="3.5" fill="currentColor"/>',
+ phone:'<rect x="17" y="3" width="30" height="58" rx="6"/><path d="M28 53h8"/><circle cx="32" cy="27" r="9"/><path d="M35 23 Q32 21 30 23 Q28 27 30 31 Q32 33 35 31M27 26h6M27 29h6" stroke-width="2.5"/>',
+ umbrella:'<path d="M3 34 Q32 0 61 34Z"/><path d="M32 34V54 Q32 60 26 60 Q20 60 20 54"/>',
+ basket:'<path d="M7 28h50 l-7 29H14Z"/><path d="M20 28 L28 9 M44 28 L36 9"/><path d="M13 38h38M15 48h34"/>',
+ office:'<rect x="13" y="6" width="38" height="52" rx="2"/><path d="M21 16h6M37 16h6M21 26h6M37 26h6M21 36h6M37 36h6M28 58V48h8v10"/>',
+ hands2:'<path d="M5 38 Q5 52 19 52 H28 V40 Q28 34 22 34 H12"/><path d="M59 38 Q59 52 45 52 H36 V40 Q36 34 42 34 H52"/><circle cx="17" cy="17" r="8"/><circle cx="47" cy="17" r="8" fill="currentColor"/>',
+ envelope:'<rect x="5" y="14" width="54" height="36" rx="5"/><path d="M5 17 L32 37 L59 17"/>',
+ lens:'<circle cx="26" cy="26" r="17"/><path d="M38 38 L57 57" stroke-width="8"/><path class="blink" d="M17 27 Q26 18 35 27 Q26 35 17 27Z" fill="currentColor"/>',
+ house:'<path d="M7 30 L32 9 L57 30"/><path d="M13 26V56H51V26"/><rect x="27" y="40" width="10" height="16"/>',
+ elder:'<circle cx="26" cy="13" r="7"/><path d="M26 21 Q19 36 22 58M26 30 L38 38"/><path d="M42 34V58"/>',
+ car:'<path d="M6 42 L13 26 H47 L56 42 V50 H6Z"/><circle cx="18" cy="50" r="6" fill="currentColor"/><circle cx="44" cy="50" r="6" fill="currentColor"/><path d="M18 30h24"/>'
+};
+function icon(ic,col,big=true){
+ const [m,...bs]=ic,pos=[[95,95],[95,25]];
+ return `<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="55" fill="#121212" stroke="${col}" stroke-width="3"/><g transform="translate(22 22) scale(1.19)" fill="none" stroke="${col}" color="${col}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">${G[m]}</g>${bs.slice(0,2).map((b,i)=>`<circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="20" fill="#fff" stroke="#000" stroke-width="3"/><g transform="translate(${pos[i][0]-13} ${pos[i][1]-13}) scale(.41)" fill="none" stroke="#000" color="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">${G[b]}</g>`).join('')}</svg>`}
+
+/* =====================================================================
+   MOTOR
+   ===================================================================== */
+const $=s=>document.querySelector(s);
+const page=$('#page'),rail=$('#rail');
+const SEC=DATA.secciones,CON=DATA.conceptos;
+let ST={dom:{},tries:{}};try{ST=Object.assign(ST,JSON.parse(localStorage.getItem('cdd-t1')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('cdd-t1',JSON.stringify(ST))}catch(e){}};
+const domC=id=>ST.dom[id]||0;
+const domS=sid=>{const cs=CON.filter(c=>c.s===sid);return cs.length?cs.reduce((a,c)=>a+domC(c.id),0)/cs.length:0};
+const domG=()=>SEC.reduce((a,s)=>a+domS(s.id)*s.p,0)/SEC.reduce((a,s)=>a+s.p,0);
+const heat=v=>v>=.8?'#4ade80':v>=.5?'#ffd23f':v>0?'#ff5a5a':'#3a3a3a';
+const pct=v=>Math.round(v*100)+' %';
+const warn=s=>s.replace('⚠ dato del libro, puede haber cambiado','<span class="warn">⚠ dato del libro, puede haber cambiado</span>');
+function ring(v,size=58){const r=24,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 60 60" width="${size}" height="${size}"><circle cx="30" cy="30" r="${r}" fill="none" stroke="#262626" stroke-width="7"/><circle cx="30" cy="30" r="${r}" fill="none" stroke="${heat(v)}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(c*v).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 30 30)"/><text x="30" y="35" text-anchor="middle" fill="#fff" font-size="14" font-weight="800" font-family="Bricolage Grotesque">${Math.round(v*100)}</text></svg>`}
+
+function buildRail(cur){
+ rail.innerHTML=`<a class="brand" href="#inicio">${ring(domG())}<span><b>${DATA.meta.ciudad}</b><small>Tema ${DATA.meta.tema} · dominio global</small></span></a>`+
+ DATA.grupos.map(g=>`<div class="grp">${g.t}</div>`+SEC.filter(s=>s.g===g.id).map(s=>{const d=domS(s.id);return `<a class="sl${s.id===cur?' on':''}" href="#s/${s.id}"><div class="top"><span class="id">${s.id}</span><span>${s.t}</span><span class="pw">${s.p} %</span></div><div class="bar"><i style="width:${d*100}%;background:${heat(d)}"></i></div></a>`}).join('')).join('');
+}
+
+function card(c){return `<article class="cc rev" id="c-${c.id}" data-id="${c.id}">
+ <div class="cc-h"><div class="ico">${icon(c.ic,c.col)}</div><div><h2>${c.n}</h2><div class="meta"><span class="pill">${c.s}</span><span class="dm" style="background:${heat(domC(c.id))}">Dominio ${pct(domC(c.id))}</span></div></div></div>
+ <p class="corta">${c.c}</p>
+ <p class="ej"><span class="lab">🌍 En la vida real:</span> ${warn(c.e)}</p>
+ <div class="acts"><button class="ab o" data-a="o" aria-expanded="false">🔄 Explícamelo de otra forma</button><button class="ab t" data-a="t" aria-expanded="false">⚠️ Trampa de examen</button><button class="ab q" data-a="q" aria-expanded="false">✅ Compruébalo</button></div>
+ <div class="pn o" hidden></div><div class="pn t" hidden><h4>⚠️ Así te la intentan colar</h4><p>${c.t}</p></div><div class="pn q" hidden></div>
+</article>`}
+
+function renderOtra(art,c,i){const p=art.querySelector('.pn.o');const txt=warn(c.o[i]);p.innerHTML=`<div class="md"><b>${DATA.modos[i]}</b><span class="dots">${DATA.modos.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</span></div>${i===2?`<div class="esq">${txt}</div>`:`<p>${txt}</p>`}`;p.style.animation='none';void p.offsetWidth;p.style.animation=''}
+function renderQ(art,c){const p=art.querySelector('.pn.q'),[q,o,k,ex]=c.q;p.innerHTML=`<p><b>${q}</b></p><div class="opts">${o.map((t,i)=>`<button class="opt" data-k="${i}">${t}</button>`).join('')}</div><div class="fb"></div>`;
+ p.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const right=+b.dataset.k===k;ST.tries[c.id]=(ST.tries[c.id]||0)+1;if(right){const v=ST.tries[c.id]===1?1:.5;ST.dom[c.id]=Math.max(domC(c.id),v);ST.tries[c.id]=0;save();b.classList.add('ok');p.querySelectorAll('.opt').forEach(z=>z.disabled=true);p.querySelector('.fb').innerHTML=`✅ <b>Correcto.</b> ${ex}`;const dm=art.querySelector('.dm');dm.textContent='Dominio '+pct(domC(c.id));dm.style.background=heat(domC(c.id));buildRail(art.closest('[data-sec]').dataset.sec)}else{b.classList.add('no','shake');p.querySelector('.fb').innerHTML='❌ No es esa. Pulsa "Explícamelo de otra forma" y vuelve a intentarlo.'}})}
+
+page.addEventListener('click',e=>{const b=e.target.closest('.ab');if(!b)return;const art=b.closest('.cc'),c=CON.find(x=>x.id===art.dataset.id),a=b.dataset.a,pn=art.querySelector('.pn.'+a);
+ if(a==='o'){const open=b.getAttribute('aria-expanded')==='true';let i=open?(+(art.dataset.mo||0)+1)%5:+(art.dataset.mo||0);art.dataset.mo=i;renderOtra(art,c,i);pn.hidden=false;b.setAttribute('aria-expanded','true');b.textContent=`🔄 Otra forma (${i+1}/5)`;return}
+ const open=!pn.hidden;pn.hidden=open;b.setAttribute('aria-expanded',String(!open));if(a==='q'&&!open)renderQ(art,c)});
+
+function sectionPage(sid,focus){const i=SEC.findIndex(s=>s.id===sid),s=SEC[i],prev=SEC[i-1],next=SEC[i+1],cs=CON.filter(c=>c.s===sid);
+ page.innerHTML=`<div data-sec="${sid}"><header class="sh"><div class="kick"><span class="pill k">${s.id}</span><span class="pill">Peso estimado en examen: ${s.p} %</span><span class="pill" style="border-color:${heat(domS(sid))}">Dominio ${pct(domS(sid))}</span></div><h1>${s.t}</h1><p>${s.d}</p></header>
+ ${cs.map(card).join('')}
+ <nav class="pager">${prev?`<a href="#s/${prev.id}"><small>← Anterior</small><b>${prev.id} ${prev.t}</b></a>`:`<a href="#inicio"><small>←</small><b>Inicio</b></a>`}${next?`<a href="#s/${next.id}"><small>Siguiente →</small><b>${next.id} ${next.t}</b></a>`:`<a href="#inicio"><small>Fin del tema →</small><b>Inicio</b></a>`}</nav></div>`;
+ $('#mt').textContent=`${s.id} · ${s.t}`;
+ if(focus){const el=document.getElementById('c-'+focus);if(el){el.classList.add('in');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60)}}}
+
+
+/* ---------- portada pixel art ---------- */
+function pixelCity(){
+ const ids=['bde','bancos','cajas','coop','ico','fgd','cnmv','dgsfp','fondo','bce','mur','sgr'];
+ const H=[74,64,50,58,68,56,76,62,58,80,54,60];
+ const roof=['ped','flag','ruin','barn','ped','dome','ant','dome','flat','ped','ant','flat'];
+ const rnd=(a,b)=>{const x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x)};
+ let o='';
+ for(let i=0;i<40;i++)o+=`<rect class="tw" style="animation-delay:${(i*.53)%3}s" x="${Math.floor(rnd(i,1)*330)}" y="${Math.floor(rnd(i,2)*40)}" width="1" height="1" fill="#fff"/>`;
+ for(let y=-7;y<=7;y++)for(let x=-7;x<=7;x++){if(x*x+y*y<=49&&!((x-3)*(x-3)+(y+2)*(y+2)<=40))o+=`<rect x="${300+x}" y="${16+y}" width="1" height="1" fill="#fef3c7"/>`}
+ ids.forEach((id,i)=>{const c=CON.find(z=>z.id===id),d=domC(id),hc=d>0?heat(d):'#3d4456',w=22,x=6+i*27,h=H[i],top=110-h;
+  let b=`<a href="#c/${id}" aria-label="${c.n}"><title>${c.n} · dominio ${pct(d)}</title>`;
+  b+=`<rect x="${x-1}" y="110" width="${w+2}" height="3" fill="${d>0?hc:'#222'}" opacity=".5"/>`;
+  const r=roof[i];
+  if(r==='ped')b+=`<rect x="${x+2}" y="${top-2}" width="${w-4}" height="2" fill="#1a2030"/><rect x="${x+5}" y="${top-4}" width="${w-10}" height="2" fill="#1a2030"/><rect x="${x+8}" y="${top-6}" width="${w-16}" height="2" fill="#1a2030"/>`;
+  if(r==='flag')b+=`<rect x="${x+11}" y="${top-12}" width="1" height="12" fill="#666"/><rect class="fl" x="${x+12}" y="${top-12}" width="5" height="3" fill="#ff5a5a"/>`;
+  if(r==='barn')b+=`<rect x="${x+1}" y="${top-2}" width="${w-2}" height="2" fill="#3a2a10"/><rect x="${x+4}" y="${top-4}" width="${w-8}" height="2" fill="#3a2a10"/><rect x="${x+7}" y="${top-6}" width="${w-14}" height="2" fill="#3a2a10"/>`;
+  if(r==='dome')b+=`<rect x="${x+6}" y="${top-3}" width="${w-12}" height="3" fill="#1a2030"/><rect x="${x+8}" y="${top-5}" width="${w-16}" height="2" fill="#1a2030"/>`;
+  if(r==='ant')b+=`<rect x="${x+10}" y="${top-10}" width="1" height="10" fill="#666"/><rect class="tw" x="${x+9}" y="${top-12}" width="3" height="2" fill="#ff5a5a"/>`;
+  b+=`<rect x="${x}" y="${top}" width="${w}" height="${h}" fill="#0f1320" stroke="${d>0?hc:'#2a3142'}" stroke-width="1"/>`;
+  if(r==='ruin')b+=`<rect x="${x+14}" y="${top-1}" width="9" height="5" fill="#04060d"/><rect x="${x+18}" y="${top+3}" width="5" height="3" fill="#04060d"/><rect x="${x-1}" y="${top-1}" width="4" height="3" fill="#04060d"/>`;
+  b+=`<rect x="${x+2}" y="${top+2}" width="18" height="18" fill="#000"/><svg x="${x+3}" y="${top+3}" width="16" height="16" viewBox="0 0 120 120">${icon(c.ic,c.col).replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg>`;
+  const lit=d>0?.25+d*.7:.18;
+  for(let wy=top+23,row=0;wy<=100;wy+=6,row++)for(let col=0;col<3;col++){const on=rnd(i*31+row,col)<lit;b+=`<rect class="${on?'wf':''}" style="animation-delay:${(rnd(i,row*7+col)*5).toFixed(2)}s" x="${x+3+col*6}" y="${wy}" width="4" height="3" fill="${on?hc:'#1b2130'}"/>`}
+  b+=`<rect x="${x+8}" y="104" width="6" height="6" fill="${d>0?hc:'#2a3142'}"/></a>`;o+=b});
+ o+=`<rect x="0" y="110" width="330" height="10" fill="#000"/>`;
+ return `<div class="skyline px"><svg viewBox="0 0 330 120" shape-rendering="crispEdges">${o}</svg></div>`}
+
+function home(){const ya=SEC.map(s=>({s,score:s.p*(1-domS(s.id))})).sort((a,b)=>b.score-a.score).slice(0,3);
+ page.innerHTML=`<section class="hero"><span class="pill k">Tema ${DATA.meta.tema} · ${DATA.meta.titulo}</span><h1>La Ciudad<br>del <span>Dinero</span></h1><p>Cada entidad del sistema financiero es un edificio con su símbolo. Lee la ficha, pide que te lo expliquen de otra forma, desactiva la trampa del examen y compruébalo.</p></section>
+ ${pixelCity()}<p class="legend">Luces de cada edificio = tu dominio: <b style="color:#ff5a5a">rojo</b> flojo · <b style="color:#ffd23f">amarillo</b> regular · <b style="color:#4ade80">verde</b> dominado · apagado = sin estudiar. Pulsa un edificio para entrar.</p>
+ <div class="dash rev"><div class="big">${ring(domG(),130)}</div><div><h3>📌 Estudia ya: lo que más pesa y menos dominas</h3><div class="ya">${ya.map(x=>`<a href="#s/${x.s.id}"><b>${x.s.id}</b>${x.s.t}<span class="w">peso ${x.s.p} % · dominio ${pct(domS(x.s.id))}</span></a>`).join('')}</div></div></div>
+ <h2 class="h2 rev">Subpuntos del tema</h2><div class="tiles">${SEC.map(s=>{const d=domS(s.id);return `<a class="tile rev" href="#s/${s.id}" style="border-color:${heat(d)}"><span class="i">${s.id}</span><span class="n">${s.t}</span><span class="w">Peso ${s.p} % · dominio ${pct(d)} · ${CON.filter(c=>c.s===s.id).length} conceptos</span></a>`}).join('')}</div>
+ <h2 class="h2 rev">Gramática visual</h2><div class="gram rev">${[['bank','Entidad financiera'],['inst','Organismo público'],['eye','Supervisión'],['shield','Protección'],['handshake','Aval o intermediación'],['brain','Autoridad central'],['truck','Resolución'],['chart','Mercado y valores'],['card','Pagos y dinero electrónico'],['basket','Fondo colectivo'],['office','Sociedad'],['screen','Plataforma'],['link','Conexión'],['people','Inversores o socios']].map(g=>`<div>${icon([g[0]],'#fff')}<span>${g[1]}</span></div>`).join('')}</div>
+ <p class="next">Fase 1 de 6. Próximas: esquemas interactivos, flashcards con repetición espaciada, ejercicios, simulador de examen y panel de predicción.</p>`;
+ $('#mt').textContent=DATA.meta.ciudad}
+
+let IO;function reveal(){if(IO)IO.disconnect();IO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');IO.unobserve(e.target)}}),{rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rev:not(.in)').forEach(el=>IO.observe(el))}
+
+function render(){document.body.classList.remove('menu');const h=(location.hash||'#inicio').slice(1);let cur=null;
+ if(h.startsWith('s/')){cur=h.slice(2);if(SEC.some(s=>s.id===cur))sectionPage(cur);else{cur=null;home()}}
+ else if(h.startsWith('c/')){const c=CON.find(x=>x.id===h.slice(2));if(c){cur=c.s;sectionPage(c.s,c.id)}else home()}
+ else home();
+ buildRail(cur);if(!h.startsWith('c/'))window.scrollTo(0,0);reveal()}
+$('#mb').onclick=e=>{e.stopPropagation();document.body.classList.toggle('menu')};
+document.addEventListener('click',e=>{if(document.body.classList.contains('menu')&&(!rail.contains(e.target)||e.target.closest('a')))document.body.classList.remove('menu')});
+addEventListener('hashchange',render);render();
+</script>
+</body>
+</html>
