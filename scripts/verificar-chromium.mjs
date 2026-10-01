@@ -36,6 +36,19 @@ const progreso = () => {
   const rotulos = await p.locator('.m-etq').allTextContents();
   ok('escritorio: solo los 4 barrios rotulados', rotulos.length === 4, rotulos.join(' | '));
   ok('escritorio: sin porcentajes ni pines en el mundo', !rotulos.join('').includes('%') && !(await p.locator('.mundo-vista').textContent()).includes('📌'));
+  ok('portada: el mapa es lo primero y ocupa la pantalla', await p.locator('.page > .mundo.portada:first-child').count() === 1 && (await p.locator('[data-mundo-vista]').boundingBox()).height >= 880);
+  ok('portada: barra lateral retirada', (await p.locator('.rail').boundingBox()).x < 0);
+  await p.mouse.move(700, 500);
+  await p.mouse.wheel(0, 800);
+  await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
+  const trasScroll = await p.evaluate(() => ({ y: scrollY, hero: document.querySelector('.hero')?.className, rail: Math.round(document.querySelector('.rail').getBoundingClientRect().x) }));
+  ok('portada: el scroll revela el tema y la barra lateral', trasScroll.hero?.includes('in') && trasScroll.rail >= 0, JSON.stringify(trasScroll));
+  await p.evaluate(() => window.scrollTo(0, 0));
+  await p.waitForTimeout(800);
+  const caja = await p.locator('[data-mundo-vista]').boundingBox();
+  await p.mouse.click(caja.x + caja.width / 2, caja.y + caja.height / 2);
+  await p.waitForTimeout(800);
+  ok('portada: un clic entra en la exploración', await p.locator('.mundo.portada').count() === 0 && await p.locator('.mundo-barra').isVisible());
   // Navegación: barrio → zona → edificio por el Atlas, y migas para volver.
   await p.click('.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(1600);
@@ -102,6 +115,8 @@ const progreso = () => {
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2500);
   ok('reduced motion: sin entrada cinematográfica', await p.locator('.entrada').count() === 0);
+  const vista = await p.locator('[data-mundo-vista]').boundingBox();
+  await p.mouse.click(vista.x + vista.width / 2, vista.y + vista.height / 2);
   await p.locator('[data-mundo-vista]').scrollIntoViewIfNeeded();
   await p.waitForTimeout(1200);
   const a = await p.evaluate(() => window.__dibujos());

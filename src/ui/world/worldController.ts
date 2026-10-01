@@ -51,6 +51,12 @@ export class ControladorMundo {
   private vistazo: Foco | null = null;
   /** Si la entrada cinematográfica está en curso, la salta y la cierra. */
   private cerrarEntrada: (() => void) | null = null;
+  /**
+   * Portada (landing): el mapa a pantalla completa, sin interfaz. Un clic pasa a la exploración;
+   * el scroll revela el bloque del tema y la barra lateral.
+   */
+  private enPortada = false;
+  private observadorPortada: IntersectionObserver | null = null;
 
   constructor(
     private readonly estado: EstadoEstudio,
@@ -86,6 +92,9 @@ export class ControladorMundo {
   desmontar(): void {
     // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
     this.cerrarEntrada?.();
+    this.observadorPortada?.disconnect();
+    this.observadorPortada = null;
+    document.body.classList.remove('portada-inmersiva');
     this.mundo?.desmontar();
     this.raiz = null;
     this.etiquetas = [];
@@ -119,6 +128,11 @@ export class ControladorMundo {
     vista.hidden = false;
     this.alternarCiudad2d(false);
     mundo.lienzo.setAttribute('aria-label', `Maqueta 3D de ${this.estado.tema.meta.ciudad}. El Atlas de abajo ofrece la misma navegación en texto.`);
+    // Con la ciudad 3D funcionando, el mundo pasa a ser lo primero de la portada. Se vuelve a la
+    // portada (landing) cuando se llega a la vista general; desde un lugar estudiado, a explorar.
+    raiz.parentElement?.prepend(raiz);
+    this.fijarPortada(this.foco.nivel === 'ciudad' && !this.vistaAtlas);
+    this.vigilarInmersion(vista);
     mundo.montarEn(vista);
     mundo.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', false);
     this.aviso('');
@@ -212,9 +226,38 @@ export class ControladorMundo {
     return Boolean(this.mundo && this.modo3d && this.disponible3d && this.raiz);
   }
 
+  private fijarPortada(activa: boolean): void {
+    this.enPortada = activa;
+    this.raiz?.classList.toggle('portada', activa);
+    if (this.mundo) this.mundo.exploracion = !activa;
+  }
+
+  /** Mientras el mapa domina la pantalla, la barra lateral se retira y el mundo ocupa todo el ancho. */
+  private vigilarInmersion(vista: HTMLElement): void {
+    // Cualquier clic (no arrastre) sobre el mapa de la portada entra en la exploración.
+    if (!vista.dataset.portadaLista) {
+      vista.dataset.portadaLista = '1';
+      let inicio: { x: number; y: number } | null = null;
+      vista.addEventListener('pointerdown', (e) => (inicio = { x: e.clientX, y: e.clientY }));
+      vista.addEventListener('pointerup', (e) => {
+        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.entrada')) {
+          this.fijarPortada(false);
+        }
+        inicio = null;
+      });
+    }
+    this.observadorPortada?.disconnect();
+    this.observadorPortada = new IntersectionObserver(
+      ([e]) => document.body.classList.toggle('portada-inmersiva', Boolean(e && e.intersectionRatio >= 0.55)),
+      { threshold: [0, 0.55, 1] },
+    );
+    this.observadorPortada.observe(vista);
+  }
+
   /* ------------------------------------------------------------ navegación */
 
   private enfocar(foco: Foco): void {
+    if (this.enPortada) this.fijarPortada(false);
     if (!igualFoco(foco, this.foco)) this.pasoHistoria = 0;
     this.foco = foco;
     this.pintarPanel();
@@ -229,6 +272,11 @@ export class ControladorMundo {
   }
 
   private alSeleccionar(s: DatosSeleccionables): void {
+    // En la portada, el primer clic solo entra en la ciudad: empieza la exploración.
+    if (this.enPortada) {
+      this.fijarPortada(false);
+      return;
+    }
     if (s.tipo === 'edificio') {
       const foco: Foco = { nivel: 'edificio', conceptoId: s.conceptoId };
       // Segundo toque sobre el edificio ya enfocado: entrar al concepto.

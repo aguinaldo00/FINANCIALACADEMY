@@ -231,6 +231,22 @@ los edificios que se interponen. **Entrada de primera visita**: negro → marca 
 mientras los barrios se levantan → "Estudiar es construirla" → navegación. Se salta con un botón,
 Escape o un toque; no se repite (`financial-academy:entrada`) ni se muestra con movimiento reducido.
 
+### Portada (landing)
+
+Con la ciudad 3D activa, el mapa es lo primero de la portada y ocupa la pantalla completa:
+
+1. **Portada:** solo la ciudad (con la entrada cinematográfica la primera vez) y una pista,
+   "Pulsa la ciudad para explorarla · Desliza para ver el tema". Sin ruta, ficha ni Atlas. La barra
+   lateral se retira y el mundo va a sangre. El mapa no captura la rueda ni el gesto táctil: desplazan
+   la página.
+2. **Clic en la ciudad:** se pasa a la exploración. Aparecen la ruta, la ficha contextual y el
+   Atlas, y la cámara vuelve a responder a la rueda y al arrastre.
+3. **Scroll:** cuando el mapa deja de dominar la pantalla (menos del 55 % visible), vuelve la barra
+   lateral y aparece con animación el bloque del tema (título, "La Ciudad del Dinero", párrafo).
+
+Al volver de estudiar (foco en una zona o un edificio) se entra directamente en exploración. Sin
+WebGL, o en 2D, la portada conserva su orden original: primero el bloque del tema.
+
 ### Interfaz editorial
 
 Sin tarjetas ni pills: filetes finos, tipografía protagonista y números grandes. La navegación es

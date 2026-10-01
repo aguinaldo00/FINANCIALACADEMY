@@ -288,6 +288,15 @@ export class Mundo3D {
     this.renderer.dispose();
   }
 
+  /**
+   * Control de cámara del usuario. En la portada está desactivado: la rueda y el gesto táctil
+   * desplazan la página (hacia el bloque del tema) en lugar de mover la cámara.
+   */
+  set exploracion(activa: boolean) {
+    this.controles.enabled = activa;
+    this.lienzo.style.touchAction = activa ? 'none' : 'pan-y';
+  }
+
   set movimientoReducido(valor: boolean) {
     this.reducido = valor;
     this.sucio = true;
