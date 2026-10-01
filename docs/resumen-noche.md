@@ -1,11 +1,11 @@
 # Resumen de la noche (01→02/10)
 
-Cola completada: tareas 1–7 y 9. La tarea 8 (extender la gramática urbana a los barrios 1–3) es
+Cola completada: tareas 1–7, 9 y 10. La tarea 8 (extender la gramática urbana a los barrios 1–3) es
 opcional, necesita tu aprobación y **no se ha hecho**.
 
 - **Rama:** `claude/quirky-lovelace-79c6fm`.
 - **PR:** https://github.com/giorgioangelo57/FINANCIALACADEMY/pull/1 (descripción actualizada).
-- **Vista previa** (mismo enlace, versión 3): https://claude.ai/artifact/Xkte8QVBzTan8pEMPuKg1i
+- **Vista previa** (mismo enlace, versión 4): https://claude.ai/artifact/Xkte8QVBzTan8pEMPuKg1i
 
 ## Qué se ha hecho
 
@@ -19,11 +19,13 @@ opcional, necesita tu aprobación y **no se ha hecho**.
 | 6 | **Storyboard de 8 fotogramas** de "Intermediación indirecta" con textos literales de DATA (`docs/microexperiencia-intermediacion.md`), sin implementar | `62ae927` |
 | 7 | **Rendimiento:** sombras bajo demanda; al orbitar, de ~600 a 175 llamadas de dibujo por fotograma. Corrige un fallo al salir de la portada durante la entrada. Tests nuevos | `eac7aaa` |
 | 9 | **Portada como landing** (tu mensaje de esta noche): el mapa a pantalla completa, un clic para explorar, el scroll revela el tema y la barra lateral | `b0edc0a` |
+| 10 | **Personaje jugable** (tu segundo mensaje): versión 3D peluda de tu dibujo, "Pasear" con WASD en tercera persona, colisiones, ficha del edificio cercano y E para entrar a estudiarlo | `ceb8adc` |
 
 El plan de cierre del slice se conserva en `docs/plan-cierre-slice.md`.
 
 ## Archivos principales
 
+- **Personaje:** `src/scene/three/avatar.ts` y `src/world/paseo.ts` (nuevos).
 - **Modelo:** `src/world/urban.ts` (nuevo), `cityModel.ts`, `labels.ts`, `atlas.ts`.
 - **Render:** `src/scene/three/taller.ts`, `urbanArchitecture.ts`, `urbanGround.ts` y `textures.ts`
   (nuevos); `architecture.ts`, `builders.ts`, `cityScene.ts` y `palette.ts`.
@@ -41,7 +43,7 @@ con el prototipo siguen pasando.
 
 ## Tests y build
 
-- `npm test`: **107 tests** en verde (eran 93 al empezar la noche).
+- `npm test`: **114 tests** en verde (eran 93 al empezar la noche).
 - `npm run typecheck`: limpio.
 - `npm run build`: correcto. Three.js sigue en un fragmento aparte que se carga bajo demanda.
 - `node scripts/verificar-chromium.mjs`: **23 de 23** comprobaciones en Chromium con WebGL.
@@ -74,8 +76,9 @@ con el prototipo siguen pasando.
   - el texto "Fase 1 de 6…" de la portada;
   - la "pregunta difícil" de las microexperiencias.
 - **Implementar** el Esquema del tema y la microexperiencia 3D, cuando apruebes los documentos.
+- **Paseo:** controles táctiles en móvil y colisiones con fuentes, árboles y bancos (ver decisiones 7 y 8).
 - **Mejoras menores:**
   - resaltar el edificio al pasar el ratón;
   - storytelling por scroll más allá de la portada.
 
-La rutina horaria `trig_01EsNSKvi2kqpUXensnJE3Xn` queda desactivada al terminar la cola.
+La rutina horaria `trig_01EsNSKvi2kqpUXensnJE3Xn` se ha desactivado al terminar la cola.
