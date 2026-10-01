@@ -4,7 +4,8 @@ import { dominioGlobal } from '../../src/domain/mastery.ts';
 import { seccionesPrioritarias } from '../../src/domain/priority.ts';
 import type { Progreso } from '../../src/domain/progress.ts';
 import { vistaAtlas } from '../../src/world/atlas.ts';
-import { ALTURA_ESTANDAR, faseObra, modeloCiudad } from '../../src/world/cityModel.ts';
+import { faseObra, modeloCiudad } from '../../src/world/cityModel.ts';
+import { ALTURA_TIPOLOGIA, TEJADO_TIPOLOGIA, tipologiaDe } from '../../src/world/typology.ts';
 import { areaRect } from '../../src/world/geometry.ts';
 
 const progreso: Progreso = { dominio: { sf: 1, bancos: 0.5, bde: 1, cajas: 0.25 }, intentos: {} };
@@ -39,31 +40,67 @@ describe('modelo visual de la ciudad', () => {
     expect(faseObra('sin-estudiar')).toBe('solar');
   });
 
-  it('solo los edificios de la portada tienen altura y tejado propios', () => {
+  it('los 12 edificios de la portada conservan su altura y su tejado de DATA', () => {
     for (const e of m.edificios) {
       const portada = tema01.ciudad.edificios.find((x) => x.conceptoId === e.conceptoId);
       expect(e.emblematico).toBe(Boolean(portada));
-      expect(e.tejado).toBe(portada ? portada.tejado : 'plano');
-      if (!portada) expect(e.alturaCompleta).toBe(ALTURA_ESTANDAR);
-    }
-    const bce = m.edificios.find((e) => e.conceptoId === 'bce')!;
-    const bde = m.edificios.find((e) => e.conceptoId === 'bde')!;
-    expect(bce.alturaCompleta).toBeGreaterThan(bde.alturaCompleta);
-  });
-
-  it('los edificios quedan dentro de su zona y el arbolado no los pisa', () => {
-    for (const e of m.edificios) {
-      const z = m.zonas.find((z) => z.seccionId === e.seccionId)!.interior;
-      expect(e.posicion.x).toBeGreaterThanOrEqual(z.x);
-      expect(e.posicion.x).toBeLessThanOrEqual(z.x + z.ancho);
-      expect(e.posicion.z).toBeGreaterThanOrEqual(z.z);
-      expect(e.posicion.z).toBeLessThanOrEqual(z.z + z.fondo);
-    }
-    for (const a of m.arboles) {
-      for (const e of m.edificios) {
-        expect(Math.max(Math.abs(a.posicion.x - e.posicion.x), Math.abs(a.posicion.z - e.posicion.z))).toBeGreaterThan(e.huella / 2);
+      if (portada) {
+        expect(e.tejado).toBe(portada.tejado);
+        expect(e.alturaCompleta).toBeCloseTo(portada.altura / 6);
+      } else {
+        expect(e.tejado).toBe(TEJADO_TIPOLOGIA[e.tipologia]);
+        expect(e.alturaCompleta).toBe(ALTURA_TIPOLOGIA[e.tipologia]);
       }
     }
+  });
+
+  it('la tipología sale de los glifos del concepto (gramática visual)', () => {
+    const tipo = (id: string) => m.edificios.find((e) => e.conceptoId === id)!.tipologia;
+    expect(tipo('bce')).toBe('institucional'); // brain
+    expect(tipo('bde')).toBe('institucional'); // vault
+    expect(tipo('bancos')).toBe('banco'); // ship
+    expect(tipo('cnmv')).toBe('supervisor'); // lens
+    expect(tipo('seguros')).toBe('aseguradora'); // shield
+    expect(tipo('mercado')).toBe('lonja'); // store → chart
+    expect(tipo('pagos')).toBe('tecnologica'); // card
+    expect(tipo('fondo')).toBe('oficina'); // basket
+    for (const e of m.edificios) {
+      expect(e.tipologia).toBe(tipologiaDe(tema01.conceptos.find((c) => c.id === e.conceptoId)!.iconos));
+    }
+  });
+
+  it('los lotes llenan la manzana: cada edificio en su lote', () => {
+    for (const z of m.zonas) {
+      const lotes = m.edificios.filter((e) => e.seccionId === z.seccionId).map((e) => e.lote);
+      const ocupado = lotes.reduce((s, r) => s + areaRect(r), 0) + (z.plaza ? areaRect(z.plaza) : 0);
+      // Solo quedan libres los pasajes entre lotes.
+      expect(ocupado / areaRect(z.interior)).toBeGreaterThan(0.7);
+      for (const r of lotes) {
+        expect(r.x).toBeGreaterThanOrEqual(z.interior.x - 1e-9);
+        expect(r.x + r.ancho).toBeLessThanOrEqual(z.interior.x + z.interior.ancho + 1e-9);
+      }
+    }
+    for (const e of m.edificios) expect(e.posicion.x).toBeCloseTo(e.lote.x + e.lote.ancho / 2);
+  });
+
+  it('calles y avenidas forman la red entre manzanas', () => {
+    expect(m.avenidas.length).toBeGreaterThan(0);
+    expect(m.calles.length).toBeGreaterThan(0);
+    // Las zonas con mucho espacio por concepto tienen plaza; las densas, no.
+    expect(m.zonas.find((z) => z.seccionId === '2')!.plaza).not.toBeNull();
+    expect(m.zonas.find((z) => z.seccionId === '4.1')!.plaza).toBeNull();
+  });
+
+  it('el arbolado tiene motivo y nunca pisa un lote', () => {
+    expect(m.arboles.every((a) => a.motivo === 'bulevar' || a.motivo === 'plaza')).toBe(true);
+    for (const a of m.arboles) {
+      for (const e of m.edificios) {
+        const dentro = a.posicion.x > e.lote.x && a.posicion.x < e.lote.x + e.lote.ancho && a.posicion.z > e.lote.z && a.posicion.z < e.lote.z + e.lote.fondo;
+        expect(dentro).toBe(false);
+      }
+    }
+    // No es relleno: es una fracción de lo que había antes (cientos de árboles sueltos).
+    expect(m.arboles.length).toBeLessThan(200);
   });
 
   it('las prioridades coinciden con "Estudia ya" de la portada', () => {

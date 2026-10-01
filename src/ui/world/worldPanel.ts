@@ -19,7 +19,7 @@ export const TEXTO_NIVEL: Record<NivelDominio, string> = {
 export const TEXTO_FASE: Record<FaseObra, string> = {
   completo: 'Construido · dominado',
   obra: 'En obra · a medias',
-  solar: 'Solar · sin estudiar',
+  solar: 'En proyecto · sin estudiar',
 };
 
 export interface Miga {
@@ -42,7 +42,7 @@ export function esqueletoMundo(): string {
  <div class="mundo-vista" data-mundo-vista hidden><div class="mundo-etiquetas" data-mundo-etiquetas aria-hidden="true"></div><div class="mundo-sobre" data-mundo-sobre aria-hidden="true" hidden></div></div>
  <p class="mundo-aviso" data-mundo-aviso role="status"></p>
  <div class="atlas" data-atlas></div>
- <p class="mundo-leyenda"><b>Cómo leer la ciudad:</b> la superficie de cada zona es su peso en el examen · edificio <b>construido</b> = dominado · <b>en obra</b> = a medias · <b>solar</b> = sin estudiar · <span class="mundo-pin">📌</span> = Estudia ya · el anillo del suelo usa los colores de dominio. Al alejarte, las zonas se tiñen con tu dominio (Atlas).</p>`;
+ <p class="mundo-leyenda"><b>Cómo leer la ciudad:</b> la superficie de cada zona es su peso en el examen · edificio <b>construido</b> (con color y luces) = dominado · <b>en obra</b> (grúa y andamio) = a medias · <b>maqueta blanca</b> = en proyecto, sin estudiar · el bordillo de cada parcela usa los colores de dominio · <span class="mundo-pin">📌</span> = Estudia ya · el tráfico solo circula por las zonas que ya estudias. La arquitectura de cada edificio sale de su símbolo en la gramática visual. Al alejarte, las zonas se tiñen con tu dominio (Atlas).</p>`;
 }
 
 export function barraMundo(e: EstadoBarra): string {

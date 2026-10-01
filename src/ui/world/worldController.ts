@@ -7,6 +7,7 @@ import type { Mundo3D } from '../../scene/three/cityScene.ts';
 import { webglDisponible } from '../../scene/webgl.ts';
 import { vistaAtlas } from '../../world/atlas.ts';
 import { type ModeloCiudad, modeloCiudad } from '../../world/cityModel.ts';
+import { etiquetasDelNivel } from '../../world/labels.ts';
 import {
   buscarBarrio,
   buscarEdificio,
@@ -43,6 +44,7 @@ export class ControladorMundo {
   private pasoHistoria = 0;
   private reducido = movimientoReducido();
   private etiquetas: { foco: Foco; el: HTMLElement }[] = [];
+  private modoMapa = false;
 
   constructor(
     private readonly estado: EstadoEstudio,
@@ -266,33 +268,39 @@ export class ControladorMundo {
     this.pintarEtiquetas();
   }
 
-  /** Etiquetas flotantes del nivel actual: zonas en la ciudad o el barrio, edificios en una zona. */
+  /** Etiquetas flotantes del nivel actual (ver `etiquetasDelNivel`). */
   private pintarEtiquetas(): void {
     const capa = this.raiz?.querySelector<HTMLElement>('[data-mundo-etiquetas]');
     if (!capa) return;
     const f = this.foco;
-    const focos: Foco[] =
-      f.nivel === 'ciudad' ? this.modelo.zonas.map((z) => ({ nivel: 'zona', seccionId: z.seccionId }))
-      : f.nivel === 'barrio' ? this.modelo.zonas.filter((z) => z.grupoId === f.grupoId).map((z) => ({ nivel: 'zona', seccionId: z.seccionId }))
-      : f.nivel === 'zona' ? this.modelo.edificios.filter((e) => e.seccionId === f.seccionId).map((e) => ({ nivel: 'edificio', conceptoId: e.conceptoId }))
-      : [f];
-
+    this.modoMapa = this.vistaAtlas || (this.mundo?.factorAtlas ?? 0) > 0.5;
     capa.innerHTML = '';
-    this.etiquetas = focos.map((foco) => {
+    this.etiquetas = etiquetasDelNivel(this.modelo, f, this.modoMapa).map((foco) => {
       const el = document.createElement('button');
       el.type = 'button';
       el.tabIndex = -1;
       el.className = 'm-etq';
       el.dataset.foco = codificarFoco(foco);
-      if (foco.nivel === 'zona') {
+      if (foco.nivel === 'barrio') {
+        const b = buscarBarrio(this.modelo, foco.grupoId)!;
+        el.classList.add('barrio');
+        el.style.setProperty('--c', b.dominio > 0 ? colorDominio(b.dominio) : '#9b958b');
+        // "1 · El sistema financiero": en pantallas estrechas solo se ve el número.
+        const corte = b.titulo.indexOf(' · ');
+        const [numero, resto] = corte > 0 ? [b.titulo.slice(0, corte), b.titulo.slice(corte)] : [b.titulo, ''];
+        el.innerHTML = `<span><b>${numero}</b><span class="m-largo">${resto}</span></span><small>${b.pesoExamen} %<span class="m-largo"> del examen</span></small>`;
+        el.setAttribute('aria-label', b.titulo);
+      } else if (foco.nivel === 'zona') {
         const z = buscarZona(this.modelo, foco.seccionId)!;
         el.style.setProperty('--c', z.dominio > 0 ? colorDominio(z.dominio) : '#9b958b');
         const titulo = f.nivel === 'barrio' ? ` ${z.titulo}` : '';
-        el.innerHTML = `${z.prioridad ? '📌 ' : ''}<b>${z.seccionId}</b>${titulo}<small>${z.pesoExamen} %</small>`;
+        const prioridad = z.prioridad ? '📌 ' : '';
+        el.innerHTML = `${prioridad}<b>${z.seccionId}</b>${titulo}<small>${z.pesoExamen} %</small>`;
+        if (z.prioridad) el.classList.add('prioridad');
       } else if (foco.nivel === 'edificio') {
         const e = buscarEdificio(this.modelo, foco.conceptoId)!;
         el.style.setProperty('--c', e.dominio > 0 ? colorDominio(e.dominio) : '#9b958b');
-        el.textContent = e.nombre;
+        el.innerHTML = `${e.nombre}<small>${TEXTO_FASE[e.fase]}</small>`;
       }
       capa.append(el);
       return { foco, el };
@@ -302,10 +310,26 @@ export class ControladorMundo {
 
   private colocarEtiquetas(): void {
     if (!this.activo3d) return;
-    for (const { foco, el } of this.etiquetas) {
-      const p = this.mundo!.proyectarFoco(foco);
+    // Al alejarse, la ciudad pasa a leerse como mapa y cambian las etiquetas.
+    if ((this.vistaAtlas || this.mundo!.factorAtlas > 0.5) !== this.modoMapa) return this.pintarEtiquetas();
+    // Se colocan de arriba abajo y, si una pisa a otra ya colocada, baja lo justo para no taparla.
+    const colocadas: { x0: number; x1: number; y0: number; y1: number }[] = [];
+    const puntos = this.etiquetas
+      .map(({ foco, el }) => ({ el, p: this.mundo!.proyectarFoco(foco) }))
+      .sort((a, b) => a.p.y - b.p.y);
+    for (const { el, p } of puntos) {
       el.hidden = !p.visible;
-      el.style.transform = `translate(-50%, -100%) translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
+      if (!p.visible) continue;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      let y = Math.round(p.y);
+      const x = Math.round(p.x);
+      for (const c of colocadas) {
+        if (x - w / 2 < c.x1 && x + w / 2 > c.x0 && y - h < c.y1 && y > c.y0) y = Math.round(c.y1 + h + 4);
+      }
+      colocadas.push({ x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y });
+      // Píxeles enteros: sin temblor de las etiquetas al mover la cámara.
+      el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
     }
   }
 

@@ -80,3 +80,58 @@ export const pseudoAleatorio = (a: number, b: number): number => {
   const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
   return x - Math.floor(x);
 };
+
+/** Tramo recto en el suelo (siempre paralelo a un eje). */
+export interface Segmento {
+  a: Punto;
+  b: Punto;
+}
+
+export const longitudSegmento = (s: Segmento): number => Math.hypot(s.b.x - s.a.x, s.b.z - s.a.z);
+
+/**
+ * Ejes de las calles entre parcelas: los bordes de los rectángulos que no están sobre el contorno
+ * exterior. Los bordes compartidos se fusionan para que cada calle aparezca una sola vez.
+ */
+export function segmentosInteriores(rects: readonly Rect[], contorno: Rect): Segmento[] {
+  const eps = 1e-6;
+  const clave = (v: number) => v.toFixed(5);
+  // Líneas verticales (x fija) y horizontales (z fija), con sus intervalos.
+  const verticales = new Map<string, { fijo: number; tramos: [number, number][] }>();
+  const horizontales = new Map<string, { fijo: number; tramos: [number, number][] }>();
+  const anadir = (mapa: typeof verticales, fijo: number, desde: number, hasta: number) => {
+    const linea = mapa.get(clave(fijo)) ?? { fijo, tramos: [] };
+    linea.tramos.push([desde, hasta]);
+    mapa.set(clave(fijo), linea);
+  };
+  const enContorno = (v: number, min: number, max: number) => Math.abs(v - min) < eps || Math.abs(v - max) < eps;
+
+  for (const r of rects) {
+    for (const x of [r.x, r.x + r.ancho]) {
+      if (!enContorno(x, contorno.x, contorno.x + contorno.ancho)) anadir(verticales, x, r.z, r.z + r.fondo);
+    }
+    for (const z of [r.z, r.z + r.fondo]) {
+      if (!enContorno(z, contorno.z, contorno.z + contorno.fondo)) anadir(horizontales, z, r.x, r.x + r.ancho);
+    }
+  }
+
+  const fusionar = (tramos: [number, number][]) => {
+    const orden = [...tramos].sort((p, q) => p[0] - q[0]);
+    const salida: [number, number][] = [];
+    for (const t of orden) {
+      const ultimo = salida[salida.length - 1];
+      if (ultimo && t[0] <= ultimo[1] + eps) ultimo[1] = Math.max(ultimo[1], t[1]);
+      else salida.push([t[0], t[1]]);
+    }
+    return salida;
+  };
+
+  const segmentos: Segmento[] = [];
+  for (const { fijo, tramos } of verticales.values()) {
+    for (const [d, h] of fusionar(tramos)) segmentos.push({ a: { x: fijo, z: d }, b: { x: fijo, z: h } });
+  }
+  for (const { fijo, tramos } of horizontales.values()) {
+    for (const [d, h] of fusionar(tramos)) segmentos.push({ a: { x: d, z: fijo }, b: { x: h, z: fijo } });
+  }
+  return segmentos;
+}

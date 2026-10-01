@@ -4,12 +4,9 @@ import {
   Color,
   ConeGeometry,
   CylinderGeometry,
-  EdgesGeometry,
   Group,
   IcosahedronGeometry,
   InstancedMesh,
-  LineBasicMaterial,
-  LineSegments,
   type Material,
   Matrix4,
   Mesh,
@@ -17,56 +14,47 @@ import {
   MeshStandardMaterial,
   type Object3D,
   PlaneGeometry,
-  RingGeometry,
   SphereGeometry,
 } from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { colorDominio } from '../../ui/format.ts';
-import type { EdificioVisual, ModeloCiudad, ZonaVisual } from '../../world/cityModel.ts';
-import { centroRect, pseudoAleatorio, type Rect } from '../../world/geometry.ts';
-import { ALTO_BARRIO, ALTO_ZONA, PALETA } from './palette.ts';
+import { AVENIDA, CALLE, type ModeloCiudad, tramosEntreCruces, type ZonaVisual } from '../../world/cityModel.ts';
+import { centroRect, encoger, longitudSegmento, type Rect, type Segmento } from '../../world/geometry.ts';
+import { construirArquitectura, type DatosArquitectura } from './architecture.ts';
+import { emisivo, esCompartido, mate, unir } from './materials.ts';
+import { NIVEL, PALETA } from './palette.ts';
 
 /*
  * Construcción de la maqueta a partir del modelo visual. Solo crea objetos Three.js
  * (sin renderer ni DOM), así que se puede probar en Node.
  *
- * - Capa estática: base, calles, barrios, zonas y arbolado. No depende del progreso.
- * - Capa dinámica: edificios, calor del Atlas, marcadores "Estudia ya" y tráfico. Se rehace
- *   cuando cambia el progreso.
+ * - Capa estática: peana, calles, medianas, manzanas, plazas, arbolado y farolas.
+ * - Capa dinámica: edificios, lectura de Atlas, hitos "Estudia ya" y tráfico. Se rehace cuando
+ *   cambia el progreso.
+ *
+ * Regla anti-parpadeo: ninguna superficie visible comparte plano con otra. Cada nivel del suelo
+ * está en `NIVEL` y los calcos (marcas viales, ventanas) usan polygonOffset.
  */
 
 export type DatosSeleccionables = { tipo: 'zona'; seccionId: string } | { tipo: 'edificio'; conceptoId: string };
 
-const materiales = new Map<string, MeshStandardMaterial>();
-/** Materiales mate compartidos por color. */
-function mate(color: string, rugosidad = 0.85): MeshStandardMaterial {
-  const clave = `${color}|${rugosidad}`;
-  let m = materiales.get(clave);
-  if (!m) {
-    m = new MeshStandardMaterial({ color, roughness: rugosidad, metalness: 0 });
-    materiales.set(clave, m);
-  }
-  return m;
-}
+const MARGEN_PEANA = 3;
 
-const mezclar = (a: string, b: string, t: number) => `#${new Color(a).lerp(new Color(b), t).getHexString()}`;
-
-function caja(ancho: number, alto: number, fondo: number, material: Material, sombras = true): Mesh {
-  const malla = new Mesh(new BoxGeometry(ancho, alto, fondo), material);
-  malla.castShadow = sombras;
-  malla.receiveShadow = true;
-  return malla;
-}
-
-function losa(r: Rect, alto: number, y: number, material: Material, redondeo = 0): Mesh {
-  const geometria = redondeo > 0
-    ? new RoundedBoxGeometry(r.ancho, alto, r.fondo, 2, Math.min(redondeo, alto / 2, r.ancho / 2, r.fondo / 2))
-    : new BoxGeometry(r.ancho, alto, r.fondo);
-  const malla = new Mesh(geometria, material);
+function losa(r: Rect, desde: number, hasta: number, material: Material | Material[]): Mesh {
+  const malla = new Mesh(new BoxGeometry(r.ancho, hasta - desde, r.fondo), material);
   const c = centroRect(r);
-  malla.position.set(c.x, y + alto / 2, c.z);
+  malla.position.set(c.x, (desde + hasta) / 2, c.z);
   malla.receiveShadow = true;
   return malla;
+}
+
+/** Caja orientada a lo largo de un eje de calle (desplazada `lateral` en perpendicular). */
+function aLoLargo(s: Segmento, ancho: number, alto: number, y: number, lateral = 0): BufferGeometry {
+  const largo = longitudSegmento(s);
+  const horizontal = Math.abs(s.a.z - s.b.z) < 1e-9;
+  const g = horizontal ? new BoxGeometry(largo, alto, ancho) : new BoxGeometry(ancho, alto, largo);
+  const cx = (s.a.x + s.b.x) / 2 + (horizontal ? 0 : lateral);
+  const cz = (s.a.z + s.b.z) / 2 + (horizontal ? lateral : 0);
+  return g.translate(cx, y + alto / 2, cz);
 }
 
 /* ------------------------------------------------------------------ capa estática */
@@ -74,40 +62,101 @@ function losa(r: Rect, alto: number, y: number, material: Material, redondeo = 0
 export function construirCapaEstatica(m: ModeloCiudad): Group {
   const capa = new Group();
   capa.name = 'estatica';
-  const margen = 6;
-  const lado = m.lado + margen * 2;
+  const lado = m.lado + MARGEN_PEANA * 2;
+  const ciudad: Rect = { x: -m.lado / 2, z: -m.lado / 2, ancho: m.lado, fondo: m.lado };
 
-  // Peana de madera con el borde claro: lectura inmediata de "maqueta".
-  const peana = losa({ x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado }, 4, -4, mate(PALETA.baseMadera, 0.7), 0.6);
-  const borde = losa({ x: -lado / 2 + 0.6, z: -lado / 2 + 0.6, ancho: lado - 1.2, fondo: lado - 1.2 }, 0.05, -0.05, mate(PALETA.baseBorde));
-  const asfalto = losa({ x: -m.lado / 2, z: -m.lado / 2, ancho: m.lado, fondo: m.lado }, 0.02, -0.02, mate(PALETA.avenida, 0.95));
-  peana.receiveShadow = false;
-  capa.add(peana, borde, asfalto);
+  // Peana de madera con canto claro: la ciudad es una maqueta sobre una mesa.
+  const madera = mate(PALETA.peanaMadera, { rugosidad: 0.65 });
+  const peana = losa({ x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado }, NIVEL.peana - 3, NIVEL.peana, [
+    madera, madera, mate(PALETA.peanaCanto, { rugosidad: 0.9 }), madera, madera, madera,
+  ]);
+  peana.name = 'peana';
+  const asfalto = losa(ciudad, NIVEL.peana, NIVEL.calle, mate(PALETA.asfalto, { rugosidad: 0.95 }));
+  asfalto.name = 'asfalto';
+  capa.add(peana, asfalto);
 
-  for (const b of m.barrios) {
-    const tinte = PALETA.barrios[b.indice % PALETA.barrios.length]!;
-    const placa = losa(b.parcela, ALTO_BARRIO, 0, mate(mezclar(PALETA.calle, tinte, 0.35), 0.95));
-    placa.name = `barrio-${b.grupoId}`;
-    capa.add(placa);
+  const ejes = [...m.avenidas, ...m.calles];
+
+  // Bulevares: mediana ajardinada entre cruces.
+  const medianas = m.avenidas.flatMap((s) => tramosEntreCruces(s, ejes, AVENIDA * 0.75)).map((t) => aLoLargo(t, 1.2, NIVEL.mediana, 0));
+  const mediana = unir(medianas);
+  if (mediana) {
+    const malla = new Mesh(mediana, mate(PALETA.mediana, { rugosidad: 1 }));
+    malla.name = 'medianas';
+    malla.receiveShadow = true;
+    capa.add(malla);
   }
 
-  for (const z of m.zonas) capa.add(construirZona(z, m));
-  capa.add(construirArbolado(m));
+  // Marcas viales discontinuas: eje de las calles y carriles de las avenidas.
+  const marcas: BufferGeometry[] = [];
+  const discontinua = (t: Segmento, lateral: number) => {
+    const largo = longitudSegmento(t);
+    const n = Math.floor(largo / 2.4);
+    for (let i = 0; i < n; i++) {
+      const f0 = (i * 2.4 + 0.6) / largo;
+      const f1 = (i * 2.4 + 1.7) / largo;
+      const tramo = {
+        a: { x: t.a.x + (t.b.x - t.a.x) * f0, z: t.a.z + (t.b.z - t.a.z) * f0 },
+        b: { x: t.a.x + (t.b.x - t.a.x) * f1, z: t.a.z + (t.b.z - t.a.z) * f1 },
+      };
+      marcas.push(aLoLargo(tramo, 0.13, 0.03, 0, lateral));
+    }
+  };
+  for (const s of m.calles) for (const t of tramosEntreCruces(s, ejes, CALLE)) discontinua(t, 0);
+  for (const s of m.avenidas) for (const t of tramosEntreCruces(s, ejes, AVENIDA)) for (const l of [-2.2, 2.2]) discontinua(t, l);
+  const marcasViales = unir(marcas);
+  if (marcasViales) {
+    const malla = new Mesh(marcasViales, mate(PALETA.marcaVial, { rugosidad: 0.9, calco: true }));
+    malla.name = 'marcas-viales';
+    malla.receiveShadow = true;
+    capa.add(malla);
+  }
+
+  for (const z of m.zonas) capa.add(construirManzana(z, m));
+  capa.add(construirArbolado(m), construirFarolas(m));
   return capa;
 }
 
-function construirZona(z: ZonaVisual, m: ModeloCiudad): Group {
+function construirManzana(z: ZonaVisual, m: ModeloCiudad): Group {
   const grupo = new Group();
   grupo.name = `zona-${z.seccionId}`;
-  const barrio = m.barrios.find((b) => b.grupoId === z.grupoId);
-  const tinte = PALETA.barrios[(barrio?.indice ?? 0) % PALETA.barrios.length]!;
+  const indice = m.barrios.find((b) => b.grupoId === z.grupoId)?.indice ?? 0;
+  const datos: DatosSeleccionables = { tipo: 'zona', seccionId: z.seccionId };
 
-  const plataforma = losa(z.parcela, ALTO_ZONA - ALTO_BARRIO, ALTO_BARRIO, mate(mezclar(PALETA.acera, tinte, 0.45), 0.9), 0.25);
-  plataforma.userData = { tipo: 'zona', seccionId: z.seccionId } satisfies DatosSeleccionables;
-  plataforma.name = 'plataforma';
-  const cesped = losa(z.interior, 0.04, ALTO_ZONA, mate(mezclar(PALETA.cesped, tinte, 0.15), 1));
-  cesped.userData = plataforma.userData;
-  grupo.add(plataforma, cesped);
+  const acera = losa(z.parcela, NIVEL.calle, NIVEL.acera, mate(PALETA.aceras[indice % PALETA.aceras.length]!, { rugosidad: 0.92 }));
+  acera.name = 'plataforma';
+  acera.userData = datos;
+  grupo.add(acera);
+
+  if (z.plaza) {
+    // Plaza pública de la sección: pavimento, fuente y bancos.
+    const p = z.plaza;
+    const suelo = losa(p, NIVEL.acera, NIVEL.plaza, mate(PALETA.pavimentoPlaza, { rugosidad: 0.9 }));
+    suelo.name = 'plaza';
+    suelo.userData = datos;
+    const c = centroRect(p);
+    const r = Math.min(p.ancho, p.fondo) * 0.2;
+    const fuente = new Group();
+    fuente.name = 'fuente';
+    const vaso = new Mesh(new CylinderGeometry(r, r * 1.05, 0.38, 28), mate(PALETA.piedra, { rugosidad: 0.8 }));
+    vaso.position.set(c.x, NIVEL.plaza + 0.19, c.z);
+    const agua = new Mesh(new CylinderGeometry(r * 0.86, r * 0.86, 0.06, 28), mate(PALETA.agua, { rugosidad: 0.12, metal: 0.1 }));
+    agua.position.set(c.x, NIVEL.plaza + 0.33, c.z);
+    const pila = new Mesh(new CylinderGeometry(0.16, 0.24, 1.0, 12), mate(PALETA.piedra, { rugosidad: 0.8 }));
+    pila.position.set(c.x, NIVEL.plaza + 0.5, c.z);
+    vaso.castShadow = pila.castShadow = true;
+    vaso.receiveShadow = true;
+    fuente.add(vaso, agua, pila);
+    const bancos: BufferGeometry[] = [];
+    for (const [dx, dz, giro] of [[0, 1, 0], [0, -1, 0], [1, 0, 1], [-1, 0, 1]] as const) {
+      const g = new BoxGeometry(1.3, 0.22, 0.4);
+      if (giro) g.rotateY(Math.PI / 2);
+      bancos.push(g.translate(c.x + dx * (r + 1.1), NIVEL.plaza + 0.11, c.z + dz * (r + 1.1)));
+    }
+    const malla = new Mesh(unir(bancos)!, mate(PALETA.peanaMadera, { rugosidad: 0.7 }));
+    malla.castShadow = true;
+    grupo.add(suelo, fuente, malla);
+  }
   return grupo;
 }
 
@@ -116,17 +165,22 @@ function construirArbolado(m: ModeloCiudad): Group {
   grupo.name = 'arbolado';
   const n = m.arboles.length;
   if (!n) return grupo;
-
-  const troncos = new InstancedMesh(new CylinderGeometry(0.12, 0.16, 1, 6), mate(PALETA.tronco), n);
-  const copas = new InstancedMesh(new IcosahedronGeometry(0.75, 0), new MeshStandardMaterial({ roughness: 0.9, flatShading: true }), n);
+  const troncos = new InstancedMesh(new CylinderGeometry(0.09, 0.13, 1, 6), mate(PALETA.tronco), n);
+  const copas = new InstancedMesh(
+    new IcosahedronGeometry(0.85, 1),
+    new MeshStandardMaterial({ roughness: 0.95, flatShading: true }),
+    n,
+  );
   const matriz = new Matrix4();
+  const color = new Color();
   m.arboles.forEach((a, i) => {
     const e = a.escala;
-    matriz.makeScale(e, e, e).setPosition(a.posicion.x, ALTO_ZONA + 0.5 * e, a.posicion.z);
+    const suelo = a.motivo === 'plaza' ? NIVEL.plaza : NIVEL.mediana;
+    matriz.makeScale(e, e * 1.3, e).setPosition(a.posicion.x, suelo + 0.65 * e, a.posicion.z);
     troncos.setMatrixAt(i, matriz);
-    matriz.makeScale(e, e * 1.25, e).setPosition(a.posicion.x, ALTO_ZONA + 1.45 * e, a.posicion.z);
+    matriz.makeScale(e, e * 1.12, e).setPosition(a.posicion.x, suelo + 1.75 * e, a.posicion.z);
     copas.setMatrixAt(i, matriz);
-    copas.setColorAt(i, new Color(PALETA.copa[Math.floor(pseudoAleatorio(i, 5) * PALETA.copa.length)]!));
+    copas.setColorAt(i, color.set(PALETA.copas[i % PALETA.copas.length]!));
   });
   troncos.castShadow = copas.castShadow = true;
   copas.receiveShadow = true;
@@ -134,167 +188,22 @@ function construirArbolado(m: ModeloCiudad): Group {
   return grupo;
 }
 
-/* ------------------------------------------------------------------ edificios */
-
-/** Fracción de la altura final que está levantada en cada fase. */
-export const ALTURA_POR_FASE = { solar: 0, obra: 0.5, completo: 1 } as const;
-const VENTANAS_ENCENDIDAS = { solar: 0, obra: 0.35, completo: 0.85 } as const;
-
-export function construirEdificio(e: EdificioVisual): Group {
+function construirFarolas(m: ModeloCiudad): Group {
   const grupo = new Group();
-  grupo.name = `edificio-${e.conceptoId}`;
-  grupo.position.set(e.posicion.x, ALTO_ZONA, e.posicion.z);
-  grupo.userData = { tipo: 'edificio', conceptoId: e.conceptoId } satisfies DatosSeleccionables;
-
-  const w = e.huella;
-  const H = e.alturaCompleta;
-  const h = H * ALTURA_POR_FASE[e.fase];
-  const fachada = mate(mezclar(PALETA.fachadaClara, e.color, 0.16), 0.8);
-
-  // Anillo de dominio en el suelo: mismo código de color que la ciudad 2D y las fichas.
-  const anillo = new Mesh(
-    new RingGeometry(w * 0.72 + 0.25, w * 0.72 + 0.6, 4, 1),
-    new MeshBasicMaterial({ color: e.dominio > 0 ? colorDominio(e.dominio) : PALETA.sinEstudiar }),
-  );
-  anillo.rotation.set(-Math.PI / 2, 0, Math.PI / 4);
-  anillo.position.y = 0.06;
-  anillo.name = 'anillo-dominio';
-  grupo.add(anillo);
-
-  // Cimentación: existe siempre, el solar está listo para construir.
-  const cimiento = caja(w + 0.5, 0.3, w + 0.5, mate(e.fase === 'solar' ? PALETA.cimiento : PALETA.zocalo), false);
-  cimiento.position.y = 0.15;
-  grupo.add(cimiento);
-
-  if (e.fase === 'solar') {
-    // Volumen fantasma: se ve lo que se construirá al estudiar el concepto.
-    const fantasma = new Mesh(
-      new BoxGeometry(w, H, w),
-      new MeshBasicMaterial({ color: PALETA.fantasma, transparent: true, opacity: 0.1, depthWrite: false }),
-    );
-    fantasma.position.y = 0.3 + H / 2;
-    fantasma.name = 'fantasma';
-    grupo.add(fantasma, aristas(w, H, PALETA.fantasma, 0.55, 0.3));
-    return grupo;
-  }
-
-  const cuerpo = new Mesh(new RoundedBoxGeometry(w, h, w, 2, Math.min(0.22, w / 8)), fachada);
-  cuerpo.position.y = 0.3 + h / 2;
-  cuerpo.castShadow = cuerpo.receiveShadow = true;
-  cuerpo.name = 'cuerpo';
-  grupo.add(cuerpo);
-  grupo.add(ventanas(e, w, h));
-
-  if (e.fase === 'obra') {
-    // Andamio con la silueta de lo que falta por construir.
-    const andamio = aristas(w + 0.3, H - h, PALETA.andamio, 0.9, 0.3 + h);
-    andamio.name = 'andamio';
-    grupo.add(andamio);
-    return grupo;
-  }
-
-  // Cornisa con el color del concepto y remate según el tejado de la portada.
-  const cornisa = caja(w + 0.3, 0.35, w + 0.3, mate(e.color, 0.6));
-  cornisa.position.y = 0.3 + h;
-  grupo.add(cornisa);
-  const remate = tejado(e, w);
-  remate.position.y = 0.3 + h + 0.17;
-  grupo.add(remate);
-  return grupo;
-}
-
-function aristas(w: number, alto: number, color: string, opacidad: number, y: number): LineSegments {
-  const geometria = new EdgesGeometry(new BoxGeometry(w, Math.max(alto, 0.01), w));
-  const lineas = new LineSegments(geometria, new LineBasicMaterial({ color, transparent: opacidad < 1, opacity: opacidad }));
-  lineas.position.y = y + alto / 2;
-  return lineas;
-}
-
-const geometriaVentana = new BoxGeometry(0.42, 0.62, 0.06);
-
-function ventanas(e: EdificioVisual, w: number, h: number): InstancedMesh {
-  const filas = Math.max(0, Math.floor((h - 1.2) / 1.25));
-  const columnas = Math.max(1, Math.floor((w - 0.6) / 0.95));
-  const total = filas * columnas * 4;
-  const malla = new InstancedMesh(geometriaVentana, new MeshBasicMaterial(), Math.max(total, 1));
-  malla.count = total;
-  malla.name = 'ventanas';
-  const encendidas = VENTANAS_ENCENDIDAS[e.fase];
-  const luz = new Color(PALETA.ventanaEncendida);
-  const apagada = new Color(PALETA.ventanaApagada);
+  grupo.name = 'farolas';
+  const n = m.farolas.length;
+  if (!n) return grupo;
+  const postes = new InstancedMesh(new CylinderGeometry(0.045, 0.06, 2.1, 6).translate(0, 1.05, 0), mate(PALETA.farola, { rugosidad: 0.5, metal: 0.4 }), n);
+  const luces = new InstancedMesh(new SphereGeometry(0.17, 10, 8).translate(0, 2.15, 0), emisivo(PALETA.luzFarola), n);
   const matriz = new Matrix4();
-  const giro = new Matrix4();
-  let i = 0;
-  for (let cara = 0; cara < 4; cara++) {
-    giro.makeRotationY((cara * Math.PI) / 2);
-    for (let f = 0; f < filas; f++) {
-      for (let c = 0; c < columnas; c++) {
-        const x = (c - (columnas - 1) / 2) * 0.95;
-        matriz.makeTranslation(x, 1.1 + f * 1.25, w / 2 + 0.02).premultiply(giro);
-        malla.setMatrixAt(i, matriz);
-        const semilla = e.conceptoId.length * 13 + cara * 7;
-        malla.setColorAt(i, pseudoAleatorio(semilla + f, c) < encendidas ? luz : apagada);
-        i++;
-      }
-    }
-  }
-  return malla;
-}
-
-function tejado(e: EdificioVisual, w: number): Group {
-  const g = new Group();
-  const pizarra = mate(PALETA.tejado, 0.7);
-  switch (e.tejado) {
-    case 'fronton':
-    case 'granero': {
-      const teja = e.tejado === 'granero' ? mate(PALETA.tejadoTeja, 0.75) : pizarra;
-      const cubierta = new Mesh(new ConeGeometry(w * 0.72, w * 0.45, 4, 1), teja);
-      cubierta.rotation.y = Math.PI / 4;
-      cubierta.position.y = w * 0.225;
-      cubierta.castShadow = true;
-      g.add(cubierta);
-      break;
-    }
-    case 'cupula': {
-      const cupula = new Mesh(new SphereGeometry(w * 0.34, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), mate('#9fb3b0', 0.5));
-      cupula.castShadow = true;
-      g.add(cupula);
-      break;
-    }
-    case 'bandera': {
-      const mastil = caja(0.08, 2.4, 0.08, mate('#8a8a8a'));
-      mastil.position.y = 1.2;
-      const bandera = caja(1.1, 0.62, 0.04, mate(e.color, 0.6));
-      bandera.geometry.translate(0.55, 0, 0);
-      bandera.position.set(0.04, 2.05, 0);
-      bandera.name = 'bandera';
-      g.add(mastil, bandera);
-      break;
-    }
-    case 'antena': {
-      const mastil = caja(0.1, 2.8, 0.1, mate('#8a8a8a'));
-      mastil.position.y = 1.4;
-      const baliza = new Mesh(new SphereGeometry(0.16, 10, 8), new MeshBasicMaterial({ color: '#ff5a5a' }));
-      baliza.position.y = 2.9;
-      baliza.name = 'baliza';
-      g.add(mastil, baliza);
-      break;
-    }
-    case 'ruina': {
-      // El prototipo dibuja la caja "mordida": esquina rota en la azotea.
-      const resto = caja(w * 0.45, 0.7, w * 0.4, mate(PALETA.zocalo));
-      resto.position.set(-w * 0.25, 0.35, -w * 0.28);
-      g.add(resto);
-      break;
-    }
-    case 'plano': {
-      const maquinaria = caja(w * 0.36, 0.55, w * 0.3, mate('#b9b3aa'));
-      maquinaria.position.set(w * 0.12, 0.28, -w * 0.1);
-      g.add(maquinaria);
-      break;
-    }
-  }
-  return g;
+  m.farolas.forEach((p, i) => {
+    matriz.makeTranslation(p.x, NIVEL.calle, p.z);
+    postes.setMatrixAt(i, matriz);
+    luces.setMatrixAt(i, matriz);
+  });
+  postes.castShadow = true;
+  grupo.add(postes, luces);
+  return grupo;
 }
 
 /* ------------------------------------------------------------------ capa dinámica */
@@ -309,19 +218,24 @@ export interface RutaCoche {
 export interface CapaDinamica {
   raiz: Group;
   edificios: Map<string, Group>;
-  /** Superposición de color por zona para la lectura de Atlas. */
+  /** Lámina de color por zona para la lectura de Atlas. */
   calor: Mesh[];
   marcadores: Group[];
   coches: InstancedMesh | null;
   rutas: RutaCoche[];
 }
 
+/** Altura de la lámina del Atlas: por encima de todos los edificios. */
+export const ALTURA_ATLAS = 17;
+
+export const datosArquitectura = (g: Object3D): DatosArquitectura | undefined => g.userData.arquitectura;
+
 export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
   const raiz = new Group();
   raiz.name = 'dinamica';
   const edificios = new Map<string, Group>();
   for (const e of m.edificios) {
-    const g = construirEdificio(e);
+    const g = construirArquitectura(e);
     edificios.set(e.conceptoId, g);
     raiz.add(g);
   }
@@ -338,47 +252,53 @@ export function construirCapaDinamica(m: ModeloCiudad): CapaDinamica {
       }),
     );
     plano.rotation.x = -Math.PI / 2;
-    plano.position.set(c.x, ALTO_ZONA + 0.08, c.z);
+    plano.position.set(c.x, ALTURA_ATLAS, c.z);
     plano.visible = false;
+    plano.renderOrder = 10;
     plano.name = `calor-${z.seccionId}`;
     raiz.add(plano);
     return plano;
   });
 
-  // "Estudia ya": un hito sobre las zonas prioritarias, visible también sin animación.
+  // "Estudia ya": un hito sobre la plaza (o el centro) de las zonas prioritarias.
+  const material = new MeshStandardMaterial({ color: PALETA.marcador, emissive: PALETA.marcador, emissiveIntensity: 0.3, roughness: 0.4 });
   const marcadores = m.zonas
     .filter((z) => z.prioridad !== null)
     .map((z) => {
       const g = new Group();
       g.name = `estudia-ya-${z.prioridad}`;
-      const material = new MeshStandardMaterial({ color: PALETA.marcador, emissive: PALETA.marcador, emissiveIntensity: 0.35 });
-      const punta = new Mesh(new ConeGeometry(0.7, 1.8, 4), material);
+      const punta = new Mesh(new ConeGeometry(0.55, 1.5, 16), material);
       punta.rotation.x = Math.PI;
-      const cabeza = new Mesh(new SphereGeometry(0.75, 16, 12), material);
-      cabeza.position.y = 1.2;
+      const cabeza = new Mesh(new SphereGeometry(0.62, 20, 14), material);
+      cabeza.position.y = 1.0;
       punta.castShadow = cabeza.castShadow = true;
       g.add(punta, cabeza);
-      const c = centroRect(z.parcela);
-      const alto = Math.max(0, ...m.edificios.filter((e) => e.seccionId === z.seccionId).map((e) => e.alturaCompleta));
-      g.scale.setScalar(0.8);
-      g.position.set(c.x, ALTO_ZONA + alto + 5, c.z);
-      g.userData = { baseY: g.position.y };
+      const c = centroRect(z.plaza ?? z.parcela);
+      const cima = Math.max(
+        0,
+        ...m.edificios
+          .filter((e) => e.seccionId === z.seccionId)
+          .map((e) => datosArquitectura(edificios.get(e.conceptoId)!)?.cima ?? 0),
+      );
+      g.position.set(c.x, (z.plaza ? NIVEL.plaza + 2.2 : cima + 2.2) + 0.75, c.z);
+      g.userData = { baseY: g.position.y, seccionId: z.seccionId };
       raiz.add(g);
       return g;
     });
 
-  // Tráfico: solo hay actividad en las zonas que ya has empezado a estudiar.
+  // Tráfico: solo hay actividad alrededor de las zonas que ya has empezado a estudiar.
   const rutas: RutaCoche[] = [];
-  for (const [k, z] of m.zonas.entries()) {
-    if (z.dominio <= 0) continue;
+  m.zonas.forEach((z, k) => {
+    if (z.dominio <= 0) return;
     const cantidad = Math.max(1, Math.round(z.dominio * 3));
     for (let i = 0; i < cantidad; i++) {
-      rutas.push({ rect: z.lote, inicio: (i / cantidad + pseudoAleatorio(k, i) * 0.2) % 1, velocidad: 0.012 + pseudoAleatorio(i, k) * 0.01 });
+      rutas.push({ rect: encoger(z.lote, 0.6), inicio: (i / cantidad + k * 0.137) % 1, velocidad: 0.01 + ((k * 7 + i * 3) % 5) * 0.002 });
     }
-  }
+  });
   let coches: InstancedMesh | null = null;
   if (rutas.length) {
-    coches = new InstancedMesh(new RoundedBoxGeometry(0.95, 0.5, 0.5, 1, 0.12), new MeshStandardMaterial({ roughness: 0.5 }), rutas.length);
+    const carroceria = unir([new BoxGeometry(1.0, 0.36, 0.5).translate(0, 0.26, 0), new BoxGeometry(0.55, 0.26, 0.44).translate(-0.06, 0.57, 0)])!;
+    coches = new InstancedMesh(carroceria, new MeshStandardMaterial({ roughness: 0.45, metalness: 0.2 }), rutas.length);
     rutas.forEach((_, i) => coches!.setColorAt(i, new Color(PALETA.coches[i % PALETA.coches.length]!)));
     coches.castShadow = true;
     coches.name = 'trafico';
@@ -397,7 +317,7 @@ export function colocarCoches(coches: InstancedMesh, rutas: RutaCoche[], t: numb
   rutas.forEach((ruta, i) => {
     const { rect } = ruta;
     const perimetro = 2 * (rect.ancho + rect.fondo);
-    let d = (((ruta.inicio + t * ruta.velocidad) % 1) + 1) % 1 * perimetro;
+    let d = ((((ruta.inicio + t * ruta.velocidad) % 1) + 1) % 1) * perimetro;
     let x: number, z: number, angulo: number;
     if (d < rect.ancho) {
       x = rect.x + d; z = rect.z; angulo = 0;
@@ -410,19 +330,18 @@ export function colocarCoches(coches: InstancedMesh, rutas: RutaCoche[], t: numb
       x = rect.x; z = rect.z + rect.fondo - d; angulo = Math.PI / 2;
     }
     giroCoche.makeRotationY(angulo);
-    matrizCoche.makeTranslation(x, ALTO_BARRIO + 0.26, z).multiply(giroCoche);
+    matrizCoche.makeTranslation(x, NIVEL.calle, z).multiply(giroCoche);
     coches.setMatrixAt(i, matrizCoche);
   });
   coches.instanceMatrix.needsUpdate = true;
 }
 
-/** Libera geometrías y materiales no compartidos de un subárbol. */
+/** Libera geometrías y materiales propios (no compartidos) de un subárbol. */
 export function liberar(objeto: Object3D): void {
-  const compartidos = new Set<Material>(materiales.values());
   objeto.traverse((o) => {
     const malla = o as Partial<Mesh>;
-    if (malla.geometry instanceof BufferGeometry && malla.geometry !== geometriaVentana) malla.geometry.dispose();
+    if (malla.geometry instanceof BufferGeometry) malla.geometry.dispose();
     const lista = Array.isArray(malla.material) ? malla.material : malla.material ? [malla.material] : [];
-    for (const mat of lista) if (!compartidos.has(mat)) mat.dispose();
+    for (const mat of lista) if (!esCompartido(mat)) mat.dispose();
   });
 }

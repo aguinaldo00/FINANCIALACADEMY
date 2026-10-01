@@ -1,29 +1,60 @@
-/** Paleta de la maqueta: materiales cálidos y claros, como una maqueta de arquitectura. */
+/**
+ * Paleta de la maqueta: piedra cálida, asfalto, vegetación natural y una "maqueta blanca" para
+ * lo que aún no se ha estudiado. El color de cada concepto (DATA) se reserva para acentos.
+ */
 export const PALETA = {
-  baseMadera: '#5b4332',
-  baseBorde: '#efe8dc',
-  calle: '#8f8a83',
-  avenida: '#7e7972',
-  barrios: ['#eadcc0', '#d3e2cc', '#d6dbea', '#efd3c8'],
-  acera: '#f4efe6',
-  cesped: '#b3cd96',
-  fachadaClara: '#f6f1e7',
-  zocalo: '#d9d1c3',
-  tejado: '#6c6874',
-  tejadoTeja: '#c26b4b',
-  ventanaEncendida: '#ffd27f',
-  ventanaApagada: '#4b586b',
-  cimiento: '#cbc2b2',
-  fantasma: '#ffffff',
-  andamio: '#e2a23b',
-  sinEstudiar: '#9b958b',
-  tronco: '#7a5a3c',
-  copa: ['#6f9e5a', '#7fae63', '#5f8f4f'],
+  peanaMadera: '#4d392b',
+  peanaCanto: '#e8e1d4',
+  asfalto: '#5d5a57',
+  marcaVial: '#ece5d6',
+  mediana: '#8fae6f',
+  bordillo: '#cfc6b6',
+  /** Acera de cada barrio: misma piedra con un matiz que distingue los distritos. */
+  aceras: ['#ddd1bb', '#d0d8c6', '#d2d3dc', '#e0d0c4'],
+  pavimentoLote: '#cdbfa8',
+  cesped: '#8fb06a',
+  pavimentoPlaza: '#e3d6bf',
+  agua: '#7fb3c4',
+  // Arquitectura acabada.
+  piedra: '#efe6d3',
+  granito: '#b7a993',
+  ladrillo: '#c98b68',
+  revoco: '#ece6dc',
+  vidrio: '#5d7c8c',
+  vidrioClaro: '#86a9ba',
+  pizarra: '#626070',
+  cobre: '#7fa298',
+  teja: '#b8634a',
+  zinc: '#8d9aa2',
+  metal: '#9a9a9e',
+  ajardinado: '#7fa65f',
+  ventanaEncendida: '#ffd59a',
+  ventanaApagada: '#40505f',
+  /** Maqueta blanca: el proyecto de lo que se construirá al estudiar. */
+  proyecto: '#e9e4db',
+  /** Huecos grabados en la maqueta blanca: dan escala sin color. */
+  proyectoHueco: '#cfc8bc',
+  andamio: '#c98a3a',
+  grua: '#e9b43a',
+  sinEstudiar: '#a49e93',
+  tronco: '#6f5038',
+  copas: ['#6e9a55', '#7aa65d', '#628e4c', '#86ad66'],
+  farola: '#3e3d40',
+  luzFarola: '#ffe3a8',
   marcador: '#ff4f8b',
-  coches: ['#e35d4f', '#3f7cc4', '#f2c14e', '#f4f1ea', '#58a39a'],
+  coches: ['#d9584b', '#3f74b8', '#efc04f', '#f2efe8', '#4f9a8f', '#2f3136'],
   seleccion: '#ffffff',
 } as const;
 
-/** Altura de las plataformas sobre el nivel de la calle. */
-export const ALTO_BARRIO = 0.15;
-export const ALTO_ZONA = 0.5;
+/** Niveles del suelo (sin superficies coplanares: el z-fighting producía el parpadeo). */
+export const NIVEL = {
+  peana: -0.3,
+  calle: 0,
+  mediana: 0.16,
+  acera: 0.22,
+  lote: 0.27,
+  plaza: 0.29,
+} as const;
+
+/** Compatibilidad con el resto del renderer: el suelo de los edificios. */
+export const ALTO_ZONA = NIVEL.lote;

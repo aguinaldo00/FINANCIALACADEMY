@@ -2,17 +2,31 @@ import type { TipoTejado, Tema } from '../content/schema.ts';
 import { dominioConcepto, dominioSeccion, type NivelDominio, nivelDominio } from '../domain/mastery.ts';
 import { seccionesPrioritarias } from '../domain/priority.ts';
 import type { Progreso } from '../domain/progress.ts';
-import { centroRect, encoger, particionar, pseudoAleatorio, type Punto, type Rect } from './geometry.ts';
+import {
+  centroRect,
+  encoger,
+  longitudSegmento,
+  particionar,
+  type Punto,
+  type Rect,
+  type Segmento,
+  segmentosInteriores,
+} from './geometry.ts';
+import { ALTURA_TIPOLOGIA, TEJADO_TIPOLOGIA, type Tipologia, tipologiaDe } from './typology.ts';
 
 /*
  * Modelo visual derivado: traduce contenido + progreso a una ciudad. Es puro (sin Three.js ni DOM)
  * y lo consumen tanto el renderer 3D como el Atlas HTML.
  *
  * Reglas de significado (no mezclar):
- * - Superficie de barrios y zonas = peso real en examen (`Seccion.pesoExamen`).
- * - Estado de cada edificio (solar / en obra / construido) = dominio del concepto.
- * - Altura: solo los 12 edificios emblemáticos de la portada tienen altura propia (dato de
- *   `tema.ciudad`); el resto comparten una altura estándar que no codifica nada.
+ * - Superficie de barrios y zonas = peso real en examen (`Seccion.pesoExamen`). Los lotes de una
+ *   zona se reparten su superficie a partes iguales, así que también derivan del peso.
+ * - Estado de cada edificio (proyecto / en obra / construido) = dominio del concepto.
+ * - Tipología arquitectónica = glifos del concepto en DATA (ver `typology.ts`).
+ * - Altura: los 12 edificios de la portada conservan la suya (dato de `tema.ciudad`); el resto
+ *   usan la de su tipología. La altura no codifica conocimiento.
+ * - Arbolado y farolas existen por la calle en la que están (bulevares, plazas, antejardines),
+ *   nunca como relleno.
  */
 
 /** Fase de construcción de un edificio, derivada del nivel de dominio existente. */
@@ -23,6 +37,9 @@ export function faseObra(nivel: NivelDominio): FaseObra {
   if (nivel === 'dominado') return 'completo';
   return 'obra';
 }
+
+/** Lado del lote que da a la calle (donde va la fachada principal). */
+export type Frente = 'norte' | 'sur' | 'este' | 'oeste';
 
 export interface BarrioVisual {
   grupoId: string;
@@ -43,12 +60,14 @@ export interface ZonaVisual {
   seccionId: string;
   grupoId: string;
   titulo: string;
-  /** Lote del treemap (área ∝ peso dentro del barrio). */
+  /** Lote del treemap (área ∝ peso dentro del barrio). Sus bordes son ejes de calle. */
   lote: Rect;
-  /** Plataforma de la zona, sin las calles. */
+  /** Manzana: plataforma de la zona, sin las calles. */
   parcela: Rect;
-  /** Espacio donde se colocan los edificios. */
+  /** Espacio donde se reparten los lotes de los edificios. */
   interior: Rect;
+  /** Plaza pública de la zona (si la manzana tiene espacio para ella). */
+  plaza: Rect | null;
   pesoExamen: number;
   dominio: number;
   nivel: NivelDominio;
@@ -67,7 +86,12 @@ export interface EdificioVisual {
   grupoId: string;
   nombre: string;
   color: string;
+  tipologia: Tipologia;
+  /** Lote del edificio dentro de la manzana. */
+  lote: Rect;
+  frente: Frente;
   posicion: Punto;
+  /** Lado menor del lote: escala de referencia para la masa del edificio. */
   huella: number;
   /** Altura cuando está construido del todo. */
   alturaCompleta: number;
@@ -79,9 +103,12 @@ export interface EdificioVisual {
   fase: FaseObra;
 }
 
+export type MotivoArbol = 'bulevar' | 'plaza';
+
 export interface ArbolVisual {
   posicion: Punto;
   escala: number;
+  motivo: MotivoArbol;
 }
 
 export interface ModeloCiudad {
@@ -89,14 +116,25 @@ export interface ModeloCiudad {
   barrios: BarrioVisual[];
   zonas: ZonaVisual[];
   edificios: EdificioVisual[];
+  /** Ejes de las avenidas entre barrios (con mediana arbolada). */
+  avenidas: Segmento[];
+  /** Ejes de las calles entre zonas de un mismo barrio. */
+  calles: Segmento[];
   arboles: ArbolVisual[];
+  farolas: Punto[];
 }
 
 export const LADO_CIUDAD = 120;
 export const AVENIDA = 5;
 export const CALLE = 2.6;
-const ACERA = 1.3;
-export const ALTURA_ESTANDAR = 6;
+/** Acera entre el borde de la manzana y los lotes. */
+export const ACERA = 0.8;
+/** Pasaje entre lotes vecinos. */
+export const PASAJE = 0.9;
+/** Superficie mínima por concepto para reservar una plaza en la manzana. */
+const SUPERFICIE_PLAZA = 140;
+/** Altura estándar (tipología oficina) para los edificios que no están en la portada. */
+export const ALTURA_ESTANDAR = ALTURA_TIPOLOGIA.oficina;
 /** La portada muestra 3 secciones en "Estudia ya" (valor por defecto de `seccionesPrioritarias`). */
 export const PUESTOS_ESTUDIA_YA = 3;
 /** Las alturas de la portada están en píxeles del SVG (50–80). */
@@ -104,21 +142,19 @@ const PIXELES_POR_UNIDAD = 6;
 
 export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
   const lado = LADO_CIUDAD;
+  const ciudad: Rect = { x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado };
   // Mismo criterio que "Estudia ya" de la portada, aplicado a todas las secciones.
   const ordenEstudio = seccionesPrioritarias(tema, progreso, tema.secciones.length).map((s) => s.id);
   const emblematicos = new Map(tema.ciudad.edificios.map((e) => [e.conceptoId, e]));
 
   const pesoGrupo = (grupoId: string) =>
     tema.secciones.filter((s) => s.grupoId === grupoId).reduce((suma, s) => suma + s.pesoExamen, 0);
-  const rectsBarrio = particionar(
-    tema.grupos.map((g) => ({ id: g.id, peso: pesoGrupo(g.id) })),
-    { x: -lado / 2, z: -lado / 2, ancho: lado, fondo: lado },
-  );
+  const rectsBarrio = particionar(tema.grupos.map((g) => ({ id: g.id, peso: pesoGrupo(g.id) })), ciudad);
 
   const barrios: BarrioVisual[] = [];
   const zonas: ZonaVisual[] = [];
   const edificios: EdificioVisual[] = [];
-  const arboles: ArbolVisual[] = [];
+  const calles: Segmento[] = [];
 
   tema.grupos.forEach((g, indice) => {
     const rect = rectsBarrio.get(g.id)!;
@@ -141,29 +177,38 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
     });
 
     const lotes = particionar(secciones.map((s) => ({ id: s.id, peso: s.pesoExamen })), parcela);
+    calles.push(...segmentosInteriores([...lotes.values()], parcela));
+
     for (const s of secciones) {
       const lote = lotes.get(s.id)!;
-      const parcelaZona = encoger(lote, CALLE / 2);
-      const interior = encoger(parcelaZona, ACERA);
+      const manzana = encoger(lote, CALLE / 2);
+      const interior = encoger(manzana, ACERA);
       const conceptos = tema.conceptos.filter((c) => c.seccionId === s.id);
-      const dominioZona = dominioSeccion(tema, progreso, s.id);
-      const posiciones = repartirEdificios(interior, conceptos.length);
+      const conPlaza = conceptos.length > 0 && (interior.ancho * interior.fondo) / conceptos.length >= SUPERFICIE_PLAZA;
+      const celdas = repartirLotes(interior, conceptos.length + (conPlaza ? 1 : 0));
+      const indicePlaza = conPlaza ? Math.floor(celdas.length / 2) : -1;
+      const plaza = conPlaza ? encoger(celdas[indicePlaza]!, PASAJE / 2) : null;
+      const lotesEdificio = celdas.filter((_, i) => i !== indicePlaza);
 
       conceptos.forEach((c, k) => {
         const d = dominioConcepto(progreso, c.id);
         const nivel = nivelDominio(d);
         const emblema = emblematicos.get(c.id);
-        const { posicion, huella } = posiciones[k]!;
+        const tipologia = tipologiaDe(c.iconos);
+        const loteEdificio = encoger(lotesEdificio[k]!, PASAJE / 2);
         edificios.push({
           conceptoId: c.id,
           seccionId: s.id,
           grupoId: g.id,
           nombre: c.nombre,
           color: c.color,
-          posicion,
-          huella,
-          alturaCompleta: emblema ? emblema.altura / PIXELES_POR_UNIDAD : ALTURA_ESTANDAR,
-          tejado: emblema ? emblema.tejado : 'plano',
+          tipologia,
+          lote: loteEdificio,
+          frente: frenteHaciaCalle(loteEdificio, manzana),
+          posicion: centroRect(loteEdificio),
+          huella: Math.min(loteEdificio.ancho, loteEdificio.fondo),
+          alturaCompleta: emblema ? emblema.altura / PIXELES_POR_UNIDAD : ALTURA_TIPOLOGIA[tipologia],
+          tejado: emblema ? emblema.tejado : TEJADO_TIPOLOGIA[tipologia],
           emblematico: Boolean(emblema),
           dominio: d,
           nivel,
@@ -171,19 +216,18 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
         });
       });
 
-      arboles.push(...plantarArboles(interior, posiciones, zonas.length));
-
       const orden = ordenEstudio.indexOf(s.id) + 1;
       zonas.push({
         seccionId: s.id,
         grupoId: g.id,
         titulo: s.titulo,
         lote,
-        parcela: parcelaZona,
+        parcela: manzana,
         interior,
+        plaza,
         pesoExamen: s.pesoExamen,
-        dominio: dominioZona,
-        nivel: nivelDominio(dominioZona),
+        dominio: dominioZona(tema, progreso, s.id),
+        nivel: nivelDominio(dominioZona(tema, progreso, s.id)),
         prioridad: orden > 0 && orden <= PUESTOS_ESTUDIA_YA ? orden : null,
         ordenEstudio: orden,
         conceptoIds: conceptos.map((c) => c.id),
@@ -193,56 +237,156 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
     }
   });
 
-  return { lado, barrios, zonas, edificios, arboles };
+  const avenidas = segmentosInteriores([...rectsBarrio.values()], ciudad);
+  const arboles = [...arbolesDeBulevar(avenidas, [...avenidas, ...calles]), ...arbolesDePlaza(zonas)];
+  const farolas = farolasDeAvenida(avenidas, [...avenidas, ...calles]);
+
+  return { lado, barrios, zonas, edificios, avenidas, calles, arboles, farolas };
 }
 
-interface Hueco {
-  posicion: Punto;
-  huella: number;
-}
+const dominioZona = (tema: Tema, progreso: Progreso, seccionId: string) => dominioSeccion(tema, progreso, seccionId);
 
-/** Cuadrícula que se adapta a la forma de la zona; un edificio por concepto, en orden. */
-export function repartirEdificios(interior: Rect, cantidad: number): Hueco[] {
+/**
+ * Divide el interior de la manzana en celdas que lo cubren entero (sin huecos): la última fila,
+ * si queda incompleta, reparte su anchura entre las celdas que tiene.
+ */
+export function repartirLotes(interior: Rect, cantidad: number): Rect[] {
   if (cantidad <= 0) return [];
   const proporcion = interior.ancho / Math.max(interior.fondo, 0.001);
   const columnas = Math.min(cantidad, Math.max(1, Math.round(Math.sqrt(cantidad * proporcion))));
   const filas = Math.ceil(cantidad / columnas);
-  const celdaX = interior.ancho / columnas;
-  const celdaZ = interior.fondo / filas;
-  const huella = Math.min(6.5, Math.max(2.4, Math.min(celdaX, celdaZ) * 0.58));
-
-  const huecos: Hueco[] = [];
-  for (let i = 0; i < cantidad; i++) {
-    const fila = Math.floor(i / columnas);
-    // La última fila, si queda incompleta, se centra.
-    const enFila = fila === filas - 1 ? cantidad - fila * columnas : columnas;
-    const columna = i % columnas;
-    const desplazamiento = ((columnas - enFila) * celdaX) / 2;
-    huecos.push({
-      posicion: { x: interior.x + desplazamiento + celdaX * (columna + 0.5), z: interior.z + celdaZ * (fila + 0.5) },
-      huella,
-    });
+  const alto = interior.fondo / filas;
+  const celdas: Rect[] = [];
+  for (let fila = 0; fila < filas; fila++) {
+    const enFila = Math.min(columnas, cantidad - fila * columnas);
+    const ancho = interior.ancho / enFila;
+    for (let c = 0; c < enFila; c++) {
+      celdas.push({ x: interior.x + c * ancho, z: interior.z + fila * alto, ancho, fondo: alto });
+    }
   }
-  return huecos;
+  return celdas;
 }
 
-/** Arbolado determinista en los huecos libres de la zona. */
-function plantarArboles(interior: Rect, edificios: Hueco[], semilla: number): ArbolVisual[] {
+/** El lado del lote más cercano al borde de la manzana es el que da a la calle. */
+export function frenteHaciaCalle(lote: Rect, manzana: Rect): Frente {
+  const distancias: [Frente, number][] = [
+    ['norte', lote.z - manzana.z],
+    ['sur', manzana.z + manzana.fondo - (lote.z + lote.fondo)],
+    ['oeste', lote.x - manzana.x],
+    ['este', manzana.x + manzana.ancho - (lote.x + lote.ancho)],
+  ];
+  return distancias.reduce((mejor, d) => (d[1] < mejor[1] - 1e-9 ? d : mejor))[0];
+}
+
+const esHorizontal = (s: Segmento) => Math.abs(s.a.z - s.b.z) < 1e-9;
+
+/**
+ * Distancia de un punto situado sobre un eje (horizontal o vertical) al cruce más cercano con un eje
+ * perpendicular. `tolerancia` alarga los ejes perpendiculares: las calles de un barrio terminan en la
+ * acera, a media avenida del eje.
+ */
+function distanciaACruce(p: Punto, horizontal: boolean, ejes: Segmento[], tolerancia = AVENIDA): number {
+  let minima = Infinity;
+  for (const s of ejes) {
+    if (esHorizontal(s) === horizontal) continue;
+    if (horizontal) {
+      const [z0, z1] = [Math.min(s.a.z, s.b.z), Math.max(s.a.z, s.b.z)];
+      if (p.z >= z0 - tolerancia && p.z <= z1 + tolerancia) minima = Math.min(minima, Math.abs(p.x - s.a.x));
+    } else {
+      const [x0, x1] = [Math.min(s.a.x, s.b.x), Math.max(s.a.x, s.b.x)];
+      if (p.x >= x0 - tolerancia && p.x <= x1 + tolerancia) minima = Math.min(minima, Math.abs(p.z - s.a.z));
+    }
+  }
+  return minima;
+}
+
+/**
+ * Tramos de un eje que quedan libres entre cruces, recortando `holgura` a cada lado del cruce
+ * (para medianas y marcas viales que no deben invadir las intersecciones).
+ */
+export function tramosEntreCruces(s: Segmento, ejes: Segmento[], holgura: number, tolerancia = AVENIDA): Segmento[] {
+  const horizontal = esHorizontal(s);
+  const [inicio, fin] = horizontal ? [Math.min(s.a.x, s.b.x), Math.max(s.a.x, s.b.x)] : [Math.min(s.a.z, s.b.z), Math.max(s.a.z, s.b.z)];
+  const fijo = horizontal ? s.a.z : s.a.x;
+  const cortes: number[] = [];
+  for (const e of ejes) {
+    if (esHorizontal(e) === horizontal) continue;
+    const posicion = horizontal ? e.a.x : e.a.z;
+    const [e0, e1] = horizontal ? [Math.min(e.a.z, e.b.z), Math.max(e.a.z, e.b.z)] : [Math.min(e.a.x, e.b.x), Math.max(e.a.x, e.b.x)];
+    if (fijo >= e0 - tolerancia && fijo <= e1 + tolerancia && posicion > inicio - 1e-9 && posicion < fin + 1e-9) cortes.push(posicion);
+  }
+  const limites = [inicio, ...cortes.sort((a, b) => a - b), fin];
+  const tramos: Segmento[] = [];
+  for (let i = 0; i < limites.length - 1; i++) {
+    const desde = limites[i]! + (i === 0 && !cortes.includes(inicio) ? 0 : holgura);
+    const hasta = limites[i + 1]! - (i + 1 === limites.length - 1 && !cortes.includes(fin) ? 0 : holgura);
+    if (hasta - desde < 0.5) continue;
+    tramos.push(horizontal
+      ? { a: { x: desde, z: fijo }, b: { x: hasta, z: fijo } }
+      : { a: { x: fijo, z: desde }, b: { x: fijo, z: hasta } });
+  }
+  return tramos;
+}
+
+function puntosALoLargo(s: Segmento, paso: number, desplazamiento = 0): Punto[] {
+  const largo = longitudSegmento(s);
+  const ux = (s.b.x - s.a.x) / largo;
+  const uz = (s.b.z - s.a.z) / largo;
+  const puntos: Punto[] = [];
+  const n = Math.floor(largo / paso);
+  const inicio = (largo - n * paso) / 2;
+  for (let i = 0; i <= n; i++) {
+    const t = inicio + i * paso;
+    // Perpendicular al eje: (-uz, ux).
+    puntos.push({ x: s.a.x + ux * t - uz * desplazamiento, z: s.a.z + uz * t + ux * desplazamiento });
+  }
+  return puntos;
+}
+
+/** Bulevares: una hilera de árboles en la mediana de cada avenida, sin invadir los cruces. */
+function arbolesDeBulevar(avenidas: Segmento[], ejes: Segmento[]): ArbolVisual[] {
   const arboles: ArbolVisual[] = [];
-  const paso = 2.4;
-  for (let x = interior.x + paso / 2, i = 0; x < interior.x + interior.ancho; x += paso, i++) {
-    for (let z = interior.z + paso / 2, j = 0; z < interior.z + interior.fondo; z += paso, j++) {
-      if (pseudoAleatorio(semilla * 97 + i, j) > 0.26) continue;
-      const libre = edificios.every(
-        (e) => Math.max(Math.abs(e.posicion.x - x), Math.abs(e.posicion.z - z)) > e.huella / 2 + 1.4,
-      );
-      if (!libre) continue;
-      const jx = (pseudoAleatorio(i, j + semilla) - 0.5) * 0.8;
-      const jz = (pseudoAleatorio(j, i + semilla) - 0.5) * 0.8;
-      arboles.push({ posicion: { x: x + jx, z: z + jz }, escala: 0.75 + pseudoAleatorio(i + semilla, j * 3) * 0.5 });
+  avenidas.forEach((s, i) => {
+    for (const [k, p] of puntosALoLargo(s, 3.6).entries()) {
+      if (distanciaACruce(p, esHorizontal(s), ejes) < AVENIDA * 0.9) continue;
+      arboles.push({ posicion: p, escala: 0.9 + ((i * 7 + k * 3) % 5) * 0.05, motivo: 'bulevar' });
+    }
+  });
+  return arboles;
+}
+
+/** Plazas: un árbol en cada esquina, enmarcando el espacio público. */
+function arbolesDePlaza(zonas: ZonaVisual[]): ArbolVisual[] {
+  const arboles: ArbolVisual[] = [];
+  for (const z of zonas) {
+    if (!z.plaza) continue;
+    const m = Math.min(1.4, Math.min(z.plaza.ancho, z.plaza.fondo) * 0.18);
+    const r = encoger(z.plaza, m);
+    for (const p of [
+      { x: r.x, z: r.z },
+      { x: r.x + r.ancho, z: r.z },
+      { x: r.x, z: r.z + r.fondo },
+      { x: r.x + r.ancho, z: r.z + r.fondo },
+    ]) {
+      arboles.push({ posicion: p, escala: 1.05, motivo: 'plaza' });
     }
   }
   return arboles;
+}
+
+/** Farolas a ambos lados de las avenidas, alternadas. */
+function farolasDeAvenida(avenidas: Segmento[], ejes: Segmento[]): Punto[] {
+  const farolas: Punto[] = [];
+  const borde = AVENIDA / 2 + CALLE / 2 - 0.45;
+  for (const s of avenidas) {
+    const izquierda = puntosALoLargo(s, 7, -borde);
+    const derecha = puntosALoLargo(s, 7, borde);
+    izquierda.forEach((p, k) => {
+      const q = k % 2 ? derecha[k]! : p;
+      if (distanciaACruce(q, esHorizontal(s), ejes) > AVENIDA / 2 + CALLE + 0.6) farolas.push(q);
+    });
+  }
+  return farolas;
 }
 
 export const centroZona = (z: ZonaVisual): Punto => centroRect(z.parcela);
