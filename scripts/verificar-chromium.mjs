@@ -100,7 +100,7 @@ const progreso = () => {
   await p.waitForTimeout(1600);
   ok('navegación: edificio rotulado y destacado', (await p.locator('.m-etq.edificio:not(.tenue)').first().textContent()) === 'Cajas de ahorro');
   ok('navegación: edificio con acción de estudio', (await p.locator('.ficha .ficha-accion').getAttribute('href')) === '#c/cajas');
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-edificio.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-edificio.png` }).catch(() => {});
   // Estudiar: entrar al concepto, acertar a la primera y volver al mapa.
   await pulsar(p, '.ficha .ficha-accion');
   await p.waitForSelector('#c-cajas');
@@ -118,7 +118,7 @@ const progreso = () => {
   ok('vuelta al mapa: se abre en el edificio estudiado', (await p.locator('.migas [aria-current]').textContent()) === 'Cajas de ahorro');
   const estado = await p.locator('.atlas-estado').first().textContent();
   ok('vuelta al mapa: el edificio cambia de estado', !estado.includes('En proyecto'), `${dominio} → ${estado}`);
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-vuelta.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-vuelta.png` }).catch(() => {});
   // Subir al mapa con Escape y migas.
   await p.locator('.migas button').first().click();
   await p.waitForTimeout(1500);
@@ -133,7 +133,7 @@ const progreso = () => {
   await pulsar(p, '[data-recorrido="1"]');
   await p.waitForTimeout(1600);
   ok('recorrido: "Siguiente" avanza y mueve el mapa', (await pasoTexto()).includes('Paso 2 de') && (await p.locator('.migas [aria-current]').textContent()) === 'Eurosistema', await pasoTexto());
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-recorrido.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-recorrido.png` }).catch(() => {});
   await pulsar(p, '[data-recorrido="salir"]');
   await p.waitForTimeout(800);
   ok('recorrido: se puede salir', (await p.locator('.m-etq.paso').count()) === 0 && (await p.locator('.ficha-antetitulo').first().textContent().catch(() => '')).includes('Recorrido') === false);
@@ -163,7 +163,7 @@ const progreso = () => {
   ok('noche: solo se rotulan los edificios con algo pendiente', pendientesN.length === 2 && (await p.locator('.m-etq').count()) === 2, pendientesN.join(' | '));
   ok('noche: el error con seguridad se marca', (await p.locator('.m-etq.pendiente.sorpresa').count()) === 1);
   ok('noche: la ficha resume la noche', await p.waitForFunction(() => document.querySelector('.ficha:not([hidden])')?.textContent.includes('Repaso de esta noche'), null, { timeout: 8000 }).then(() => true).catch(() => false));
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` }).catch(() => {});
   await pulsar(p, '.ficha-pend');
   await p.waitForTimeout(1600);
   const repasar = await p.locator('.ficha .ficha-accion').getAttribute('href');
@@ -183,7 +183,7 @@ const progreso = () => {
   await p.click('[data-mundo-atlas]');
   await p.waitForTimeout(1800);
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-atlas.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-atlas.png` }).catch(() => {});
   await p.close();
 }
 
@@ -215,7 +215,7 @@ const progreso = () => {
   ok('móvil: sin desbordamiento horizontal', anchoPagina <= 390, `${anchoPagina}px`);
   ok('móvil: rótulos de barrio compactos', await p.locator('.m-etq .m-largo').first().evaluate((e) => getComputedStyle(e).display === 'none'));
   await p.locator('[data-mundo-vista]').scrollIntoViewIfNeeded();
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-movil.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-movil.png` }).catch(() => {});
   await p.close();
 }
 
@@ -378,7 +378,7 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   for (let i = 0; i < 20 && enAire !== '1'; i++) { await p.waitForTimeout(50); enAire = await p.evaluate(() => document.querySelector('.mundo-lienzo').dataset.enAire); }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   ok('móvil: salta mientras camina (dos dedos)', andando === '1' && enAire === '1', `andando ${andando} · en el aire ${enAire}`);
-  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-joystick.png` });
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-joystick.png` }).catch(() => {});
   await p.close();
 }
 
