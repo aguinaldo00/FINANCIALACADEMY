@@ -1,3 +1,4 @@
+import { GLYPHS } from '../../icons/glyphs.ts';
 import type { Concepto } from '../../content/schema.ts';
 import { dominioConcepto } from '../../domain/mastery.ts';
 import type { Progreso } from '../../domain/progress.ts';
@@ -7,7 +8,8 @@ import { colorDominio, porcentaje, resaltarAviso } from '../format.ts';
 /** Ficha de concepto: definición, ejemplo y los tres paneles (otra forma, trampa, compruébalo). */
 export function fichaConcepto(c: Concepto, progreso: Progreso, conInfografia = false): string {
   const d = dominioConcepto(progreso, c.id);
-  return `<article class="cc rev" id="c-${c.id}" data-id="${c.id}">
+  const marca = c.iconos[0] ? `<svg class="cc-marca" viewBox="0 0 64 64" aria-hidden="true" style="--c:${c.color}">${GLYPHS[c.iconos[0]]}</svg>` : '';
+  return `<article class="cc rev" id="c-${c.id}" data-id="${c.id}">${marca}
  <div class="cc-h"><div class="ico">${iconoSvg(c.iconos, c.color)}</div><div><h2>${c.nombre}</h2><div class="meta"><span class="pill">${c.seccionId}</span><span class="dm" style="background:${colorDominio(d)}">Dominio ${porcentaje(d)}</span></div></div></div>
  <p class="corta">${c.definicion}</p>
  <p class="ej"><span class="lab">🌍 En la vida real:</span> ${resaltarAviso(c.ejemploReal)}</p>

@@ -1,3 +1,5 @@
+import { sacudir, saltarMonedas } from '../components/celebrar.ts';
+import { skylineSeccion } from '../components/skyline.ts';
 import { hrefInicio, hrefSeccion } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { Concepto, Pregunta } from '../../content/schema.ts';
@@ -24,7 +26,7 @@ export function pintarSeccion(ctx: ContextoVista, estado: EstadoEstudio, seccion
     ? `<a href="${hrefSeccion(siguiente.id)}"><small>Siguiente →</small><b>${siguiente.id} ${siguiente.titulo}</b></a>`
     : `<a href="${hrefInicio()}"><small>Fin del tema →</small><b>Inicio</b></a>`;
 
-  ctx.pagina.innerHTML = `<div data-sec="${seccionId}"><header class="sh"><div class="kick"><span class="pill k">${s.id}</span><span class="pill">Peso estimado en examen: ${s.pesoExamen} %</span><span class="pill" style="border-color:${colorDominio(d)}">Dominio ${porcentaje(d)}</span></div><h1>${s.titulo}</h1><p>${s.descripcion}</p></header>
+  ctx.pagina.innerHTML = `<div data-sec="${seccionId}"><header class="sh"><div class="kick"><span class="pill k">${s.id}</span><span class="pill">Peso estimado en examen: ${s.pesoExamen} %</span><span class="pill" style="border-color:${colorDominio(d)}">Dominio ${porcentaje(d)}</span></div><h1>${s.titulo}</h1><p>${s.descripcion}</p>${skylineSeccion(conceptos, progreso)}</header>
  ${pretest(estado, conceptos)}
  ${conceptos.map((c) => fichaConcepto(c, progreso, infografiasDe(tema.ampliacion?.infografias, c.id).length > 0)).join('')}
  <nav class="pager">${enlaceAnterior}${enlaceSiguiente}</nav></div>`;
@@ -82,6 +84,8 @@ function conectarPretest(raiz: HTMLElement | null, estado: EstadoEstudio, concep
         for (const x of panel.querySelectorAll<HTMLButtonElement>('.opt')) x.disabled = true;
         panel.querySelectorAll<HTMLButtonElement>('.opt')[q.indiceCorrecta]?.classList.add('ok');
         if (!bien) b.classList.add('no');
+        if (bien) saltarMonedas(b);
+        else sacudir(b);
         panel.querySelector('.fb')!.innerHTML = `${bien ? '✅ ¡Bien!' : '🔎 Lo verás en la ficha'} <a href="#c-${q.conceptoId}" data-pre-ir>${nombre}</a>. <button type="button" class="fc-btn" data-pre="sig">${i + 1 < preguntas.length ? 'Siguiente →' : 'Terminar'}</button>`;
         panel.querySelector<HTMLButtonElement>('[data-pre="sig"]')!.onclick = () => mostrar(i + 1);
         panel.querySelector<HTMLAnchorElement>('[data-pre-ir]')!.onclick = (e) => {

@@ -43,3 +43,11 @@ clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
 - [x] 18. Discriminación de conceptos parecidos en la sesión: "¿A qué concepto corresponde esta
   definición?" con la definición de DATA (nombre oculto) y opciones del mismo bloque. Intercalado
   con discriminación: es donde más rinde (Brunmair y Richter, 2019).
+- [x] 19. Detalle y decoración:
+  - emblemas de fachada con el icono del concepto;
+  - día, atardecer y noche;
+  - halos, palomas, nubes y monedas en la entrada;
+  - placa de la peana;
+  - silueta de la manzana en las secciones;
+  - celebraciones al responder y medalla del simulacro.
+

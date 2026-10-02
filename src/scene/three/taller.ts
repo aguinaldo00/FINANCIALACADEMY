@@ -1,6 +1,7 @@
 import { BoxGeometry, BufferGeometry, CylinderGeometry, Float32BufferAttribute, PlaneGeometry, SphereGeometry } from 'three';
 import type { TipoTejado } from '../../content/schema.ts';
 import { pseudoAleatorio } from '../../world/geometry.ts';
+import type { Escudo } from './emblemas.ts';
 
 /*
  * Taller de piezas: acumula geometría etiquetada por "rol" (zócalo, muro, moldura, vidrio…) en
@@ -12,6 +13,8 @@ export type Rol =
   | 'base' | 'muro' | 'acento' | 'tejado' | 'vidrio' | 'metal' | 'verde'
   | 'luz' | 'oscuro' | 'pantalla' | 'baliza' | 'bandera'
   | 'moldura' | 'junta' | 'bronce'
+  /** Disco del emblema de fachada (ver emblemas.ts). */
+  | 'medallon'
   /** Entorno del edificio (jardín del lote): siempre construido, no depende del dominio. */
   | 'entorno';
 
@@ -31,6 +34,8 @@ export class Taller {
   readonly piezas = new Map<Rol, BufferGeometry[]>();
   principal: Volumen = { w: 1, d: 1, h: 1, x: 0, z: 0 };
   cima = 0;
+  /** Sitio del emblema que fija cada tipología; si falta, se usa la fachada del volumen principal. */
+  escudo: Escudo | null = null;
 
   anadir(rol: Rol, g: BufferGeometry): void {
     const lista = this.piezas.get(rol) ?? [];

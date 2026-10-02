@@ -80,6 +80,9 @@ const progreso = () => {
   // Se responde en orden: el primer acierto deja dominio 1 (a la primera) o 0,5 (tras fallar).
   const n = await p.locator('#c-cajas .opt').count();
   for (let i = 0; i < n; i++) { await p.locator('#c-cajas .opt').nth(i).click(); if (await p.locator('#c-cajas .opt.ok').count()) break; }
+  ok('decoración: monedas al acertar', (await p.locator('.monedas-salto i').count()) > 0);
+  ok('decoración: silueta de la manzana con un edificio por concepto', (await p.locator('.manzana-sil .sk-ed').count()) === 8);
+  ok('decoración: marca de agua del icono en la ficha', (await p.locator('#c-cajas .cc-marca').count()) === 1);
   const dominio = await p.locator('#c-cajas .dm').textContent();
   await p.evaluate(() => { location.hash = '#inicio'; });
   await p.waitForSelector('.mundo-lienzo', { timeout: 20000 });
@@ -92,6 +95,16 @@ const progreso = () => {
   await p.locator('.migas button').first().click();
   await p.waitForTimeout(1500);
   ok('navegación: migas devuelven a la ciudad', (await p.locator('.migas [aria-current]').textContent()) === 'La ciudad del dinero');
+  // Día / atardecer / noche: el botón recorre los ambientes y la elección se recuerda.
+  const ambientes = [];
+  for (let k = 0; k < 3; k++) {
+    await p.click('[data-mundo-ambiente]');
+    await p.waitForTimeout(1100);
+    ambientes.push(await p.locator('.mundo').getAttribute('data-ambiente'));
+    if (ambientes.at(-1) === 'noche') await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` });
+  }
+  ok('ambiente: el botón recorre día, atardecer y noche', new Set(ambientes).size === 3, ambientes.join(' → '));
+  ok('ambiente: la elección se guarda', (await p.evaluate(() => localStorage.getItem('financial-academy:ambiente'))) === JSON.stringify(ambientes.at(-1)));
   await p.click('[data-mundo-atlas]');
   await p.waitForTimeout(1800);
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
@@ -160,6 +173,8 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.waitForSelector('[data-sim-nota]');
   const nota = await p.locator('[data-sim-nota]').textContent();
   ok(`simulacro (${nombre}): 10 preguntas y nota`, (await p.locator('.sim-correccion li').count()) === 10, `nota ${nota}`);
+  const valor = Number(nota.replace(',', '.'));
+  ok(`simulacro (${nombre}): medalla según la nota`, (await p.locator('.medalla').count()) === (valor >= 5 ? 1 : 0), `nota ${nota}`);
   ok(`simulacro (${nombre}): calibración por seguridad`, (await p.locator('.sim-cal .ex-fila').count()) === 2);
   ok(`simulacro (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho);
   await p.screenshot({ path: `${SP}/ver-simulacro-${ancho}.png`, fullPage: false });

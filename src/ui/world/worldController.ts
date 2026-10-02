@@ -1,3 +1,4 @@
+import { type Ambiente, type PreferenciaAmbiente, resolverAmbiente, sanearPreferencia, siguienteAmbiente } from '../../world/ambiente.ts';
 import { MARCA, tituloMarca } from '../components/brandTitle.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
@@ -30,6 +31,8 @@ import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separar
 export const CLAVE_VISTA = 'financial-academy:vista';
 /** Zoom con la rueda fuera de pantalla completa (comodidad local). */
 export const CLAVE_ZOOM = 'financial-academy:zoom-rueda';
+/** Preferencia de luz de la maqueta (día, atardecer, noche o según la hora). */
+export const CLAVE_AMBIENTE = 'financial-academy:ambiente';
 /** La entrada cinematográfica solo se muestra completa la primera vez. */
 export const CLAVE_ENTRADA = 'financial-academy:entrada';
 
@@ -68,6 +71,7 @@ export class ControladorMundo {
   /** El mapa está en pantalla completa (API nativa o capa de reserva). */
   private pantallaCompleta = false;
   private zoomRueda: boolean;
+  private preferenciaAmbiente: PreferenciaAmbiente;
   private pistaZoomMostrada = false;
   private observadorPortada: IntersectionObserver | null = null;
   /** El mapa ocupa la mayor parte de la pantalla (≥ 55 % visible). */
@@ -79,6 +83,7 @@ export class ControladorMundo {
   ) {
     this.modo3d = leerJson(almacen, CLAVE_VISTA) !== '2d';
     this.zoomRueda = leerJson(almacen, CLAVE_ZOOM) === true;
+    this.preferenciaAmbiente = sanearPreferencia(leerJson(almacen, CLAVE_AMBIENTE));
     document.addEventListener('fullscreenchange', () => {
       const nativa = Boolean(this.raiz && document.fullscreenElement === this.raiz);
       if (!nativa && !this.raiz?.classList.contains('pantalla-completa')) this.fijarPantallaCompleta(false);
@@ -88,6 +93,11 @@ export class ControladorMundo {
       this.reducido = reducido;
       if (this.mundo) this.mundo.movimientoReducido = reducido;
     });
+  }
+
+  /** Ambiente vigente: el elegido o, si no hay elección, el de la hora local. */
+  get ambiente(): Ambiente {
+    return resolverAmbiente(this.preferenciaAmbiente);
   }
 
   /** Recuerda el último lugar visitado para volver a él al regresar al mapa. */
@@ -101,6 +111,7 @@ export class ControladorMundo {
     this.modelo = modeloCiudad(this.estado.tema, this.estado.progreso);
     if (!focoValido(this.modelo, this.foco)) this.foco = FOCO_CIUDAD;
     raiz.innerHTML = esqueletoMundo();
+    raiz.dataset.ambiente = this.ambiente;
     raiz.addEventListener('click', (e) => this.alPulsar(e));
     // Esc se escucha en todo el documento: al navegar con el Atlas, el botón pulsado se repinta y
     // el foco vuelve al documento (fuera del mapa).
@@ -156,7 +167,10 @@ export class ControladorMundo {
     let mundo: Mundo3D;
     try {
       if (this.mundo) this.mundo.actualizar(this.modelo);
-      else this.mundo = await this.crearMundo();
+      else {
+        this.mundo = await this.crearMundo();
+        this.mundo.fijarAmbiente(this.ambiente, false);
+      }
       mundo = this.mundo;
     } catch (error) {
       console.error('No se pudo iniciar la vista 3D', error);
@@ -639,6 +653,13 @@ export class ControladorMundo {
       escribirJson(this.almacen, CLAVE_ZOOM, this.zoomRueda);
       this.aplicarZoom();
       this.pintarPanel();
+    } else if ('mundoAmbiente' in dataset) {
+      this.preferenciaAmbiente = siguienteAmbiente(this.ambiente);
+      escribirJson(this.almacen, CLAVE_AMBIENTE, this.preferenciaAmbiente);
+      if (this.raiz) this.raiz.dataset.ambiente = this.ambiente;
+      this.mundo?.fijarAmbiente(this.ambiente, true);
+      this.pintarPanel();
+      this.raiz?.querySelector<HTMLButtonElement>('[data-mundo-ambiente]')?.focus();
     } else if ('mundoPaseo' in dataset) {
       if (this.paseando) this.detenerPaseo(true);
       else this.empezarPaseo();
@@ -683,6 +704,7 @@ export class ControladorMundo {
       paseando: this.paseando,
       pantallaCompleta: this.pantallaCompleta,
       zoomRueda: this.zoomRueda,
+      ambiente: this.ambiente,
     });
 
     let historia = '';

@@ -110,6 +110,7 @@ function torreCentral(t: Taller, e: Encargo): void {
   t.cilindro('moldura', r + 0.2, 0.22, 0, yt + 1.4, -D * 0.05, 20);
   t.esfera('tejado', r + 0.1, 0, yt + 1.62, -D * 0.05, true);
   t.principal = { w: W, d: D, h: y0 + alto + 0.32, x: 0, z: 0 };
+  t.escudo = { x: 0, y: y0 + alto - 2.1, z: -D * 0.05 + tw / 2, tam: Math.min(1.9, tw * 0.34), modo: 'placa' };
 }
 
 /** Palacio institucional: zócalo almohadillado, pórtico de orden gigante y frontón o cúpula. */
@@ -145,6 +146,9 @@ const institucional: Constructor = (t, e) => {
   t.principal = { w: W, d: D, h: H + 0.32, x: 0, z: 0 };
 
   const y = H + 0.32;
+  t.escudo = e.tejado === 'fronton'
+    ? { x: 0, y: y + P * 0.075, z: D / 2 + vuelo + 0.03, tam: Math.min(1.6, P * 0.12), modo: 'placa' }
+    : { x: 0, y: H, z: D / 2 + vuelo - 0.25, tam: Math.min(1.7, P * 0.2), modo: 'cresta' };
   if (e.tejado === 'fronton') {
     // Frontón sobre el pórtico y cubierta a cuatro aguas detrás.
     t.prisma('moldura', P + 0.7, P * 0.2, vuelo + 0.35, 0, y, D / 2 + vuelo / 2 - 0.15, 'z');
@@ -178,6 +182,7 @@ const banco: Constructor = (t, e) => {
   cornisa(t, W, D, muro);
   portada(t, 1.6, 1.9, D / 2, true);
   t.principal = { w: W, d: D, h: muro + 0.32, x: 0, z: 0 };
+  t.escudo = { x: 0, y: base + (muro - base) / 2, z: D / 2 + 0.04, tam: Math.min(1.6, (muro - base) * 0.62), modo: 'placa' };
 
   if (e.tejado === 'ruina') {
     // La portada original dibuja la caja "mordida": nave de ladrillo con hastial y rosetón,
@@ -231,6 +236,7 @@ const supervisor: Constructor = (t, e) => {
   t.caja('vidrio', tw * 0.84, 1.1, td * 0.84, 0, H - 0.8, 0);
   portada(t, 1.8, 1.25, D / 2, true);
   t.principal = { w: tw, d: td, h: H, x: 0, z: 0 };
+  t.escudo = { x: 0, y: podio + (H - podio) * 0.55, z: td / 2 + 0.08, tam: Math.min(1.7, tw * 0.32), modo: 'placa' };
   if (e.tejado !== 'plano') remate(t, e.tejado, tw * 0.6, td * 0.6, H + 0.3, 0, 0, 'x');
 };
 
@@ -268,6 +274,7 @@ const aseguradora: Constructor = (t, e) => {
     }
     portada(t, 1.3, 2.0, D / 2, true);
     t.principal = { w: r * 2, d: r * 2, h: y, x: 0, z: 0 };
+    t.escudo = { x: 0, y: 1.0 + alto * 0.6, z: r + 0.06, tam: Math.min(1.4, alto * 0.34, r * 0.8), modo: 'placa' };
     return;
   }
   const H = Math.max(4, e.H);
@@ -279,6 +286,7 @@ const aseguradora: Constructor = (t, e) => {
   t.tronco('tejado', W + 0.4, D + 0.4, W * 0.3, D * 0.3, Math.min(W, D) * 0.22, 0, H + 0.28, 0);
   portada(t, 1.5, 1.9, D / 2, true);
   t.principal = { w: W, d: D, h: H + 0.28, x: 0, z: 0 };
+  t.escudo = { x: 0, y: Math.max(3.1, 1.2 + (H - 1.2) * 0.6), z: D / 2 + 0.04, tam: Math.min(1.5, W * 0.25, (H - 2.6) * 0.8), modo: 'placa' };
 };
 
 /** Lonja: nave de ladrillo con bóveda de zinc, grandes ventanales y panel de cotizaciones. */
@@ -298,6 +306,7 @@ const lonja: Constructor = (t, e) => {
   t.boveda('tejado', W, (D * 0.9) / 2, 0, 0.82 + alto, 0);
   t.caja('acento', 2.4, 0.1, 1.0, 0, 2.2, (D * 0.9) / 2 + 0.5);
   t.principal = { w: W, d: D * 0.9, h: 0.82 + alto + (D * 0.9) / 2, x: 0, z: 0 };
+  t.escudo = { x: 0, y: 0.82 + alto, z: (D * 0.9) / 2 - 0.05, tam: Math.min(1.6, W * 0.2), modo: 'cresta' };
 };
 
 /** Pagos: caja de vidrio claro y un volumen superior girado, con líneas de luz en los forjados. */
@@ -313,6 +322,7 @@ const tecnologica: Constructor = (t, e) => {
   t.caja('pantalla', w2 + 0.08, 0.08, w2 + 0.08, W * 0.08, H - 0.1, -D * 0.06, 0.26);
   portada(t, 2.0, 2.0, (D * 0.92) / 2, false);
   t.principal = { w: W * 0.92, d: D * 0.92, h: H, x: 0, z: 0 };
+  t.escudo = { x: 0, y: Math.max(3.2, h1 * 0.62), z: (D * 0.92) / 2 + 0.04, tam: Math.min(1.5, W * 0.24, Math.max(0.9, h1 - 2.8)), modo: 'placa' };
 };
 
 /** Oficinas: bloque de fachada continua con ático retranqueado y rasgos según sus glifos. */
@@ -336,6 +346,7 @@ const oficina: Constructor = (t, e) => {
     t.caja('acento', W - ancho * 2 + 0.3, 0.12, D * 0.47, 0, yPasarela - 0.12, 0);
     portada(t, 1.4, 1.9, D / 2, true, (-(W - ancho)) / 2);
     t.principal = { w: W, d: D, h: H, x: 0, z: 0 };
+    t.escudo = { x: 0, y: yPasarela + 0.6, z: D * 0.225 + 0.02, tam: Math.min(1.1, W - ancho * 2), modo: 'placa' };
     remate(t, e.tejado, ancho * 0.8, D * 0.7, H + 0.32, (-(W - ancho)) / 2, 0, 'x');
     return;
   }
@@ -369,6 +380,7 @@ const oficina: Constructor = (t, e) => {
     for (let x = -W / 2 + 0.4; x <= W / 2 - 0.4; x += 0.55) t.caja('bronce', 0.08, h1 - 2.4, 0.18, x, 2.4, D / 2 + 0.1);
   }
   t.principal = { w: W, d: D, h: H, x: 0, z: 0 };
+  t.escudo = { x: W * 0.28, y: h1 + 0.32, z: D / 2 - 0.35, tam: Math.min(1.4, W * 0.22), modo: 'cresta' };
   remate(t, e.tejado, uw, ud, H + 0.05, 0, uz, 'x');
 };
 
@@ -415,6 +427,7 @@ export function materialUrbano(rol: Rol, e: EdificioVisual, semilla: number): Ma
     case 'vidrio': return mate(e.tipologia === 'tecnologica' ? '#79a2b4' : '#34505e', { rugosidad: 0.14, metal: 0.6 });
     case 'metal': return mate('#6c6e73', { rugosidad: 0.4, metal: 0.6 });
     case 'bronce': return mate('#7d5d33', { rugosidad: 0.35, metal: 0.75 });
+    case 'medallon': return mate('#22252b', { rugosidad: 0.45, metal: 0.35 });
     case 'verde': return mate('#6c9850', { rugosidad: 1 });
     case 'entorno': return mate('#6f9a52', { rugosidad: 1 });
     case 'luz': return emisivo('#ffcf86', true);

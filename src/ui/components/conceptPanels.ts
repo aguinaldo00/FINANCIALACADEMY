@@ -1,3 +1,4 @@
+import { sacudir, saltarMonedas, sellar } from './celebrar.ts';
 import type { Concepto, ModoExplicacion, NodoEsquema, Pregunta, Tema } from '../../content/schema.ts';
 import { type Confianza, CONFIANZAS, idTarjetaFrase } from '../../domain/practice.ts';
 import { compararRecuerdo, ideasClave } from '../../domain/recall.ts';
@@ -42,6 +43,7 @@ export function pintarPreguntaEn(
     boton.onclick = () => {
       if (alResponder(Number(boton.dataset.k))) {
         boton.classList.add('ok');
+        saltarMonedas(boton);
         for (const b of botones) b.disabled = true;
         feedback.innerHTML = `✅ <b>Correcto.</b> ${explicacion}`;
       } else {
@@ -93,7 +95,13 @@ export function pintarPreguntaConConfianza(
         x.classList.remove('elegida');
       }
       botones[indiceCorrecta]?.classList.add('ok');
-      if (!correcta) botones[elegida]?.classList.add('no');
+      if (!correcta) {
+        botones[elegida]?.classList.add('no');
+        sacudir(botones[elegida]);
+      } else {
+        saltarMonedas(botones[indiceCorrecta]);
+        if (confianza === 'seguro') sellar(panel);
+      }
       for (const x of conf.querySelectorAll<HTMLButtonElement>('button')) {
         x.disabled = true;
         x.classList.toggle('on', x === c);

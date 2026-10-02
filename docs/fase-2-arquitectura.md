@@ -411,6 +411,39 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
   - Barra del mapa en móvil con etiquetas cortas.
   - Silueta del personaje cuando algo lo tapa.
 
+## Detalle y decoración (02/10, noche)
+
+- **Emblemas de fachada** (`scene/three/emblemas.ts`):
+  - cada edificio lleva un medallón con el **primer glifo de su concepto en DATA**, el mismo del
+    icono 2D, trazado a partir del SVG original con `SVGLoader`;
+  - cada tipología fija dónde va (`Taller.escudo`): en placa sobre la fachada o en cresta sobre la
+    cornisa;
+  - se reparte por roles (`medallon`, `bronce`, `acento`), así que respeta el corte por fase: en
+    obra solo se ve si ya está construido.
+- **Día, atardecer y noche:**
+  - la parte pura está en `world/ambiente.ts` (hora → ambiente, preferencia saneada) y los
+    preajustes de luz en `scene/three/ambiente.ts`;
+  - el botón ☀️/🌇/🌙 de la barra del mapa recorre los tres;
+  - la preferencia se guarda en `financial-academy:ambiente`; sin ella, sigue la hora local;
+  - la transición dura unos 0,85 s;
+  - el cielo es el fondo CSS del visor (estrellas de noche) y la niebla usa el mismo color de borde.
+- **Decorado vivo** (`scene/three/decorado.ts`):
+  - halos de las farolas (un `Points` aditivo);
+  - palomas sobre las plazas;
+  - nubes en las vistas de ciudad y barrio;
+  - lluvia de monedas en la entrada;
+  - placa de latón grabada en el canto de la peana.
+  - Las palomas y las nubes se animan a unos 30 fps. Con movimiento reducido no se anima nada y se
+    mantienen los 0 redibujados en reposo.
+- **Pantallas 2D:**
+  - silueta de la manzana en la cabecera de cada sección (`ui/components/skyline.ts`), con la
+    tipología y la fase de obra de cada concepto;
+  - marca de agua del icono en las fichas;
+  - monedas al acertar, sacudida al fallar y sello "¡Lo sabías!" al acertar con seguridad
+    (`ui/components/celebrar.ts`);
+  - medalla de la nota del simulacro;
+  - fondo guilloché tenue en las vistas de práctica.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

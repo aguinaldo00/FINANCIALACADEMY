@@ -53,3 +53,18 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
   progreso no cambia de formato.
 - **Repaso de fallos:** una pregunta fallada sale del repaso tras 2 aciertos seguidos.
 - **Flashcards:** entran como mucho 10 nuevas al día (constantes en `domain/practice.ts`).
+
+## Decoración y día/noche (02/10)
+
+- **Preferencia de ambiente:**
+  - se guarda en `financial-academy:ambiente`, que es una preferencia de interfaz como la vista
+    2D/3D o el zoom, no progreso;
+  - sin elección, el ambiente sigue la hora local (día de 7 a 19, atardecer de 19 a 21, noche el
+    resto).
+- **Mapa 2D:** no cambia con el ambiente (ya tiene un cielo nocturno propio).
+  - **¿Igualarlo?** Decidir si debería seguir el mismo ciclo.
+- **Emblemas:** solo usan el primer glifo de cada concepto (el principal del icono 2D). Los glifos
+  secundarios no se dibujan, para no recargar la fachada.
+- **Animación continua:** las palomas y las nubes hacen que la escena se redibuje (a unos 30 fps)
+  mientras el mapa está a la vista. Con movimiento reducido no se anima nada.
+

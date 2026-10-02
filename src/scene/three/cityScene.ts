@@ -52,6 +52,8 @@ import {
 import { encoger as encogerRect } from '../../world/geometry.ts';
 import { NIVEL_PASAJE } from './urbanGround.ts';
 import { NIVEL, PALETA } from './palette.ts';
+import { type Ambiente, AMBIENTES, mezclarPreajustes, type Preajuste } from './ambiente.ts';
+import { Decorado } from './decorado.ts';
 
 /*
  * Renderer de la Ciudad del Dinero. Solo dibuja el modelo visual y avisa de lo que el usuario
@@ -177,6 +179,14 @@ export class Mundo3D {
   private atlas = 0;
   private pulsado: { x: number; y: number } | null = null;
   private reducido: boolean;
+  /** Luces que cambian con el ambiente (día, atardecer, noche). */
+  private hemi!: HemisphereLight;
+  private sol!: DirectionalLight;
+  private relleno!: DirectionalLight;
+  private ambiente: Preajuste = AMBIENTES.dia;
+  private cambioAmbiente: { desde: Preajuste; hacia: Preajuste; inicio: number } | null = null;
+  private readonly decorado: Decorado;
+  private ultimoDecorado = 0;
 
   constructor(modelo: ModeloCiudad, private readonly opciones: OpcionesMundo3D) {
     this.modelo = modelo;
@@ -204,7 +214,8 @@ export class Mundo3D {
     this.estatica = construirCapaEstatica(modelo);
     this.dinamica = construirCapaDinamica(modelo);
     this.obstaculos = obstaculosDe(modelo);
-    this.escena.add(this.estatica, this.dinamica.raiz);
+    this.decorado = new Decorado(modelo);
+    this.escena.add(this.estatica, this.dinamica.raiz, this.decorado.raiz);
     this.sombraDeContacto(modelo.lado + MARGEN_PEANA * 2);
 
     this.contorno.visible = false;
@@ -238,7 +249,8 @@ export class Mundo3D {
     this.escena.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     this.escena.environmentIntensity = 0.3;
     pmrem.dispose();
-    this.escena.add(new HemisphereLight('#fff1dc', '#4a3c30', 0.4));
+    this.hemi = new HemisphereLight('#fff1dc', '#4a3c30', 0.4);
+    this.escena.add(this.hemi);
     // Profundidad atmosférica: lo lejano se funde con el fondo del visor.
     this.escena.fog = new Fog('#2a2521', 200, 600);
     // Sol bajo desde la izquierda de la vista inicial: fachadas con luz y sombra, sombras largas visibles.
@@ -257,6 +269,51 @@ export class Mundo3D {
     const relleno = new DirectionalLight('#c9dcff', 0.5);
     relleno.position.set(lado * 0.7, lado * 0.3, -lado * 0.2);
     this.escena.add(sol, relleno);
+    this.sol = sol;
+    this.relleno = relleno;
+  }
+
+  /* ------------------------------------------------------------ ambiente */
+
+  /** Día, atardecer o noche. Con animación, la luz cambia en algo menos de un segundo. */
+  fijarAmbiente(nombre: Ambiente, animar: boolean): void {
+    const hacia = AMBIENTES[nombre];
+    if (animar && !this.reducido) this.cambioAmbiente = { desde: this.ambiente, hacia, inicio: performance.now() };
+    else {
+      this.cambioAmbiente = null;
+      this.aplicarPreajuste(hacia);
+    }
+    this.sucio = true;
+  }
+
+  private aplicarPreajuste(p: Preajuste): void {
+    this.ambiente = p;
+    const lado = this.modelo.lado;
+    this.hemi.color.set(p.hemiCielo);
+    this.hemi.groundColor.set(p.hemiSuelo);
+    this.hemi.intensity = p.hemi;
+    this.sol.color.set(p.sol);
+    this.sol.intensity = p.sol_i;
+    // El sol baja hacia el horizonte (sombras largas) sin cambiar de lado.
+    const f = 1 + (1 - p.solAltura) * 0.6;
+    this.sol.position.set(-lado * 0.55 * f, lado * 0.62 * Math.max(0.25, p.solAltura), lado * 0.62 * f);
+    this.relleno.color.set(p.relleno);
+    this.relleno.intensity = p.relleno_i;
+    if (this.escena.fog instanceof Fog) this.escena.fog.color.set(p.niebla);
+    this.escena.environmentIntensity = p.entorno;
+    this.renderer.toneMappingExposure = p.exposicion;
+    this.decorado.fijarNoche(p.noche);
+    this.sombrasSucias = true;
+  }
+
+  private avanzarAmbiente(ahora: number): boolean {
+    const c = this.cambioAmbiente;
+    if (!c) return false;
+    const t = Math.min(1, (ahora - c.inicio) / 850);
+    const k = t * t * (3 - 2 * t);
+    this.aplicarPreajuste(mezclarPreajustes(c.desde, c.hacia, k));
+    if (t >= 1) this.cambioAmbiente = null;
+    return true;
   }
 
   /** Sombra difusa bajo la peana: la maqueta se apoya sobre algo. */
@@ -315,6 +372,7 @@ export class Mundo3D {
     this.controles.dispose();
     liberar(this.estatica);
     liberar(this.dinamica.raiz);
+    this.decorado.liberar();
     this.renderer.dispose();
   }
 
@@ -440,6 +498,8 @@ export class Mundo3D {
       grupo.scale.y = 0.0001;
       return { grupo, inicio: ahora + 1700 + (orden.get(e.grupoId) ?? 0) * 750 + (k % 7) * 110 };
     });
+    // Lluvia de monedas mientras la ciudad se levanta.
+    this.decorado.llover(ahora + 1300);
     let terminado = false;
     const terminar = () => {
       if (terminado) return;
@@ -452,6 +512,7 @@ export class Mundo3D {
     return () => {
       for (const a of this.apariciones) a.grupo.scale.y = 1;
       this.apariciones = [];
+      this.decorado.terminarLluvia();
       this.sombrasSucias = true;
       this.transicion = null;
       this.camara.fov = OPTICA.ciudad.fov;
@@ -953,7 +1014,18 @@ export class Mundo3D {
     cambio = this.controles.update() || cambio;
     cambio = this.animarCrecimientos(ahora) || cambio;
     cambio = this.animarApariciones(ahora) || cambio;
+    cambio = this.avanzarAmbiente(ahora) || cambio;
+    cambio = this.decorado.animarLluvia(ahora) || cambio;
+    this.lienzo.dataset.lluvia = this.decorado.lloviendo ? '1' : '';
     if (!this.reducido) cambio = this.animarAmbiente(ahora / 1000) || cambio;
+    // Palomas y nubes: vida de fondo, a ~30 fps y solo si no hay nada más que dibujar.
+    if (!this.reducido && (cambio || this.sucio || ahora - this.ultimoDecorado > 33)) {
+      this.decorado.nubesEnVista = !this.paseo && (this.focoActual.nivel === 'ciudad' || this.focoActual.nivel === 'barrio') && this.vista === 'maqueta';
+      if (this.decorado.animar(ahora / 1000)) {
+        this.ultimoDecorado = ahora;
+        cambio = true;
+      }
+    }
     if (!cambio && !this.sucio) return;
     this.despejarVista();
     this.ajustarProfundidad();

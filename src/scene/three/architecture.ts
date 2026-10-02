@@ -16,6 +16,7 @@ import type { Tipologia } from '../../world/typology.ts';
 import { emisivo, mate, mezclar, unir } from './materials.ts';
 import { type Rol, remate, SOLO_ACABADO, Taller, type Volumen } from './taller.ts';
 import { CONSTRUCTORES_URBANOS, materialUrbano } from './urbanArchitecture.ts';
+import { emblema } from './emblemas.ts';
 import { NIVEL, PALETA } from './palette.ts';
 
 /*
@@ -199,7 +200,8 @@ function materialAcabado(rol: Rol, e: EdificioVisual): Material {
     case 'bandera': return mate(e.color, { rugosidad: 0.7 });
     case 'moldura': return mate(PALETA.piedra, { rugosidad: 0.8 });
     case 'junta': return mate(PALETA.granito, { rugosidad: 0.85 });
-    case 'bronce': return mate(PALETA.metal, { rugosidad: 0.45, metal: 0.5 });
+    case 'bronce': return mate('#9a7a45', { rugosidad: 0.4, metal: 0.6 });
+    case 'medallon': return mate('#22252b', { rugosidad: 0.45, metal: 0.35 });
     case 'entorno': return mate(PALETA.cesped, { rugosidad: 1 });
   }
 }
@@ -262,6 +264,11 @@ export function construirArquitectura(e: EdificioVisual): Group {
   } else {
     CONSTRUCTORES[e.tipologia](taller, W, D, e.alturaCompleta, e.tejado, semilla);
   }
+  // Emblema de fachada con el icono del concepto (ver emblemas.ts).
+  const v = taller.principal;
+  emblema(taller, e.iconos, taller.escudo ?? {
+    x: v.x, y: Math.max(2.8, v.h * 0.6), z: v.z + v.d / 2, tam: Math.min(1.5, v.w * 0.3, Math.max(0.9, v.h * 0.22)), modo: 'placa',
+  });
   const material = (rol: Rol) => (e.composicion === 'urbana' ? materialUrbano(rol, e, semilla) : materialAcabado(rol, e));
 
   const cimaMundo = NIVEL.lote + taller.cima;
