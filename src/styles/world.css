@@ -264,3 +264,17 @@ body.menu .indice-flotante{display:none!important}
 .mundo[data-ambiente="atardecer"] .mundo-vista::before{opacity:.25}
 @keyframes titilar{from{opacity:.75}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.mundo[data-ambiente="noche"] .mundo-vista::before{animation:none}}
+
+/* Modo noche (repaso): rótulos con lo pendiente y ficha con los edificios encendidos. */
+.m-etq.edificio.pendiente{opacity:1;background:rgba(20,24,38,.88);box-shadow:inset 0 0 0 1px rgba(255,210,122,.55);color:#ffe7b0}
+.m-etq.edificio.pendiente.sorpresa{box-shadow:inset 0 0 0 1px rgba(255,90,74,.8)}
+.m-pend{display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;margin-left:4px;padding:0 5px;border-radius:999px;background:#ffd27a;color:#1b1406;font-size:.92em;font-variant-numeric:tabular-nums}
+.sorpresa .m-pend{background:#ff5a4a;color:#fff}
+.ficha-texto{margin:0;font-size:.9rem;line-height:1.45;color:var(--m-tinta2)}
+button.ficha-accion{cursor:pointer;background:none;border-top:0;border-left:0;border-right:0;font:inherit;font-weight:700;padding:0 0 2px}
+.ficha-pendientes{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ficha-pend{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;cursor:pointer;border:0;border-radius:3px;background:rgba(255,210,122,.08);color:var(--m-tinta);font:inherit;font-size:.82rem;font-weight:700;padding:6px 8px;text-align:left}
+.ficha-pend:hover{background:rgba(255,210,122,.18)}
+.ficha-pend b{flex:none;min-width:1.6em;text-align:center;border-radius:999px;background:#ffd27a;color:#1b1406;font-variant-numeric:tabular-nums}
+.ficha-pend[data-sorpresa] b{background:#ff5a4a;color:#fff}
+@media (max-width:640px){.ficha-pendientes li:nth-child(n+4){display:none}}

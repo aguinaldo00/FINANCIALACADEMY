@@ -33,3 +33,25 @@ function edificiosDeZona(m: ModeloCiudad, seccionId: string): Foco[] {
     .filter((id) => m.edificios.some((e) => e.conceptoId === id))
     .map((conceptoId): Foco => ({ nivel: 'edificio', conceptoId }));
 }
+
+/**
+ * Rótulos del modo noche (repaso): solo los edificios con algo pendiente dentro de lo que se mira,
+ * y el enfocado aunque no tenga nada. La ciudad apagada queda sin rótulos.
+ */
+export function etiquetasNocturnas(m: ModeloCiudad, foco: Foco, pendientes: ReadonlyMap<string, { total: number }>): Foco[] {
+  const ids = (() => {
+    switch (foco.nivel) {
+      case 'ciudad':
+        return m.edificios.map((e) => e.conceptoId);
+      case 'barrio':
+        return m.zonas.filter((z) => z.grupoId === foco.grupoId).flatMap((z) => z.conceptoIds);
+      case 'zona':
+        return m.zonas.find((z) => z.seccionId === foco.seccionId)?.conceptoIds ?? [];
+      case 'edificio':
+        return m.zonas.find((z) => z.conceptoIds.includes(foco.conceptoId))?.conceptoIds ?? [];
+    }
+  })();
+  const encendidos = ids.filter((id) => pendientes.get(id)?.total && m.edificios.some((e) => e.conceptoId === id));
+  if (foco.nivel === 'edificio' && !encendidos.includes(foco.conceptoId)) encendidos.unshift(foco.conceptoId);
+  return encendidos.map((conceptoId): Foco => ({ nivel: 'edificio', conceptoId }));
+}

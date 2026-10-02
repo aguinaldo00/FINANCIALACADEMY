@@ -56,11 +56,10 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 
 ## Decoración y día/noche (02/10)
 
-- **Preferencia de ambiente:**
-  - se guarda en `financial-academy:ambiente`, que es una preferencia de interfaz como la vista
-    2D/3D o el zoom, no progreso;
-  - sin elección, el ambiente sigue la hora local (día de 7 a 19, atardecer de 19 a 21, noche el
-    resto).
+- **Día y noche:** día = aprender y noche = repasar, como eligió el usuario.
+  - **Cambio:** solo con el botón, y el mapa se abre siempre de día.
+  - **Persistencia:** no se guarda nada; la elección dura mientras la aplicación está abierta.
+  - **Ruta nueva:** `#repaso/<concepto>`, para repasar solo lo pendiente de un edificio.
 - **Mapa 2D:** no cambia con el ambiente (ya tiene un cielo nocturno propio).
   - **¿Igualarlo?** Decidir si debería seguir el mismo ciclo.
 - **Emblemas:** solo usan el primer glifo de cada concepto (el principal del icono 2D). Los glifos

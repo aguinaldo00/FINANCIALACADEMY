@@ -33,7 +33,7 @@ export function iniciarApp(tema: Tema): void {
   const almacen = almacenNavegador();
   const estado = new EstadoEstudio(tema, almacen);
   const practica = new EstadoPractica(tema, almacen);
-  const mundo = new ControladorMundo(estado, almacen);
+  const mundo = new ControladorMundo(estado, almacen, practica);
 
   let seccionActual: string | null = null;
 
@@ -51,7 +51,7 @@ export function iniciarApp(tema: Tema): void {
       else if (ruta.vista === 'sesion') pintarSesion(ctx, estado, practica);
       else if (ruta.vista === 'progreso') pintarProgreso(ctx, estado, practica);
       else if (ruta.vista === 'visual') pintarVisual(ctx, estado);
-      else pintarRepaso(ctx, estado, practica);
+      else pintarRepaso(ctx, estado, practica, undefined, 'conceptoId' in ruta ? ruta.conceptoId : undefined);
     } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;
       mundo.desmontar();

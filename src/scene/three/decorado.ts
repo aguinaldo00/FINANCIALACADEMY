@@ -40,7 +40,7 @@ const PALOMAS_POR_PLAZA = 7;
 const MONEDAS = 70;
 const DURACION_LLUVIA = 3400;
 
-function texturaHalo(): CanvasTexture | null {
+export function texturaHalo(): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const lienzo = document.createElement('canvas');
   lienzo.width = lienzo.height = 64;

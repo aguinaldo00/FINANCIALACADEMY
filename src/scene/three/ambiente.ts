@@ -1,7 +1,8 @@
 import { Color } from 'three';
 import type { Ambiente } from '../../world/ambiente.ts';
 
-export type { Ambiente };
+/** Los dos modos y el atardecer, que es el paso intermedio de la transición. */
+export type Luz = Ambiente | 'atardecer';
 
 /*
  * Ambientes de la maqueta: día, atardecer y noche. Son preajustes de luz (sol, cielo, relleno,
@@ -27,7 +28,7 @@ export interface Preajuste {
   noche: number;
 }
 
-export const AMBIENTES: Record<Ambiente, Preajuste> = {
+export const AMBIENTES: Record<Luz, Preajuste> = {
   dia: {
     niebla: '#2a2521', hemiCielo: '#fff1dc', hemiSuelo: '#4a3c30', hemi: 0.4,
     sol: '#ffd9a8', sol_i: 3.3, solAltura: 1, relleno: '#c9dcff', relleno_i: 0.5, entorno: 0.3, exposicion: 0.92, noche: 0,

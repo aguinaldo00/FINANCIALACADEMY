@@ -420,12 +420,9 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
     cornisa;
   - se reparte por roles (`medallon`, `bronce`, `acento`), así que respeta el corte por fase: en
     obra solo se ve si ya está construido.
-- **Día, atardecer y noche:**
-  - la parte pura está en `world/ambiente.ts` (hora → ambiente, preferencia saneada) y los
-    preajustes de luz en `scene/three/ambiente.ts`;
-  - el botón ☀️/🌇/🌙 de la barra del mapa recorre los tres;
-  - la preferencia se guarda en `financial-academy:ambiente`; sin ella, sigue la hora local;
-  - la transición dura unos 0,85 s;
+- **Día y noche:**
+  - ver "Día = aprender, noche = repasar" más abajo, que sustituye al ciclo con atardecer y hora
+    automática;
   - el cielo es el fondo CSS del visor (estrellas de noche) y la niebla usa el mismo color de borde.
 - **Decorado vivo** (`scene/three/decorado.ts`):
   - halos de las farolas (un `Points` aditivo);
@@ -443,6 +440,26 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
     (`ui/components/celebrar.ts`);
   - medalla de la nota del simulacro;
   - fondo guilloché tenue en las vistas de práctica.
+
+## Día = aprender, noche = repasar (02/10)
+
+- **Botón ☀️ Aprender / 🌙 Repasar** en la barra del mapa:
+  - solo lo cambia el alumno, porque cambia el contenido;
+  - el mapa se abre siempre de día;
+  - la elección se recuerda mientras la aplicación está abierta;
+  - la luz pasa por el atardecer al cambiar.
+- **Noche:**
+  - la ciudad se apaga;
+  - cada concepto con algo pendiente hoy enciende sus ventanas (más pendiente, más luz) y lleva un
+    faro, rojo si hay errores con seguridad (`Mundo3D.fijarPendientes`);
+  - se ocultan las columnas de "Estudia ya";
+  - solo se rotulan los edificios encendidos, con su número (`etiquetasNocturnas`);
+  - la ficha resume la noche, lista los edificios y lleva a `#repaso/<concepto>`.
+- **Qué cuenta como pendiente** (`domain/pendientes.ts`):
+  - fallos, preguntas cuyo repaso espaciado vence hoy y flashcards ya vistas que vencen hoy;
+  - lo nuevo no cuenta: aprender es cosa del día.
+- **Repaso de un solo concepto:** ruta `#repaso/<concepto>`. Muestra sus fallos y vencidas, y sus
+  flashcards.
 
 ## Pendiente (siguientes pasos)
 

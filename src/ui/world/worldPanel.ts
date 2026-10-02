@@ -79,7 +79,7 @@ export function barraMundo(e: EstadoBarra): string {
     con3d ? btn(`data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}"`, e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa', e.pantallaCompleta ? '✕ Salir' : '⛶ Completa') : '',
     con3d && !e.pantallaCompleta ? btn(`data-mundo-zoom aria-pressed="${Boolean(e.zoomRueda)}"`, 'Zoom con rueda', 'Zoom') : '',
     con3d ? btn(`data-mundo-paseo aria-pressed="${Boolean(e.paseando)}"`, e.paseando ? 'Dejar de pasear' : 'Pasear', e.paseando ? '■ Parar' : '🚶 Pasear') : '',
-    con3d && e.ambiente ? btn(`data-mundo-ambiente aria-label="Luz: ${NOMBRE_AMBIENTE[e.ambiente]}. Cambiar a ${NOMBRE_AMBIENTE[siguienteAmbiente(e.ambiente)].toLowerCase()}"`, `${ICONO_AMBIENTE[e.ambiente]} ${NOMBRE_AMBIENTE[e.ambiente]}`, ICONO_AMBIENTE[e.ambiente]) : '',
+    con3d && e.ambiente ? btn(`data-mundo-ambiente aria-pressed="${e.ambiente === 'noche'}" aria-label="Modo ${NOMBRE_AMBIENTE[e.ambiente].toLowerCase()} (${e.ambiente === 'dia' ? 'día' : 'noche'}). Cambiar a ${NOMBRE_AMBIENTE[siguienteAmbiente(e.ambiente)].toLowerCase()}" title="${e.ambiente === 'dia' ? 'De noche solo se encienden los edificios con algo que repasar hoy' : 'De día, la ciudad completa del temario'}"`, `${ICONO_AMBIENTE[e.ambiente]} ${NOMBRE_AMBIENTE[e.ambiente]}`, ICONO_AMBIENTE[e.ambiente]) : '',
     con3d ? btn(`data-mundo-atlas aria-pressed="${e.vistaAtlas}"`, e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas', e.vistaAtlas ? 'Maqueta' : 'Atlas') : '',
     e.disponible3d !== false ? btn('data-mundo-modo', e.modo3d ? 'Ver en 2D' : 'Ver en 3D', e.modo3d ? '2D' : '3D') : '',
   ].join('');

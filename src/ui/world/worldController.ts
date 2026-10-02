@@ -1,4 +1,6 @@
-import { type Ambiente, type PreferenciaAmbiente, resolverAmbiente, sanearPreferencia, siguienteAmbiente } from '../../world/ambiente.ts';
+import type { EstadoPractica } from '../../app/practiceStore.ts';
+import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
+import { type Ambiente, siguienteAmbiente } from '../../world/ambiente.ts';
 import { MARCA, tituloMarca } from '../components/brandTitle.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
@@ -9,7 +11,7 @@ import type { Mundo3D } from '../../scene/three/cityScene.ts';
 import { webglDisponible } from '../../scene/webgl.ts';
 import { vistaAtlas } from '../../world/atlas.ts';
 import { type ModeloCiudad, modeloCiudad } from '../../world/cityModel.ts';
-import { etiquetasDelNivel } from '../../world/labels.ts';
+import { etiquetasDelNivel, etiquetasNocturnas } from '../../world/labels.ts';
 import {
   buscarBarrio,
   buscarEdificio,
@@ -24,15 +26,13 @@ import {
   igualFoco,
 } from '../../world/focus.ts';
 import { alCambiarMovimiento, movimientoReducido } from '../motion.ts';
-import { fichaContextual } from './contextCard.ts';
+import { fichaContextual, fichaNocturna } from './contextCard.ts';
 import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separarTitulo } from './worldPanel.ts';
 
 /** Preferencia de vista de cada usuario (comodidad local, no es progreso). */
 export const CLAVE_VISTA = 'financial-academy:vista';
 /** Zoom con la rueda fuera de pantalla completa (comodidad local). */
 export const CLAVE_ZOOM = 'financial-academy:zoom-rueda';
-/** Preferencia de luz de la maqueta (día, atardecer, noche o según la hora). */
-export const CLAVE_AMBIENTE = 'financial-academy:ambiente';
 /** La entrada cinematográfica solo se muestra completa la primera vez. */
 export const CLAVE_ENTRADA = 'financial-academy:entrada';
 
@@ -71,7 +71,11 @@ export class ControladorMundo {
   /** El mapa está en pantalla completa (API nativa o capa de reserva). */
   private pantallaCompleta = false;
   private zoomRueda: boolean;
-  private preferenciaAmbiente: PreferenciaAmbiente;
+  /**
+   * Día (aprender) o noche (repasar). Se recuerda mientras la aplicación está abierta; al cargarla,
+   * el mapa se abre siempre de día.
+   */
+  private modo: Ambiente = 'dia';
   private pistaZoomMostrada = false;
   private observadorPortada: IntersectionObserver | null = null;
   /** El mapa ocupa la mayor parte de la pantalla (≥ 55 % visible). */
@@ -80,10 +84,10 @@ export class ControladorMundo {
   constructor(
     private readonly estado: EstadoEstudio,
     private readonly almacen: AlmacenClaveValor | null,
+    private readonly practica: EstadoPractica | null = null,
   ) {
     this.modo3d = leerJson(almacen, CLAVE_VISTA) !== '2d';
     this.zoomRueda = leerJson(almacen, CLAVE_ZOOM) === true;
-    this.preferenciaAmbiente = sanearPreferencia(leerJson(almacen, CLAVE_AMBIENTE));
     document.addEventListener('fullscreenchange', () => {
       const nativa = Boolean(this.raiz && document.fullscreenElement === this.raiz);
       if (!nativa && !this.raiz?.classList.contains('pantalla-completa')) this.fijarPantallaCompleta(false);
@@ -97,7 +101,13 @@ export class ControladorMundo {
 
   /** Ambiente vigente: el elegido o, si no hay elección, el de la hora local. */
   get ambiente(): Ambiente {
-    return resolverAmbiente(this.preferenciaAmbiente);
+    return this.modo;
+  }
+
+  /** De noche, lo que cada concepto tiene pendiente de repaso hoy; de día, null. */
+  private pendientes(): Map<string, PendienteConcepto> | null {
+    if (this.modo !== 'noche' || !this.practica) return null;
+    return pendientesPorConcepto(this.estado.tema, this.practica.practica, this.practica.fecha, this.practica.tarjetasDelTema());
   }
 
   /** Recuerda el último lugar visitado para volver a él al regresar al mapa. */
@@ -170,6 +180,7 @@ export class ControladorMundo {
       else {
         this.mundo = await this.crearMundo();
         this.mundo.fijarAmbiente(this.ambiente, false);
+        this.mundo.fijarPendientes(this.pendientes());
       }
       mundo = this.mundo;
     } catch (error) {
@@ -618,11 +629,14 @@ export class ControladorMundo {
       return;
     }
     const vistazo = this.vistazo && !igualFoco(this.vistazo, this.foco) ? this.vistazo : null;
-    const html = vistazo
-      ? fichaContextual(this.modelo, vistazo, 'vistazo')
-      : this.foco.nivel !== 'ciudad'
-        ? fichaContextual(this.modelo, this.foco, 'seleccion')
-        : '';
+    const noche = this.activo3d ? this.pendientes() : null;
+    const html = noche
+      ? fichaNocturna(this.modelo, vistazo ?? this.foco, vistazo ? 'vistazo' : 'seleccion', noche)
+      : vistazo
+        ? fichaContextual(this.modelo, vistazo, 'vistazo')
+        : this.foco.nivel !== 'ciudad'
+          ? fichaContextual(this.modelo, this.foco, 'seleccion')
+          : '';
     el.innerHTML = html;
     el.hidden = !html;
     el.classList.toggle('vistazo', Boolean(vistazo));
@@ -654,10 +668,11 @@ export class ControladorMundo {
       this.aplicarZoom();
       this.pintarPanel();
     } else if ('mundoAmbiente' in dataset) {
-      this.preferenciaAmbiente = siguienteAmbiente(this.ambiente);
-      escribirJson(this.almacen, CLAVE_AMBIENTE, this.preferenciaAmbiente);
+      this.modo = siguienteAmbiente(this.modo);
       if (this.raiz) this.raiz.dataset.ambiente = this.ambiente;
       this.mundo?.fijarAmbiente(this.ambiente, true);
+      this.mundo?.fijarPendientes(this.pendientes());
+      this.aviso(this.modo === 'noche' ? 'Modo repaso: solo se encienden los edificios con algo que repasar hoy.' : 'Modo aprender: la ciudad completa del temario.');
       this.pintarPanel();
       this.raiz?.querySelector<HTMLButtonElement>('[data-mundo-ambiente]')?.focus();
     } else if ('mundoPaseo' in dataset) {
@@ -727,7 +742,8 @@ export class ControladorMundo {
     const f = this.foco;
     this.modoMapa = this.vistaAtlas || (this.mundo?.factorAtlas ?? 0) > 0.5;
     capa.innerHTML = '';
-    const focos = etiquetasDelNivel(this.modelo, f, this.modoMapa);
+    const noche = this.activo3d ? this.pendientes() : null;
+    const focos = noche ? etiquetasNocturnas(this.modelo, f, noche) : etiquetasDelNivel(this.modelo, f, this.modoMapa);
     // El edificio que señala el puntero lleva siempre su nombre, en cualquier nivel.
     const v = this.vistazo;
     if (v?.nivel === 'edificio' && !focos.some((x) => igualFoco(x, v))) focos.push(v);
@@ -750,6 +766,13 @@ export class ControladorMundo {
       } else if (foco.nivel === 'edificio') {
         el.textContent = buscarEdificio(this.modelo, foco.conceptoId)!.nombre;
         el.classList.add('edificio');
+        const p = noche?.get(foco.conceptoId);
+        if (p?.total) {
+          // De noche, cada rótulo dice cuánto hay que repasar.
+          el.classList.add('pendiente');
+          el.classList.toggle('sorpresa', p.sorpresas > 0);
+          el.insertAdjacentHTML('beforeend', ` <b class="m-pend">${p.total}</b>`);
+        }
         if (f.nivel === 'edificio') el.classList.toggle('tenue', !igualFoco(foco, f));
         if (v && igualFoco(foco, v)) el.classList.add('sobrevuelo');
       }
@@ -784,7 +807,7 @@ export class ControladorMundo {
       .map(({ foco, el }) => ({
         el,
         p: this.mundo!.proyectarFoco(foco),
-        principal: !el.classList.contains('tenue') && (W >= 600 || !el.classList.contains('edificio') || el.classList.contains('sobrevuelo')),
+        principal: !el.classList.contains('tenue') && (W >= 600 || !el.classList.contains('edificio') || el.classList.contains('sobrevuelo') || el.classList.contains('pendiente')),
       }))
       .sort((a, b) => Number(b.principal) - Number(a.principal) || a.p.y - b.p.y);
     for (const { el, p, principal } of puntos) {

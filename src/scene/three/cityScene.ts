@@ -1,10 +1,13 @@
 import {
   ACESFilmicToneMapping,
+  AdditiveBlending,
+  Group,
+  Sprite,
+  SpriteMaterial,
   BoxGeometry,
   CanvasTexture,
   DirectionalLight,
   Fog,
-  type Group,
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
@@ -52,8 +55,9 @@ import {
 import { encoger as encogerRect } from '../../world/geometry.ts';
 import { NIVEL_PASAJE } from './urbanGround.ts';
 import { NIVEL, PALETA } from './palette.ts';
-import { type Ambiente, AMBIENTES, mezclarPreajustes, type Preajuste } from './ambiente.ts';
-import { Decorado } from './decorado.ts';
+import type { Ambiente } from '../../world/ambiente.ts';
+import { AMBIENTES, mezclarPreajustes, type Preajuste } from './ambiente.ts';
+import { Decorado, texturaHalo } from './decorado.ts';
 
 /*
  * Renderer de la Ciudad del Dinero. Solo dibuja el modelo visual y avisa de lo que el usuario
@@ -184,9 +188,13 @@ export class Mundo3D {
   private sol!: DirectionalLight;
   private relleno!: DirectionalLight;
   private ambiente: Preajuste = AMBIENTES.dia;
-  private cambioAmbiente: { desde: Preajuste; hacia: Preajuste; inicio: number } | null = null;
+  private cambioAmbiente: { desde: Preajuste; via: Preajuste; hacia: Preajuste; inicio: number } | null = null;
   private readonly decorado: Decorado;
+  private texturaFaro: CanvasTexture | null = null;
   private ultimoDecorado = 0;
+  /** Modo noche (repaso): lo pendiente de cada concepto; null de día. */
+  private pendientes: ReadonlyMap<string, { total: number; sorpresas: number }> | null = null;
+  private faros = new Group();
 
   constructor(modelo: ModeloCiudad, private readonly opciones: OpcionesMundo3D) {
     this.modelo = modelo;
@@ -215,7 +223,8 @@ export class Mundo3D {
     this.dinamica = construirCapaDinamica(modelo);
     this.obstaculos = obstaculosDe(modelo);
     this.decorado = new Decorado(modelo);
-    this.escena.add(this.estatica, this.dinamica.raiz, this.decorado.raiz);
+    this.faros.name = 'faros-repaso';
+    this.escena.add(this.estatica, this.dinamica.raiz, this.decorado.raiz, this.faros);
     this.sombraDeContacto(modelo.lado + MARGEN_PEANA * 2);
 
     this.contorno.visible = false;
@@ -278,7 +287,8 @@ export class Mundo3D {
   /** Día, atardecer o noche. Con animación, la luz cambia en algo menos de un segundo. */
   fijarAmbiente(nombre: Ambiente, animar: boolean): void {
     const hacia = AMBIENTES[nombre];
-    if (animar && !this.reducido) this.cambioAmbiente = { desde: this.ambiente, hacia, inicio: performance.now() };
+    // Del día a la noche (y al revés) se pasa por el atardecer.
+    if (animar && !this.reducido) this.cambioAmbiente = { desde: this.ambiente, via: AMBIENTES.atardecer, hacia, inicio: performance.now() };
     else {
       this.cambioAmbiente = null;
       this.aplicarPreajuste(hacia);
@@ -309,9 +319,9 @@ export class Mundo3D {
   private avanzarAmbiente(ahora: number): boolean {
     const c = this.cambioAmbiente;
     if (!c) return false;
-    const t = Math.min(1, (ahora - c.inicio) / 850);
+    const t = Math.min(1, (ahora - c.inicio) / 1400);
     const k = t * t * (3 - 2 * t);
-    this.aplicarPreajuste(mezclarPreajustes(c.desde, c.hacia, k));
+    this.aplicarPreajuste(k < 0.5 ? mezclarPreajustes(c.desde, c.via, k * 2) : mezclarPreajustes(c.via, c.hacia, k * 2 - 1));
     if (t >= 1) this.cambioAmbiente = null;
     return true;
   }
@@ -453,6 +463,7 @@ export class Mundo3D {
     this.ocultos = new Set();
     this.sombrasSucias = true;
     this.ajustarSenales();
+    this.aplicarPendientes();
 
     if (!this.reducido) {
       const ahora = performance.now();
@@ -580,10 +591,60 @@ export class Mundo3D {
   private ajustarSenales(): void {
     const lejos = this.focoActual.nivel === 'ciudad' || this.focoActual.nivel === 'barrio';
     for (const g of this.dinamica.senales) {
+      // De noche (repaso) no se recomienda qué estudiar: se apagan las columnas de "Estudia ya".
+      g.visible = !this.pendientes;
       const columna = g.getObjectByName('senal-columna');
       if (columna) columna.visible = lejos;
     }
   }
+
+  /**
+   * Modo noche (repaso): cada edificio enciende sus ventanas según lo que tiene pendiente hoy y
+   * lleva un faro encima (rojo si hay errores cometidos con seguridad). El resto queda a oscuras.
+   * Con `null` (de día) todo vuelve a su estado.
+   */
+  fijarPendientes(pendientes: ReadonlyMap<string, { total: number; sorpresas: number }> | null): void {
+    this.pendientes = pendientes;
+    this.aplicarPendientes();
+    this.ajustarSenales();
+    this.sucio = true;
+  }
+
+  private aplicarPendientes(): void {
+    for (const f of [...this.faros.children]) {
+      this.faros.remove(f);
+      ((f as Sprite).material as SpriteMaterial).dispose();
+    }
+    const textura = this.pendientes ? (this.texturaFaro ??= texturaHalo()) : null;
+    for (const [id, grupo] of this.dinamica.edificios) {
+      const p = this.pendientes?.get(id);
+      grupo.traverse((o) => {
+        if (!(o instanceof Mesh) || (o.name !== 'acabado-luz' && o.name !== 'acabado-pantalla')) return;
+        const mat = o.material as MeshBasicMaterial;
+        mat.userData.colorDia ??= mat.color.getHexString();
+        if (!this.pendientes) mat.color.set(`#${mat.userData.colorDia}`);
+        else if (p?.total) {
+          // Más pendiente, más luz.
+          const k = Math.min(1, 0.55 + p.total * 0.12);
+          mat.color.set(o.name === 'acabado-luz' ? '#ffd27a' : `#${mat.userData.colorDia}`).multiplyScalar(o.name === 'acabado-luz' ? k : 1);
+        } else mat.color.set(o.name === 'acabado-luz' ? '#141b24' : '#1d232b');
+      });
+      if (p?.total && textura) {
+        const e = buscarEdificio(this.modelo, id);
+        if (!e) continue;
+        const faro = new Sprite(new SpriteMaterial({
+          map: textura, color: p.sorpresas ? '#ff5a4a' : '#ffd27a', transparent: true, depthWrite: false, blending: AdditiveBlending,
+        }));
+        const tam = 3 + Math.min(4, p.total * 0.8);
+        faro.scale.set(tam, tam, 1);
+        faro.position.set(e.posicion.x, this.cimaEdificio(id) + 1.4, e.posicion.z);
+        faro.name = `faro-${id}`;
+        faro.renderOrder = 4;
+        this.faros.add(faro);
+      }
+    }
+  }
+
 
   private animarApariciones(ahora: number): boolean {
     if (!this.apariciones.length) {

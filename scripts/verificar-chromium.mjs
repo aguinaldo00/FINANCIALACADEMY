@@ -95,16 +95,44 @@ const progreso = () => {
   await p.locator('.migas button').first().click();
   await p.waitForTimeout(1500);
   ok('navegación: migas devuelven a la ciudad', (await p.locator('.migas [aria-current]').textContent()) === 'La ciudad del dinero');
-  // Día / atardecer / noche: el botón recorre los ambientes y la elección se recuerda.
-  const ambientes = [];
-  for (let k = 0; k < 3; k++) {
-    await p.click('[data-mundo-ambiente]');
-    await p.waitForTimeout(1100);
-    ambientes.push(await p.locator('.mundo').getAttribute('data-ambiente'));
-    if (ambientes.at(-1) === 'noche') await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` });
-  }
-  ok('ambiente: el botón recorre día, atardecer y noche', new Set(ambientes).size === 3, ambientes.join(' → '));
-  ok('ambiente: la elección se guarda', (await p.evaluate(() => localStorage.getItem('financial-academy:ambiente'))) === JSON.stringify(ambientes.at(-1)));
+  // Noche = repasar: solo se encienden los edificios con algo pendiente hoy.
+  await p.evaluate(() => localStorage.setItem('financial-academy:practica', JSON.stringify({ version: 1, temas: { 1: {
+    fallos: { 'oficial:bde': { veces: 1, racha: 0, ultima: '2026-01-01', sorpresa: true }, 'oficial:cnmv': { veces: 2, racha: 0, ultima: '2026-01-01' } },
+    tarjetas: {}, simulacros: [], preguntas: {}, calibracion: {}, actividad: {}, conceptos: {},
+  } } })));
+  await p.reload();
+  await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
+  await p.waitForTimeout(2000);
+  ok('noche: el mapa se abre de día', (await p.locator('.mundo').getAttribute('data-ambiente')) === 'dia');
+  const cajaN = await p.locator('[data-mundo-vista]').boundingBox();
+  await p.mouse.click(cajaN.x + cajaN.width / 2, cajaN.y + cajaN.height / 2);
+  await p.waitForTimeout(800);
+  if (await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')))) await p.click('[data-mundo-completa]');
+  await p.waitForTimeout(1200);
+  await p.click('[data-mundo-ambiente]');
+  await p.waitForTimeout(1800);
+  ok('noche: el botón cambia a modo repaso', (await p.locator('.mundo').getAttribute('data-ambiente')) === 'noche');
+  const pendientesN = await p.locator('.m-etq.pendiente').allTextContents();
+  ok('noche: solo se rotulan los edificios con algo pendiente', pendientesN.length === 2 && (await p.locator('.m-etq').count()) === 2, pendientesN.join(' | '));
+  ok('noche: el error con seguridad se marca', (await p.locator('.m-etq.pendiente.sorpresa').count()) === 1);
+  ok('noche: la ficha resume la noche', (await p.locator('.ficha:not([hidden])').textContent()).includes('Repaso de esta noche'));
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` });
+  await p.locator('.ficha-pend').first().click();
+  await p.waitForTimeout(1600);
+  const repasar = await p.locator('.ficha .ficha-accion').getAttribute('href');
+  ok('noche: un edificio encendido lleva a repasarlo', repasar === '#repaso/bde', repasar);
+  await p.click('.ficha .ficha-accion');
+  await p.waitForSelector('[data-repaso-concepto="bde"]');
+  ok('noche: repaso solo de ese concepto', (await p.locator('.rep-tab[data-tab="fallos"] b').textContent()) === '1');
+  await p.evaluate(() => { location.hash = '#inicio'; });
+  await p.waitForSelector('.mundo-lienzo', { timeout: 20000 });
+  await p.waitForTimeout(1500);
+  ok('noche: al volver al mapa sigue de noche', (await p.locator('.mundo').getAttribute('data-ambiente')) === 'noche');
+  await p.click('[data-mundo-ambiente]');
+  await p.waitForTimeout(1600);
+  ok('día: vuelven los rótulos de siempre', (await p.locator('.mundo').getAttribute('data-ambiente')) === 'dia' && (await p.locator('.m-etq.pendiente').count()) === 0);
+  await p.locator('.migas button').first().click().catch(() => {});
+  await p.waitForTimeout(1200);
   await p.click('[data-mundo-atlas]');
   await p.waitForTimeout(1800);
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
