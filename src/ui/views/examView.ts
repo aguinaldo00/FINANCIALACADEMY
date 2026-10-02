@@ -5,7 +5,7 @@ import type { BloqueExamen, Concepto, Pregunta, Tema } from '../../content/schem
 import { bancoDePreguntas } from '../../domain/exam.ts';
 import { dominioConcepto } from '../../domain/mastery.ts';
 import { treemap } from '../../world/treemap.ts';
-import { pintarPreguntaEn } from '../components/conceptPanels.ts';
+import { pintarPreguntaConConfianza } from '../components/conceptPanels.ts';
 import { anilloDominio } from '../components/ring.ts';
 import { COLORES_BLOQUE, nombreCortoBloque } from '../blockColors.ts';
 import { colorDominio, porcentaje } from '../format.ts';
@@ -193,21 +193,15 @@ function pintarSimulacro(ficha: HTMLElement, panel: HTMLElement, d: DatosBloque,
   const pregunta = lista[i]!;
   const marcador = () => `Aciertos ${ficha.dataset.ok ?? 0} / ${ficha.dataset.hechas ?? 0}`;
   const pie = `<div class="pq-pie"><span>Simulacro ${i + 1} / ${lista.length} · <b class="ex-marcador">${marcador()}</b> · no cambia tu dominio</span><button type="button" class="fc-btn" data-sim="siguiente">Siguiente →</button></div>`;
-  let respondida = false;
-  pintarPreguntaEn(
+  pintarPreguntaConConfianza(
     panel,
     pregunta,
-    (k) => {
-      const correcta = k === pregunta.indiceCorrecta;
-      if (!respondida) {
-        respondida = true;
-        ficha.dataset.hechas = String(Number(ficha.dataset.hechas ?? 0) + 1);
-        if (correcta) ficha.dataset.ok = String(Number(ficha.dataset.ok ?? 0) + 1);
-        practica?.responder(pregunta.id, correcta);
-        const m = panel.querySelector('.ex-marcador');
-        if (m) m.textContent = marcador();
-      }
-      return correcta;
+    (correcta, confianza) => {
+      ficha.dataset.hechas = String(Number(ficha.dataset.hechas ?? 0) + 1);
+      if (correcta) ficha.dataset.ok = String(Number(ficha.dataset.ok ?? 0) + 1);
+      const m = panel.querySelector('.ex-marcador');
+      if (m) m.textContent = marcador();
+      practica?.responder(pregunta.id, correcta, { conceptoId: pregunta.conceptoId, confianza });
     },
     pie,
   );

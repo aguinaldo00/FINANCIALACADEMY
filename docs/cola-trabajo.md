@@ -34,7 +34,7 @@ clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
 - [x] 11. Auditoría visual a 1400, 1024, 820 y 390 px; corregir la barra del mapa, los rótulos, la
   ficha en móvil, la pista de la portada, el índice activo y el desborde horizontal.
 - [x] 12. Investigación de métodos de estudio con evidencia (`docs/metodos-estudio.md`).
-- [ ] 13. Confianza y calibración (Seguro / Dudo / Adivino) en simulacro, repaso y práctica.
+- [x] 13. Confianza y calibración (Seguro / Dudo / Adivino) en simulacro, repaso y práctica.
 - [ ] 14. Sesión de estudio de hoy: espaciada (también para preguntas), intercalada y por prioridad;
   fecha de examen opcional.
 - [ ] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.

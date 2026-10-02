@@ -3,7 +3,7 @@ import type { EstadoEstudio } from '../app/store.ts';
 import { idPregunta } from '../domain/practice.ts';
 import { dominioConcepto } from '../domain/mastery.ts';
 import { actualizarEtiquetaDominio } from './components/conceptCard.ts';
-import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaEn, tarjetasDe } from './components/conceptPanels.ts';
+import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaConConfianza, tarjetasDe } from './components/conceptPanels.ts';
 import { pintarRail } from './components/rail.ts';
 import type { ContextoVista } from './views/context.ts';
 
@@ -93,14 +93,10 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practi
     ficha.dataset.pi = String(i);
     const pregunta = lista[i]!;
     const pie = `<div class="pq-pie"><span>Práctica ${i + 1} / ${lista.length} · no cambia tu dominio</span>${lista.length > 1 ? '<button type="button" class="fc-btn" data-pq="siguiente">Otra pregunta →</button>' : ''}</div>`;
-    pintarPreguntaEn(
+    pintarPreguntaConConfianza(
       panel,
       pregunta,
-      (k) => {
-        const correcta = k === pregunta.indiceCorrecta;
-        practica?.responder(idPregunta(pregunta.conceptoId, pregunta.id), correcta);
-        return correcta;
-      },
+      (correcta, confianza) => practica?.responder(idPregunta(pregunta.conceptoId, pregunta.id), correcta, { conceptoId: pregunta.conceptoId, confianza }),
       pie,
     );
   }

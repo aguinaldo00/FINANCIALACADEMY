@@ -95,3 +95,15 @@
   .sim-hist li{grid-template-columns:5.4em 1fr 2.6em}
   .sim-hist li small{display:none}
 }
+
+/* Calibración del simulacro y confianza en la corrección. */
+.ex-barra.cal{border-radius:0 4px 4px 0}
+.ex-barra.cal.seguro{background:#3b82f6}
+.ex-barra.cal.dudo{background:#2563a8}
+.ex-barra.cal.adivino{background:#1e3a66;outline:1px dashed #3b82f6}
+.ex-et small{color:var(--mut)}
+.sim-cal{margin-bottom:16px}
+.sim-cal-nota{margin:10px 0 0;font-size:.92rem;color:var(--mut)}
+.sim-c-conf{display:inline-block;margin:6px 0 0 1.9em;font-size:.75rem;font-weight:700;border-radius:999px;padding:1px 10px;border:1px solid #3b82f6;color:#cfe0ff}
+.sim-c-conf.sorpresa{border-color:var(--y);color:var(--y)}
+.sim-correccion li.sorpresa{border-left-color:var(--y)}

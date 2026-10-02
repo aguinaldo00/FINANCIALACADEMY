@@ -1,5 +1,5 @@
 import type { Concepto, ModoExplicacion, NodoEsquema, Pregunta, Tema } from '../../content/schema.ts';
-import { idTarjetaFrase } from '../../domain/practice.ts';
+import { type Confianza, CONFIANZAS, idTarjetaFrase } from '../../domain/practice.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
 import { resaltarAviso } from '../format.ts';
 
@@ -47,6 +47,64 @@ export function pintarPreguntaEn(
         boton.classList.add('no', 'shake');
         feedback.innerHTML = '❌ No es esa. Pulsa "Explícamelo de otra forma" y vuelve a intentarlo.';
       }
+    };
+  }
+}
+
+/** Textos de la confianza (orden fijo: de más a menos seguridad). */
+export const ETIQUETA_CONFIANZA: Record<Confianza, string> = { seguro: 'Seguro', dudo: 'Dudo', adivino: 'Adivino' };
+
+/**
+ * Pregunta de práctica con confianza: se elige una opción, se dice cómo de seguro se está y solo
+ * entonces se corrige (metacognición; los errores con seguridad se corrigen mejor). La elección se
+ * puede cambiar hasta indicar la confianza. `alTerminar` recibe el resultado una sola vez.
+ */
+export function pintarPreguntaConConfianza(
+  panel: HTMLElement,
+  pregunta: Pregunta,
+  alTerminar: (correcta: boolean, confianza: Confianza) => void,
+  pie = '',
+): void {
+  const { enunciado, opciones, explicacion, indiceCorrecta } = pregunta;
+  panel.innerHTML = `<p><b>${enunciado}</b></p><div class="opts">${opciones.map((t, i) => `<button type="button" class="opt" data-k="${i}">${t}</button>`).join('')}</div>
+<div class="conf" hidden><span>¿Cómo de seguro estás?</span>${CONFIANZAS.map((c) => `<button type="button" class="conf-btn ${c}" data-conf="${c}">${ETIQUETA_CONFIANZA[c]}</button>`).join('')}</div><div class="fb"></div>${pie}`;
+  const botones = [...panel.querySelectorAll<HTMLButtonElement>('.opt')];
+  const conf = panel.querySelector<HTMLElement>('.conf')!;
+  const feedback = panel.querySelector<HTMLElement>('.fb')!;
+  let elegida: number | null = null;
+  for (const b of botones) {
+    b.onclick = () => {
+      elegida = Number(b.dataset.k);
+      for (const x of botones) x.classList.toggle('elegida', x === b);
+      conf.hidden = false;
+      conf.querySelector<HTMLButtonElement>('.conf-btn')?.focus({ preventScroll: true });
+    };
+  }
+  for (const c of conf.querySelectorAll<HTMLButtonElement>('[data-conf]')) {
+    c.onclick = () => {
+      if (elegida === null) return;
+      const confianza = c.dataset.conf as Confianza;
+      const correcta = elegida === indiceCorrecta;
+      for (const x of botones) {
+        x.disabled = true;
+        x.classList.remove('elegida');
+      }
+      botones[indiceCorrecta]?.classList.add('ok');
+      if (!correcta) botones[elegida]?.classList.add('no');
+      for (const x of conf.querySelectorAll<HTMLButtonElement>('button')) {
+        x.disabled = true;
+        x.classList.toggle('on', x === c);
+      }
+      const exp = resaltarAviso(explicacion);
+      feedback.innerHTML = correcta
+        ? confianza === 'seguro'
+          ? `✅ <b>Correcto.</b> ${exp}`
+          : `✅ <b>Correcto, pero sin seguridad:</b> volverá pronto a tu repaso para afianzarla. ${exp}`
+        : confianza === 'seguro'
+          ? `⚡ <b>Error con seguridad.</b> Son los que mejor se corrigen si te fijas ahora: la correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`
+          : `❌ <b>No es esa.</b> La correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`;
+      feedback.classList.toggle('sorpresa', !correcta && confianza === 'seguro');
+      alTerminar(correcta, confianza);
     };
   }
 }

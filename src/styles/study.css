@@ -68,3 +68,17 @@
 .fc-btn{cursor:pointer;border:1px solid var(--line);background:var(--bg3);color:#fff;border-radius:999px;padding:6px 14px;font-weight:700;font-size:.9rem}
 .fc-btn:hover:not(:disabled){border-color:#fff}
 .fc-btn:disabled{opacity:.4;cursor:default}
+
+/* Confianza antes de corregir (Seguro / Dudo / Adivino). Escala ordinal de un solo tono. */
+.conf{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border-radius:14px;background:#000;border:1px dashed var(--line)}
+.conf[hidden]{display:none}
+.conf>span{font-weight:700;font-size:.92rem;margin-right:4px}
+.conf-btn{cursor:pointer;border-radius:999px;padding:7px 16px;font-weight:800;font-size:.92rem;border:2px solid #3b82f6;background:none;color:#fff}
+.conf-btn.seguro{background:#3b82f6;color:#000}
+.conf-btn.dudo{background:#1e3a66}
+.conf-btn.adivino{border-style:dashed}
+.conf-btn:hover:not(:disabled){filter:brightness(1.15)}
+.conf-btn:disabled{cursor:default;opacity:.45}
+.conf-btn.on{opacity:1;box-shadow:0 0 0 3px #000,0 0 0 5px #fff}
+.opt.elegida{border-color:var(--b);background:#0b1a2e}
+.fb.sorpresa{padding:10px 12px;border-radius:12px;background:#2a2205;border:1px solid #ffd23f88}

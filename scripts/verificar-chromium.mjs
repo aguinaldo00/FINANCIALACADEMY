@@ -155,10 +155,12 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   for (let i = 0; i < 10; i++) {
     await p.waitForFunction((n) => document.querySelector('.sim-n b')?.textContent === String(n), i + 1);
     await p.locator('.opt').nth(i % 2).click();
+    await p.locator(i % 3 ? '[data-conf="seguro"]' : '[data-conf="dudo"]').click();
   }
   await p.waitForSelector('[data-sim-nota]');
   const nota = await p.locator('[data-sim-nota]').textContent();
   ok(`simulacro (${nombre}): 10 preguntas y nota`, (await p.locator('.sim-correccion li').count()) === 10, `nota ${nota}`);
+  ok(`simulacro (${nombre}): calibración por seguridad`, (await p.locator('.sim-cal .ex-fila').count()) === 2);
   ok(`simulacro (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho);
   await p.screenshot({ path: `${SP}/ver-simulacro-${ancho}.png`, fullPage: false });
   await p.goto('http://localhost:4173/#repaso');

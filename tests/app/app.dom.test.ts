@@ -134,8 +134,16 @@ describe('app en el navegador', () => {
     const pregunta = tema01.ampliacion!.preguntas.filter((p) => p.conceptoId === 'ico')[0]!;
     expect($('p b', panel).textContent).toBe(pregunta.enunciado);
     ($$('.opt', panel) as HTMLButtonElement[])[pregunta.indiceCorrecta]!.click();
-    expect($('.fb', panel).textContent).toContain('Correcto');
+    // Antes de corregir se pide la confianza.
+    expect($('.fb', panel).textContent).toBe('');
+    expect($('.conf', panel).hidden).toBe(false);
+    $<HTMLButtonElement>('[data-conf="dudo"]', panel).click();
+    expect($('.fb', panel).textContent).toContain('Correcto, pero sin seguridad');
     expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
+    // Un acierto dudoso entra al repaso.
+    const practica = JSON.parse(localStorage.getItem('financial-academy:practica')!).temas['1'];
+    expect(practica.fallos[pregunta.id]).toMatchObject({ dudosa: true });
+    expect(practica.calibracion.dudo).toEqual({ aciertos: 1, total: 1 });
     $<HTMLButtonElement>('[data-pq="siguiente"]', panel).click();
     expect($('.pq-pie span', panel).textContent).toContain('Práctica 2 / 3');
   });
@@ -166,7 +174,9 @@ describe('app en el navegador', () => {
     // Primero la pregunta oficial de "instrumento".
     const correcta = tema01.conceptos.find((c) => c.id === 'instrumento')!.pregunta.indiceCorrecta;
     $<HTMLButtonElement>(`.opt[data-k="${correcta}"]`, panel).click();
+    $<HTMLButtonElement>('[data-conf="seguro"]', panel).click();
     expect($('.fb', panel).textContent).toContain('Correcto');
+    expect($('.ex-marcador', panel).textContent).toBe('Aciertos 1 / 1');
     expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
     $<HTMLButtonElement>('[data-sim="siguiente"]', panel).click();
     expect($('.pq-pie', panel).textContent).toContain('Simulacro 2 /');
@@ -183,12 +193,16 @@ describe('app en el navegador', () => {
         expect($('.sim-n b').textContent).toBe(String(i + 1));
         // Siempre la primera opción: algunas acertarán y otras no.
         $<HTMLButtonElement>('.opt[data-k="0"]').click();
+        $<HTMLButtonElement>(i % 2 ? '[data-conf="seguro"]' : '[data-conf="adivino"]').click();
         expect($$('.opt.ok, .opt.no')).toHaveLength(0);
         vi.advanceTimersByTime(300);
       }
       const nota = $('[data-sim-nota]').textContent!;
       expect(Number(nota.replace(',', '.'))).toBeGreaterThanOrEqual(0);
       expect($$('.sim-correccion li')).toHaveLength(10);
+      // Calibración: aciertos según la seguridad declarada.
+      expect($('.sim-cal')).toBeTruthy();
+      expect($$('.sim-cal .ex-fila')).toHaveLength(2);
       const guardado = JSON.parse(localStorage.getItem('financial-academy:practica')!);
       expect(guardado.temas['1'].simulacros).toHaveLength(1);
       expect(guardado.temas['1'].simulacros[0].total).toBe(10);

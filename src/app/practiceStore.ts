@@ -1,10 +1,11 @@
 import type { Tema } from '../content/schema.ts';
 import {
   calificarTarjeta,
+  type Confianza,
   fechaDe,
+  fijarFechaExamen,
   type Practica,
-  registrarAcierto,
-  registrarFallo,
+  registrarRespuesta,
   registrarSimulacro,
   tarjetasPendientes,
 } from '../domain/practice.ts';
@@ -41,9 +42,21 @@ export class EstadoPractica {
     return () => this.oyentes.delete(fn);
   }
 
-  /** Resultado de responder una pregunta de cualquier sitio: alimenta el repaso. */
-  responder(idPregunta: string, correcta: boolean): void {
-    this.cambiar(correcta ? registrarAcierto(this.actual, idPregunta) : registrarFallo(this.actual, idPregunta, this.hoy()));
+  /**
+   * Resultado de responder una pregunta de cualquier sitio: alimenta el repaso, la repetición
+   * espaciada, la calibración (si se indicó la confianza) y la actividad.
+   */
+  responder(idPregunta: string, correcta: boolean, extra: { conceptoId?: string; confianza?: Confianza } = {}): void {
+    const conceptoId = extra.conceptoId ?? (idPregunta.startsWith('oficial:') ? idPregunta.slice(8) : this.conceptoDe(idPregunta));
+    this.cambiar(registrarRespuesta(this.actual, { id: idPregunta, conceptoId, correcta, confianza: extra.confianza, hoy: this.hoy() }));
+  }
+
+  fechaExamen(fecha: string | undefined): void {
+    this.cambiar(fijarFechaExamen(this.actual, fecha));
+  }
+
+  private conceptoDe(idExtra: string): string | undefined {
+    return this.tema.ampliacion?.preguntas.find((p) => p.id === idExtra)?.conceptoId;
   }
 
   calificar(idTarjeta: string, sabia: boolean): void {

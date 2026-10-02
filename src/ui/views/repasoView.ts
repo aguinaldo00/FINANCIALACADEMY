@@ -4,7 +4,7 @@ import type { EstadoEstudio } from '../../app/store.ts';
 import { bancoDePreguntas, type PreguntaExamen } from '../../domain/exam.ts';
 import { ACIERTOS_PARA_SALIR, INTERVALOS } from '../../domain/practice.ts';
 import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
-import { pintarPreguntaEn, type Tarjeta, tarjetasDe } from '../components/conceptPanels.ts';
+import { pintarPreguntaConConfianza, type Tarjeta, tarjetasDe } from '../components/conceptPanels.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -39,7 +39,8 @@ function pintarFallos(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoEst
   // Primero lo más fallado.
   const cola = Object.keys(fallos)
     .filter((id) => banco.has(id))
-    .sort((a, b) => fallos[b]!.veces - fallos[a]!.veces);
+    // Primero los errores cometidos con seguridad (hipercorrección), luego lo más fallado.
+    .sort((a, b) => Number(Boolean(fallos[b]!.sorpresa)) - Number(Boolean(fallos[a]!.sorpresa)) || fallos[b]!.veces - fallos[a]!.veces);
   if (!cola.length) {
     cuerpo.innerHTML = vacio('No tienes fallos pendientes.');
     return;
@@ -59,25 +60,20 @@ function pintarFallos(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoEst
     const p: PreguntaExamen = banco.get(id)!;
     const estadoFallo = practica.practica.fallos[id];
     const concepto = estado.tema.conceptos.find((c) => c.id === p.conceptoId);
-    const racha = estadoFallo ? `Fallada ${estadoFallo.veces} ${estadoFallo.veces === 1 ? 'vez' : 'veces'} · aciertos seguidos ${estadoFallo.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada';
+    const motivo = estadoFallo?.sorpresa ? '⚡ Fallada con seguridad · ' : estadoFallo?.dudosa && !estadoFallo.veces ? 'Acertada sin seguridad · ' : '';
+    const racha = estadoFallo ? `${motivo}${estadoFallo.veces ? `Fallada ${estadoFallo.veces} ${estadoFallo.veces === 1 ? 'vez' : 'veces'} · ` : ''}aciertos seguidos ${estadoFallo.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada';
     const pie = `<div class="pq-pie"><span>Repaso ${(i % cola.length) + 1} / ${cola.length} · ${racha} · <a href="${hrefConcepto(p.conceptoId)}">${concepto?.nombre ?? ''}</a></span><button type="button" class="fc-btn" data-rep-sig>Siguiente →</button></div>`;
-    let respondida = false;
-    pintarPreguntaEn(
+    pintarPreguntaConConfianza(
       panel,
       p,
-      (k) => {
-        const correcta = k === p.indiceCorrecta;
-        if (!respondida) {
-          respondida = true;
-          practica.responder(p.id, correcta);
-          const pieTexto = panel.querySelector('.pq-pie span');
-          const f = practica.practica.fallos[p.id];
-          if (pieTexto) {
-            const estadoTexto = f ? `Fallada ${f.veces} ${f.veces === 1 ? 'vez' : 'veces'} · aciertos seguidos ${f.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada: sale de tu repaso';
-            pieTexto.innerHTML = `Repaso ${(i % cola.length) + 1} / ${cola.length} · ${estadoTexto} · <a href="${hrefConcepto(p.conceptoId)}">${concepto?.nombre ?? ''}</a>`;
-          }
+      (correcta, confianza) => {
+        practica.responder(p.id, correcta, { conceptoId: p.conceptoId, confianza });
+        const pieTexto = panel.querySelector('.pq-pie span');
+        const f = practica.practica.fallos[p.id];
+        if (pieTexto) {
+          const estadoTexto = f ? `Fallada ${f.veces} ${f.veces === 1 ? 'vez' : 'veces'} · aciertos seguidos ${f.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada: sale de tu repaso';
+          pieTexto.innerHTML = `Repaso ${(i % cola.length) + 1} / ${cola.length} · ${estadoTexto} · <a href="${hrefConcepto(p.conceptoId)}">${concepto?.nombre ?? ''}</a>`;
         }
-        return correcta;
       },
       pie,
     );

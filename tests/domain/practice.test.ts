@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   calificarTarjeta,
+  diasEntre,
+  intervaloAjustado,
+  preguntasVencidas,
+  racha,
+  registrarRespuesta,
   idPregunta,
   practicaVacia,
   registrarAcierto,
@@ -80,5 +85,62 @@ describe('simulacros y saneado', () => {
     expect(Object.keys(p.tarjetas)).toEqual(['ok']);
     expect(p.simulacros).toHaveLength(1);
     expect(sanearPractica(null)).toEqual(practicaVacia());
+  });
+});
+
+describe('confianza, espaciado de preguntas y actividad', () => {
+  const R = (correcta: boolean, confianza?: 'seguro' | 'dudo' | 'adivino', hoy = HOY) => ({ id: 'q', conceptoId: 'fgd', correcta, confianza, hoy });
+
+  it('un error con "Seguro" entra al repaso como sorpresa', () => {
+    const p = registrarRespuesta(practicaVacia(), R(false, 'seguro'));
+    expect(p.fallos.q).toMatchObject({ veces: 1, racha: 0, sorpresa: true });
+    expect(p.calibracion.seguro).toEqual({ aciertos: 0, total: 1 });
+  });
+
+  it('un acierto dudoso entra al repaso; uno seguro cuenta para salir', () => {
+    let p = registrarRespuesta(practicaVacia(), R(true, 'dudo'));
+    expect(p.fallos.q).toMatchObject({ veces: 0, dudosa: true });
+    p = registrarRespuesta(p, R(true, 'seguro'));
+    p = registrarRespuesta(p, R(true, 'seguro'));
+    expect(p.fallos.q).toBeUndefined();
+  });
+
+  it('repetición espaciada de la pregunta según la confianza', () => {
+    let p = registrarRespuesta(practicaVacia(), R(true, 'seguro'));
+    expect(p.preguntas.q).toMatchObject({ caja: 1, proxima: '2026-10-03' });
+    p = registrarRespuesta(p, R(true, 'dudo', '2026-10-03'));
+    expect(p.preguntas.q!.caja).toBe(1);
+    p = registrarRespuesta(p, R(true, 'adivino', '2026-10-04'));
+    expect(p.preguntas.q).toMatchObject({ caja: 0, proxima: '2026-10-04' });
+    expect(preguntasVencidas(p, '2026-10-04')).toEqual(['q']);
+  });
+
+  it('con examen cerca, los intervalos no superan el 20 % de lo que falta', () => {
+    expect(intervaloAjustado(4, HOY)).toBe(14);
+    expect(intervaloAjustado(4, HOY, sumarDias(HOY, 10))).toBe(2);
+    expect(intervaloAjustado(1, HOY, sumarDias(HOY, 3))).toBe(1);
+    expect(intervaloAjustado(0, HOY, sumarDias(HOY, 3))).toBe(0);
+    expect(intervaloAjustado(3, HOY, sumarDias(HOY, -1))).toBe(7);
+    expect(diasEntre('2026-10-30', '2026-11-02')).toBe(3);
+  });
+
+  it('actividad por día y racha de días seguidos', () => {
+    let p = registrarRespuesta(practicaVacia(), R(true, undefined, '2026-09-30'));
+    p = registrarRespuesta(p, R(false, undefined, '2026-10-01'));
+    expect(racha(p, '2026-10-01')).toBe(2);
+    // Hoy aún sin responder: la racha cuenta hasta ayer.
+    expect(racha(p, '2026-10-02')).toBe(2);
+    expect(racha(p, '2026-10-03')).toBe(0);
+    expect(p.actividad['2026-10-01']).toEqual({ aciertos: 0, total: 1 });
+    expect(p.conceptos.fgd).toEqual({ aciertos: 1, total: 2 });
+  });
+
+  it('datos de la versión anterior (sin campos nuevos) se leen bien', () => {
+    const p = sanearPractica({ fallos: {}, tarjetas: {}, simulacros: [] });
+    expect(p.calibracion.dudo).toEqual({ aciertos: 0, total: 0 });
+    expect(p.preguntas).toEqual({});
+    const q = sanearPractica({ fechaExamen: '2026-11-15', calibracion: { seguro: { aciertos: 3, total: 2 } } });
+    expect(q.fechaExamen).toBe('2026-11-15');
+    expect(q.calibracion.seguro).toEqual({ aciertos: 0, total: 0 });
   });
 });
