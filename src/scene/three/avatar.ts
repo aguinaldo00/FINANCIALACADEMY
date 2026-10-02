@@ -3,10 +3,12 @@ import {
   Color,
   ConeGeometry,
   ExtrudeGeometry,
+  GreaterDepth,
   Group,
   InstancedMesh,
   Matrix4,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   Quaternion,
   Shape,
@@ -96,6 +98,15 @@ export function construirAvatar(): PartesAvatar {
   const nucleo = new Mesh(new RoundedBoxGeometry(W, H, D, 4, 0.32), mat(PALETA_AVATAR.pelo));
   nucleo.castShadow = true;
   cuerpo.add(nucleo, pelaje(W, H, D, 1700));
+  // Silueta "rayos X": solo se dibuja donde algo tapa al personaje (árboles, edificios), para no
+  // perderlo de vista al pasear. GreaterDepth = visible únicamente detrás de otra geometría.
+  const silueta = new Mesh(
+    nucleo.geometry,
+    new MeshBasicMaterial({ color: '#7cc8e8', depthWrite: false, depthFunc: GreaterDepth }),
+  );
+  silueta.name = 'avatar-silueta';
+  silueta.scale.setScalar(0.96);
+  cuerpo.add(silueta);
 
   // Orejas de gato: triángulos de punta suave con el interior rosado y un mechón en la base.
   // La izquierda negra y la derecha azul, como en el dibujo.
@@ -174,6 +185,11 @@ export function construirAvatar(): PartesAvatar {
   pataDerecha.name = 'avatar-pata-derecha';
 
   raiz.add(cuerpo, pataIzquierda, pataDerecha);
+  // Orden de dibujado: escenario (0) → silueta (1, solo donde algo tapa) → personaje (2, encima
+  // de su propia silueta cuando está a la vista).
+  raiz.traverse((o) => {
+    o.renderOrder = o === silueta ? 1 : 2;
+  });
   return { raiz, cuerpo, pataIzquierda, pataDerecha, colas };
 }
 

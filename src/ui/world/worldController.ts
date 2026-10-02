@@ -102,21 +102,33 @@ export class ControladorMundo {
     if (!focoValido(this.modelo, this.foco)) this.foco = FOCO_CIUDAD;
     raiz.innerHTML = esqueletoMundo();
     raiz.addEventListener('click', (e) => this.alPulsar(e));
-    raiz.addEventListener('keydown', (e) => {
-      // Capa de reserva (sin API nativa): Esc sale de la pantalla completa.
-      if (e.key === 'Escape' && raiz.classList.contains('pantalla-completa') && !this.paseando) {
-        e.preventDefault();
-        void this.salirPantallaCompleta();
-        return;
-      }
-      if (this.paseando) return;
-      if (e.key === 'Escape' && this.subir()) e.preventDefault();
-    });
+    // Esc se escucha en todo el documento: al navegar con el Atlas, el botón pulsado se repinta y
+    // el foco vuelve al documento (fuera del mapa).
+    document.removeEventListener('keydown', this.alEscape);
+    document.addEventListener('keydown', this.alEscape);
     this.pintarPanel();
     void this.prepararVista();
   }
 
+  private alEscape = (e: KeyboardEvent): void => {
+    const raiz = this.raiz;
+    if (!raiz || e.key !== 'Escape' || e.defaultPrevented) return;
+    const destino = e.target as Element | null;
+    if (destino?.closest('input, textarea, select, [contenteditable="true"]') || document.body.classList.contains('menu')) return;
+    // Solo si el foco está en el mapa o en ningún sitio concreto (no en otra parte de la página).
+    if (destino && destino !== document.body && !raiz.contains(destino)) return;
+    // Capa de reserva (sin API nativa): Esc sale de la pantalla completa.
+    if (raiz.classList.contains('pantalla-completa') && !this.paseando) {
+      e.preventDefault();
+      void this.salirPantallaCompleta();
+      return;
+    }
+    if (this.paseando) return;
+    if (this.subir()) e.preventDefault();
+  };
+
   desmontar(): void {
+    document.removeEventListener('keydown', this.alEscape);
     // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
     this.cerrarEntrada?.();
     this.detenerPaseo(false);
@@ -132,7 +144,8 @@ export class ControladorMundo {
 
   /* ------------------------------------------------------------ vista 3D / 2D */
 
-  private async prepararVista(): Promise<void> {
+  /** `explorando`: se vuelve a 3D desde la exploración (botón «Ver en 3D»): sin portada ni entrada. */
+  private async prepararVista(explorando = false): Promise<void> {
     const raiz = this.raiz;
     if (!raiz) return;
     if (!this.modo3d) return this.mostrar2d('');
@@ -161,14 +174,14 @@ export class ControladorMundo {
     // Con la ciudad 3D funcionando, el mundo pasa a ser lo primero de la portada. Se vuelve a la
     // portada (landing) cuando se llega a la vista general; desde un lugar estudiado, a explorar.
     raiz.parentElement?.prepend(raiz);
-    this.fijarPortada(this.foco.nivel === 'ciudad' && !this.vistaAtlas);
+    this.fijarPortada(!explorando && this.foco.nivel === 'ciudad' && !this.vistaAtlas);
     this.vigilarInmersion(vista);
     this.aplicarZoom();
     mundo.montarEn(vista);
     mundo.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', false);
     this.aviso('');
     this.pintarPanel();
-    if (this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
+    if (!explorando && this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
       this.iniciarEntrada(vista, mundo);
     }
   }
@@ -632,7 +645,7 @@ export class ControladorMundo {
     } else if ('mundoModo' in dataset) {
       this.modo3d = !this.modo3d;
       escribirJson(this.almacen, CLAVE_VISTA, this.modo3d ? '3d' : '2d');
-      if (this.modo3d) void this.prepararVista();
+      if (this.modo3d) void this.prepararVista(true);
       else this.mostrar2d('');
     } else if (dataset.historia) {
       this.pasoHistoria = Math.max(0, this.pasoHistoria + Number(dataset.historia));

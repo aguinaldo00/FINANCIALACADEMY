@@ -244,3 +244,12 @@ body.menu .indice-flotante{display:none!important}
 @media (pointer:coarse){[data-mundo-zoom]{display:none}}
 .ficha{z-index:2}
 .mundo-etiquetas{z-index:1}
+
+/* Etiquetas de la barra: largas en pantallas anchas, cortas (icono + palabra) en móvil. */
+.mb-corto{display:none}
+@media (max-width:760px){
+  .mb-largo{display:none}
+  .mb-corto{display:inline}
+  .mundo-acciones{gap:14px}
+  .mb-btn{letter-spacing:.06em}
+}

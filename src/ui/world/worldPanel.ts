@@ -67,23 +67,17 @@ export function barraMundo(e: EstadoBarra): string {
       return `<li><button type="button" data-foco="${codificarFoco(m.foco)}"${actual ? ' aria-current="location"' : ''}>${m.etiqueta}</button></li>`;
     })
     .join('');
+  // Texto largo en pantallas anchas; icono + palabra en móvil (todas caben sin desplazar).
+  const btn = (atributos: string, largo: string, corto: string) =>
+    `<button type="button" class="mb-btn" ${atributos} aria-label="${largo}"><span class="mb-largo">${largo}</span><span class="mb-corto" aria-hidden="true">${corto}</span></button>`;
+  const con3d = e.modo3d && e.disponible3d;
   const acciones = [
-    e.puedeSubir ? '<button type="button" class="mb-btn" data-mundo-subir>Subir de nivel</button>' : '',
-    e.modo3d && e.disponible3d
-      ? `<button type="button" class="mb-btn" data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}">${e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'}</button>`
-      : '',
-    e.modo3d && e.disponible3d && !e.pantallaCompleta
-      ? `<button type="button" class="mb-btn" data-mundo-zoom aria-pressed="${Boolean(e.zoomRueda)}">Zoom con rueda</button>`
-      : '',
-    e.modo3d && e.disponible3d
-      ? `<button type="button" class="mb-btn" data-mundo-paseo aria-pressed="${Boolean(e.paseando)}">${e.paseando ? 'Dejar de pasear' : 'Pasear'}</button>`
-      : '',
-    e.modo3d && e.disponible3d
-      ? `<button type="button" class="mb-btn" data-mundo-atlas aria-pressed="${e.vistaAtlas}">${e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas'}</button>`
-      : '',
-    e.disponible3d !== false
-      ? `<button type="button" class="mb-btn" data-mundo-modo>${e.modo3d ? 'Ver en 2D' : 'Ver en 3D'}</button>`
-      : '',
+    e.puedeSubir ? btn('data-mundo-subir', 'Subir de nivel', '↑ Subir') : '',
+    con3d ? btn(`data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}"`, e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa', e.pantallaCompleta ? '✕ Salir' : '⛶ Completa') : '',
+    con3d && !e.pantallaCompleta ? btn(`data-mundo-zoom aria-pressed="${Boolean(e.zoomRueda)}"`, 'Zoom con rueda', 'Zoom') : '',
+    con3d ? btn(`data-mundo-paseo aria-pressed="${Boolean(e.paseando)}"`, e.paseando ? 'Dejar de pasear' : 'Pasear', e.paseando ? '■ Parar' : '🚶 Pasear') : '',
+    con3d ? btn(`data-mundo-atlas aria-pressed="${e.vistaAtlas}"`, e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas', e.vistaAtlas ? 'Maqueta' : 'Atlas') : '',
+    e.disponible3d !== false ? btn('data-mundo-modo', e.modo3d ? 'Ver en 2D' : 'Ver en 3D', e.modo3d ? '2D' : '3D') : '',
   ].join('');
   return `<nav aria-label="Nivel del mapa"><ol class="migas">${migas}</ol></nav><div class="mundo-acciones">${acciones}</div>`;
 }
