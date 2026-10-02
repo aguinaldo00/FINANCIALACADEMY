@@ -7,11 +7,13 @@ import { type Practica, preguntasVencidas, tarjetasPendientes } from './practice
  * más cae y menos se domina. Evidencia y criterios: `docs/metodos-estudio.md`.
  */
 
-export type MotivoSesion = 'repaso' | 'espaciada' | 'nueva' | 'tarjeta';
+export type MotivoSesion = 'repaso' | 'espaciada' | 'nueva' | 'tarjeta' | 'identifica';
 
 export type ItemSesion =
   | { tipo: 'pregunta'; pregunta: PreguntaExamen; motivo: Exclude<MotivoSesion, 'tarjeta'> }
-  | { tipo: 'tarjeta'; tarjetaId: string; conceptoId: string; motivo: 'tarjeta' };
+  | { tipo: 'tarjeta'; tarjetaId: string; conceptoId: string; motivo: 'tarjeta' }
+  /** "¿A qué concepto corresponde esta definición?": opciones del mismo bloque (discriminación). */
+  | { tipo: 'identifica'; conceptoId: string; opciones: string[]; motivo: 'identifica' };
 
 export interface OpcionesSesion {
   /** Número de elementos de la sesión (≈ 1 minuto cada uno). */
@@ -24,7 +26,7 @@ export interface OpcionesSesion {
 }
 
 /** Proporciones máximas de la sesión. */
-export const CUOTA = { repaso: 0.4, tarjetas: 0.2 };
+export const CUOTA = { repaso: 0.4, tarjetas: 0.2, identifica: 0.2 };
 
 /**
  * Prioridad de cada bloque: probabilidad en el examen × lo que falta por saber (mezcla del dominio
@@ -90,8 +92,28 @@ export function construirSesion(tema: Tema, p: Practica, hoy: string, opciones: 
     items.push({ tipo: 'tarjeta', tarjetaId: id, conceptoId: conceptoTarjeta.get(id) ?? '', motivo: 'tarjeta' });
   }
 
-  // 4. Nuevas: sin ver nunca, elegidas por bloque según la prioridad (muestreo ponderado).
   const prioridad = prioridadBloques(tema, p, dominio);
+
+  // 4. Discriminación: identificar un concepto por su definición entre otros del mismo bloque
+  //    (los que más se confunden). Se eligen los de más prioridad y menos dominio.
+  const bloques = tema.ampliacion?.bloques ?? [];
+  const huecoIdentifica = Math.min(Math.round(tamano * CUOTA.identifica), tamano - items.length);
+  const candidatos = bloques
+    .flatMap((b) => b.conceptoIds.map((id) => ({ id, b, peso: (prioridad[b.id] ?? 0.1) * (1.05 - dominio(id)) * (0.5 + azar()) })))
+    .sort((x, y) => y.peso - x.peso);
+  const yaIdentifica = new Set<string>();
+  for (const c of candidatos) {
+    if (yaIdentifica.size >= Math.max(0, huecoIdentifica)) break;
+    if (yaIdentifica.has(c.id)) continue;
+    const mismos = c.b.conceptoIds.filter((x) => x !== c.id);
+    const otros = bloques.flatMap((b) => b.conceptoIds).filter((x) => x !== c.id && !mismos.includes(x));
+    const distractores = [...barajarCon(mismos, azar), ...barajarCon(otros, azar)].slice(0, 2);
+    if (distractores.length < 2) continue;
+    yaIdentifica.add(c.id);
+    items.push({ tipo: 'identifica', conceptoId: c.id, opciones: barajarCon([c.id, ...distractores], azar), motivo: 'identifica' });
+  }
+
+  // 5. Nuevas: sin ver nunca, elegidas por bloque según la prioridad (muestreo ponderado).
   const nuevasPorBloque = new Map<string, PreguntaExamen[]>();
   for (const q of banco) {
     if (p.preguntas[q.id] || usadas.has(q.id)) continue;
@@ -122,7 +144,7 @@ export function construirSesion(tema: Tema, p: Practica, hoy: string, opciones: 
     meter(nuevasPorBloque.get(elegido)!.shift(), 'nueva');
   }
 
-  // 5. Si todo está visto y al día, se completa con lo que más tiempo lleva sin repasar.
+  // 6. Si todo está visto y al día, se completa con lo que más tiempo lleva sin repasar.
   if (items.length < tamano) {
     const porFecha = Object.entries(p.preguntas).sort((a, b) => a[1].proxima.localeCompare(b[1].proxima));
     for (const [id] of porFecha) meter(porId.get(id), 'espaciada');
@@ -132,7 +154,16 @@ export function construirSesion(tema: Tema, p: Practica, hoy: string, opciones: 
 
 /** Resumen de una sesión para mostrarla antes de empezar. */
 export function resumenSesion(items: ItemSesion[]): Record<MotivoSesion, number> {
-  const r: Record<MotivoSesion, number> = { repaso: 0, espaciada: 0, nueva: 0, tarjeta: 0 };
+  const r: Record<MotivoSesion, number> = { repaso: 0, espaciada: 0, nueva: 0, tarjeta: 0, identifica: 0 };
   for (const i of items) r[i.motivo]++;
   return r;
+}
+
+function barajarCon<T>(lista: T[], azar: () => number): T[] {
+  const copia = [...lista];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(azar() * (i + 1));
+    [copia[i], copia[j]] = [copia[j]!, copia[i]!];
+  }
+  return copia;
 }

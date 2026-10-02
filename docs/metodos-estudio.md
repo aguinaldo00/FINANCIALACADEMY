@@ -43,7 +43,11 @@ y de la ampliación (apuntes y libro); nada se inventa.
    - Al abrir una sección: 3 preguntas rápidas antes de las fichas (no cuentan para nada).
    - En la ficha: escribir la definición de memoria y compararla con la de DATA, con las palabras
      clave resaltadas. La autoevaluación ("La sabía" o "No la sabía") alimenta el repaso.
-4. **Mi progreso**
+4. **Discriminación de conceptos parecidos** (dentro de la sesión).
+   - "¿A qué concepto corresponde esta definición?": la definición de DATA con el nombre oculto y
+     opciones del mismo bloque.
+   - Es el intercalado que más rinde: obliga a distinguir categorías parecidas.
+5. **Mi progreso**
    - Racha de días.
    - Preguntas respondidas hoy.
    - Evolución de las notas de los simulacros.

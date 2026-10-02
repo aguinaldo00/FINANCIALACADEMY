@@ -6,6 +6,7 @@ import { diasEntre, racha } from '../../domain/practice.ts';
 import { construirSesion, type ItemSesion, type MotivoSesion, resumenSesion } from '../../domain/session.ts';
 import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
 import { pintarPreguntaConConfianza, type Tarjeta, tarjetasDe } from '../components/conceptPanels.ts';
+import { ocultarNombre } from '../../domain/recall.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -15,6 +16,7 @@ const MOTIVO: Record<MotivoSesion, string> = {
   espaciada: 'Toca repasarla hoy',
   nueva: 'Nueva',
   tarjeta: 'Flashcard',
+  identifica: '¿Cuál es?',
 };
 /** Resumen del plan: [singular, plural]. */
 const PLAN: Record<MotivoSesion, [string, string]> = {
@@ -22,6 +24,7 @@ const PLAN: Record<MotivoSesion, [string, string]> = {
   espaciada: ['toca repasarla hoy', 'toca repasarlas hoy'],
   nueva: ['nueva', 'nuevas'],
   tarjeta: ['flashcard', 'flashcards'],
+  identifica: ['para distinguir conceptos parecidos', 'para distinguir conceptos parecidos'],
 };
 
 /**
@@ -49,7 +52,7 @@ export function pintarSesion(ctx: ContextoVista, estado: EstadoEstudio, practica
   const hechasHoy = p.actividad[hoy]?.total ?? 0;
   const etiqueta = (m: MotivoSesion, n: number) => (n ? `<li class="ses-${m}"><b>${n}</b>${PLAN[m][n === 1 ? 0 : 1]}</li>` : '');
   ctx.pagina.innerHTML = `<div class="ses" data-sesion><header class="sh"><div class="kick"><span class="pill k">🎯 Estudiar hoy</span>${racha_ ? `<span class="pill">🔥 Racha de ${racha_} ${racha_ === 1 ? 'día' : 'días'}</span>` : ''}${hechasHoy ? `<span class="pill">${hechasHoy} respuestas hoy</span>` : ''}</div><h1>Tu sesión de hoy</h1><p>Preguntas mezcladas de todo el tema: primero lo que fallaste, después lo que toca repasar y lo nuevo que más cae en el examen. Antes de cada corrección, di cómo de seguro estás.</p></header>
-<section class="ses-plan"><ul class="ses-resumen">${etiqueta('repaso', r.repaso)}${etiqueta('espaciada', r.espaciada)}${etiqueta('nueva', r.nueva)}${etiqueta('tarjeta', r.tarjeta)}</ul>
+<section class="ses-plan"><ul class="ses-resumen">${etiqueta('repaso', r.repaso)}${etiqueta('espaciada', r.espaciada)}${etiqueta('nueva', r.nueva)}${etiqueta('identifica', r.identifica)}${etiqueta('tarjeta', r.tarjeta)}</ul>
 <div class="ses-ops"><fieldset><legend>Duración</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="ses-n" value="${n}"${n === tamano ? ' checked' : ''}><span>${n}<small>≈ ${n} min</small></span></label>`).join('')}</fieldset>
 <label class="ses-fecha"><span>Fecha del examen</span><input type="date" data-ses-fecha value="${p.fechaExamen ?? ''}" min="${hoy}">${p.fechaExamen ? '<button type="button" class="fc-btn" data-ses-borrar>Borrar</button>' : ''}</label></div>
 <p class="ses-examen">${examen}</p>
@@ -96,10 +99,37 @@ function jugar(juego: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
 <article class="cc ses-tarjeta"><div class="pn p" data-ses-panel></div></article>`;
   const panel = juego.querySelector<HTMLElement>('[data-ses-panel]')!;
   // Mismo color que en la ficha: azul para preguntas, violeta para flashcards.
-  panel.className = item.tipo === 'pregunta' ? 'pn p' : 'pn f';
-  const siguiente = `<div class="pq-pie"><span>${concepto ? `<a href="${hrefConcepto(concepto.id)}" target="_self">${concepto.nombre}</a>` : ''}</span><button type="button" class="fc-btn" data-ses-sig hidden>Siguiente →</button></div>`;
+  panel.className = item.tipo === 'tarjeta' ? 'pn f' : item.tipo === 'identifica' ? 'pn e' : 'pn p';
+  // En "¿Cuál es?" el nombre del concepto no se enseña hasta responder.
+  const enlace = concepto ? `<a href="${hrefConcepto(concepto.id)}">${concepto.nombre}</a>` : '';
+  const siguiente = `<div class="pq-pie"><span data-ses-enlace>${item.tipo === 'identifica' ? '' : enlace}</span><button type="button" class="fc-btn" data-ses-sig hidden>Siguiente →</button></div>`;
   const avanzar = () => jugar(juego, estado, practica, items, i + 1, m, ctx);
-  if (item.tipo === 'pregunta') {
+  if (item.tipo === 'identifica' && concepto) {
+    const nombres = item.opciones.map((id) => estado.tema.conceptos.find((c) => c.id === id)?.nombre ?? id);
+    const definicion = ocultarNombre(concepto.definicion, concepto.nombre);
+    const frase = estado.tema.modos.findIndex((x) => x.etiqueta.includes('Frase de examen'));
+    pintarPreguntaConConfianza(
+      panel,
+      {
+        enunciado: '¿A qué concepto corresponde esta definición?',
+        opciones: nombres,
+        indiceCorrecta: item.opciones.indexOf(concepto.id),
+        explicacion: resaltarAviso(concepto.explicaciones[frase >= 0 ? frase : 0] ?? ''),
+      },
+      (correcta, confianza) => {
+        practica.responder(`identifica:${concepto.id}`, correcta, { conceptoId: concepto.id, confianza, repaso: false });
+        m.hechas++;
+        if (correcta) m.aciertos++;
+        panel.querySelector('[data-ses-enlace]')!.innerHTML = enlace;
+        const b = panel.querySelector<HTMLButtonElement>('[data-ses-sig]')!;
+        b.hidden = false;
+        b.focus({ preventScroll: true });
+      },
+      siguiente,
+      `<blockquote class="ses-def">${definicion}</blockquote><p class="ses-def-pista">Son conceptos que se confunden: fíjate en el detalle que los distingue.</p>`,
+    );
+    panel.querySelector<HTMLButtonElement>('[data-ses-sig]')!.onclick = avanzar;
+  } else if (item.tipo === 'pregunta') {
     pintarPreguntaConConfianza(
       panel,
       item.pregunta,
@@ -114,7 +144,7 @@ function jugar(juego: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
       siguiente,
     );
     panel.querySelector<HTMLButtonElement>('[data-ses-sig]')!.onclick = avanzar;
-  } else {
+  } else if (item.tipo === 'tarjeta') {
     const tarjeta = concepto ? tarjetasDe(concepto, estado.tema).find((t) => t.id === item.tarjetaId) : undefined;
     if (!tarjeta) return avanzar();
     pintarTarjeta(panel, tarjeta, false, (sabia) => {
@@ -123,6 +153,8 @@ function jugar(juego: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
       if (sabia) m.aciertos++;
       avanzar();
     });
+  } else {
+    return avanzar();
   }
   window.scrollTo({ top: Math.max(0, juego.getBoundingClientRect().top + window.scrollY - 80) });
 }

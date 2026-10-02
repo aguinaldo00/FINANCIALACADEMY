@@ -6,7 +6,7 @@
 - "Trabajar en automático toda la noche en investigar e implementar métodos más óptimos de estudio".
 
 **Dónde está:**
-- Cola: `docs/cola-trabajo.md` (tareas 11–17), todas hechas.
+- Cola: `docs/cola-trabajo.md` (tareas 11–18), todas hechas.
 - Vista previa en el mismo enlace: https://claude.ai/artifact/Xkte8QVBzTan8pEMPuKg1i
 - PR: https://github.com/giorgioangelo57/FINANCIALACADEMY/pull/1
 
@@ -29,7 +29,7 @@ predicción, simulacro, repaso, menú móvil y modo 2D. Fallos encontrados y cor
 |---|---|
 | **Práctica de recuperación** y **espaciado** (las de mayor utilidad, Dunlosky et al. 2013) | **🎯 Estudiar hoy** (`#sesion`): sesión de 10, 15 o 25 min que mezcla tu repaso, lo que toca repasar hoy, preguntas nuevas de lo que más cae y menos dominas, y flashcards. La repetición espaciada se aplica también a las preguntas |
 | **Espaciado según la fecha del examen** (Cepeda et al. 2008: intervalo ≈ 10–20 % del plazo) | Fecha de examen opcional: los intervalos nunca superan el 20 % de los días que faltan |
-| **Intercalado** (g = 0,42) | La sesión nunca pone dos preguntas seguidas del mismo concepto y alterna bloques |
+| **Intercalado** (g = 0,42, mayor con categorías parecidas) | La sesión nunca pone dos preguntas seguidas del mismo concepto y alterna bloques. Incluye **"¿Cuál es?"**: identificar un concepto por su definición (nombre oculto) entre otros parecidos del mismo bloque |
 | **Confianza / hipercorrección** (Butterfield y Metcalfe 2001) | Antes de corregir: "Seguro / Dudo / Adivino" en práctica, repaso, sesión y simulacros. Los errores con seguridad se avisan y se repasan primero; los aciertos sin seguridad vuelven al repaso. En el simulacro hay un gráfico "¿Sabías lo que sabías?" |
 | **Pretest** (Richland, Kornell y Kao 2009) | 3 preguntas rápidas al abrir cada sección, antes de las fichas |
 | **Generación / recuerdo libre** | **✍️ Escríbelo tú** en cada ficha: la definición se oculta, escribes de memoria y se compara con las ideas clave de DATA |
@@ -42,7 +42,7 @@ predicción, simulacro, repaso, menú móvil y modo 2D. Fallos encontrados y cor
 - El dominio solo sube con "Compruébalo".
 
 ## Verificación
-- 170 tests, typecheck y build correctos.
+- 173 tests, typecheck y build correctos.
 - `scripts/verificar-chromium.mjs` en verde, con comprobaciones nuevas de sesión, progreso, pretest y
   "Escríbelo tú" en escritorio y móvil, y sin errores de consola.
 

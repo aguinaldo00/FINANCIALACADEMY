@@ -111,8 +111,8 @@
 /* Estudiar hoy */
 .ses-plan{display:grid;gap:16px;margin-top:22px;padding:22px;border-radius:24px;background:var(--bg2);border:1px solid var(--line)}
 .ses-plan[hidden]{display:none}
-.ses-resumen{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
-.ses-resumen li{display:flex;gap:6px;align-items:baseline;padding:6px 14px;border-radius:999px;background:#000;border:1px solid var(--line);font-size:.92rem}
+.ses-resumen{display:flex;flex-wrap:wrap;align-items:center;gap:8px;list-style:none;margin:0;padding:0}
+.ses-resumen li{display:flex;gap:6px;align-items:baseline;white-space:nowrap;padding:6px 14px;border-radius:999px;background:#000;border:1px solid var(--line);font-size:.92rem}
 .ses-resumen b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.15rem}
 .ses-resumen .ses-repaso{border-color:#ff5a5a88}.ses-resumen .ses-espaciada{border-color:#60a5fa88}.ses-resumen .ses-nueva{border-color:#4ade8088}.ses-resumen .ses-tarjeta{border-color:#a78bfa88}
 .ses-ops{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
@@ -168,3 +168,9 @@
 .ex-val small{color:var(--mut);font-weight:400}
 .ses .sim-cab{justify-content:flex-start}
 .ses .sim-cab .sim-bloque{margin-left:auto}
+
+/* ¿Cuál es? (discriminación de conceptos parecidos) */
+.ses-def{margin:8px 0 6px;padding:12px 16px;border-left:4px solid var(--c);background:#000;border-radius:0 12px 12px 0;font-size:1.02rem;line-height:1.5}
+.ses-def-pista{margin:0 0 4px;font-size:.85rem;color:var(--mut)}
+.ses-motivo.ses-identifica{border-color:#3ddbd9;color:#bff3f2}
+.ses-resumen .ses-identifica{border-color:#3ddbd988}

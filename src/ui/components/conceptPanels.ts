@@ -65,9 +65,11 @@ export function pintarPreguntaConConfianza(
   pregunta: Pregunta,
   alTerminar: (correcta: boolean, confianza: Confianza) => void,
   pie = '',
+  /** HTML entre el enunciado y las opciones (p. ej. la definición a identificar). */
+  contexto = '',
 ): void {
   const { enunciado, opciones, explicacion, indiceCorrecta } = pregunta;
-  panel.innerHTML = `<p><b>${enunciado}</b></p><div class="opts">${opciones.map((t, i) => `<button type="button" class="opt" data-k="${i}">${t}</button>`).join('')}</div>
+  panel.innerHTML = `<p><b>${enunciado}</b></p>${contexto}<div class="opts">${opciones.map((t, i) => `<button type="button" class="opt" data-k="${i}">${t}</button>`).join('')}</div>
 <div class="conf" hidden><span>¿Cómo de seguro estás?</span>${CONFIANZAS.map((c) => `<button type="button" class="conf-btn ${c}" data-conf="${c}">${ETIQUETA_CONFIANZA[c]}</button>`).join('')}</div><div class="fb"></div>${pie}`;
   const botones = [...panel.querySelectorAll<HTMLButtonElement>('.opt')];
   const conf = panel.querySelector<HTMLElement>('.conf')!;

@@ -40,3 +40,6 @@ clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
 - [x] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.
 - [x] 16. Mi progreso: racha, actividad, simulacros, calibración y acierto por bloque.
 - [x] 17. Auditoría visual final, docs, PR y artefacto. Resumen en `docs/resumen-noche.md`.
+- [x] 18. Discriminación de conceptos parecidos en la sesión: "¿A qué concepto corresponde esta
+  definición?" con la definición de DATA (nombre oculto) y opciones del mismo bloque. Intercalado
+  con discriminación: es donde más rinde (Brunmair y Richter, 2019).

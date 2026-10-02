@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
-import { compararRecuerdo, ideasClave, normalizar } from '../../src/domain/recall.ts';
+import { compararRecuerdo, ideasClave, normalizar, ocultarNombre } from '../../src/domain/recall.ts';
 
 describe('Escríbelo tú: comparar el recuerdo con las ideas clave', () => {
   it('normaliza acentos, mayúsculas, signos y etiquetas', () => {
@@ -29,6 +29,21 @@ describe('Escríbelo tú: comparar el recuerdo con las ideas clave', () => {
       expect(ideas.length, c.id).toBeGreaterThan(0);
       // Copiar la definición entera cubre todas sus ideas.
       expect(compararRecuerdo(c.definicion, ideas).cobertura, c.id).toBe(1);
+    }
+  });
+});
+
+describe('ocultar el nombre de un concepto', () => {
+  it('oculta el nombre y su sigla, sin tocar palabras que solo lo contienen', () => {
+    expect(ocultarNombre('El ICO es la agencia financiera; el ICO presta.', 'Instituto de Crédito Oficial (ICO)')).toBe('El ▢▢▢ es la agencia financiera; el ▢▢▢ presta.');
+    expect(ocultarNombre('Ley de Autonomía del Banco de España', 'Banco de España')).toBe('Ley de Autonomía del ▢▢▢');
+    expect(ocultarNombre('Los BCEX no', 'Banco Central Europeo (BCE)')).toBe('Los BCEX no');
+  });
+
+  it('ninguna definición de DATA deja ver el nombre de su concepto', () => {
+    for (const c of tema01.conceptos) {
+      const plano = ocultarNombre(c.definicion.replace(/<[^>]+>/g, ''), c.nombre).toLowerCase();
+      expect(plano.includes(c.nombre.replace(/\s*\(.*?\)/g, '').toLowerCase()), c.id).toBe(false);
     }
   });
 });

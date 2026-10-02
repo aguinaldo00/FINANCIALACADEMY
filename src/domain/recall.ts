@@ -57,3 +57,19 @@ export function compararRecuerdo(texto: string, ideas: string[]): ResultadoRecue
   }
   return { encontradas, faltan, cobertura: ideas.length ? encontradas.length / ideas.length : 0 };
 }
+
+const escaparRegex = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Oculta el nombre de un concepto (y su sigla o alias entre paréntesis) dentro de un texto, para
+ * preguntar "¿a qué concepto corresponde?" sin regalar la respuesta.
+ */
+export function ocultarNombre(texto: string, nombre: string, oculto = '▢▢▢'): string {
+  const base = nombre.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+  const alias = [...nombre.matchAll(/\(([^)]+)\)/g)].map((m) => m[1]!.trim());
+  let res = texto;
+  for (const t of [base, ...alias].filter((x) => x.length >= 2).sort((a, b) => b.length - a.length)) {
+    res = res.replace(new RegExp(`(^|[^\\p{L}])${escaparRegex(t)}(?=$|[^\\p{L}])`, 'giu'), `$1${oculto}`);
+  }
+  return res;
+}

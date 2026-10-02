@@ -146,6 +146,8 @@ export interface Respuesta {
   correcta: boolean;
   confianza?: Confianza;
   hoy: string;
+  /** `false`: solo cuenta para la calibración y la actividad (no entra al repaso ni al espaciado). */
+  repaso?: boolean;
 }
 
 const sumar = (r: Recuento | undefined, acierto: boolean): Recuento => ({ aciertos: (r?.aciertos ?? 0) + (acierto ? 1 : 0), total: (r?.total ?? 0) + 1 });
@@ -161,6 +163,12 @@ const sumar = (r: Recuento | undefined, acierto: boolean): Recuento => ({ aciert
 export function registrarRespuesta(p: Practica, r: Respuesta): Practica {
   const { id, correcta, confianza, hoy } = r;
   let n: Practica = p;
+  if (r.repaso === false) {
+    const calibracion = confianza ? { ...n.calibracion, [confianza]: sumar(n.calibracion[confianza], correcta) } : n.calibracion;
+    const actividad = recortarActividad({ ...n.actividad, [hoy]: sumar(n.actividad[hoy], correcta) });
+    const conceptos = r.conceptoId ? { ...n.conceptos, [r.conceptoId]: sumar(n.conceptos[r.conceptoId], correcta) } : n.conceptos;
+    return { ...n, calibracion, actividad, conceptos };
+  }
   if (!correcta) {
     n = registrarFallo(n, id, hoy);
     if (confianza === 'seguro') n = { ...n, fallos: { ...n.fallos, [id]: { ...n.fallos[id]!, sorpresa: true } } };

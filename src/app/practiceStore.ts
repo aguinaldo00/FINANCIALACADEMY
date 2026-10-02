@@ -46,9 +46,9 @@ export class EstadoPractica {
    * Resultado de responder una pregunta de cualquier sitio: alimenta el repaso, la repetición
    * espaciada, la calibración (si se indicó la confianza) y la actividad.
    */
-  responder(idPregunta: string, correcta: boolean, extra: { conceptoId?: string; confianza?: Confianza } = {}): void {
+  responder(idPregunta: string, correcta: boolean, extra: { conceptoId?: string; confianza?: Confianza; repaso?: boolean } = {}): void {
     const conceptoId = extra.conceptoId ?? (idPregunta.startsWith('oficial:') ? idPregunta.slice(8) : this.conceptoDe(idPregunta));
-    this.cambiar(registrarRespuesta(this.actual, { id: idPregunta, conceptoId, correcta, confianza: extra.confianza, hoy: this.hoy() }));
+    this.cambiar(registrarRespuesta(this.actual, { id: idPregunta, conceptoId, correcta, confianza: extra.confianza, hoy: this.hoy(), repaso: extra.repaso }));
   }
 
   fechaExamen(fecha: string | undefined): void {

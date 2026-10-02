@@ -9,14 +9,30 @@ const banco = bancoDePreguntas(tema01);
 const tarjetas = tema01.conceptos.map((c) => ({ id: `frase:${c.id}`, conceptoId: c.id }));
 
 describe('sesión de estudio de hoy', () => {
+  it('discriminación: identificar un concepto entre otros del mismo bloque, sin repetir opciones', () => {
+    const s = construirSesion(tema01, practicaVacia(), HOY, { semilla: 5 });
+    const ids = s.filter((i) => i.tipo === 'identifica');
+    expect(ids.length).toBe(3);
+    for (const i of ids) {
+      if (i.tipo !== 'identifica') continue;
+      expect(i.opciones).toHaveLength(3);
+      expect(new Set(i.opciones).size).toBe(3);
+      expect(i.opciones).toContain(i.conceptoId);
+      const bloque = tema01.ampliacion!.bloques.find((b) => b.conceptoIds.includes(i.conceptoId))!;
+      // Si el bloque tiene al menos 3 conceptos, los distractores son del mismo bloque.
+      if (bloque.conceptoIds.length >= 3) for (const o of i.opciones) expect(bloque.conceptoIds).toContain(o);
+    }
+  });
+
   it('sin historial: 15 preguntas nuevas y algunas tarjetas, sin repetir', () => {
     const s = construirSesion(tema01, practicaVacia(), HOY, { semilla: 3, tarjetas });
     expect(s).toHaveLength(15);
     const r = resumenSesion(s);
     expect(r.repaso).toBe(0);
     expect(r.tarjeta).toBe(3);
-    expect(r.nueva).toBe(12);
-    const ids = s.map((i) => (i.tipo === 'pregunta' ? i.pregunta.id : i.tarjetaId));
+    expect(r.identifica).toBe(3);
+    expect(r.nueva).toBe(9);
+    const ids = s.map((i) => (i.tipo === 'pregunta' ? i.pregunta.id : i.tipo === 'tarjeta' ? i.tarjetaId : `identifica:${i.conceptoId}`));
     expect(new Set(ids).size).toBe(15);
   });
 
@@ -70,6 +86,6 @@ describe('sesión de estudio de hoy', () => {
     for (const t of tarjetas) p = calificarTarjeta(p, t.id, true, HOY);
     const s = construirSesion(tema01, p, HOY, { tarjetas });
     expect(s).toHaveLength(15);
-    expect(s.every((i) => i.motivo === 'espaciada')).toBe(true);
+    expect(s.every((i) => i.motivo === 'espaciada' || i.motivo === 'identifica')).toBe(true);
   });
 });
