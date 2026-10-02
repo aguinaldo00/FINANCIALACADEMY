@@ -30,11 +30,13 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
 
   ctx.pagina.innerHTML = `<section class="hero rev"><span class="pill k">Tema ${tema.meta.numero} · ${tema.meta.titulo}</span>${tituloMarca('hero', 'h1')}<p>Cada entidad del sistema financiero es un edificio con su símbolo. Lee la ficha, pide que te lo expliquen de otra forma, desactiva la trampa del examen y compruébalo.</p></section>
  <section class="mundo" data-mundo aria-label="Mapa explorable de ${MARCA.ciudad}"></section>
- ${ciudadPixel(tema, progreso, { iconosSobreTejado: true })}<p class="legend">Luces de cada edificio = tu dominio: <b style="color:#ff5a5a">rojo</b> flojo · <b style="color:#ffd23f">amarillo</b> regular · <b style="color:#4ade80">verde</b> dominado · apagado = sin estudiar. Pulsa un edificio para entrar.</p>
+
  <div class="dash rev"><div class="big">${anilloDominio(dominioGlobal(tema, progreso), 130)}</div><div><h3>📌 Estudia ya: lo que más pesa y menos dominas</h3><div class="ya">${estudiaYa}</div></div></div>
  <h2 class="h2 rev">Subpuntos del tema</h2><div class="tiles">${tiles}</div>
  ${tarjetaExamen(estado)}
  <h2 class="h2 rev">Gramática visual</h2><div class="gram rev">${gramatica}</div>
+ <section class="historia rev" aria-labelledby="historia-t"><span class="pill">📜 Historia del proyecto</span><h2 class="h2" id="historia-t">Así empezó la ciudad</h2><p class="historia-p">La primera versión de ${MARCA.ciudad} era este dibujo en 2D: un edificio por subpunto del tema, con sus luces según tu dominio. De aquí nació la maqueta 3D de arriba.</p>
+ ${ciudadPixel(tema, progreso, { iconosSobreTejado: true })}<p class="legend">Luces de cada edificio = tu dominio: <b style="color:#ff5a5a">rojo</b> flojo · <b style="color:#ffd23f">amarillo</b> regular · <b style="color:#4ade80">verde</b> dominado · apagado = sin estudiar. Pulsa un edificio para entrar.</p></section>
 `;
   ctx.tituloMovil.textContent = MARCA_COMPLETA;
 }

@@ -1,7 +1,11 @@
 import {
   ACESFilmicToneMapping,
   AdditiveBlending,
+  ConeGeometry,
   Group,
+  QuadraticBezierCurve3,
+  SphereGeometry,
+  TubeGeometry,
   Sprite,
   SpriteMaterial,
   BoxGeometry,
@@ -195,6 +199,8 @@ export class Mundo3D {
   /** Modo noche (repaso): lo pendiente de cada concepto; null de día. */
   private pendientes: ReadonlyMap<string, { total: number; sorpresas: number }> | null = null;
   private faros = new Group();
+  private readonly recorrido = new Group();
+  private tramoActivo: { curva: QuadraticBezierCurve3; luz: Mesh } | null = null;
 
   constructor(modelo: ModeloCiudad, private readonly opciones: OpcionesMundo3D) {
     this.modelo = modelo;
@@ -224,7 +230,8 @@ export class Mundo3D {
     this.obstaculos = obstaculosDe(modelo);
     this.decorado = new Decorado(modelo);
     this.faros.name = 'faros-repaso';
-    this.escena.add(this.estatica, this.dinamica.raiz, this.decorado.raiz, this.faros);
+    this.recorrido.name = 'recorrido';
+    this.escena.add(this.estatica, this.dinamica.raiz, this.decorado.raiz, this.faros, this.recorrido);
     this.sombraDeContacto(modelo.lado + MARGEN_PEANA * 2);
 
     this.contorno.visible = false;
@@ -280,6 +287,58 @@ export class Mundo3D {
     this.escena.add(sol, relleno);
     this.sol = sol;
     this.relleno = relleno;
+  }
+
+  /* ------------------------------------------------------------ recorrido */
+
+  /**
+   * Recorrido guiado: arcos dorados con flechas que unen los edificios en el orden de estudio. El
+   * tramo que sale del paso activo brilla y lleva una luz que lo recorre; los demás quedan tenues.
+   */
+  fijarRecorrido(ids: readonly string[] | null, activo: number): void {
+    for (const h of [...this.recorrido.children]) {
+      this.recorrido.remove(h);
+      h.traverse((o) => {
+        const m = o as Mesh;
+        if (m.geometry) m.geometry.dispose();
+        if (m.material) (m.material as MeshBasicMaterial).dispose();
+      });
+    }
+    this.tramoActivo = null;
+    if (ids && ids.length > 1) {
+      const punto = (id: string) => {
+        const e = buscarEdificio(this.modelo, id);
+        return e ? new Vector3(e.posicion.x, this.cimaEdificio(id) + 0.6, e.posicion.z) : null;
+      };
+      for (let k = 0; k < ids.length - 1; k++) {
+        const a = punto(ids[k]!);
+        const b = punto(ids[k + 1]!);
+        if (!a || !b) continue;
+        const dist = a.distanceTo(b);
+        const medio = a.clone().add(b).multiplyScalar(0.5);
+        medio.y = Math.max(a.y, b.y) + Math.max(2, dist * 0.32);
+        const curva = new QuadraticBezierCurve3(a, medio, b);
+        const activoTramo = k === activo;
+        const color = activoTramo ? '#ffd23f' : '#e8b84a';
+        const material = new MeshBasicMaterial({ color, transparent: true, opacity: activoTramo ? 0.95 : 0.62, depthWrite: false });
+        const tramo = new Group();
+        tramo.add(new Mesh(new TubeGeometry(curva, 32, activoTramo ? 0.2 : 0.13, 8), material));
+        // Flecha a mitad del tramo, orientada según la tangente.
+        const flecha = new Mesh(new ConeGeometry(activoTramo ? 0.6 : 0.45, activoTramo ? 1.3 : 1.0, 14), material.clone());
+        const t = 0.55;
+        flecha.position.copy(curva.getPoint(t));
+        flecha.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), curva.getTangent(t).normalize());
+        tramo.add(flecha);
+        tramo.renderOrder = 6;
+        this.recorrido.add(tramo);
+        if (activoTramo) {
+          const luz = new Mesh(new SphereGeometry(0.32, 14, 10), new MeshBasicMaterial({ color: '#fff3c4' }));
+          tramo.add(luz);
+          this.tramoActivo = { curva, luz };
+        }
+      }
+    }
+    this.sucio = true;
   }
 
   /* ------------------------------------------------------------ ambiente */
@@ -1082,6 +1141,7 @@ export class Mundo3D {
     // Palomas y nubes: vida de fondo, a ~30 fps y solo si no hay nada más que dibujar.
     if (!this.reducido && (cambio || this.sucio || ahora - this.ultimoDecorado > 33)) {
       this.decorado.nubesEnVista = !this.paseo && (this.focoActual.nivel === 'ciudad' || this.focoActual.nivel === 'barrio') && this.vista === 'maqueta';
+      if (this.tramoActivo) this.tramoActivo.luz.position.copy(this.tramoActivo.curva.getPoint((ahora / 1600) % 1));
       for (const g of this.dinamica.edificios.values()) {
         const x = g.userData.escultura as Escultura | undefined;
         if (x) animarEscultura(x, ahora / 1000);

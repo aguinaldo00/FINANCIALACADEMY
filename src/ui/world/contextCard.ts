@@ -116,3 +116,16 @@ export function fichaNocturna(m: ModeloCiudad, foco: Foco, modo: ModoFicha, pend
     }
   }
 }
+
+/** Ficha del recorrido guiado: paso actual, anterior/siguiente y entrar a estudiar. */
+export function fichaRecorrido(m: ModeloCiudad, ids: readonly string[], i: number): string {
+  const e = buscarEdificio(m, ids[i] ?? '');
+  if (!e) return '';
+  const z = buscarZona(m, e.seccionId);
+  const puntos = ids.map((_, k) => `<i class="${k === i ? 'on' : k < i ? 'hecho' : ''}"></i>`).join('');
+  return `<p class="ficha-antetitulo llamada">🧭 Recorrido · Paso ${i + 1} de ${ids.length}</p><h3 class="ficha-titulo grande">${e.nombre}</h3>
+ <p class="ficha-texto">Zona ${e.seccionId}${z ? ` · ${z.titulo}` : ''}</p>
+ <div class="rec-puntos" aria-hidden="true">${puntos}</div>
+ <div class="rec-ctrl"><button type="button" class="rec-btn" data-recorrido="-1"${i === 0 ? ' disabled' : ''}>← Anterior</button><button type="button" class="rec-btn principal" data-recorrido="1"${i === ids.length - 1 ? ' disabled' : ''}>Siguiente →</button></div>
+ <div class="rec-pie"><a class="ficha-accion" href="${hrefConcepto(e.conceptoId)}">Estudiar el concepto</a><button type="button" class="rec-salir" data-recorrido="salir">Salir del recorrido</button></div>`;
+}

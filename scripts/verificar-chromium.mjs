@@ -54,7 +54,8 @@ const progreso = () => {
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2500);
   ok('escritorio: lienzo 3D montado', await p.locator('.mundo-lienzo').count() === 1);
-  ok('escritorio: ciudad 2D oculta con 3D activo', !(await p.locator('.skyline').isVisible()));
+  ok('historia: la ciudad 2D del prototipo está al final de la página', await p.evaluate(() => { const h = document.querySelector('.historia .skyline'); const m = document.querySelector('.mundo'); return Boolean(h && m && h.getBoundingClientRect().top > m.getBoundingClientRect().bottom); }));
+  ok('sin botón de modo 2D', (await p.locator('[data-mundo-modo]').count()) === 0);
   const rotulos = await p.locator('.m-etq').allTextContents();
   ok('escritorio: solo los 4 barrios rotulados', rotulos.length === 4, rotulos.join(' | '));
   ok('escritorio: sin porcentajes ni pines en el mundo', !rotulos.join('').includes('%') && !(await p.locator('.mundo-vista').textContent()).includes('📌'));
@@ -120,6 +121,21 @@ const progreso = () => {
   await p.locator('.migas button').first().click();
   await p.waitForTimeout(1500);
   ok('navegación: migas devuelven a la ciudad', (await p.locator('.migas [aria-current]').textContent()) === 'La ciudad del dinero');
+  // Recorrido guiado del barrio 4 con flechas.
+  await aLaCiudad(p);
+  await pulsar(p, '[data-mundo-recorrido]');
+  await p.mouse.move(5, 5);
+  await p.waitForTimeout(1800);
+  const pasoTexto = async () => (await p.locator('.ficha:not([hidden]) .ficha-antetitulo').textContent()) ?? '';
+  ok('recorrido: empieza en el paso 1 con las paradas numeradas', (await pasoTexto()).includes('Paso 1 de') && (await p.locator('.m-etq.paso').count()) > 10, await pasoTexto());
+  await pulsar(p, '[data-recorrido="1"]');
+  await p.waitForTimeout(1600);
+  ok('recorrido: "Siguiente" avanza y mueve el mapa', (await pasoTexto()).includes('Paso 2 de') && (await p.locator('.migas [aria-current]').textContent()) === 'Eurosistema', await pasoTexto());
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-recorrido.png` });
+  await pulsar(p, '[data-recorrido="salir"]');
+  await p.waitForTimeout(800);
+  ok('recorrido: se puede salir', (await p.locator('.m-etq.paso').count()) === 0 && (await p.locator('.ficha-antetitulo').first().textContent().catch(() => '')).includes('Recorrido') === false);
+
   // Noche = repasar: solo se encienden los edificios con algo pendiente hoy.
   await p.evaluate(() => localStorage.setItem('financial-academy:practica', JSON.stringify({ version: 1, temas: { 1: {
     fallos: { 'oficial:bde': { veces: 1, racha: 0, ultima: '2026-01-01', sorpresa: true }, 'oficial:cnmv': { veces: 2, racha: 0, ultima: '2026-01-01' } },

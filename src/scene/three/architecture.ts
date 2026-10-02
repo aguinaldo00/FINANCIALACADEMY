@@ -268,6 +268,7 @@ export function construirArquitectura(e: EdificioVisual): Group {
   } else {
     CONSTRUCTORES[e.tipologia](taller, W, D, e.alturaCompleta, e.tejado, semilla);
   }
+  detallar(taller, e);
   // Emblema de fachada con el icono del concepto (ver emblemas.ts).
   const v = taller.principal;
   emblema(taller, e.iconos, taller.escudo ?? {
@@ -445,4 +446,47 @@ export function animarEscultura(x: Escultura, t: number): void {
   } else {
     p.rotation.y = Math.sin(t * 0.45 + x.fase) * 0.38;
   }
+}
+
+/* ------------------------------------------------------------------ detalle */
+
+/**
+ * Detalle de maqueta fina, común a todas las tipologías: farolillos a los lados de la entrada,
+ * jardineras delante de la fachada y, en las cubiertas planas, máquinas de clima, un depósito de
+ * agua y claraboyas (dejando libre el centro, donde va la escultura).
+ */
+function detallar(t: Taller, e: EdificioVisual): void {
+  const v = t.principal;
+  const zf = v.z + v.d / 2;
+  const s = [...e.conceptoId].reduce((a, c) => a + c.charCodeAt(0), 0);
+  // Farolillos y jardineras en la fachada principal.
+  for (const lado of [-1, 1]) {
+    t.caja('metal', 0.08, 0.5, 0.08, v.x + lado * 1.25, 1.55, zf + 0.12);
+    t.caja('luz', 0.2, 0.26, 0.2, v.x + lado * 1.25, 2.02, zf + 0.12);
+    t.caja('base', 0.7, 0.32, 0.4, v.x + lado * Math.min(v.w / 2 - 0.5, 2.1), 0, zf + 0.45);
+    t.caja('verde', 0.6, 0.26, 0.32, v.x + lado * Math.min(v.w / 2 - 0.5, 2.1), 0.32, zf + 0.45);
+  }
+  // Cubierta: solo en las planas (en las inclinadas, cúpulas y frontones no cabe).
+  if (!['plano', 'bandera', 'antena'].includes(e.tejado) || v.w < 3 || v.d < 3) return;
+  const y = v.h;
+  const ex = v.w / 2 - 0.65;
+  const ez = v.d / 2 - 0.65;
+  const esquinas: [number, number][] = [[-ex, -ez], [ex, -ez], [-ex, ez * 0.2], [ex, ez * 0.2]];
+  esquinas.forEach(([x, z], k) => {
+    const tipo = (s + k) % 3;
+    if (tipo === 0) {
+      // Máquina de clima: caja con rejilla.
+      t.caja('metal', 0.8, 0.45, 0.6, v.x + x, y, v.z + z);
+      t.caja('oscuro', 0.6, 0.06, 0.4, v.x + x, y + 0.45, v.z + z);
+    } else if (tipo === 1) {
+      // Depósito de agua sobre patas.
+      for (const [px, pz] of [[-0.25, -0.25], [0.25, -0.25], [-0.25, 0.25], [0.25, 0.25]] as const) t.caja('metal', 0.06, 0.5, 0.06, v.x + x + px, y, v.z + z + pz);
+      t.cilindro('muro', 0.38, 0.6, v.x + x, y + 0.5, v.z + z, 12);
+      t.cilindro('tejado', 0.42, 0.08, v.x + x, y + 1.1, v.z + z, 12);
+    } else {
+      // Claraboya acristalada.
+      t.caja('base', 0.95, 0.18, 0.7, v.x + x, y, v.z + z);
+      t.caja('vidrio', 0.8, 0.12, 0.55, v.x + x, y + 0.18, v.z + z);
+    }
+  });
 }

@@ -4,7 +4,7 @@ import { dominioGlobal } from '../../src/domain/mastery.ts';
 import { seccionesPrioritarias } from '../../src/domain/priority.ts';
 import type { Progreso } from '../../src/domain/progress.ts';
 import { vistaAtlas } from '../../src/world/atlas.ts';
-import { faseObra, modeloCiudad } from '../../src/world/cityModel.ts';
+import { ESCALA_ALTURA, faseObra, modeloCiudad } from '../../src/world/cityModel.ts';
 import { ALTURA_TIPOLOGIA, TEJADO_TIPOLOGIA, tipologiaDe } from '../../src/world/typology.ts';
 import { areaRect } from '../../src/world/geometry.ts';
 
@@ -46,10 +46,10 @@ describe('modelo visual de la ciudad', () => {
       expect(e.emblematico).toBe(Boolean(portada));
       if (portada) {
         expect(e.tejado).toBe(portada.tejado);
-        expect(e.alturaCompleta).toBeCloseTo(portada.altura / 6);
+        expect(e.alturaCompleta).toBeCloseTo((portada.altura / 6) * ESCALA_ALTURA);
       } else {
         expect(e.tejado).toBe(TEJADO_TIPOLOGIA[e.tipologia]);
-        expect(e.alturaCompleta).toBe(ALTURA_TIPOLOGIA[e.tipologia]);
+        expect(e.alturaCompleta).toBeCloseTo(ALTURA_TIPOLOGIA[e.tipologia] * ESCALA_ALTURA);
       }
     }
   });

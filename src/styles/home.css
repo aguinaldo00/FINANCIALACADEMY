@@ -31,3 +31,9 @@
 .gram div{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px 10px;font-size:.92rem;line-height:1.2}
 .gram svg{width:40px;height:40px;flex:none}
 .next{margin-top:30px;color:var(--mut);font-size:.95rem;border-top:1px solid var(--line);padding-top:14px}
+
+/* Historia del proyecto: la ciudad 2D del prototipo, al final de la portada. */
+.historia{margin-top:56px;padding-top:26px;border-top:1px dashed var(--line)}
+.historia .h2{margin-top:10px}
+.historia-p{color:var(--mut);max-width:62ch;margin:0 0 6px}
+.historia .skyline{filter:sepia(.25) saturate(.9)}

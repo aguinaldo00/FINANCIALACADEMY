@@ -27,7 +27,8 @@ import {
   igualFoco,
 } from '../../world/focus.ts';
 import { alCambiarMovimiento, movimientoReducido } from '../motion.ts';
-import { fichaContextual, fichaNocturna } from './contextCard.ts';
+import { fichaContextual, fichaNocturna, fichaRecorrido } from './contextCard.ts';
+import { BARRIO_RECORRIDO, recorridoDelBarrio } from '../../world/recorrido.ts';
 import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separarTitulo } from './worldPanel.ts';
 
 /** Preferencia de vista de cada usuario (comodidad local, no es progreso). */
@@ -77,6 +78,8 @@ export class ControladorMundo {
    * el mapa se abre siempre de día.
    */
   private modo: Ambiente = 'dia';
+  /** Recorrido guiado activo: los edificios en orden y el paso actual. */
+  private recorrido: { ids: string[]; i: number } | null = null;
   private pistaZoomMostrada = false;
   private observadorPortada: IntersectionObserver | null = null;
   /** El mapa ocupa la mayor parte de la pantalla (≥ 55 % visible). */
@@ -87,7 +90,9 @@ export class ControladorMundo {
     private readonly almacen: AlmacenClaveValor | null,
     private readonly practica: EstadoPractica | null = null,
   ) {
-    this.modo3d = leerJson(almacen, CLAVE_VISTA) !== '2d';
+    // El modo 2D ya no se elige: la ciudad 2D del prototipo queda al final de la portada como
+    // historia del proyecto y como alternativa automática si no hay WebGL.
+    this.modo3d = true;
     this.zoomRueda = leerJson(almacen, CLAVE_ZOOM) === true;
     document.addEventListener('fullscreenchange', () => {
       const nativa = Boolean(this.raiz && document.fullscreenElement === this.raiz);
@@ -132,6 +137,27 @@ export class ControladorMundo {
     void this.prepararVista();
   }
 
+  /** Empieza, avanza, retrocede o termina el recorrido guiado del barrio 4. */
+  private moverRecorrido(accion: string): void {
+    if (accion === 'salir') {
+      this.recorrido = null;
+      this.mundo?.fijarRecorrido(null, 0);
+      this.pintarPanel();
+      return;
+    }
+    if (accion === 'empezar' || !this.recorrido) {
+      const ids = recorridoDelBarrio(this.modelo, BARRIO_RECORRIDO);
+      if (!ids.length) return;
+      this.recorrido = { ids, i: 0 };
+    } else {
+      this.recorrido.i = Math.min(this.recorrido.ids.length - 1, Math.max(0, this.recorrido.i + Number(accion)));
+    }
+    const { ids, i } = this.recorrido;
+    this.mundo?.fijarRecorrido(ids, i);
+    this.enfocar({ nivel: 'edificio', conceptoId: ids[i]! });
+    this.raiz?.querySelector<HTMLButtonElement>('[data-recorrido="1"]:not(:disabled)')?.focus({ preventScroll: true });
+  }
+
   private alEscape = (e: KeyboardEvent): void => {
     const raiz = this.raiz;
     if (!raiz || e.key !== 'Escape' || e.defaultPrevented) return;
@@ -172,7 +198,7 @@ export class ControladorMundo {
     if (!raiz) return;
     if (!this.modo3d) return this.mostrar2d('');
     this.disponible3d ??= webglDisponible();
-    if (!this.disponible3d) return this.mostrar2d('La vista 3D no está disponible en este navegador: se muestra la ciudad 2D.');
+    if (!this.disponible3d) return this.mostrar2d('La vista 3D no está disponible en este navegador: usa el Atlas o la ciudad 2D del final de la página.');
 
     this.aviso('Cargando la ciudad 3D…');
     let mundo: Mundo3D;
@@ -182,12 +208,13 @@ export class ControladorMundo {
         this.mundo = await this.crearMundo();
         this.mundo.fijarAmbiente(this.ambiente, false);
         this.mundo.fijarPendientes(this.pendientes());
+        this.mundo.fijarRecorrido(this.recorrido?.ids ?? null, this.recorrido?.i ?? 0);
       }
       mundo = this.mundo;
     } catch (error) {
       console.error('No se pudo iniciar la vista 3D', error);
       this.disponible3d = false;
-      if (this.raiz === raiz) this.mostrar2d('No se pudo iniciar la vista 3D: se muestra la ciudad 2D.');
+      if (this.raiz === raiz) this.mostrar2d('No se pudo iniciar la vista 3D: usa el Atlas o la ciudad 2D del final de la página.');
       return;
     }
     // El usuario puede haber salido de la portada o cambiado a 2D mientras cargaba.
@@ -287,7 +314,7 @@ export class ControladorMundo {
         this.disponible3d = false;
         this.mundo?.destruir();
         this.mundo = null;
-        this.mostrar2d('La vista 3D se ha detenido: se muestra la ciudad 2D.');
+        this.mostrar2d('La vista 3D se ha detenido: usa el Atlas o la ciudad 2D del final de la página.');
       },
     });
   }
@@ -302,9 +329,9 @@ export class ControladorMundo {
   }
 
   /** La ciudad pixel art sigue siendo la alternativa 2D: se oculta solo con la 3D funcionando. */
-  private alternarCiudad2d(visible: boolean): void {
-    const pagina = this.raiz?.parentElement;
-    for (const el of pagina?.querySelectorAll<HTMLElement>('.skyline, .legend') ?? []) el.hidden = !visible;
+  /** La ciudad 2D del prototipo vive al final de la portada (historia del proyecto): siempre visible. */
+  private alternarCiudad2d(_visible: boolean): void {
+    // Nada que ocultar: ya no compite con la vista 3D.
   }
 
   private aviso(texto: string): void {
@@ -585,6 +612,14 @@ export class ControladorMundo {
 
   private enfocar(foco: Foco): void {
     if (this.enPortada) this.fijarPortada(false);
+    // Si se va a mano a una parada del recorrido, el recorrido sigue desde ahí.
+    if (this.recorrido && foco.nivel === 'edificio') {
+      const k = this.recorrido.ids.indexOf(foco.conceptoId);
+      if (k >= 0 && k !== this.recorrido.i) {
+        this.recorrido.i = k;
+        this.mundo?.fijarRecorrido(this.recorrido.ids, k);
+      }
+    }
     if (this.paseando) this.detenerPaseo(false);
     if (!igualFoco(foco, this.foco)) this.pasoHistoria = 0;
     this.foco = foco;
@@ -650,7 +685,9 @@ export class ControladorMundo {
     }
     const vistazo = this.vistazo && !igualFoco(this.vistazo, this.foco) ? this.vistazo : null;
     const noche = this.activo3d ? this.pendientes() : null;
-    const html = noche
+    const html = this.recorrido && !vistazo
+      ? fichaRecorrido(this.modelo, this.recorrido.ids, this.recorrido.i)
+      : noche
       ? fichaNocturna(this.modelo, vistazo ?? this.foco, vistazo ? 'vistazo' : 'seleccion', noche)
       : vistazo
         ? fichaContextual(this.modelo, vistazo, 'vistazo')
@@ -701,11 +738,10 @@ export class ControladorMundo {
     } else if ('mundoPaseo' in dataset) {
       if (this.paseando) this.detenerPaseo(true);
       else this.empezarPaseo();
-    } else if ('mundoModo' in dataset) {
-      this.modo3d = !this.modo3d;
-      escribirJson(this.almacen, CLAVE_VISTA, this.modo3d ? '3d' : '2d');
-      if (this.modo3d) void this.prepararVista(true);
-      else this.mostrar2d('');
+    } else if (dataset.recorrido) {
+      this.moverRecorrido(dataset.recorrido);
+    } else if ('mundoRecorrido' in dataset) {
+      this.moverRecorrido(this.recorrido ? 'salir' : 'empezar');
     } else if ('verIntro' in dataset) {
       // Volver a ver la intro (desde la portada).
       const vista = this.raiz?.querySelector<HTMLElement>('[data-mundo-vista]');
@@ -750,6 +786,7 @@ export class ControladorMundo {
       pantallaCompleta: this.pantallaCompleta,
       zoomRueda: this.zoomRueda,
       ambiente: this.ambiente,
+      recorrido: Boolean(this.recorrido),
     });
 
     let historia = '';
@@ -773,7 +810,10 @@ export class ControladorMundo {
     this.modoMapa = this.vistaAtlas || (this.mundo?.factorAtlas ?? 0) > 0.5;
     capa.innerHTML = '';
     const noche = this.activo3d ? this.pendientes() : null;
-    const focos = noche ? etiquetasNocturnas(this.modelo, f, noche) : etiquetasDelNivel(this.modelo, f, this.modoMapa);
+    const rec = this.activo3d ? this.recorrido : null;
+    const focos = rec
+      ? rec.ids.map((conceptoId): Foco => ({ nivel: 'edificio', conceptoId }))
+      : noche ? etiquetasNocturnas(this.modelo, f, noche) : etiquetasDelNivel(this.modelo, f, this.modoMapa);
     // El edificio que señala el puntero lleva siempre su nombre, en cualquier nivel.
     const v = this.vistazo;
     if (v?.nivel === 'edificio' && !focos.some((x) => igualFoco(x, v))) focos.push(v);
@@ -796,6 +836,13 @@ export class ControladorMundo {
       } else if (foco.nivel === 'edificio') {
         el.textContent = buscarEdificio(this.modelo, foco.conceptoId)!.nombre;
         el.classList.add('edificio');
+        const paso = rec ? rec.ids.indexOf(foco.conceptoId) : -1;
+        if (paso >= 0) {
+          // Recorrido: cada parada con su número; la actual destacada y el resto atenuado.
+          el.insertAdjacentHTML('afterbegin', `<b class="m-paso">${paso + 1}</b> `);
+          el.classList.add('paso');
+          el.classList.toggle('tenue', paso !== rec!.i);
+        }
         const p = noche?.get(foco.conceptoId);
         if (p?.total) {
           // De noche, cada rótulo dice cuánto hay que repasar.

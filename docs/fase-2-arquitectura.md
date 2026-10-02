@@ -498,6 +498,26 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
   - cuatro nubes cercanas que cruzan la cámara, con un velo blanco al atravesarlas;
   - las texturas se generan en ratos libres mientras carga la escena 3D (`prepararNubesIntro`).
 
+## Recorrido del barrio 4, edificios más grandes e historia 2D (02/10)
+
+- **Recorrido guiado del barrio 4** (`world/recorrido.ts`, `Mundo3D.fijarRecorrido`):
+  - botón "🧭 Recorrido del barrio 4" en la barra;
+  - arcos dorados con flechas unen los 24 edificios en el orden de estudio (4.1 → 4.2A → 4.2B y,
+    dentro de cada sección, el orden de DATA);
+  - el tramo activo brilla y lleva una luz que lo recorre;
+  - rótulos numerados;
+  - ficha con el paso, "Anterior / Siguiente" (la cámara va de parada en parada), "Estudiar el
+    concepto" y "Salir del recorrido";
+  - ir a mano a una parada sigue el recorrido desde ahí.
+- **Edificios:**
+  - un 25 % más altos (`ESCALA_ALTURA`);
+  - más detalle (`detallar`): farolillos y jardineras en la entrada y, en las cubiertas planas,
+    máquinas de clima, depósitos de agua y claraboyas.
+- **Modo 2D:** desaparece como opción.
+  - La ciudad 2D del prototipo queda al final de la portada como "Historia del proyecto".
+  - Sigue sirviendo de alternativa si no hay WebGL.
+  - La preferencia antigua `financial-academy:vista` se ignora.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

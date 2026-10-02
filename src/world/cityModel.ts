@@ -163,6 +163,8 @@ export const ALTURA_ESTANDAR = ALTURA_TIPOLOGIA.oficina;
 export const PUESTOS_ESTUDIA_YA = 3;
 /** Las alturas de la portada están en píxeles del SVG (50–80). */
 const PIXELES_POR_UNIDAD = 6;
+/** Los edificios de la maqueta, algo más altos que en la portada 2D original (más presencia). */
+export const ESCALA_ALTURA = 1.25;
 
 export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
   const lado = LADO_CIUDAD;
@@ -243,7 +245,7 @@ export function modeloCiudad(tema: Tema, progreso: Progreso): ModeloCiudad {
           frente: hueco ? hueco.frente : frenteHaciaCalle(loteEdificio, manzana),
           posicion: centroRect(loteEdificio),
           huella: Math.min(loteEdificio.ancho, loteEdificio.fondo),
-          alturaCompleta: emblema ? emblema.altura / PIXELES_POR_UNIDAD : ALTURA_TIPOLOGIA[tipologia],
+          alturaCompleta: (emblema ? emblema.altura / PIXELES_POR_UNIDAD : ALTURA_TIPOLOGIA[tipologia]) * ESCALA_ALTURA,
           tejado: emblema ? emblema.tejado : TEJADO_TIPOLOGIA[tipologia],
           emblematico: Boolean(emblema),
           dominio: d,
