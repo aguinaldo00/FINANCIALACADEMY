@@ -148,6 +148,36 @@ describe('app en el navegador', () => {
     expect($('.pq-pie span', panel).textContent).toContain('Práctica 2 / 3');
   });
 
+  it('Escríbelo tú: oculta la definición, compara con las ideas clave y anota la tarjeta', () => {
+    navegar('#s/4.2A');
+    const ficha = $('#c-fgd');
+    $<HTMLButtonElement>('.ab.w', ficha).click();
+    expect(ficha.classList.contains('recordando')).toBe(true);
+    const panel = $('.pn.w', ficha);
+    $<HTMLTextAreaElement>('.rec-texto', panel).value = 'Garantiza los depósitos hasta 100.000 euros por titular';
+    $<HTMLButtonElement>('[data-rec="comparar"]', panel).click();
+    expect(ficha.classList.contains('recordando')).toBe(false);
+    expect($$('.rec-ideas li', panel).length).toBeGreaterThan(0);
+    $<HTMLButtonElement>('[data-rec="si"]', panel).click();
+    const practica = JSON.parse(localStorage.getItem('financial-academy:practica')!).temas['1'];
+    expect(practica.tarjetas['frase:fgd'].caja).toBe(1);
+  });
+
+  it('Pretest: preguntas rápidas antes de las fichas, sin afectar al dominio', () => {
+    navegar('#s/4.2A');
+    const antes = localStorage.getItem(CLAVE_PROGRESO);
+    const pre = $('[data-pretest]');
+    expect($('.pre-panel', pre).hidden).toBe(true);
+    $<HTMLButtonElement>('[data-pre="empezar"]', pre).click();
+    for (let i = 0; i < 3; i++) {
+      $<HTMLButtonElement>('.opt[data-k="0"]', pre).click();
+      expect($$('.opt.ok', pre)).toHaveLength(1);
+      $<HTMLButtonElement>('[data-pre="sig"]', pre).click();
+    }
+    expect($('.pre-fin', pre).textContent).toMatch(/de 3/);
+    expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
+  });
+
   it('#c/<id> abre la sección del concepto y lo muestra', () => {
     navegar('#c/bce');
     expect($('[data-sec]').dataset.sec).toBe('4.1');

@@ -1,9 +1,9 @@
 import type { EstadoPractica } from '../app/practiceStore.ts';
 import type { EstadoEstudio } from '../app/store.ts';
-import { idPregunta } from '../domain/practice.ts';
+import { idPregunta, idTarjetaFrase } from '../domain/practice.ts';
 import { dominioConcepto } from '../domain/mastery.ts';
 import { actualizarEtiquetaDominio } from './components/conceptCard.ts';
-import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaConConfianza, tarjetasDe } from './components/conceptPanels.ts';
+import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaConConfianza, pintarRecuerdo, tarjetasDe } from './components/conceptPanels.ts';
 import { pintarRail } from './components/rail.ts';
 import type { ContextoVista } from './views/context.ts';
 
@@ -60,6 +60,10 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practi
     const abierto = !panel.hidden;
     panel.hidden = abierto;
     boton.setAttribute('aria-expanded', String(!abierto));
+    if (accion === 'w') {
+      if (abierto) ficha.classList.remove('recordando');
+      else pintarRecuerdo(panel, concepto, ficha, (sabia) => practica?.calificar(idTarjetaFrase(concepto.id), sabia));
+    }
     if (!abierto && accion === 'e') pintarEsquema(panel, concepto, estado.tema);
     if (!abierto && accion === 'f') {
       ficha.dataset.fi = '0';

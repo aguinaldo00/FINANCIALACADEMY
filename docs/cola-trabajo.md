@@ -37,6 +37,6 @@ clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
 - [x] 13. Confianza y calibración (Seguro / Dudo / Adivino) en simulacro, repaso y práctica.
 - [x] 14. Sesión de estudio de hoy: espaciada (también para preguntas), intercalada y por prioridad;
   fecha de examen opcional.
-- [ ] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.
+- [x] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.
 - [x] 16. Mi progreso: racha, actividad, simulacros, calibración y acierto por bloque.
 - [ ] 17. Auditoría visual final, docs, PR y artefacto. Resumen en `docs/resumen-noche.md`.

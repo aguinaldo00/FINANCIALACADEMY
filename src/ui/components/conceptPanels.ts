@@ -1,5 +1,6 @@
 import type { Concepto, ModoExplicacion, NodoEsquema, Pregunta, Tema } from '../../content/schema.ts';
 import { type Confianza, CONFIANZAS, idTarjetaFrase } from '../../domain/practice.ts';
+import { compararRecuerdo, ideasClave } from '../../domain/recall.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
 import { resaltarAviso } from '../format.ts';
 
@@ -237,4 +238,42 @@ export function pintarFlashcard(panel: HTMLElement, tarjetas: Tarjeta[], indice:
   <span class="fc-cara fc-reverso">${resaltarAviso(t.reverso)}</span>
  </button>
  <div class="fc-ctrl"><button type="button" class="fc-btn" data-fc="anterior"${indice === 0 ? ' disabled' : ''}>← Anterior</button><button type="button" class="fc-btn" data-fc="siguiente"${indice >= tarjetas.length - 1 ? ' disabled' : ''}>Siguiente →</button></div>`;
+}
+
+/**
+ * "Escríbelo tú" (recuerdo libre): con la definición oculta, se escribe de memoria y después se
+ * compara con las ideas clave de DATA. La autoevaluación alimenta la repetición espaciada de la
+ * tarjeta del concepto (`alCalificar`).
+ */
+export function pintarRecuerdo(panel: HTMLElement, concepto: Concepto, ficha: HTMLElement, alCalificar: (sabia: boolean) => void): void {
+  ficha.classList.add('recordando');
+  panel.innerHTML = `<div class="md"><b>✍️ Escríbelo tú</b><span class="fc-n">sin mirar</span></div>
+<label class="rec-preg" for="rec-${concepto.id}">¿Qué es <b>${concepto.nombre}</b>? Escríbelo con tus palabras.</label>
+<textarea id="rec-${concepto.id}" class="rec-texto" rows="4" placeholder="Lo que recuerdes, aunque sea poco: intentarlo ya ayuda a fijarlo."></textarea>
+<div class="fc-ctrl"><span class="pq-pie"><span>La definición está oculta mientras escribes.</span></span><button type="button" class="fc-btn" data-rec="comparar">Comparar con la definición →</button></div>`;
+  const texto = panel.querySelector<HTMLTextAreaElement>('.rec-texto')!;
+  texto.focus({ preventScroll: true });
+  panel.querySelector<HTMLButtonElement>('[data-rec="comparar"]')!.onclick = () => {
+    ficha.classList.remove('recordando');
+    const ideas = ideasClave(concepto.definicion);
+    const r = compararRecuerdo(texto.value, ideas);
+    const pct = Math.round(r.cobertura * 100);
+    const lista = [...r.encontradas.map((i) => `<li class="si">✓ ${i}</li>`), ...r.faltan.map((i) => `<li class="no">✗ ${i}</li>`)].join('');
+    panel.innerHTML = `<div class="md"><b>✍️ Escríbelo tú</b><span class="fc-n">${r.encontradas.length} de ${ideas.length} ideas clave</span></div>
+<div class="rec-barra" role="img" aria-label="Has recordado el ${pct} % de las ideas clave"><i style="width:${Math.max(pct, 2)}%"></i></div>
+<div class="rec-comp"><div><h5>Lo que escribiste</h5><p class="rec-tuyo">${texto.value.trim() ? escaparHtml(texto.value.trim()) : '<em>(nada)</em>'}</p></div><div><h5>Ideas clave de la definición</h5><ul class="rec-ideas">${lista}</ul></div></div>
+<p class="rec-nota">La comparación es orientativa (busca las palabras clave). Decide tú:</p>
+<div class="fc-ctrl rep-calif"><button type="button" class="fc-btn rep-no" data-rec="no">✗ No la sabía</button><button type="button" class="fc-btn rep-si" data-rec="si">✓ La sabía</button></div>`;
+    for (const b of panel.querySelectorAll<HTMLButtonElement>('[data-rec="si"], [data-rec="no"]')) {
+      b.onclick = () => {
+        const sabia = b.dataset.rec === 'si';
+        alCalificar(sabia);
+        panel.querySelector('.rep-calif')!.outerHTML = `<p class="rec-nota">${sabia ? '✅ Anotado: volverá más espaciada.' : '🔁 Anotado: volverá pronto en tu repaso de flashcards.'}</p>`;
+      };
+    }
+  };
+}
+
+function escaparHtml(t: string): string {
+  return t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }

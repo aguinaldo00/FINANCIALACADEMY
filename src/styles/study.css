@@ -82,3 +82,35 @@
 .conf-btn.on{opacity:1;box-shadow:0 0 0 3px #000,0 0 0 5px #fff}
 .opt.elegida{border-color:var(--b);background:#0b1a2e}
 .fb.sorpresa{padding:10px 12px;border-radius:12px;background:#2a2205;border:1px solid #ffd23f88}
+
+/* Escríbelo tú (recuerdo libre). */
+.ab.w{background:#f5f5f4}
+.pn.w{background:#151515;border:1px solid #ffffff33}
+.pn.w .md b{color:#fff}
+.cc.recordando .corta,.cc.recordando .ej{filter:blur(7px);user-select:none;transition:filter .3s}
+.cc .corta,.cc .ej{transition:filter .3s}
+.rec-preg{display:block;margin:2px 0 8px;font-size:1.02rem}
+.rec-texto{width:100%;font:inherit;font-size:1rem;color:#fff;background:#000;border:2px solid var(--line);border-radius:12px;padding:10px 12px;resize:vertical}
+.rec-texto:focus{border-color:#fff;outline:none}
+.rec-barra{height:8px;border-radius:4px;background:#262626;overflow:hidden;margin:4px 0 12px}
+.rec-barra i{display:block;height:100%;background:var(--g)}
+.rec-comp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rec-comp h5{margin:0 0 6px;font-family:"Bricolage Grotesque",sans-serif;font-size:.9rem;color:var(--mut)}
+.rec-tuyo{margin:0;padding:10px 12px;border-radius:12px;background:#000;border:1px dashed var(--line);white-space:pre-wrap;font-size:.95rem}
+.rec-ideas{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.95rem}
+.rec-ideas .si{color:#c8f5d8}.rec-ideas .no{color:#ffb3b3}
+.rec-nota{margin:10px 0 0;font-size:.88rem;color:var(--mut)}
+@media (max-width:600px){.rec-comp{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.cc.recordando .corta,.cc.recordando .ej{filter:none;visibility:hidden}}
+
+/* Pretest al abrir una sección. */
+.pre{margin-top:22px;padding:16px 20px;border-radius:22px;background:#1f1a05;border:1px solid #ffd23f55}
+.pre-cab{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.pre h3{font-size:1.1rem;margin:0 0 4px}
+.pre-cab p{margin:0;color:var(--mut);font-size:.92rem;max-width:56ch}
+.pre-panel{margin-top:12px}
+.pre-panel[hidden]{display:none}
+.pre-n{margin:0;font-size:.8rem;color:var(--mut)}
+.pre-panel .fb a{color:var(--y)}
+.pre-panel .fb .fc-btn{margin-left:8px}
+.pre-fin{margin:0;font-weight:700}
