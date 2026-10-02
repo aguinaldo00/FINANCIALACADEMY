@@ -169,8 +169,8 @@
 .mundo.portada .mundo-vista{height:calc(100svh - var(--alto-topbar,0px))}
 .portada-pista{display:none}
 .mundo.portada .portada-pista{display:flex;position:absolute;left:0;right:0;bottom:22px;justify-content:center;gap:28px;margin:0;pointer-events:none;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.85);animation:pista 1.2s 1s ease both}
-.portada-pista span+span{color:var(--m-tinta2)}
-.portada-pista span+span::before{content:"↓ "}
+.portada-pista span:last-child{color:var(--m-tinta2)}
+.portada-pista span:last-child::before{content:"↓ "}
 .en-entrada .portada-pista{opacity:0}
 @keyframes pista{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 

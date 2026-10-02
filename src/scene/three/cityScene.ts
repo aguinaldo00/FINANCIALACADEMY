@@ -486,7 +486,7 @@ export class Mundo3D {
    * Entrada de la primera visita: la cámara desciende sobre la peana mientras los barrios se
    * levantan uno tras otro. Devuelve una función para saltarla (deja la escena en su estado final).
    */
-  entrada(alTerminar: () => void): () => void {
+  entrada(alTerminar: () => void, { retraso = 700 }: { retraso?: number } = {}): () => void {
     const ahora = performance.now();
     const foco: Foco = { nivel: 'ciudad' };
     this.focoActual = foco;
@@ -500,17 +500,17 @@ export class Mundo3D {
     this.fijarDesplazamiento(0);
     this.colocarCamara(objetivo, inicio);
     this.transicion = {
-      inicio: ahora + 700, duracion: 5600, desdeObjetivo: objetivo.clone(), haciaObjetivo: objetivo,
+      inicio: ahora + retraso, duracion: 5600, desdeObjetivo: objetivo.clone(), haciaObjetivo: objetivo,
       desde: inicio, hacia: final, fovDesde: 24, fovHacia: OPTICA.ciudad.fov, desplazamientoDesde: 0, desplazamientoHacia: 0, arco: 0,
     };
     const orden = new Map(this.modelo.barrios.map((b, i) => [b.grupoId, i]));
     this.apariciones = this.modelo.edificios.map((e, k) => {
       const grupo = this.dinamica.edificios.get(e.conceptoId)!;
       grupo.scale.y = 0.0001;
-      return { grupo, inicio: ahora + 1700 + (orden.get(e.grupoId) ?? 0) * 750 + (k % 7) * 110 };
+      return { grupo, inicio: ahora + retraso + 1000 + (orden.get(e.grupoId) ?? 0) * 750 + (k % 7) * 110 };
     });
     // Lluvia de monedas mientras la ciudad se levanta.
-    this.decorado.llover(ahora + 1300);
+    this.decorado.llover(ahora + retraso + 600);
     let terminado = false;
     const terminar = () => {
       if (terminado) return;

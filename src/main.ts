@@ -10,6 +10,7 @@ import './styles/exam.css';
 import './styles/practice.css';
 import './styles/infographic.css';
 import './styles/decor.css';
+import './styles/intro.css';
 import './styles/responsive.css';
 import { iniciarApp } from './app/app.ts';
 import { temaActivo } from './content/temas/index.ts';

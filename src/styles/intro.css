@@ -1,0 +1,76 @@
+/* Intro "entre nubes": cielo azul, la cámara vuela entre nubes de algodón, el título llega desde
+   el fondo, las nubes del primer plano se abren como un telón y aparece la ciudad (el descenso 3D
+   empieza debajo). Solo en la primera visita y nunca con movimiento reducido. */
+
+.entrada.cielo,.entrada.cielo.abierta{background:transparent;overflow:hidden}
+.entrada.cielo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#3d9be9 0%,#69b8f5 45%,#bfe4ff 100%);transition:opacity 1.4s ease .2s}
+.entrada.cielo.abriendo::before{opacity:0}
+
+/* Escenario con perspectiva: las nubes avanzan en Z hacia la cámara. */
+.nubes{position:absolute;inset:0;perspective:700px;perspective-origin:50% 45%;pointer-events:none}
+.nube{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:2.1;margin-left:calc(var(--w) / -2);
+  background:
+    radial-gradient(circle at 28% 62%,#fff 0 21%,rgba(255,255,255,0) 22.5%),
+    radial-gradient(circle at 47% 40%,#fff 0 27%,rgba(255,255,255,0) 28.5%),
+    radial-gradient(circle at 68% 52%,#fff 0 23%,rgba(255,255,255,0) 24.5%),
+    radial-gradient(circle at 84% 66%,#fff 0 15%,rgba(255,255,255,0) 16.5%),
+    radial-gradient(ellipse 46% 26% at 52% 72%,#fff 0 98%,rgba(255,255,255,0) 100%);
+  filter:drop-shadow(0 calc(var(--w) * .035) 0 rgba(150,190,232,.75)) drop-shadow(0 6px 16px rgba(40,90,160,.18));
+  transform:translate3d(0,0,var(--z));opacity:0;will-change:transform,opacity}
+.entrada.volando .nube{animation:nube-vuela var(--t,3.2s) cubic-bezier(.35,.05,.6,1) var(--d,0s) both}
+@keyframes nube-vuela{
+  0%{transform:translate3d(0,0,var(--z));opacity:0}
+  12%{opacity:1}
+  80%{opacity:1}
+  100%{transform:translate3d(var(--dx),var(--dy),calc(var(--z) + 900px));opacity:0}
+}
+/* Profundidades y derivas: las de la izquierda se apartan a la izquierda y las de la derecha a la derecha. */
+.n1{--x:18%;--y:22%;--w:34vmin;--z:-1200px;--dx:-60vmin;--dy:-10vmin;--d:0s}
+.n2{--x:82%;--y:30%;--w:38vmin;--z:-1100px;--dx:60vmin;--dy:-6vmin;--d:.15s}
+.n3{--x:50%;--y:70%;--w:44vmin;--z:-1300px;--dx:0vmin;--dy:40vmin;--d:.3s}
+.n4{--x:30%;--y:55%;--w:30vmin;--z:-900px;--dx:-50vmin;--dy:20vmin;--d:.45s}
+.n5{--x:70%;--y:62%;--w:32vmin;--z:-950px;--dx:50vmin;--dy:24vmin;--d:.55s}
+.n6{--x:62%;--y:14%;--w:28vmin;--z:-1250px;--dx:40vmin;--dy:-30vmin;--d:.7s}
+.n7{--x:12%;--y:76%;--w:36vmin;--z:-1150px;--dx:-55vmin;--dy:30vmin;--d:.85s}
+.n8{--x:88%;--y:80%;--w:34vmin;--z:-1050px;--dx:55vmin;--dy:30vmin;--d:1s}
+.n9{--x:40%;--y:18%;--w:26vmin;--z:-1350px;--dx:-30vmin;--dy:-34vmin;--d:1.15s}
+.n10{--x:58%;--y:84%;--w:30vmin;--z:-1400px;--dx:20vmin;--dy:40vmin;--d:1.3s}
+/* Nubes realistas: la imagen generada (cúmulo con luz desde arriba) sustituye al dibujo CSS. */
+.nube.real{background:var(--img) center/100% 100% no-repeat;filter:drop-shadow(0 18px 30px rgba(40,90,160,.16))}
+.nube.telon.real{filter:none}
+
+/* Telón: dos nubes enormes en primer plano que se abren hacia los lados. */
+.nube.telon{--w:95vmax;opacity:1;top:auto;bottom:-22vmax;transform:none;transition:transform 1.5s cubic-bezier(.6,0,.3,1),opacity 1.2s ease .3s;animation:none!important}
+.nube.telon.izq{left:8%}
+.nube.telon.der{left:92%}
+.entrada.volando .nube.telon{transform:translateY(-6vmax)}
+.entrada.abriendo .nube.telon.izq{transform:translate(-80vmax,10vmax) scale(1.3);opacity:0}
+.entrada.abriendo .nube.telon.der{transform:translate(80vmax,10vmax) scale(1.3);opacity:0}
+
+/* El título llega desde el fondo, entre las nubes, y se queda delante. */
+.entrada.cielo .entrada-marca{position:relative;z-index:2;color:#fff;filter:drop-shadow(0 4px 0 rgba(30,70,130,.45)) drop-shadow(0 10px 22px rgba(20,50,100,.35));animation:none;opacity:0;transform:scale(.18)}
+.entrada.cielo.volando .entrada-marca{animation:titulo-llega 2.2s cubic-bezier(.2,.75,.25,1) .5s both}
+@keyframes titulo-llega{0%{opacity:0;transform:scale(.18) translateY(30px)}25%{opacity:1}100%{opacity:1;transform:none}}
+.entrada.cielo.abriendo .entrada-marca{animation:none;opacity:0;transform:translateY(-40px) scale(1.15);transition:opacity .9s ease,transform 1.2s ease}
+
+.entrada.cielo .entrada-saltar{color:#fff;border-bottom-color:rgba(255,255,255,.7);text-shadow:0 1px 3px rgba(20,50,100,.6);z-index:3}
+.entrada.cielo .entrada-lema{z-index:3}
+
+/* Mientras dura la intro, la barra flotante de la portada no se ve. */
+.mundo:has(.en-entrada)>.mundo-barra{opacity:0;pointer-events:none}
+
+@media (max-width:600px){
+  .n9,.n10{display:none}
+  .nube.telon{--w:125vmax;bottom:-40vmax}
+}
+
+/* Botón para volver a ver la intro, en la pista de la portada. */
+.ver-intro{pointer-events:auto;cursor:pointer;border:0;background:none;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--m-oro);text-shadow:inherit}
+.ver-intro:hover{color:#ffe7b0}
+
+/* Al abrirse el telón, todas las nubes se desvanecen con el cielo (no quedan sobre la maqueta). */
+.nubes{transition:opacity 1.1s ease .25s}
+.entrada.abriendo .nubes{opacity:0}
+
+/* Las nubes realistas que pasan, algo más grandes: se nota más que se atraviesan. */
+.nube.real:not(.telon){width:calc(var(--w) * 1.5);margin-left:calc(var(--w) * -.75)}

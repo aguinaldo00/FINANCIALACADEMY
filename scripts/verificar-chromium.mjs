@@ -12,6 +12,28 @@ const GL = ['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftsha
 const resultados = [];
 const ok = (nombre, cond, extra = '') => { resultados.push(`${cond ? 'PASA ' : 'FALLA'} ${nombre}${extra ? ' — ' + extra : ''}`); };
 const errores = [];
+// Con el decorado animado y WebGL por software cada fotograma es lento y Playwright puede tardar en
+// dar un botón por "estable": se lleva a la vista y se pulsa sin esa espera.
+// Antes de navegar por el Atlas desde la ciudad: si un clic en el mapa ya entró en un barrio, se
+// vuelve a la vista general con la primera miga.
+async function aLaCiudad(p) {
+  if ((await p.locator('.migas li').count()) > 1) {
+    await p.locator('.migas button').first().click({ force: true });
+    await p.waitForTimeout(1200);
+  }
+}
+async function pulsar(p, sel) {
+  const l = p.locator(sel).first();
+  try {
+    await l.waitFor({ state: 'visible', timeout: 30000 });
+  } catch (e) {
+    console.log('ESTADO', sel, JSON.stringify(await p.evaluate(() => ({ y: scrollY, fs: !!document.fullscreenElement, mundo: document.querySelector('.mundo')?.className, atlas: document.querySelector('[data-atlas]') && getComputedStyle(document.querySelector('[data-atlas]')).display, vista: document.querySelector('[data-mundo-vista]')?.hidden, entrada: !!document.querySelector('.entrada'), hash: location.hash }))));
+    await p.screenshot({ path: `${SP}/fallo-pulsar.png` });
+    throw e;
+  }
+  await l.scrollIntoViewIfNeeded();
+  await l.click({ force: true });
+}
 const browser = await chromium.launch({ args: GL });
 async function pagina(opts, init) {
   const p = await browser.newPage(opts);
@@ -61,20 +83,22 @@ const progreso = () => {
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
   ok('explorando: el índice vuelve a verse', (await p.locator('.rail').boundingBox()).x >= 0 && !(await p.locator('#ib').isVisible()));
   // Navegación: barrio → zona → edificio por el Atlas, y migas para volver.
-  await p.click('.atlas-item[data-foco="barrio:4"]');
+  await p.mouse.move(5, 5);
+  await aLaCiudad(p);
+  await pulsar(p, '.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(1600);
   ok('navegación: barrio con ficha', (await p.locator('.ficha:not([hidden])').textContent()).includes('Barrio 4'));
-  await p.click('.atlas-item[data-foco="zona:4.2A"]');
+  await pulsar(p, '.atlas-item[data-foco="zona:4.2A"]');
   await p.waitForTimeout(1600);
   const nombres = await p.locator('.m-etq.edificio').allTextContents();
   ok('navegación: la zona rotula sus edificios', nombres.length === 8, nombres.join(' | '));
-  await p.click('.atlas-item[data-foco="edificio:cajas"]');
+  await pulsar(p, '.atlas-item[data-foco="edificio:cajas"]');
   await p.waitForTimeout(1600);
   ok('navegación: edificio rotulado y destacado', (await p.locator('.m-etq.edificio:not(.tenue)').first().textContent()) === 'Cajas de ahorro');
   ok('navegación: edificio con acción de estudio', (await p.locator('.ficha .ficha-accion').getAttribute('href')) === '#c/cajas');
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-edificio.png` });
   // Estudiar: entrar al concepto, acertar a la primera y volver al mapa.
-  await p.click('.ficha .ficha-accion');
+  await pulsar(p, '.ficha .ficha-accion');
   await p.waitForSelector('#c-cajas');
   await p.click('#c-cajas .ab.q');
   // Se responde en orden: el primer acierto deja dominio 1 (a la primera) o 0,5 (tras fallar).
@@ -109,19 +133,23 @@ const progreso = () => {
   await p.waitForTimeout(800);
   if (await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')))) await p.click('[data-mundo-completa]');
   await p.waitForTimeout(1200);
+  await p.mouse.move(5, 5);
+  await aLaCiudad(p);
   await p.click('[data-mundo-ambiente]');
+  // El puntero fuera del mapa: sobre un edificio, la ficha sería la del vistazo.
+  await p.mouse.move(5, 5);
   await p.waitForTimeout(1800);
   ok('noche: el botón cambia a modo repaso', (await p.locator('.mundo').getAttribute('data-ambiente')) === 'noche');
   const pendientesN = await p.locator('.m-etq.pendiente').allTextContents();
   ok('noche: solo se rotulan los edificios con algo pendiente', pendientesN.length === 2 && (await p.locator('.m-etq').count()) === 2, pendientesN.join(' | '));
   ok('noche: el error con seguridad se marca', (await p.locator('.m-etq.pendiente.sorpresa').count()) === 1);
-  ok('noche: la ficha resume la noche', (await p.locator('.ficha:not([hidden])').textContent()).includes('Repaso de esta noche'));
+  ok('noche: la ficha resume la noche', await p.waitForFunction(() => document.querySelector('.ficha:not([hidden])')?.textContent.includes('Repaso de esta noche'), null, { timeout: 8000 }).then(() => true).catch(() => false));
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-noche.png` });
-  await p.locator('.ficha-pend').first().click();
+  await pulsar(p, '.ficha-pend');
   await p.waitForTimeout(1600);
   const repasar = await p.locator('.ficha .ficha-accion').getAttribute('href');
   ok('noche: un edificio encendido lleva a repasarlo', repasar === '#repaso/bde', repasar);
-  await p.click('.ficha .ficha-accion');
+  await pulsar(p, '.ficha .ficha-accion');
   await p.waitForSelector('[data-repaso-concepto="bde"]');
   ok('noche: repaso solo de ese concepto', (await p.locator('.rep-tab[data-tab="fallos"] b').textContent()) === '1');
   await p.evaluate(() => { location.hash = '#inicio'; });
@@ -137,6 +165,24 @@ const progreso = () => {
   await p.waitForTimeout(1800);
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-atlas.png` });
+  await p.close();
+}
+
+// 1b. Intro entre nubes (primera visita), volver a verla y saltarla
+{
+  const p = await pagina({ viewport: { width: 1300, height: 860 } });
+  await p.goto('http://localhost:4173/');
+  const capa = await p.waitForSelector('.entrada.cielo', { timeout: 30000 }).then(() => true).catch(() => false);
+  ok('intro: primera visita entre nubes', capa && (await p.locator('.entrada.cielo .nube').count()) >= 10);
+  ok('intro: la barra no se ve durante la intro', (await p.evaluate(() => getComputedStyle(document.querySelector('.mundo-barra')).opacity)) === '0');
+  await p.waitForSelector('.entrada', { state: 'detached', timeout: 60000 }).catch(() => {});
+  ok('intro: termina y queda vista', (await p.locator('.entrada').count()) === 0 && (await p.evaluate(() => localStorage.getItem('financial-academy:entrada'))) === '"vista"');
+  await p.click('[data-ver-intro]');
+  await p.waitForTimeout(300);
+  ok('intro: "Ver la intro" la repite sin abrir pantalla completa', (await p.locator('.entrada.cielo').count()) === 1 && !(await p.evaluate(() => Boolean(document.fullscreenElement))));
+  await p.click('.entrada-saltar');
+  await p.waitForTimeout(400);
+  ok('intro: se puede saltar', (await p.locator('.entrada').count()) === 0 && (await p.locator('.mundo.portada').count()) === 1);
   await p.close();
 }
 
@@ -180,7 +226,8 @@ const progreso = () => {
   // El clic abrió la pantalla completa: se sale para usar el Atlas de debajo.
   if (await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')))) await p.click('[data-mundo-completa]');
   await p.waitForTimeout(500);
-  await p.click('.atlas-item[data-foco="barrio:4"]');
+  await aLaCiudad(p);
+  await pulsar(p, '.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(300);
   ok('reduced motion: el cambio de nivel es inmediato', (await p.locator('.migas [aria-current]').textContent()).includes('Estructura'));
   await p.close();
@@ -322,8 +369,8 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.goto('http://localhost:4173/');
   await p.waitForTimeout(2000);
   ok('sin WebGL: aviso y ciudad 2D', (await p.locator('[data-mundo-aviso]').textContent()).includes('2D') && await p.locator('.skyline').isVisible());
-  await p.click('.atlas-item[data-foco="barrio:4"]');
-  await p.click('.atlas-item[data-foco="zona:4.2A"]');
+  await pulsar(p, '.atlas-item[data-foco="barrio:4"]');
+  await pulsar(p, '.atlas-item[data-foco="zona:4.2A"]');
   ok('sin WebGL: el Atlas navega', (await p.locator('.atlas-item').count()) === 8);
   await p.close();
 }

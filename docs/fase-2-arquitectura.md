@@ -461,6 +461,22 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
 - **Repaso de un solo concepto:** ruta `#repaso/<concepto>`. Muestra sus fallos y vencidas, y sus
   flashcards.
 
+## Intro entre nubes (02/10)
+
+- **Primera visita:** cielo azul → vuelo entre nubes realistas (cúmulos generados en un lienzo
+  con ruido fractal y luz desde arriba, en `ui/components/nubesRealistas.ts`, movidos con CSS 3D:
+  perspectiva y `translateZ`) → el título con letras de moneda llega desde el fondo → dos nubes en primer plano
+  se abren como un telón.
+- **Debajo**, `Mundo3D.entrada(…, { retraso: 2600 })` empieza el descenso de la cámara justo al
+  abrirse las nubes.
+- **Barra:** no se ve durante la intro.
+- **Control:**
+  - se salta con el botón, Esc o un toque;
+  - "▶ Ver la intro" en la pista de la portada la repite;
+  - con movimiento reducido no se reproduce.
+- **Por qué en CSS y no en la escena 3D:** las nubes no cargan la GPU.
+- **Estilos:** `src/styles/intro.css`.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y
