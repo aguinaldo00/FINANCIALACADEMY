@@ -29,5 +29,12 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
   const examen = tema.ampliacion?.bloques.length
     ? `<div class="grp">Examen</div>${enlace('examen', hrefExamen(), '📊', 'Predicción de examen', 'Qué es más probable que caiga')}${enlace('simulacro', hrefSimulacro(), '📝', 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), '🔁', 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}`
     : '';
+  const scroll = rail.scrollTop;
   rail.innerHTML = cabecera + grupos + examen;
+  rail.scrollTop = scroll;
+  // El apartado activo siempre a la vista dentro del índice (p. ej. el grupo Examen, al final).
+  const activo = rail.querySelector<HTMLElement>('.sl.on');
+  if (activo && (activo.offsetTop < rail.scrollTop || activo.offsetTop + activo.offsetHeight > rail.scrollTop + rail.clientHeight)) {
+    rail.scrollTop = Math.max(0, activo.offsetTop - rail.clientHeight / 3);
+  }
 }

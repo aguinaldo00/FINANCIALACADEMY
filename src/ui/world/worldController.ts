@@ -566,11 +566,12 @@ export class ControladorMundo {
     const el = this.raiz?.querySelector<HTMLElement>('[data-mundo-ficha]');
     if (!el) return;
     if (this.paseando) {
-      const html = this.cercano ? fichaContextual(this.modelo, { nivel: 'edificio', conceptoId: this.cercano }, 'seleccion') + '<p class="ficha-pista">Pulsa E para entrar</p>' : '';
+      const html = this.cercano ? fichaContextual(this.modelo, { nivel: 'edificio', conceptoId: this.cercano }, 'seleccion') + `<p class="ficha-pista">${matchMedia('(pointer: coarse)').matches ? 'Pulsa «Entrar»' : 'Pulsa E para entrar'}</p>` : '';
       el.innerHTML = html;
       el.hidden = !html;
       el.classList.remove('vistazo');
       el.removeAttribute('aria-hidden');
+      this.colocarEtiquetas();
       return;
     }
     const vistazo = this.vistazo && !igualFoco(this.vistazo, this.foco) ? this.vistazo : null;
@@ -584,6 +585,8 @@ export class ControladorMundo {
     el.classList.toggle('vistazo', Boolean(vistazo));
     if (vistazo) el.setAttribute('aria-hidden', 'true');
     else el.removeAttribute('aria-hidden');
+    // La ficha cambia de tamaño: los rótulos se recolocan para no quedar debajo.
+    this.colocarEtiquetas();
   }
 
   private alPulsar(e: Event): void {
@@ -709,22 +712,62 @@ export class ControladorMundo {
     if (!this.activo3d) return;
     // Al alejarse, la ciudad pasa a leerse como mapa y cambian las etiquetas.
     if ((this.vistaAtlas || this.mundo!.factorAtlas > 0.5) !== this.modoMapa) return this.pintarEtiquetas();
-    // Se colocan de arriba abajo y, si una pisa a otra ya colocada, baja lo justo para no taparla.
-    const colocadas: { x0: number; x1: number; y0: number; y1: number }[] = [];
+    // Reglas: dentro del visor, sin pisarse entre sí y sin quedar debajo de la ficha. Primero se
+    // colocan los rótulos principales (no atenuados); los secundarios que no caben se ocultan.
+    const capa = this.raiz?.querySelector<HTMLElement>('[data-mundo-etiquetas]');
+    if (!capa) return;
+    const W = capa.clientWidth;
+    const H = capa.clientHeight;
+    const fichaEl = this.raiz?.querySelector<HTMLElement>('[data-mundo-ficha]');
+    const ficha = fichaEl && !fichaEl.hidden && fichaEl.offsetWidth
+      ? { x0: fichaEl.offsetLeft - 4, x1: fichaEl.offsetLeft + fichaEl.offsetWidth + 4, y0: fichaEl.offsetTop - 4, y1: fichaEl.offsetTop + fichaEl.offsetHeight + 4 }
+      : null;
+    type Caja = { x0: number; x1: number; y0: number; y1: number };
+    // Margen entre rótulos: más aire en pantallas estrechas para que no formen una maraña.
+    const m = W < 600 ? 4 : 1;
+    const pisa = (a: Caja, b: Caja) => a.x0 - m < b.x1 && a.x1 + m > b.x0 && a.y0 - m < b.y1 && a.y1 + m > b.y0;
+    const colocadas: Caja[] = [];
     const puntos = this.etiquetas
-      .map(({ foco, el }) => ({ el, p: this.mundo!.proyectarFoco(foco) }))
-      .sort((a, b) => a.p.y - b.p.y);
-    for (const { el, p } of puntos) {
+      // En pantallas estrechas los nombres de edificio son secundarios (se ocultan si no caben),
+      // salvo el que se señala.
+      .map(({ foco, el }) => ({
+        el,
+        p: this.mundo!.proyectarFoco(foco),
+        principal: !el.classList.contains('tenue') && (W >= 600 || !el.classList.contains('edificio') || el.classList.contains('sobrevuelo')),
+      }))
+      .sort((a, b) => Number(b.principal) - Number(a.principal) || a.p.y - b.p.y);
+    for (const { el, p, principal } of puntos) {
       el.hidden = !p.visible;
       if (!p.visible) continue;
       const w = el.offsetWidth;
       const h = el.offsetHeight;
-      let y = Math.round(p.y);
-      const x = Math.round(p.x);
-      for (const c of colocadas) {
-        if (x - w / 2 < c.x1 && x + w / 2 > c.x0 && y - h < c.y1 && y > c.y0) y = Math.round(c.y1 + h + 4);
+      const x = Math.round(Math.min(Math.max(p.x, w / 2 + 6), W - w / 2 - 6));
+      const y0 = Math.round(Math.min(Math.max(p.y, h + 6), H - 6));
+      let y = y0;
+      let caja: Caja = { x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y };
+      // Se baja lo justo para no pisar otro rótulo (unas pocas veces como mucho).
+      for (let intento = 0; intento < 6; intento++) {
+        const choque = colocadas.find((c) => pisa(caja, c));
+        if (!choque) break;
+        y = Math.round(choque.y1 + h + 3);
+        caja = { x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y };
       }
-      colocadas.push({ x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y });
+      if (ficha && pisa(caja, ficha)) {
+        // Los principales suben por encima de la ficha; los secundarios se ocultan.
+        if (principal && ficha.y0 - 6 > h) {
+          y = Math.round(ficha.y0 - 6);
+          caja = { x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y };
+        } else {
+          el.hidden = true;
+          continue;
+        }
+      }
+      const desplazado = Math.abs(y - y0) > h * 3;
+      if (y > H - 4 || colocadas.some((c) => pisa(caja, c)) || (!principal && desplazado)) {
+        el.hidden = true;
+        continue;
+      }
+      colocadas.push(caja);
       // Píxeles enteros: sin temblor de las etiquetas al mover la cámara.
       el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
     }

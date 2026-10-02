@@ -22,14 +22,19 @@
 .skyline[hidden],.legend[hidden]{display:none}
 
 /* Navegación: ruta de lugares y tres acciones de texto. */
-.mundo-barra{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between;padding:12px 2px}
-.migas{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;margin:0;padding:0;list-style:none;font-size:.86rem}
+.mundo-barra{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:12px 2px;min-width:0}
+/* Dos filas fijas: migas arriba y acciones debajo; cada una se desplaza en horizontal si no cabe. */
+.mundo-barra>nav{min-width:0}
+.mundo-acciones{display:flex;gap:18px;min-width:0;overflow-x:auto;scrollbar-width:none;white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 18px),transparent);padding-right:14px}
+.mundo-acciones::-webkit-scrollbar{display:none}
+.migas{display:flex;flex-wrap:nowrap;align-items:baseline;gap:0;margin:0;padding:0;list-style:none;font-size:.86rem;min-width:0;overflow-x:auto;scrollbar-width:none}
+.migas::-webkit-scrollbar{display:none}
+.migas li{flex:none;white-space:nowrap}
 .migas li+li::before{content:"/";color:var(--m-tinta3);margin:0 8px}
 .migas button{cursor:pointer;border:0;background:none;padding:2px 0;color:var(--m-tinta2);font:inherit;font-weight:700}
 .migas button:hover{color:var(--m-tinta)}
 .migas [aria-current]{color:var(--m-tinta)}
-.mundo-acciones{display:flex;flex-wrap:wrap;gap:18px}
-.mb-btn{cursor:pointer;border:0;background:none;color:var(--m-tinta2);padding:2px 0;font:inherit;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid transparent}
+.mb-btn{flex:none;white-space:nowrap;cursor:pointer;border:0;background:none;color:var(--m-tinta2);padding:2px 0;font:inherit;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid transparent}
 .mb-btn:hover:not(:disabled){color:var(--m-tinta);border-bottom-color:var(--m-tinta3)}
 .mb-btn:disabled{opacity:.4;cursor:default}
 .mb-btn[aria-pressed="true"]{color:var(--m-tinta);border-bottom-color:var(--m-oro)}
@@ -60,7 +65,7 @@
 .m-etq.edificio.tenue{opacity:.55;font-size:.62rem}
 .m-etq.edificio.sobrevuelo{opacity:1;background:var(--m-tinta);color:var(--m-noche)}
 .m-etq.edificio:hover{background:rgba(14,13,12,.85);opacity:1}
-@media (max-width:600px){.m-etq.edificio{font-size:.6rem;max-width:9.5em;white-space:normal;line-height:1.15;text-align:center}.m-etq.edificio.tenue{display:none}}
+@media (max-width:600px){.m-etq.edificio{font-size:.6rem;padding:2px 5px}.m-etq.edificio.tenue{display:none}}
 .m-etq:hover .m-largo{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--m-oro)}
 
 /* Ficha contextual: fuera del mundo, en la esquina; aparece al señalar o seleccionar. */
@@ -143,9 +148,12 @@
 @media (max-width:600px){
   .mundo-vista{height:56vh}
   .m-largo{display:none}
-  .ficha{left:10px;right:10px;bottom:10px;width:auto;padding:12px 14px 14px;gap:8px}
-  .ficha-titulo,.ficha-titulo.grande{font-size:1.25rem}
-  .ficha-cifra b{font-size:1.35rem}
+  .ficha{left:8px;right:8px;bottom:8px;width:auto;padding:10px 12px 12px;gap:6px}
+  .ficha-titulo,.ficha-titulo.grande{font-size:1.1rem}
+  .ficha-cifra b{font-size:1.15rem}
+  /* En móvil la ficha no tapa el mapa: título, estado breve y acción. */
+  .ficha-datos{padding-top:6px;gap:4px 16px}
+  .ficha-datos .ficha-cifra:nth-child(n+3),.ficha-pista{display:none}
 }
 
 /*
@@ -178,7 +186,7 @@ body.portada-inmersiva{overflow-x:clip}
 body.portada-inmersiva .mundo{width:100vw;margin-left:calc(50% - 50vw)}
 .page:has(>.mundo:first-child){padding-top:0}
 @media (max-width:1000px){:root{--alto-topbar:49px}}
-@media (max-width:600px){.mundo.portada .portada-pista{flex-direction:column;align-items:center;gap:6px}}
+@media (max-width:600px){.mundo.portada .portada-pista{flex-direction:column;align-items:center;gap:6px;padding:0 16px;text-align:center;letter-spacing:.1em}}
 .page>.mundo:first-child{margin-top:0;border-top:0}
 body.portada-inmersiva .mundo>:not(.mundo-vista){padding-inline:max(16px,calc(50vw - 450px))}
 
@@ -224,3 +232,14 @@ body.menu .indice-flotante{display:none!important}
 .en-entrada .portada-marca{opacity:0}
 .entrada-marca .marca{color:inherit}
 .brand .brand-ante{display:block;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y)}
+
+/* Barra del mundo en pantallas estrechas: migas en una fila y acciones en otra, sin saltos de línea. */
+@media (max-width:760px){
+  .mundo-acciones{gap:16px}
+  /* En móvil solo el nivel actual: para subir está "Subir de nivel". */
+  .migas li:not(:last-child){display:none}
+  .migas li:last-child::before{display:none}
+}
+@media (pointer:coarse){[data-mundo-zoom]{display:none}}
+.ficha{z-index:2}
+.mundo-etiquetas{z-index:1}
