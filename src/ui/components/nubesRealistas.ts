@@ -151,7 +151,6 @@ export function nubeRealista(variante: number, ancho = 360): string {
 export const TEXTURAS_INTRO = {
   lejanas: [[0, 440], [1, 440], [2, 440], [3, 440]] as const,
   cercanas: [[4, 640], [7, 640]] as const,
-  telon: [[5, 900], [6, 900]] as const,
 };
 
 /**
@@ -159,7 +158,7 @@ export const TEXTURAS_INTRO = {
  * empezar la intro ya estén hechas y no se note el cálculo.
  */
 export function prepararNubesIntro(): void {
-  const pendientes = [...TEXTURAS_INTRO.lejanas, ...TEXTURAS_INTRO.cercanas, ...TEXTURAS_INTRO.telon];
+  const pendientes = [...TEXTURAS_INTRO.lejanas, ...TEXTURAS_INTRO.cercanas];
   const ocioso = (fn: () => void): void => {
     if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 1500 });
     else setTimeout(fn, 30);

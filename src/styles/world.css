@@ -45,17 +45,6 @@
 .mundo-vista{position:relative;height:clamp(380px,72vh,760px);background:radial-gradient(ellipse 85% 75% at 50% 45%,#3b3530 0%,#221e1b 55%,#100e0d 100%);overflow:hidden}
 .mundo-lienzo{display:block;width:100%;height:100%;touch-action:none;outline:none}
 
-/* Entrada cinematográfica (primera visita). */
-.entrada{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:#0b0a09;transition:background 1.6s ease}
-.entrada.abierta{background:rgba(11,10,9,0)}
-.entrada-marca{margin:0;display:grid;justify-items:center;font-family:var(--m-display);font-weight:800;font-size:clamp(2.4rem,6vw,4.4rem);line-height:.92;letter-spacing:-.035em;color:var(--m-tinta);animation:entrada-marca 1s ease both;transition:opacity .9s ease,transform 1.2s ease}
-.entrada.abierta .entrada-marca{opacity:0;transform:translateY(-14px)}
-@keyframes entrada-marca{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.entrada-lema{position:absolute;left:0;right:0;bottom:14%;margin:0;text-align:center;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.32em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:0;transition:opacity 1s ease}
-.entrada.lema .entrada-lema{opacity:1}
-.entrada-saltar{position:absolute;right:18px;bottom:16px;cursor:pointer;border:0;background:none;color:var(--m-tinta2);font:inherit;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-bottom:1px solid var(--m-tinta3);padding:2px 0}
-.entrada-saltar:hover{color:var(--m-tinta)}
-.en-entrada .mundo-etiquetas,.en-entrada .ficha{opacity:0;pointer-events:none}
 
 /* Rótulos: texto de plano, sin caja ni cifras. Sombra solo para que se lea sobre la ciudad. */
 .mundo-etiquetas{position:absolute;inset:0;pointer-events:none}
@@ -171,7 +160,6 @@
 .mundo.portada .portada-pista{display:flex;position:absolute;left:0;right:0;bottom:22px;justify-content:center;gap:28px;margin:0;pointer-events:none;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.85);animation:pista 1.2s 1s ease both}
 .portada-pista span:last-child{color:var(--m-tinta2)}
 .portada-pista span:last-child::before{content:"↓ "}
-.en-entrada .portada-pista{opacity:0}
 @keyframes pista{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Inmersión: mientras el mapa domina la pantalla, la barra lateral se retira y el mundo va a sangre. */
@@ -232,8 +220,6 @@ body.menu .indice-flotante{display:none!important}
 /* Título de marca sobre el mapa de la portada (letras de moneda, ver brand.css). */
 .portada-marca{display:none}
 .mundo.portada .portada-marca{display:flex;justify-content:center;position:absolute;left:16px;right:16px;top:7%;z-index:2;pointer-events:none;filter:drop-shadow(0 4px 18px rgba(0,0,0,.65))}
-.en-entrada .portada-marca{opacity:0}
-.entrada-marca .marca{color:inherit}
 .brand .brand-ante{display:block;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y)}
 
 /* Barra del mundo en pantallas estrechas: migas en una fila y acciones en otra, sin saltos de línea. */

@@ -1,8 +1,9 @@
-import { nubeRealista, prepararNubesIntro, TEXTURAS_INTRO } from '../components/nubesRealistas.ts';
+import { prepararNubesIntro } from '../components/nubesRealistas.ts';
+import { reproducirIntro } from '../intro/introCinematica.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
 import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
 import { type Ambiente, siguienteAmbiente } from '../../world/ambiente.ts';
-import { MARCA, tituloMarca } from '../components/brandTitle.ts';
+import { MARCA } from '../components/brandTitle.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
@@ -134,7 +135,12 @@ export class ControladorMundo {
     document.removeEventListener('keydown', this.alEscape);
     document.addEventListener('keydown', this.alEscape);
     this.pintarPanel();
-    void this.prepararVista();
+    // Primera visita: la intro va ANTES del mapa, a pantalla completa, mientras la 3D carga debajo.
+    let avisar: (ok: boolean) => void = () => {};
+    if (this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
+      this.lanzarIntro(new Promise<boolean>((r) => (avisar = r)));
+    }
+    void this.prepararVista().then(avisar, () => avisar(false));
   }
 
   /** Empieza, avanza, retrocede o termina el recorrido guiado del barrio 4. */
@@ -193,12 +199,19 @@ export class ControladorMundo {
   /* ------------------------------------------------------------ vista 3D / 2D */
 
   /** `explorando`: se vuelve a 3D desde la exploración (botón «Ver en 3D»): sin portada ni entrada. */
-  private async prepararVista(explorando = false): Promise<void> {
+  /** Devuelve si la ciudad 3D ha quedado montada. */
+  private async prepararVista(explorando = false): Promise<boolean> {
     const raiz = this.raiz;
-    if (!raiz) return;
-    if (!this.modo3d) return this.mostrar2d('');
+    if (!raiz) return false;
+    if (!this.modo3d) {
+      this.mostrar2d('');
+      return false;
+    }
     this.disponible3d ??= webglDisponible();
-    if (!this.disponible3d) return this.mostrar2d('La vista 3D no está disponible en este navegador: usa el Atlas o la ciudad 2D del final de la página.');
+    if (!this.disponible3d) {
+      this.mostrar2d('La vista 3D no está disponible en este navegador: usa el Atlas o la ciudad 2D del final de la página.');
+      return false;
+    }
 
     this.aviso('Cargando la ciudad 3D…');
     let mundo: Mundo3D;
@@ -215,10 +228,10 @@ export class ControladorMundo {
       console.error('No se pudo iniciar la vista 3D', error);
       this.disponible3d = false;
       if (this.raiz === raiz) this.mostrar2d('No se pudo iniciar la vista 3D: usa el Atlas o la ciudad 2D del final de la página.');
-      return;
+      return false;
     }
     // El usuario puede haber salido de la portada o cambiado a 2D mientras cargaba.
-    if (this.raiz !== raiz || !this.modo3d) return;
+    if (this.raiz !== raiz || !this.modo3d) return false;
 
     const vista = this.el('[data-mundo-vista]');
     vista.hidden = false;
@@ -237,66 +250,32 @@ export class ControladorMundo {
     mundo.enfocar(this.foco, this.vistaAtlas ? 'atlas' : 'maqueta', false);
     this.aviso('');
     this.pintarPanel();
-    if (!explorando && this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
-      this.iniciarEntrada(vista, mundo);
-    }
+    return true;
   }
 
   /**
-   * Primera visita (o "Ver la intro"): cielo azul → vuelo entre nubes → el título llega desde el
-   * fondo → las nubes se abren como un telón → debajo, la cámara desciende sobre la ciudad y los
-   * barrios se levantan → "Estudiar es construirla" → navegación. Se salta con el botón, Escape o
-   * un toque.
+   * Intro cinemática (primera visita o "Ver la intro"): el primer acto de la ciudad, a pantalla
+   * completa. Bajo su velo la cámara empieza a descender y, al abrirse el iris, sigue bajando entre
+   * nubes hasta posarse en el encuadre de la portada. Se salta con el botón, Escape o un toque.
    */
-  private iniciarEntrada(vista: HTMLElement, mundo: Mundo3D): void {
+  private lanzarIntro(mundoListo: Promise<boolean>): void {
     this.cerrarEntrada?.();
-    const capa = document.createElement('div');
-    capa.className = 'entrada cielo';
-    // Nubes realistas (generadas en un lienzo); si no hay lienzo, quedan las nubes dibujadas con CSS.
-    const nube = (clase: string, variante: number, ancho: number) => {
-      const img = nubeRealista(variante, ancho);
-      return `<i class="nube ${clase}${img ? ' real' : ''}"${img ? ` style="--img:url(${img})"` : ''}></i>`;
-    };
-    const { lejanas, cercanas, telon } = TEXTURAS_INTRO;
-    const nubes = Array.from({ length: 10 }, (_, i) => nube(`n${i + 1}`, lejanas[i % lejanas.length]![0], lejanas[i % lejanas.length]![1])).join('');
-    const cerca = Array.from({ length: 4 }, (_, i) => nube(`cerca c${i + 1}`, cercanas[i % cercanas.length]![0], cercanas[i % cercanas.length]![1])).join('');
-    capa.innerHTML = `<div class="nubes" aria-hidden="true">${nubes}${cerca}${nube('telon izq', telon[0][0], telon[0][1])}${nube('telon der', telon[1][0], telon[1][1])}</div><div class="bruma" aria-hidden="true"></div><div class="entrada-marca">${tituloMarca('entrada')}</div><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
-    vista.append(capa);
-    vista.classList.add('en-entrada');
-    const temporizadores: number[] = [];
-    const despues = (ms: number, fn: () => void) => temporizadores.push(window.setTimeout(fn, ms));
-    let cerrada = false;
-    const cerrar = () => {
-      if (cerrada) return;
-      cerrada = true;
-      for (const t of temporizadores) clearTimeout(t);
-      escribirJson(this.almacen, CLAVE_ENTRADA, 'vista');
-      capa.remove();
-      vista.classList.remove('en-entrada');
-      document.removeEventListener('keydown', alTeclado);
-      this.cerrarEntrada = null;
-    };
-    // El descenso 3D empieza cuando se abren las nubes.
-    const saltar = mundo.entrada(() => {
-      capa.classList.add('lema');
-      despues(2600, cerrar);
-    }, { retraso: 3300 });
-    const saltarYCerrar = () => {
-      saltar();
-      cerrar();
-    };
-    this.cerrarEntrada = saltarYCerrar;
-    const alTeclado = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') saltarYCerrar();
-    };
-    document.addEventListener('keydown', alTeclado);
-    capa.querySelector('button')!.addEventListener('click', saltarYCerrar);
-    capa.addEventListener('pointerdown', (e) => {
-      if (!(e.target as Element).closest('button')) saltarYCerrar();
+    const { numero, titulo } = this.estado.tema.meta;
+    let saltarDescenso: (() => void) | null = null;
+    this.cerrarEntrada = reproducirIntro({
+      mundoListo,
+      subtitulo: `Gestión financiera · Tema ${numero} · ${titulo}`,
+      alDescender: () => {
+        if (!this.activo3d) return;
+        this.foco = FOCO_CIUDAD;
+        saltarDescenso = this.mundo!.entrada(() => {}, { retraso: 0, intro: true });
+      },
+      alSaltar: () => saltarDescenso?.(),
+      alTerminar: () => {
+        escribirJson(this.almacen, CLAVE_ENTRADA, 'vista');
+        this.cerrarEntrada = null;
+      },
     });
-    // Fases: vuelo entre nubes → apertura del telón (y el cielo se funde con la maqueta).
-    despues(60, () => capa.classList.add('volando'));
-    despues(3400, () => capa.classList.add('abriendo', 'abierta'));
   }
 
   private async crearMundo(): Promise<Mundo3D> {
@@ -593,7 +572,7 @@ export class ControladorMundo {
         { passive: false },
       );
       vista.addEventListener('pointerup', (e) => {
-        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.entrada, .ver-intro, .mundo-acciones')) {
+        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.ver-intro, .mundo-acciones')) {
           // Clic en el mapa de la portada: pantalla completa y exploración.
           void this.entrarPantallaCompleta();
         }
@@ -747,10 +726,9 @@ export class ControladorMundo {
       this.moverRecorrido(this.recorrido ? 'salir' : 'empezar');
     } else if ('verIntro' in dataset) {
       // Volver a ver la intro (desde la portada).
-      const vista = this.raiz?.querySelector<HTMLElement>('[data-mundo-vista]');
-      if (vista && this.activo3d && !this.reducido) {
+      if (this.activo3d && !this.reducido) {
         this.foco = FOCO_CIUDAD;
-        this.iniciarEntrada(vista, this.mundo!);
+        this.lanzarIntro(Promise.resolve(true));
       }
     } else if (dataset.historia) {
       this.pasoHistoria = Math.max(0, this.pasoHistoria + Number(dataset.historia));

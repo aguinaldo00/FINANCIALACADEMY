@@ -463,6 +463,8 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
 
 ## Intro entre nubes (02/10)
 
+> Sustituida por la intro cinemática (ver "Intro cinemática: el primer acto" más abajo).
+
 - **Primera visita:** cielo azul → vuelo entre nubes realistas (cúmulos generados en un lienzo
   con ruido fractal y luz desde arriba, en `ui/components/nubesRealistas.ts`, movidos con CSS 3D:
   perspectiva y `translateZ`) → el título con letras de moneda llega desde el fondo → dos nubes en primer plano
@@ -529,6 +531,66 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
   subpuntos como paradas, rellenas con tu dominio.
 - **Siguiente recomendación:** destacada; su parada late.
 - **Navegación:** todo lleva a la sección.
+
+## Intro cinemática: el primer acto (02/10)
+
+La intro deja de ser una capa dentro del visor del mapa. Es el **primer acto** de la ciudad, a
+pantalla completa y antes de ver el mapa, en una sola toma: NEGRO → NUBES → DESCENSO → CIUDAD →
+EXPLORACIÓN.
+
+- **Capa** (`ui/intro/introCinematica.ts`, `styles/intro.css`):
+  - `.intro`, fija y por encima de todo, nada más montar la portada en la primera visita;
+  - la escena 3D carga debajo en paralelo;
+  - `body.intro-activa` oculta la barra, los rótulos, la ficha y la marca mientras dura.
+- **Guion** (`GUION`, en ms):
+
+  | Instante | Qué pasa |
+  |---|---|
+  | 0–3300 | Cielo y vuelo entre nubes realistas; llega el título. |
+  | 3300 | Velo blanco: una nube llena la pantalla. Llega por animación CSS con retraso, así que llega a su hora aunque el hilo principal esté ocupado montando la 3D. |
+  | 4200 | Morph gooey de "La ciudad del dinero" a **"Bienvenido a la Ciudad Financiera"** (filtro SVG de umbral alfa y cruce de desenfoque y opacidad), con Ken Burns del bloque. |
+  | 4400 | Empieza el descenso 3D bajo el velo. |
+  | 5200 | Presagio: el velo pasa a bruma (blanco al 80 % con `backdrop-filter`) y se intuyen los volúmenes de la ciudad. |
+  | 5600 | Fly-in, palabra a palabra, de "Gestión financiera · Tema 1 · …" (de `tema.meta`). |
+  | 6200 | Iris (`@property --iris`): el velo se abre desde el centro y dos nubes salen hacia los bordes. |
+  | 6300 | Fly-out del texto hacia la cámara. |
+  | 7700 | La capa se retira; la cámara sigue bajando. |
+
+- **Fases encadenadas:** cada fase se programa desde que la anterior ha ocurrido de verdad. Si el
+  hilo se bloquea, el guion se retrasa pero no se amontona.
+- **Espera de la 3D:**
+  - si a los 4,4 s la 3D no está lista, la bienvenida respira hasta 4 s más;
+  - sin WebGL, el iris se abre sobre la página;
+  - el guion de la capa sigue dos fotogramas después de arrancar el descenso (el primero puede
+    tardar), para que iris y cámara vayan a la par.
+- **Descenso 3D** (`Mundo3D.entrada(…, { intro: true })`):
+  - **Trayectoria:** sale con radio ×3, picado (`phi` 0,25, nunca cenital) y giro de 0,6 rad. La
+    distancia frena al final (`1-(1-t)³`) y el giro se concentra en el centro (smootherstep). Sin
+    roll: siempre mira al centro.
+  - **Final:** exactamente el encuadre de la portada, así que no hay reencuadre.
+  - **Controles:** durante el descenso se levanta el límite `maxDistance` de los controles para
+    poder salir desde lo alto.
+  - **Nubes** (`capaNubes.ts`):
+    - una franja de 26 sprites con la misma textura que las nubes CSS, repartida sobre la ciudad y
+      con unas pocas en el camino de la cámara, algo por debajo para verlas venir;
+    - varían en escala, giro, altura y deriva;
+    - se disuelven al acercarse la cámara, sin escribir profundidad ni niebla.
+  - **Bruma:** el fondo (color de borrado del renderer) y la niebla salen del mismo blanco que el
+    velo y vuelven a los del ambiente entre el 28 % y el 68 % del descenso. La ciudad sale del
+    blanco, no de una caja oscura.
+  - **Parones:** si un fotograma llega muy tarde (compilación de sombreadores), el descenso se
+    desplaza lo que sobra, con un tope de 2,5 s. El parón lo pausa en vez de saltárselo.
+- **Control:**
+  - se salta con el botón, Esc o un toque; la cámara queda en el encuadre final y se quitan las
+    nubes 3D;
+  - "▶ Ver la intro" la repite con el mundo ya montado;
+  - con movimiento reducido no hay intro.
+- **Pruebas:** `scripts/verificar-chromium.mjs` comprueba:
+  - que aparece antes que el lienzo y a pantalla completa;
+  - que termina sola y queda marcada;
+  - que el descenso sale de lo alto;
+  - que saltar con el botón o con Esc deja la cámara en el encuadre final;
+  - que no hay intro con movimiento reducido y que, sin WebGL, termina igualmente.
 
 ## Pendiente (siguientes pasos)
 
