@@ -1,4 +1,6 @@
+import type { EstadoPractica } from '../app/practiceStore.ts';
 import type { EstadoEstudio } from '../app/store.ts';
+import { idPregunta } from '../domain/practice.ts';
 import { dominioConcepto } from '../domain/mastery.ts';
 import { actualizarEtiquetaDominio } from './components/conceptCard.ts';
 import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaEn, tarjetasDe } from './components/conceptPanels.ts';
@@ -6,7 +8,7 @@ import { pintarRail } from './components/rail.ts';
 import type { ContextoVista } from './views/context.ts';
 
 /** Delegación de clics de las fichas: otra forma (cicla modos), trampa y compruébalo. */
-export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio): void {
+export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
   ctx.pagina.addEventListener('click', (e) => {
     const destino = e.target as Element;
     // Controles internos de los paneles de flashcards y de preguntas de práctica.
@@ -68,9 +70,11 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio): void 
     if (accion === 'q' && !abierto) {
       pintarPregunta(panel, concepto, (indiceElegido) => {
         const { correcta } = estado.responder(concepto, indiceElegido);
+        // Los fallos van al repaso (el dominio sigue sus propias reglas).
+        practica?.responder(idPregunta(concepto.id), correcta);
         if (correcta) {
           actualizarEtiquetaDominio(ficha, dominioConcepto(estado.progreso, concepto.id));
-          pintarRail(ctx.rail, estado, ficha.closest<HTMLElement>('[data-sec]')?.dataset.sec ?? null);
+          pintarRail(ctx.rail, estado, ficha.closest<HTMLElement>('[data-sec]')?.dataset.sec ?? null, practica);
         }
         return correcta;
       });
@@ -89,7 +93,16 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio): void 
     ficha.dataset.pi = String(i);
     const pregunta = lista[i]!;
     const pie = `<div class="pq-pie"><span>Práctica ${i + 1} / ${lista.length} · no cambia tu dominio</span>${lista.length > 1 ? '<button type="button" class="fc-btn" data-pq="siguiente">Otra pregunta →</button>' : ''}</div>`;
-    pintarPreguntaEn(panel, pregunta, (k) => k === pregunta.indiceCorrecta, pie);
+    pintarPreguntaEn(
+      panel,
+      pregunta,
+      (k) => {
+        const correcta = k === pregunta.indiceCorrecta;
+        practica?.responder(idPregunta(pregunta.conceptoId, pregunta.id), correcta);
+        return correcta;
+      },
+      pie,
+    );
   }
 }
 

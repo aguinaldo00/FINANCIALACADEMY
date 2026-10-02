@@ -296,16 +296,7 @@ export class ControladorMundo {
       if (tecla === ' ' || e.code === 'Space') {
         // Espacio salta; dos espacios seguidos (menos de 280 ms), dash.
         e.preventDefault();
-        if (e.type === 'keydown' && !e.repeat) {
-          const ahora = performance.now();
-          if (ahora - this.ultimoEspacio < 280) {
-            this.mundo?.dashear();
-            this.ultimoEspacio = 0;
-          } else {
-            this.mundo?.saltar();
-            this.ultimoEspacio = ahora;
-          }
-        }
+        if (e.type === 'keydown' && !e.repeat) this.saltarODash();
         return;
       }
       if (!MOVER.has(tecla)) return;
@@ -317,7 +308,74 @@ export class ControladorMundo {
     window.addEventListener('keydown', this.alTecladoPaseo);
     window.addEventListener('keyup', this.alTecladoPaseo);
     window.addEventListener('blur', this.soltarTeclas);
+    this.conectarJoystick();
     this.pintarPanel();
+  }
+
+  /** Espacio o botón "Saltar": salta; dos seguidos en menos de 280 ms, dash. */
+  private saltarODash(): void {
+    const ahora = performance.now();
+    if (ahora - this.ultimoEspacio < 280) {
+      this.mundo?.dashear();
+      this.ultimoEspacio = 0;
+    } else {
+      this.mundo?.saltar();
+      this.ultimoEspacio = ahora;
+    }
+  }
+
+  /**
+   * Controles táctiles del paseo (se ven con puntero grueso): un joystick que da la misma entrada
+   * que WASD y botones de saltar (doble toque: dash) y entrar. Se conectan una vez por mundo.
+   */
+  private conectarJoystick(): void {
+    const raiz = this.raiz;
+    const joy = raiz?.querySelector<HTMLElement>('[data-joy]');
+    if (!raiz || !joy || joy.dataset.listo) return;
+    joy.dataset.listo = '1';
+    const pomo = joy.querySelector<HTMLElement>('.joy-pomo')!;
+    let dedo: number | null = null;
+    const mover = (e: PointerEvent) => {
+      const caja = joy.getBoundingClientRect();
+      const radio = caja.width / 2;
+      let dx = (e.clientX - (caja.left + radio)) / radio;
+      let dy = (e.clientY - (caja.top + radio)) / radio;
+      const largo = Math.hypot(dx, dy);
+      if (largo > 1) {
+        dx /= largo;
+        dy /= largo;
+      }
+      pomo.style.transform = `translate(${dx * radio * 0.6}px, ${dy * radio * 0.6}px)`;
+      // Zona muerta en el centro; arriba en pantalla = adelante.
+      this.mundo?.fijarEntradaPaseo(largo < 0.2 ? { x: 0, y: 0 } : { x: dx, y: -dy });
+    };
+    const soltar = () => {
+      dedo = null;
+      joy.classList.remove('activo');
+      pomo.style.transform = '';
+      this.mundo?.fijarEntradaPaseo({ x: 0, y: 0 });
+    };
+    joy.addEventListener('pointerdown', (e) => {
+      if (!this.paseando) return;
+      e.preventDefault();
+      dedo = e.pointerId;
+      try {
+        joy.setPointerCapture(e.pointerId);
+      } catch {
+        /* sin captura (puntero ya liberado): el gesto sigue con los eventos del propio joystick */
+      }
+      joy.classList.add('activo');
+      mover(e);
+    });
+    joy.addEventListener('pointermove', (e) => {
+      if (e.pointerId === dedo) mover(e);
+    });
+    joy.addEventListener('pointerup', soltar);
+    joy.addEventListener('pointercancel', soltar);
+    raiz.querySelector<HTMLButtonElement>('[data-paseo-saltar]')?.addEventListener('click', () => this.paseando && this.saltarODash());
+    raiz.querySelector<HTMLButtonElement>('[data-paseo-entrar]')?.addEventListener('click', () => {
+      if (this.paseando && this.cercano) location.hash = hrefConcepto(this.cercano);
+    });
   }
 
   private soltarTeclas = () => {

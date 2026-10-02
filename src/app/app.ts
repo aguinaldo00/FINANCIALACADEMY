@@ -5,10 +5,13 @@ import { pintarRail } from '../ui/components/rail.ts';
 import { activarAparicion, conectarFichas, conectarMenuMovil } from '../ui/interactions.ts';
 import type { ContextoVista } from '../ui/views/context.ts';
 import { pintarExamen } from '../ui/views/examView.ts';
+import { pintarRepaso } from '../ui/views/repasoView.ts';
+import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
 import { resolverRuta } from './router.ts';
+import { EstadoPractica } from './practiceStore.ts';
 import { EstadoEstudio } from './store.ts';
 
 function elemento(selector: string): HTMLElement {
@@ -26,16 +29,22 @@ export function iniciarApp(tema: Tema): void {
   const ctx: ContextoVista = { pagina: elemento('#page'), rail: elemento('#rail'), tituloMovil: elemento('#mt') };
   const almacen = almacenNavegador();
   const estado = new EstadoEstudio(tema, almacen);
+  const practica = new EstadoPractica(tema, almacen);
   const mundo = new ControladorMundo(estado, almacen);
+
+  let seccionActual: string | null = null;
 
   function pintar(): void {
     document.body.classList.remove('menu');
     const ruta = resolverRuta(location.hash, tema);
-    let seccionActual: string | null = null;
-    if (ruta.vista === 'examen') {
-      seccionActual = 'examen';
+    seccionActual = null;
+    detenerSimulacro();
+    if (ruta.vista === 'examen' || ruta.vista === 'simulacro' || ruta.vista === 'repaso') {
+      seccionActual = ruta.vista;
       mundo.desmontar();
-      pintarExamen(ctx, estado);
+      if (ruta.vista === 'examen') pintarExamen(ctx, estado, practica);
+      else if (ruta.vista === 'simulacro') pintarSimulacro(ctx, estado, practica);
+      else pintarRepaso(ctx, estado, practica);
     } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;
       mundo.desmontar();
@@ -47,12 +56,14 @@ export function iniciarApp(tema: Tema): void {
       const raizMundo = ctx.pagina.querySelector<HTMLElement>('[data-mundo]');
       if (raizMundo) mundo.montar(raizMundo);
     }
-    pintarRail(ctx.rail, estado, seccionActual);
+    pintarRail(ctx.rail, estado, seccionActual, practica);
     if (ruta.scrollArriba) window.scrollTo(0, 0);
     activarAparicion();
   }
 
-  conectarFichas(ctx, estado);
+  conectarFichas(ctx, estado, practica);
+  // La insignia de pendientes del índice sigue a la práctica.
+  practica.escuchar(() => pintarRail(ctx.rail, estado, seccionActual, practica));
   const flotante = document.querySelector<HTMLElement>('#ib');
   conectarMenuMovil(flotante ? [elemento('#mb'), flotante] : [elemento('#mb')], ctx.rail);
   addEventListener('hashchange', pintar);

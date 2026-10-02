@@ -187,7 +187,20 @@ body.portada-inmersiva .mundo>:not(.mundo-vista){padding-inline:max(16px,calc(50
 .mundo.paseando .paseo-pista{display:flex;position:absolute;top:14px;left:0;right:0;justify-content:center;gap:22px;margin:0;pointer-events:none;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--m-tinta2);text-shadow:0 1px 3px rgba(0,0,0,.85)}
 .paseo-pista b{color:var(--m-tinta);letter-spacing:.06em}
 .mundo.paseando .mundo-etiquetas{display:none}
-@media (pointer:coarse){[data-mundo-paseo]{display:none}}
+/* Paseo táctil: joystick a la izquierda; saltar y entrar a la derecha (solo con puntero grueso). */
+.paseo-tactil{display:none}
+@media (pointer:coarse){
+  .mundo.paseando .paseo-pista{display:none}
+  .mundo.paseando .paseo-tactil{display:flex;position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));justify-content:space-between;align-items:flex-end;padding:0 18px;pointer-events:none;z-index:4}
+}
+.joy{position:relative;width:118px;height:118px;border-radius:50%;background:rgba(14,13,12,.45);border:2px solid var(--m-linea);pointer-events:auto;touch-action:none;backdrop-filter:blur(4px)}
+.joy-pomo{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--m-tinta);box-shadow:0 3px 10px rgba(0,0,0,.5);transition:transform .12s}
+.joy.activo .joy-pomo{transition:none}
+.joy-botones{display:flex;gap:12px;pointer-events:auto}
+.joy-btn{display:grid;place-items:center;width:70px;height:70px;border-radius:50%;border:2px solid var(--m-linea);background:rgba(14,13,12,.6);color:var(--m-tinta);font-size:1.4rem;line-height:1;touch-action:manipulation;cursor:pointer}
+.joy-btn small{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.joy-btn:active{background:var(--m-oro);color:var(--m-noche)}
+.joy-btn[data-paseo-entrar]:disabled{opacity:.35}
 
 /* Pantalla completa del mapa (API nativa o capa de reserva). */
 .mundo:fullscreen,.mundo.pantalla-completa{display:flex;flex-direction:column;width:100vw!important;height:100vh;margin:0!important;border:0;background:var(--m-noche)}

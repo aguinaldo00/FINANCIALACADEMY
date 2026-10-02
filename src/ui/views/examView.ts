@@ -1,10 +1,13 @@
 import { hrefConcepto } from '../../app/router.ts';
+import type { EstadoPractica } from '../../app/practiceStore.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
-import type { BloqueExamen, Concepto, Pregunta } from '../../content/schema.ts';
+import type { BloqueExamen, Concepto, Pregunta, Tema } from '../../content/schema.ts';
+import { bancoDePreguntas } from '../../domain/exam.ts';
 import { dominioConcepto } from '../../domain/mastery.ts';
 import { treemap } from '../../world/treemap.ts';
 import { pintarPreguntaEn } from '../components/conceptPanels.ts';
 import { anilloDominio } from '../components/ring.ts';
+import { COLORES_BLOQUE, nombreCortoBloque } from '../blockColors.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -19,13 +22,6 @@ interface DatosBloque {
   /** Color de identidad del bloque (el mismo en todos los gráficos de la vista). */
   color: string;
 }
-
-/**
- * Colores categóricos de los bloques, en orden fijo. Validados para fondo oscuro (#111) con el
- * validador de paleta de dataviz: banda de luminosidad, croma, separación para daltonismo y
- * contraste 3:1.
- */
-const COLORES_BLOQUE = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181'];
 
 function datosDe(estado: EstadoEstudio): DatosBloque[] {
   const { tema, progreso } = estado;
@@ -46,15 +42,7 @@ function datosDe(estado: EstadoEstudio): DatosBloque[] {
   });
 }
 
-/** Nombre corto de cada bloque para las etiquetas de los gráficos (los de tu predicción). */
-const CORTO: Record<string, string> = {
-  intermediarios: 'Intermediarios',
-  supervisores: 'Supervisores',
-  mercados: 'Mercados',
-  activos: 'Activos y trinomio',
-  basicos: 'Conceptos básicos',
-};
-const corto = (b: BloqueExamen) => CORTO[b.id] ?? b.titulo.split(' (')[0]!;
+const corto = nombreCortoBloque;
 const tip = (html: string) => `data-tip="${encodeURIComponent(html)}"`;
 
 /* ------------------------------------------------------------ reparto */
@@ -167,7 +155,7 @@ function fichaBloque(d: DatosBloque, i: number, estado: EstadoEstudio): string {
  * conceptos con el dominio, gráficos, tabla y un simulacro por bloque. El simulacro es práctica:
  * no cambia el dominio (que solo mide "Compruébalo" en cada ficha).
  */
-export function pintarExamen(ctx: ContextoVista, estado: EstadoEstudio): void {
+export function pintarExamen(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
   const datos = datosDe(estado);
   const fuente = estado.tema.ampliacion?.fuente ?? '';
   ctx.pagina.innerHTML = `<div class="ex" data-examen><header class="sh ex-cab"><div class="kick"><span class="pill k">📊 Predicción de examen</span><span class="pill">Fuente: ${fuente}</span></div><h1>¿Qué caerá en el examen?</h1><p>Los cinco bloques del tema, ordenados por la probabilidad de que salgan. Es una estimación de tus apuntes, no un dato oficial.</p>${reparto(datos)}</header>
@@ -190,16 +178,16 @@ ${mapa(datos, estado)}
       const abierto = !panel.hidden;
       panel.hidden = abierto;
       boton.setAttribute('aria-expanded', String(!abierto));
-      if (!abierto) pintarSimulacro(ficha, panel, d, Number(ficha.dataset.si || 0));
+      if (!abierto) pintarSimulacro(ficha, panel, d, Number(ficha.dataset.si || 0), estado.tema, practica);
     } else {
-      pintarSimulacro(ficha, panel, d, Number(ficha.dataset.si || 0) + 1);
+      pintarSimulacro(ficha, panel, d, Number(ficha.dataset.si || 0) + 1, estado.tema, practica);
     }
   });
 }
 
 /** Una pregunta del simulacro con el marcador de la sesión (aciertos a la primera / respondidas). */
-function pintarSimulacro(ficha: HTMLElement, panel: HTMLElement, d: DatosBloque, indice: number): void {
-  const lista = [...d.oficiales, ...d.practica];
+function pintarSimulacro(ficha: HTMLElement, panel: HTMLElement, d: DatosBloque, indice: number, tema: Tema, practica?: EstadoPractica): void {
+  const lista = bancoDePreguntas(tema).filter((p) => p.bloqueId === d.bloque.id);
   const i = indice % lista.length;
   ficha.dataset.si = String(i);
   const pregunta = lista[i]!;
@@ -215,6 +203,7 @@ function pintarSimulacro(ficha: HTMLElement, panel: HTMLElement, d: DatosBloque,
         respondida = true;
         ficha.dataset.hechas = String(Number(ficha.dataset.hechas ?? 0) + 1);
         if (correcta) ficha.dataset.ok = String(Number(ficha.dataset.ok ?? 0) + 1);
+        practica?.responder(pregunta.id, correcta);
         const m = panel.querySelector('.ex-marcador');
         if (m) m.textContent = marcador();
       }

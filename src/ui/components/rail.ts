@@ -1,12 +1,13 @@
 import type { EstadoEstudio } from '../../app/store.ts';
-import { hrefExamen, hrefInicio, hrefSeccion } from '../../app/router.ts';
+import type { EstadoPractica } from '../../app/practiceStore.ts';
+import { hrefExamen, hrefInicio, hrefRepaso, hrefSeccion, hrefSimulacro } from '../../app/router.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { MARCA } from './brandTitle.ts';
 import { anilloDominio } from './ring.ts';
 
-/** Índice lateral: dominio global y una barra de dominio por sección. */
-export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActual: string | null): void {
+/** Índice lateral: dominio global, una barra de dominio por sección y, al final, el grupo Examen. */
+export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActual: string | null, practica?: EstadoPractica): void {
   const { tema, progreso } = estado;
   const cabecera = `<a class="brand" href="${hrefInicio()}">${anilloDominio(dominioGlobal(tema, progreso))}<span><small class="brand-ante">${MARCA.asignatura}</small><b>${MARCA.ciudad}</b><small>Tema ${tema.meta.numero} · dominio global</small></span></a>`;
   const grupos = tema.grupos
@@ -21,8 +22,12 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
       return `<div class="grp">${g.titulo}</div>${secciones}`;
     })
     .join('');
+  const enlace = (id: string, href: string, icono: string, titulo: string, sub: string, insignia = '') =>
+    `<a class="sl exn${seccionActual === id ? ' on' : ''}" href="${href}"><div class="top"><span class="id">${icono}</span><span>${titulo}</span>${insignia}</div><small class="ex-sub">${sub}</small></a>`;
+  const n = practica?.pendientes() ?? 0;
+  const insignia = n ? `<span class="pw insignia" aria-label="${n} pendientes">${n}</span>` : '';
   const examen = tema.ampliacion?.bloques.length
-    ? `<div class="grp">Examen</div><a class="sl exn${seccionActual === 'examen' ? ' on' : ''}" href="${hrefExamen()}"><div class="top"><span class="id">📊</span><span>Predicción de examen</span></div><small class="ex-sub">Qué es más probable que caiga</small></a>`
+    ? `<div class="grp">Examen</div>${enlace('examen', hrefExamen(), '📊', 'Predicción de examen', 'Qué es más probable que caiga')}${enlace('simulacro', hrefSimulacro(), '📝', 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), '🔁', 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}`
     : '';
   rail.innerHTML = cabecera + grupos + examen;
 }

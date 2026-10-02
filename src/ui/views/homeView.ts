@@ -1,4 +1,4 @@
-import { hrefExamen, hrefSeccion } from '../../app/router.ts';
+import { hrefExamen, hrefRepaso, hrefSeccion, hrefSimulacro } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { seccionesPrioritarias } from '../../domain/priority.ts';
@@ -35,7 +35,7 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
  <h2 class="h2 rev">Subpuntos del tema</h2><div class="tiles">${tiles}</div>
  ${tarjetaExamen(estado)}
  <h2 class="h2 rev">Gramática visual</h2><div class="gram rev">${gramatica}</div>
- <p class="next">Fase 1 de 6. Próximas: esquemas interactivos, flashcards con repetición espaciada, ejercicios, simulador de examen y panel de predicción.</p>`;
+`;
   ctx.tituloMovil.textContent = MARCA_COMPLETA;
 }
 
@@ -44,5 +44,5 @@ function tarjetaExamen(estado: EstadoEstudio): string {
   const bloques = estado.tema.ampliacion?.bloques ?? [];
   if (!bloques.length) return '';
   const barras = bloques.map((b) => `<i style="flex-grow:${b.probabilidad}" title="${b.titulo}: ${b.probabilidad} %"></i>`).join('');
-  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">📊 Predicción de examen</span><b>¿Qué caerá en el examen?</b><span class="he-t">Los ${bloques.length} bloques ordenados por probabilidad, tu dominio en cada uno y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver la predicción →</span></a>`;
+  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">📊 Predicción de examen</span><b>¿Qué caerá en el examen?</b><span class="he-t">Los ${bloques.length} bloques ordenados por probabilidad, tu dominio en cada uno y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver la predicción →</span></a><p class="home-practica"><a href="${hrefSimulacro()}">📝 Hacer un simulacro</a><a href="${hrefRepaso()}">🔁 Mi repaso de hoy</a></p>`;
 }

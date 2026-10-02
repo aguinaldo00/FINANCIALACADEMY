@@ -347,6 +347,26 @@ con barra fina y dominio alineados a la derecha. La leyenda tiene cuatro claves.
     comprueba que no se pierde texto.
   - Árbol con ramas y "Desplegar / Plegar todo".
 
+## Simulacro, repaso y cierre del tema
+
+- **Simulacro (`#simulacro`):** `domain/exam.ts` reparte las preguntas por bloque según la
+  predicción, con redondeo por restos mayores (20 → 6/5/4/3/2). Las elige con semilla entre las
+  oficiales y las de práctica, sin repetir.
+  - Una pregunta cada vez, con tiempo opcional (60 s).
+  - Al final: nota sobre 10, aciertos por bloque y corrección explicada.
+- **Repaso (`#repaso`):** `domain/practice.ts` (puro) y `persistence/practiceRepository.ts` (clave
+  `financial-academy:practica`).
+  - **Fallos:** de "Compruébalo", "Más preguntas", simulacros de bloque y simulacro del tema. Salen
+    tras 2 aciertos seguidos.
+  - **Flashcards:** Leitner de 5 cajas (0, 1, 3, 7 y 14 días), con 10 nuevas al día.
+  - **Índice:** el grupo "Examen" (Predicción, Simulacro y Repaso) va al final, con una insignia de
+    pendientes.
+- **Contenido:** apartado 3 completo y refuerzo de 4.1 y 4.2.
+  - Todos los conceptos tienen al menos 2 preguntas de práctica (125 en total).
+  - 50 flashcards y 18 esquemas.
+  - Un test vigila la cobertura y que la respuesta correcta no esté siempre en la misma posición.
+- **Móvil:** joystick táctil para pasear. La portada ya no muestra el texto de fases del prototipo.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

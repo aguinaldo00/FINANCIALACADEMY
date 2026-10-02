@@ -7,6 +7,7 @@ import './styles/world.css';
 import './styles/brand.css';
 import './styles/study.css';
 import './styles/exam.css';
+import './styles/practice.css';
 import './styles/responsive.css';
 import { iniciarApp } from './app/app.ts';
 import { temaActivo } from './content/temas/index.ts';

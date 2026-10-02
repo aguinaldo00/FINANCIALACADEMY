@@ -40,12 +40,13 @@ const progreso = () => {
   ok('portada: barra lateral retirada', (await p.locator('.rail').boundingBox()).x < 0);
   ok('portada: botón flotante del índice', await p.locator('#ib').isVisible());
   ok('portada: título de marca sobre el mapa', (await p.locator('.portada-marca .marca').getAttribute('aria-label')) === 'Gestión financiera: La ciudad del dinero');
-  ok('índice: la predicción de examen va al final', (await p.locator('#rail a').last().getAttribute('href')) === '#examen');
+  ok('índice: el grupo Examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-3).map((a) => a.getAttribute('href')))) === '["#examen","#simulacro","#repaso"]');
   await p.mouse.move(700, 500);
   await p.mouse.wheel(0, 800);
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
-  const trasScroll = await p.evaluate(() => ({ y: scrollY, hero: document.querySelector('.hero')?.className, rail: Math.round(document.querySelector('.rail').getBoundingClientRect().x) }));
-  ok('portada: el scroll revela el tema y la barra lateral', trasScroll.hero?.includes('in') && trasScroll.rail >= 0, JSON.stringify(trasScroll));
+  // Se comprueba el estado (la clase) y no la posición: con SwiftShader la transición CSS puede tardar.
+  const trasScroll = await p.evaluate(() => ({ y: scrollY, hero: document.querySelector('.hero')?.className, retirada: document.body.classList.contains('portada-inmersiva'), rail: Math.round(document.querySelector('.rail').getBoundingClientRect().x) }));
+  ok('portada: el scroll revela el tema y la barra lateral', trasScroll.hero?.includes('in') && !trasScroll.retirada, JSON.stringify(trasScroll));
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.waitForTimeout(800);
   const caja = await p.locator('[data-mundo-vista]').boundingBox();
@@ -141,6 +142,63 @@ const progreso = () => {
   await p.click('.atlas-item[data-foco="barrio:4"]');
   await p.waitForTimeout(300);
   ok('reduced motion: el cambio de nivel es inmediato', (await p.locator('.migas [aria-current]').textContent()).includes('Estructura'));
+  await p.close();
+}
+
+// 5. Simulacro y repaso (escritorio y móvil)
+for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móvil']]) {
+  const p = await pagina({ viewport: { width: ancho, height: alto } });
+  await p.goto('http://localhost:4173/#simulacro');
+  await p.waitForSelector('[data-sim-empezar]');
+  await p.click('.sim-op:has(input[value="10"])');
+  await p.click('[data-sim-empezar]');
+  for (let i = 0; i < 10; i++) {
+    await p.waitForFunction((n) => document.querySelector('.sim-n b')?.textContent === String(n), i + 1);
+    await p.locator('.opt').nth(i % 2).click();
+  }
+  await p.waitForSelector('[data-sim-nota]');
+  const nota = await p.locator('[data-sim-nota]').textContent();
+  ok(`simulacro (${nombre}): 10 preguntas y nota`, (await p.locator('.sim-correccion li').count()) === 10, `nota ${nota}`);
+  ok(`simulacro (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho);
+  await p.screenshot({ path: `${SP}/ver-simulacro-${ancho}.png`, fullPage: false });
+  await p.goto('http://localhost:4173/#repaso');
+  await p.waitForSelector('[data-repaso]');
+  const fallos = Number(await p.locator('.rep-tab[data-tab="fallos"] b').textContent());
+  ok(`repaso (${nombre}): los fallos del simulacro están en el repaso`, fallos > 0, `${fallos} fallos`);
+  await p.click('.rep-tab[data-tab="tarjetas"]');
+  await p.click('[data-rep-girar]');
+  await p.click('[data-rep-sabia="1"]');
+  ok(`repaso (${nombre}): flashcard calificada`, (await p.locator('.fc-n').textContent()).startsWith('1 hechas'));
+  ok(`repaso (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho);
+  await p.screenshot({ path: `${SP}/ver-repaso-${ancho}.png`, fullPage: false });
+  await p.close();
+}
+
+// 6. Paseo táctil
+{
+  const p = await pagina({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, progreso);
+  await p.goto('http://localhost:4173/');
+  await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
+  await p.waitForTimeout(2000);
+  const vista = await p.locator('[data-mundo-vista]').boundingBox();
+  await p.mouse.click(vista.x + vista.width / 2, vista.y + vista.height / 2);
+  await p.waitForTimeout(800);
+  if (await p.evaluate(() => Boolean(document.fullscreenElement || document.querySelector('.mundo.en-pantalla-completa')))) await p.click('[data-mundo-completa]');
+  await p.waitForTimeout(500);
+  ok('móvil: botón Pasear visible', await p.locator('[data-mundo-paseo]').isVisible());
+  await p.click('[data-mundo-paseo]');
+  await p.waitForTimeout(800);
+  ok('móvil: joystick visible al pasear', await p.locator('[data-joy]').isVisible());
+  const antes = await p.locator('.mundo-lienzo').screenshot();
+  const joy = await p.locator('[data-joy]').boundingBox();
+  const cx = joy.x + joy.width / 2;
+  const cy = joy.y + joy.height / 2;
+  await p.locator('[data-joy]').dispatchEvent('pointerdown', { pointerId: 7, clientX: cx, clientY: cy - 50, bubbles: true });
+  await p.waitForTimeout(1500);
+  await p.locator('[data-joy]').dispatchEvent('pointerup', { pointerId: 7, clientX: cx, clientY: cy - 50, bubbles: true });
+  const despues = await p.locator('.mundo-lienzo').screenshot();
+  ok('móvil: el joystick mueve al personaje', !antes.equals(despues));
+  await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-joystick.png` });
   await p.close();
 }
 

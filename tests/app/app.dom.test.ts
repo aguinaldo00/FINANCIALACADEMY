@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { iniciarApp } from '../../src/app/app.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 import { CLAVE_PROGRESO } from '../../src/persistence/progressRepository.ts';
@@ -151,7 +151,7 @@ describe('app en el navegador', () => {
     expect($('#mt').textContent).toBe('Predicción de examen');
     expect($('.sl.on').getAttribute('href')).toBe('#examen');
     // La predicción va al final del índice.
-    expect($$('#rail a').at(-1)!.getAttribute('href')).toBe('#examen');
+    expect($$('#rail a').slice(-3).map((a) => a.getAttribute('href'))).toEqual(['#examen', '#simulacro', '#repaso']);
     expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
     // Cada concepto del tema aparece una vez en el mapa.
     expect($$('.ex-chip')).toHaveLength(tema01.conceptos.length);
@@ -170,6 +170,47 @@ describe('app en el navegador', () => {
     expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
     $<HTMLButtonElement>('[data-sim="siguiente"]', panel).click();
     expect($('.pq-pie', panel).textContent).toContain('Simulacro 2 /');
+  });
+
+  it('Simulacro: 10 preguntas sin corrección inmediata, nota final y fallos al repaso', () => {
+    vi.useFakeTimers();
+    try {
+      navegar('#simulacro');
+      expect($('#mt').textContent).toBe('Simulacro');
+      $<HTMLInputElement>('input[name="sim-n"][value="10"]').click();
+      $<HTMLButtonElement>('[data-sim-empezar]').click();
+      for (let i = 0; i < 10; i++) {
+        expect($('.sim-n b').textContent).toBe(String(i + 1));
+        // Siempre la primera opción: algunas acertarán y otras no.
+        $<HTMLButtonElement>('.opt[data-k="0"]').click();
+        expect($$('.opt.ok, .opt.no')).toHaveLength(0);
+        vi.advanceTimersByTime(300);
+      }
+      const nota = $('[data-sim-nota]').textContent!;
+      expect(Number(nota.replace(',', '.'))).toBeGreaterThanOrEqual(0);
+      expect($$('.sim-correccion li')).toHaveLength(10);
+      const guardado = JSON.parse(localStorage.getItem('financial-academy:practica')!);
+      expect(guardado.temas['1'].simulacros).toHaveLength(1);
+      expect(guardado.temas['1'].simulacros[0].total).toBe(10);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('Repaso: los fallos aparecen y una flashcard que te sabes sale de las de hoy', () => {
+    navegar('#repaso');
+    expect(Number($('.rep-tab[data-tab="fallos"] b').textContent)).toBeGreaterThan(0);
+    expect($('[data-rep-panel] .pq-pie').textContent).toContain('Fallada');
+    // El índice muestra la insignia de pendientes.
+    expect(Number($('#rail .insignia').textContent)).toBeGreaterThan(0);
+    $<HTMLButtonElement>('.rep-tab[data-tab="tarjetas"]').click();
+    const antes = Number($('.rep-tab[data-tab="tarjetas"] b').textContent);
+    expect(antes).toBeGreaterThan(0);
+    expect($('.rep-calif').hidden).toBe(true);
+    $<HTMLButtonElement>('[data-rep-girar]').click();
+    $<HTMLButtonElement>('[data-rep-sabia="1"]').click();
+    $<HTMLButtonElement>('.rep-tab[data-tab="tarjetas"]').click();
+    expect(Number($('.rep-tab[data-tab="tarjetas"] b').textContent)).toBe(antes - 1);
   });
 
   it('un id desconocido vuelve a la portada', () => {

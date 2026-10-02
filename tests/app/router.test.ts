@@ -19,6 +19,9 @@ describe('rutas hash', () => {
   it('#examen abre la predicción de examen', () => {
     expect(resolverRuta('#examen', tema01)).toEqual({ vista: 'examen', scrollArriba: true });
     expect(resolverRuta('#examen', { ...tema01, ampliacion: undefined })).toEqual({ vista: 'inicio', scrollArriba: true });
+    expect(resolverRuta('#simulacro', tema01)).toEqual({ vista: 'simulacro', scrollArriba: true });
+    expect(resolverRuta('#repaso', tema01)).toEqual({ vista: 'repaso', scrollArriba: true });
+    expect(resolverRuta('#repaso', { ...tema01, ampliacion: undefined })).toEqual({ vista: 'inicio', scrollArriba: true });
   });
 
   it('ids desconocidos llevan al inicio', () => {

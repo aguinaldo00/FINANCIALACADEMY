@@ -15,8 +15,8 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
    coincide con la del proyecto actual. No se ha tocado.
 6. **"Dominio alto → pregunta difícil" en las microexperiencias.** DATA tiene una sola pregunta por
    concepto; en dominio alto se propone la misma pregunta en versión abreviada.
-7. **Paseo en móvil.** El personaje se mueve con teclado; en pantallas táctiles el botón "Pasear"
-   está oculto. ¿Añadimos un joystick táctil o tocar el suelo para ir a ese punto?
+7. ~~**Paseo en móvil.**~~ **Resuelto (02/10):** joystick táctil con botones "Saltar" (doble
+   toque: dash) y "Entrar".
 8. **Colisiones del paseo.** Hoy solo chocan los edificios; el personaje atraviesa fuentes, árboles
    y bancos. ¿Merece la pena añadirlos como obstáculos?
 
@@ -44,3 +44,12 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
     que no se puede resolver sin inventarlo.
   - **Introducción de la Unidad 2 (cálculo financiero):** el texto incluye su portada, pero
     pertenece a otro tema.
+
+## Simulacro, repaso y práctica persistente (02/10)
+
+- **Dominio:** el simulacro del tema y el repaso no cambian el dominio (solo "Compruébalo" lo hace).
+  - **¿Contar parcialmente?** Decidir si un simulacro aprobado debería sumar dominio.
+- **Persistencia:** la práctica se guarda en una clave aparte (`financial-academy:practica`); el
+  progreso no cambia de formato.
+- **Repaso de fallos:** una pregunta fallada sale del repaso tras 2 aciertos seguidos.
+- **Flashcards:** entran como mucho 10 nuevas al día (constantes en `domain/practice.ts`).

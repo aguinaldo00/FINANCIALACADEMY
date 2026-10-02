@@ -1,4 +1,5 @@
 import type { Concepto, ModoExplicacion, NodoEsquema, Pregunta, Tema } from '../../content/schema.ts';
+import { idTarjetaFrase } from '../../domain/practice.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
 import { resaltarAviso } from '../format.ts';
 
@@ -151,6 +152,8 @@ export function pintarEsquema(panel: HTMLElement, concepto: Concepto, tema: Tema
 }
 
 export interface Tarjeta {
+  /** Id estable para la repetición espaciada (`frase:<concepto>` o el de la tarjeta de los apuntes). */
+  id: string;
   anverso: string;
   reverso: string;
   fuente: string;
@@ -161,8 +164,8 @@ export function tarjetasDe(concepto: Concepto, tema: Tema): Tarjeta[] {
   const frase = tema.modos.findIndex((m) => m.etiqueta.includes('Frase de examen'));
   const propias = (tema.ampliacion?.flashcards ?? []).filter((f) => f.conceptoId === concepto.id);
   return [
-    { anverso: concepto.nombre, reverso: concepto.explicaciones[frase >= 0 ? frase : concepto.explicaciones.length - 1] ?? '', fuente: 'Frase de examen' },
-    ...propias.map((f) => ({ anverso: f.anverso, reverso: f.reverso, fuente: 'De tus apuntes' })),
+    { id: idTarjetaFrase(concepto.id), anverso: concepto.nombre, reverso: concepto.explicaciones[frase >= 0 ? frase : concepto.explicaciones.length - 1] ?? '', fuente: 'Frase de examen' },
+    ...propias.map((f) => ({ id: f.id, anverso: f.anverso, reverso: f.reverso, fuente: 'De tus apuntes' })),
   ];
 }
 
