@@ -37,7 +37,7 @@ export function trazosDeGlifo(g: GlyphName): BufferGeometry | null {
   if (cacheTrazos.has(g)) return cacheTrazos.get(g)!;
   let resultado: BufferGeometry | null = null;
   try {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g fill="none" stroke="#000" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">${GLYPHS[g]}</g></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g fill="none" stroke="#000" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">${GLYPHS[g].replaceAll('currentColor', '#000')}</g></svg>`;
     const datos = new SVGLoader().parse(svg);
     const xy: number[] = [];
     const recoger = (geo: BufferGeometry) => {
@@ -49,7 +49,7 @@ export function trazosDeGlifo(g: GlyphName): BufferGeometry | null {
     };
     for (const ruta of datos.paths) {
       const estilo = (ruta.userData?.style ?? {}) as { fill?: string; stroke?: string; strokeWidth?: number };
-      if (estilo.fill && estilo.fill !== 'none') for (const forma of SVGLoader.createShapes(ruta)) recoger(new ShapeGeometry(forma, 6));
+      if (estilo.fill && estilo.fill !== 'none') for (const forma of ruta.toShapes()) recoger(new ShapeGeometry(forma, 6));
       if (estilo.stroke && estilo.stroke !== 'none') {
         const trazo = SVGLoader.getStrokeStyle(estilo.strokeWidth ?? 5, '#000', 'round', 'round', 4);
         for (const sub of ruta.subPaths) {
@@ -124,4 +124,56 @@ export function emblema(t: Taller, glifos: readonly GlyphName[], e: Escudo): boo
     t.anadir('acento', trazosDeGlifo(g)!.clone().scale(lado, lado, 1).rotateY(Math.PI).translate(e.x, cy, zDisco - GROSOR / 2 - 0.012));
   }
   return true;
+}
+
+const cacheSolidos = new Map<GlyphName, BufferGeometry | null>();
+
+/**
+ * El glifo como pieza maciza (lado 1, grosor `grosor`, centrada): la cara de delante, la de detrás
+ * y las paredes de su contorno. El contorno son las aristas que solo usa un triángulo; los trazos
+ * que se solapan dejan alguna pared interior, que queda oculta dentro del sólido.
+ */
+export function glifoSolido(g: GlyphName, grosor = 0.14): BufferGeometry | null {
+  if (cacheSolidos.has(g)) return cacheSolidos.get(g)!;
+  const plano = trazosDeGlifo(g);
+  if (!plano) {
+    cacheSolidos.set(g, null);
+    return null;
+  }
+  const p = plano.getAttribute('position');
+  const h = grosor / 2;
+  const pos: number[] = [];
+  const nor: number[] = [];
+  const clave = (i: number) => `${Math.round(p.getX(i) * 1e4)},${Math.round(p.getY(i) * 1e4)}`;
+  const aristas = new Map<string, { a: number; b: number; n: number }>();
+  for (let t = 0; t < p.count; t += 3) {
+    // Delante (+z) y detrás (−z, orden invertido).
+    for (const k of [0, 1, 2]) pos.push(p.getX(t + k), p.getY(t + k), h), nor.push(0, 0, 1);
+    for (const k of [0, 2, 1]) pos.push(p.getX(t + k), p.getY(t + k), -h), nor.push(0, 0, -1);
+    for (const [a, b] of [[t, t + 1], [t + 1, t + 2], [t + 2, t]] as const) {
+      const ka = clave(a);
+      const kb = clave(b);
+      if (ka === kb) continue;
+      const id = ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
+      const e = aristas.get(id);
+      if (e) e.n++;
+      else aristas.set(id, { a, b, n: 1 });
+    }
+  }
+  for (const { a, b, n } of aristas.values()) {
+    if (n !== 1) continue;
+    const ax = p.getX(a), ay = p.getY(a), bx = p.getX(b), by = p.getY(b);
+    // Normal hacia fuera: a la derecha del sentido a→b (los triángulos van en sentido antihorario).
+    const nx = by - ay, ny = -(bx - ax);
+    const l = Math.hypot(nx, ny) || 1;
+    const quad = [[ax, ay, h], [bx, by, h], [bx, by, -h], [ax, ay, h], [bx, by, -h], [ax, ay, -h]];
+    // Orden de vértices para que la cara mire hacia fuera.
+    for (const v of [quad[0]!, quad[2]!, quad[1]!, quad[3]!, quad[5]!, quad[4]!]) pos.push(v[0]!, v[1]!, v[2]!), nor.push(nx / l, ny / l, 0);
+  }
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  geo.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  geo.setAttribute('uv', new Float32BufferAttribute(new Float32Array((pos.length / 3) * 2), 2));
+  cacheSolidos.set(g, geo);
+  return geo;
 }

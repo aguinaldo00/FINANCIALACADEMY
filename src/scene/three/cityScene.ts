@@ -28,7 +28,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { FaseObra, ModeloCiudad } from '../../world/cityModel.ts';
 import { buscarBarrio, buscarEdificio, buscarZona, type Foco, rectFoco } from '../../world/focus.ts';
 import { encoger, type Rect } from '../../world/geometry.ts';
-import { CONSTRUIDO_POR_FASE, type DatosArquitectura } from './architecture.ts';
+import { animarEscultura, CONSTRUIDO_POR_FASE, type DatosArquitectura, type Escultura } from './architecture.ts';
 import {
   type CapaDinamica,
   colocarCoches,
@@ -1082,6 +1082,10 @@ export class Mundo3D {
     // Palomas y nubes: vida de fondo, a ~30 fps y solo si no hay nada más que dibujar.
     if (!this.reducido && (cambio || this.sucio || ahora - this.ultimoDecorado > 33)) {
       this.decorado.nubesEnVista = !this.paseo && (this.focoActual.nivel === 'ciudad' || this.focoActual.nivel === 'barrio') && this.vista === 'maqueta';
+      for (const g of this.dinamica.edificios.values()) {
+        const x = g.userData.escultura as Escultura | undefined;
+        if (x) animarEscultura(x, ahora / 1000);
+      }
       if (this.decorado.animar(ahora / 1000)) {
         this.ultimoDecorado = ahora;
         cambio = true;

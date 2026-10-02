@@ -1,7 +1,10 @@
 import {
   BoxGeometry,
   BufferGeometry,
+  CylinderGeometry,
   Group,
+  MeshStandardMaterial,
+  type Object3D,
   type Material,
   Mesh,
   Plane,
@@ -9,6 +12,7 @@ import {
   Vector3,
 } from 'three';
 import type { TipoTejado } from '../../content/schema.ts';
+import type { GlyphName } from '../../icons/glyphs.ts';
 import { colorDominio } from '../../ui/format.ts';
 import type { EdificioVisual, Frente } from '../../world/cityModel.ts';
 import { pseudoAleatorio } from '../../world/geometry.ts';
@@ -16,7 +20,7 @@ import type { Tipologia } from '../../world/typology.ts';
 import { emisivo, mate, mezclar, unir } from './materials.ts';
 import { type Rol, remate, SOLO_ACABADO, Taller, type Volumen } from './taller.ts';
 import { CONSTRUCTORES_URBANOS, materialUrbano } from './urbanArchitecture.ts';
-import { emblema } from './emblemas.ts';
+import { emblema, glifoDelEmblema, glifoSolido } from './emblemas.ts';
 import { NIVEL, PALETA } from './palette.ts';
 
 /*
@@ -307,10 +311,14 @@ export function construirArquitectura(e: EdificioVisual): Group {
   }
 
   if (e.fase === 'obra') cuerpo.add(obras(taller.principal, W, D, taller.cima, corteFase - NIVEL.lote));
+  // Escultura del icono sobre la cubierta: lo que representa el edificio se reconoce de lejos.
+  const escultura = construirEscultura(e, taller, W, D);
+  if (escultura) cuerpo.add(escultura.raiz);
   grupo.add(cuerpo);
 
+  if (escultura) grupo.userData.escultura = escultura;
   const datos: DatosArquitectura = {
-    cima: cimaMundo,
+    cima: escultura ? NIVEL.lote + escultura.cima : cimaMundo,
     principal: taller.principal,
     corteFase,
     fijarCorte(y: number) {
@@ -368,4 +376,73 @@ function obras(v: Volumen, W: number, D: number, cima: number, corte: number): G
   andamio.castShadow = grua.castShadow = true;
   grupo.add(andamio, grua);
   return grupo;
+}
+
+/* ------------------------------------------------------------------ escultura del icono */
+
+/** Cómo se mueve cada escultura: los organismos que vigilan barren la ciudad; las monedas giran. */
+export type MovimientoEscultura = 'vigila' | 'gira' | 'mece';
+const MOVIMIENTO: Partial<Record<GlyphName, MovimientoEscultura>> = {
+  eye: 'vigila', lens: 'vigila', euro: 'gira', globe: 'gira', clock: 'gira', brain: 'vigila',
+};
+
+export interface Escultura {
+  raiz: Group;
+  /** Pieza que se anima (gira en torno al eje vertical). */
+  pieza: Object3D;
+  movimiento: MovimientoEscultura;
+  fase: number;
+  /** Altura (local, sobre el lote) de lo más alto de la escultura. */
+  cima: number;
+}
+
+/**
+ * El icono principal del concepto (su primer glifo de DATA) en grande y macizo sobre un mástil en
+ * la cubierta. Construido: en el color del concepto, con brillo metálico. En obra: a medio color.
+ * Sin estudiar: en maqueta blanca, como el resto del edificio.
+ */
+function construirEscultura(e: EdificioVisual, t: Taller, W: number, D: number): Escultura | null {
+  const glifo = glifoDelEmblema(e.iconos);
+  const solido = glifo ? glifoSolido(glifo) : null;
+  if (!glifo || !solido) return null;
+  const v = t.principal;
+  const tam = Math.min(4.2, Math.max(2.3, Math.min(W, D) * 0.5));
+  const apoyo = Math.max(v.h, t.cima - 0.6);
+  const altoMastil = Math.max(0.5, t.cima + 0.4 - apoyo);
+  const raiz = new Group();
+  raiz.name = 'escultura';
+  raiz.position.set(v.x, apoyo, v.z);
+  const metal = mate('#5d6168', { rugosidad: 0.4, metal: 0.6 });
+  const mastil = new Mesh(new CylinderGeometry(0.07, 0.1, altoMastil, 8).translate(0, altoMastil / 2, 0), metal);
+  const peana = new Mesh(new CylinderGeometry(0.42, 0.5, 0.18, 16).translate(0, 0.09, 0), metal);
+  const color = e.fase === 'completo' ? e.color : e.fase === 'obra' ? mezclar(e.color, PALETA.proyecto, 0.5) : PALETA.proyecto;
+  const material = e.fase === 'solar'
+    ? mate(PALETA.proyecto, { rugosidad: 0.9 })
+    : new MeshStandardMaterial({ color, metalness: 0.45, roughness: 0.32, emissive: color, emissiveIntensity: e.fase === 'completo' ? 0.22 : 0.06 });
+  const pieza = new Group();
+  pieza.position.y = altoMastil + tam / 2;
+  const icono = new Mesh(solido, material);
+  icono.scale.set(tam, tam, tam);
+  icono.name = `escultura-${glifo}`;
+  pieza.add(icono);
+  raiz.add(peana, mastil, pieza);
+  return {
+    raiz, pieza, movimiento: MOVIMIENTO[glifo] ?? 'mece',
+    fase: [...e.conceptoId].reduce((s, c) => s + c.charCodeAt(0), 0) % 7,
+    cima: apoyo + altoMastil + tam,
+  };
+}
+
+/** Anima la escultura de un edificio (t en segundos). */
+export function animarEscultura(x: Escultura, t: number): void {
+  const p = x.pieza;
+  if (x.movimiento === 'vigila') {
+    // Barre la ciudad de un lado a otro, como quien vigila.
+    p.rotation.y = Math.sin(t * 0.55 + x.fase) * 1.25;
+    p.rotation.x = Math.sin(t * 0.37 + x.fase) * 0.12;
+  } else if (x.movimiento === 'gira') {
+    p.rotation.y = t * 0.7 + x.fase;
+  } else {
+    p.rotation.y = Math.sin(t * 0.45 + x.fase) * 0.38;
+  }
 }

@@ -1,4 +1,4 @@
-import { nubeRealista } from '../components/nubesRealistas.ts';
+import { nubeRealista, prepararNubesIntro, TEXTURAS_INTRO } from '../components/nubesRealistas.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
 import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
 import { type Ambiente, siguienteAmbiente } from '../../world/ambiente.ts';
@@ -227,8 +227,10 @@ export class ControladorMundo {
       const img = nubeRealista(variante, ancho);
       return `<i class="nube ${clase}${img ? ' real' : ''}"${img ? ` style="--img:url(${img})"` : ''}></i>`;
     };
-    const nubes = Array.from({ length: 10 }, (_, i) => nube(`n${i + 1}`, i % 5, 320)).join('');
-    capa.innerHTML = `<div class="nubes" aria-hidden="true">${nubes}${nube('telon izq', 5, 640)}${nube('telon der', 6, 640)}</div><div class="entrada-marca">${tituloMarca('entrada')}</div><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
+    const { lejanas, cercanas, telon } = TEXTURAS_INTRO;
+    const nubes = Array.from({ length: 10 }, (_, i) => nube(`n${i + 1}`, lejanas[i % lejanas.length]![0], lejanas[i % lejanas.length]![1])).join('');
+    const cerca = Array.from({ length: 4 }, (_, i) => nube(`cerca c${i + 1}`, cercanas[i % cercanas.length]![0], cercanas[i % cercanas.length]![1])).join('');
+    capa.innerHTML = `<div class="nubes" aria-hidden="true">${nubes}${cerca}${nube('telon izq', telon[0][0], telon[0][1])}${nube('telon der', telon[1][0], telon[1][1])}</div><div class="bruma" aria-hidden="true"></div><div class="entrada-marca">${tituloMarca('entrada')}</div><p class="entrada-lema">Estudiar es construirla</p><button type="button" class="entrada-saltar">Saltar</button>`;
     vista.append(capa);
     vista.classList.add('en-entrada');
     const temporizadores: number[] = [];
@@ -248,7 +250,7 @@ export class ControladorMundo {
     const saltar = mundo.entrada(() => {
       capa.classList.add('lema');
       despues(2600, cerrar);
-    }, { retraso: 2600 });
+    }, { retraso: 3300 });
     const saltarYCerrar = () => {
       saltar();
       cerrar();
@@ -264,10 +266,12 @@ export class ControladorMundo {
     });
     // Fases: vuelo entre nubes → apertura del telón (y el cielo se funde con la maqueta).
     despues(60, () => capa.classList.add('volando'));
-    despues(2700, () => capa.classList.add('abriendo', 'abierta'));
+    despues(3400, () => capa.classList.add('abriendo', 'abierta'));
   }
 
   private async crearMundo(): Promise<Mundo3D> {
+    // Si la intro va a sonar, sus nubes se generan mientras se descarga y monta la escena 3D.
+    if (!this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') prepararNubesIntro();
     // Three.js va en un fragmento aparte: la portada 2D no lo descarga.
     const { Mundo3D } = await import('../../scene/three/cityScene.ts');
     return new Mundo3D(this.modelo, {

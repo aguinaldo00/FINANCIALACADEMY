@@ -54,50 +54,86 @@ export function nubeRealista(variante: number, ancho = 360): string {
     if (ctx) {
       const r = aleatorio(variante * 7919 + 13);
       const n = ruido(variante * 104729 + 7);
-      // Bolas del cúmulo: más grandes en el centro, apoyadas en una base común.
-      const base = 0.74;
-      const cuantas = 6 + Math.floor(r() * 4);
-      const bolas = Array.from({ length: cuantas }, (_, i) => {
-        const t = (i + 0.5) / cuantas;
-        const radio = 0.13 + 0.16 * Math.sin(Math.PI * t) * (0.7 + 0.5 * r());
-        return { x: 0.1 + 0.8 * t + (r() - 0.5) * 0.06, y: base - radio * (0.55 + 0.35 * r()), r: radio };
-      });
-      const img = ctx.createImageData(ancho, alto);
-      const d = img.data;
+      // Cúmulo: bolas grandes apoyadas en una base plana, medianas encima y pequeñas en la cima
+      // (la "coliflor"). Coordenadas: u (0–1, ancho) y v (0–1, alto); el radio se mide en v.
+      const base = 0.8;
+      const bolas: { x: number; y: number; r: number; peso?: number }[] = [];
+      const capa = (cuantas: number, rMin: number, rMax: number, x0: number, x1: number, alto: number) => {
+        for (let i = 0; i < cuantas; i++) {
+          const radio = rMin + (rMax - rMin) * r();
+          const x = x0 + ((i + 0.5) / cuantas) * (x1 - x0) + (r() - 0.5) * 0.05;
+          bolas.push({ x, y: base - alto - radio * (0.55 + 0.2 * r()), r: radio });
+        }
+      };
+      capa(7, 0.16, 0.23, 0.15, 0.85, 0);
+      capa(6, 0.12, 0.17, 0.24, 0.76, 0.14);
+      capa(4, 0.09, 0.13, 0.33, 0.67, 0.29);
+      // Bolitas en el contorno superior de las grandes: el borde "en coliflor" de un cúmulo.
+      const grandes = bolas.length;
+      for (let i = 0; i < 30; i++) {
+        const madre = bolas[Math.floor(r() * grandes)]!;
+        const ang = Math.PI * (1.05 + r() * 0.9);
+        const radio = 0.05 + r() * 0.05;
+        bolas.push({ x: madre.x + (Math.cos(ang) * madre.r * 0.75) / 2, y: madre.y + Math.sin(ang) * madre.r * 0.75, r: radio, peso: 0.45 });
+      }
+      // Luz del sol: desde arriba y algo de lado.
+      const L = [-0.35, -0.8, 0.5];
+      const lL = Math.hypot(L[0]!, L[1]!, L[2]!);
+      // 1.ª pasada: "espesor" de la nube como suma suave de las bolas (metabolas), deshilachada con
+      // ruido fractal. Así las bolas se funden sin costuras.
+      const H = new Float32Array(ancho * alto);
+      const F = new Float32Array(ancho * alto);
       for (let py = 0; py < alto; py++) {
         const v = py / alto;
         for (let px = 0; px < ancho; px++) {
           const u = px / ancho;
-          // Forma: unión suave de las bolas (en proporción 2:1).
-          let forma = 0;
-          for (const b of bolas) {
-            const dx = (u - b.x) * 2;
-            const dy = v - b.y;
-            const k = 1 - Math.hypot(dx, dy) / (b.r * 2);
-            if (k > forma) forma = k;
-          }
-          // Base algo plana: se recorta por debajo con un borde suave.
-          forma *= Math.min(1, Math.max(0, (base + 0.06 - v) / 0.08));
-          // Deshilachado: fBm de 5 octavas.
           let f = 0;
           let amp = 0.5;
-          let frec = 6;
-          for (let o = 0; o < 5; o++) {
+          let frec = 4;
+          for (let o = 0; o < 6; o++) {
             f += amp * n(u * frec * 2, v * frec);
             amp *= 0.5;
-            frec *= 2.1;
+            frec *= 2.03;
           }
-          const densidad = forma * 1.6 + (f - 0.5) * 1.1 - 0.12;
-          // Se desvanece hacia los bordes del lienzo: sin cortes rectos ni costuras.
-          const borde = Math.min(u, 1 - u, v * 1.4, 1 - v) / 0.12;
-          const a = Math.min(1, Math.max(0, densidad / 0.5)) * Math.min(1, Math.max(0, borde));
-          if (a <= 0) continue;
-          // Luz desde arriba: más blanca en la cima de cada bola, gris azulada en la base.
-          const sombra = Math.min(1, Math.max(0, (v - (base - 0.3)) / 0.36)) * 0.55 + (1 - f) * 0.22;
-          const i4 = (py * ancho + px) * 4;
-          d[i4] = 255 - sombra * 88;
-          d[i4 + 1] = 255 - sombra * 72;
-          d[i4 + 2] = 255 - sombra * 45;
+          let h = 0;
+          for (const b of bolas) {
+            const dx = ((u - b.x) * 2) / b.r;
+            const dy = (v - b.y) / b.r;
+            const q = 1 - (dx * dx + dy * dy) * (1 + (0.5 - f) * 1.5);
+            if (q > 0) h += q * q * (b.peso ?? 1);
+          }
+          // Base plana: se aplana y corta por debajo de la línea de base.
+          const corte = Math.min(1, Math.max(0, (base + 0.02 - v) / 0.07 + (f - 0.5) * 0.5));
+          H[py * ancho + px] = h * corte;
+          F[py * ancho + px] = f;
+        }
+      }
+      // 2.ª pasada: normales a partir del espesor (luz suave y continua) y color.
+      const img = ctx.createImageData(ancho, alto);
+      const d = img.data;
+      const escala = alto * 0.032;
+      for (let py = 1; py < alto - 1; py++) {
+        const v = py / alto;
+        for (let px = 1; px < ancho - 1; px++) {
+          const i = py * ancho + px;
+          const h = H[i]!;
+          const a0 = Math.min(1, Math.max(0, (h - 0.05) / 0.42));
+          if (a0 <= 0.003) continue;
+          const nx = (H[i - 1]! - H[i + 1]!) * escala;
+          const ny = (H[i - ancho]! - H[i + ancho]!) * escala;
+          const nl = Math.hypot(nx, ny, 1);
+          const luz = Math.max(0, (nx * L[0]! + ny * L[1]! + L[2]!) / (nl * lL));
+          const f = F[i]!;
+          // Más espesor, más luz difusa; la base queda gris azulada.
+          const espesor = Math.min(1, h / 1.6);
+          const sombraBase = Math.min(1, Math.max(0, (v - 0.5) / 0.3)) * 0.3;
+          const k = Math.min(1, Math.max(0, 0.25 + luz * 0.6 + espesor * 0.22 + (f - 0.5) * 0.3 - sombraBase));
+          const u = px / ancho;
+          const a = a0 * Math.min(1, Math.max(0, Math.min(u, 1 - u, v, 1 - v) / 0.04));
+          const i4 = i * 4;
+          d[i4] = 160 + 95 * k;
+          d[i4 + 1] = 176 + 79 * k;
+          d[i4 + 2] = 200 + 55 * k;
           d[i4 + 3] = Math.round(a * a * (3 - 2 * a) * 255);
         }
       }
@@ -109,4 +145,30 @@ export function nubeRealista(variante: number, ancho = 360): string {
   }
   cache.set(clave, url);
   return url;
+}
+
+/** Texturas que usa la intro: [variante, ancho]. */
+export const TEXTURAS_INTRO = {
+  lejanas: [[0, 440], [1, 440], [2, 440], [3, 440]] as const,
+  cercanas: [[4, 640], [7, 640]] as const,
+  telon: [[5, 900], [6, 900]] as const,
+};
+
+/**
+ * Genera las texturas de la intro en ratos libres del navegador (una por turno), para que al
+ * empezar la intro ya estén hechas y no se note el cálculo.
+ */
+export function prepararNubesIntro(): void {
+  const pendientes = [...TEXTURAS_INTRO.lejanas, ...TEXTURAS_INTRO.cercanas, ...TEXTURAS_INTRO.telon];
+  const ocioso = (fn: () => void): void => {
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 1500 });
+    else setTimeout(fn, 30);
+  };
+  const siguiente = () => {
+    const t = pendientes.shift();
+    if (!t) return;
+    nubeRealista(t[0], t[1]);
+    ocioso(siguiente);
+  };
+  ocioso(siguiente);
 }

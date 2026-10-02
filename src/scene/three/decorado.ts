@@ -18,10 +18,12 @@ import {
   Points,
   PointsMaterial,
   Quaternion,
+  SphereGeometry,
   Vector3,
 } from 'three';
 import type { ModeloCiudad } from '../../world/cityModel.ts';
-import { pseudoAleatorio } from '../../world/geometry.ts';
+import { encoger, pseudoAleatorio } from '../../world/geometry.ts';
+import { colocarEnRecorrido, type RutaCoche } from './builders.ts';
 import { unir } from './materials.ts';
 import { NIVEL } from './palette.ts';
 
@@ -37,7 +39,8 @@ import { NIVEL } from './palette.ts';
 const ALTURA_LUZ_FAROLA = 2.15;
 const MARGEN_PEANA = 3;
 const PALOMAS_POR_PLAZA = 7;
-const MONEDAS = 70;
+const GOTAS_POR_FUENTE = 48;
+const MONEDAS = 14;
 const DURACION_LLUVIA = 3400;
 
 export function texturaHalo(): CanvasTexture | null {
@@ -90,6 +93,8 @@ interface Plaza {
   x: number;
   z: number;
   r: number;
+  /** Radio del vaso de la fuente. */
+  fuente: number;
 }
 
 export class Decorado {
@@ -97,6 +102,8 @@ export class Decorado {
   private readonly halos: Points | null = null;
   private readonly palomas: InstancedMesh | null = null;
   private readonly plazas: Plaza[] = [];
+  private readonly agua: Points | null = null;
+  private readonly paseantes: { malla: InstancedMesh; rutas: RutaCoche[] } | null = null;
   private readonly nubes = new Group();
   private readonly monedas: InstancedMesh;
   private lluvia: { inicio: number; caidas: { x: number; z: number; y0: number; retraso: number; giro: number }[] } | null = null;
@@ -132,7 +139,7 @@ export class Decorado {
     // Palomas sobre las plazas.
     for (const z of modelo.zonas) {
       if (!z.plaza) continue;
-      this.plazas.push({ x: z.plaza.x + z.plaza.ancho / 2, z: z.plaza.z + z.plaza.fondo / 2, r: Math.max(2.4, Math.min(z.plaza.ancho, z.plaza.fondo) * 0.35) });
+      this.plazas.push({ x: z.plaza.x + z.plaza.ancho / 2, z: z.plaza.z + z.plaza.fondo / 2, r: Math.max(2.4, Math.min(z.plaza.ancho, z.plaza.fondo) * 0.35), fuente: Math.min(z.plaza.ancho, z.plaza.fondo) * 0.2 });
     }
     if (this.plazas.length) {
       const palomas = new InstancedMesh(geometriaPaloma(), new MeshStandardMaterial({ color: '#d9d6cf', roughness: 0.9, side: 2 }), this.plazas.length * PALOMAS_POR_PLAZA);
@@ -144,6 +151,42 @@ export class Decorado {
       this.palomas = palomas;
       this.raiz.add(palomas);
       this.animar(0);
+    }
+
+    // Fuentes de las plazas: chorros de agua (un Points por toda la ciudad).
+    if (this.plazas.length) {
+      const n = this.plazas.length * GOTAS_POR_FUENTE;
+      const g = new BufferGeometry();
+      g.setAttribute('position', new Float32BufferAttribute(new Float32Array(n * 3), 3));
+      const agua = new Points(g, new PointsMaterial({ color: '#cfeaff', size: 0.22, sizeAttenuation: true, transparent: true, opacity: 0.85, depthWrite: false }));
+      agua.name = 'fuentes';
+      agua.frustumCulled = false;
+      this.agua = agua;
+      this.raiz.add(agua);
+    }
+
+    // Paseantes: dan vuelta a las plazas y a los patios de manzana (vida de fondo, sin significado).
+    const rutas: RutaCoche[] = [];
+    let k = 0;
+    for (const z of modelo.zonas) {
+      const recintos = [...(z.plaza ? [z.plaza] : []), ...z.patios];
+      for (const r of recintos) {
+        const cuantos = r === z.plaza ? 6 : 3;
+        for (let i = 0; i < cuantos; i++, k++) {
+          rutas.push({ rect: encoger(r, 0.45 + (i % 3) * 0.35), inicio: pseudoAleatorio(k, 3), velocidad: (i % 2 ? 1 : -1) * (0.006 + pseudoAleatorio(k, 5) * 0.006) });
+        }
+      }
+    }
+    if (rutas.length) {
+      const figura = unir([new CylinderGeometry(0.13, 0.16, 0.6, 8).translate(0, 0.3, 0), new SphereGeometry(0.12, 10, 8).translate(0, 0.74, 0)])!;
+      const gente = new InstancedMesh(figura, new MeshStandardMaterial({ roughness: 0.8 }), rutas.length);
+      const ropa = ['#3b4656', '#a8473a', '#c9b9a0', '#4d6b4a', '#2d2f36', '#c48a3e', '#6b5ea8'];
+      rutas.forEach((_, i) => gente.setColorAt(i, new Color(ropa[i % ropa.length]!)));
+      gente.instanceMatrix.setUsage(DynamicDrawUsage);
+      gente.name = 'paseantes';
+      this.paseantes = { malla: gente, rutas };
+      colocarEnRecorrido(gente, rutas, 0, NIVEL.plaza);
+      this.raiz.add(gente);
     }
 
     // Nubes: pocas, altas, sin sombra (el mapa de sombras no se recalcula al moverlas).
@@ -333,8 +376,24 @@ export class Decorado {
       });
       palomas.instanceMatrix.needsUpdate = true;
     }
+    const agua = this.agua;
+    if (agua) {
+      const pos = agua.geometry.getAttribute('position') as Float32BufferAttribute;
+      let i = 0;
+      for (const p of this.plazas) {
+        for (let j = 0; j < GOTAS_POR_FUENTE; j++, i++) {
+          // Cada gota sale de la pila, sube y cae en arco dentro del vaso.
+          const tau = (t * 0.85 + j / GOTAS_POR_FUENTE) % 1;
+          const ang = j * 2.399;
+          const d = tau * p.fuente * 0.8;
+          pos.setXYZ(i, p.x + Math.cos(ang) * d, NIVEL.plaza + 1.0 + 2.4 * tau - 2.6 * tau * tau, p.z + Math.sin(ang) * d);
+        }
+      }
+      pos.needsUpdate = true;
+    }
+    if (this.paseantes) colocarEnRecorrido(this.paseantes.malla, this.paseantes.rutas, t, NIVEL.plaza);
     if (this.nubes.visible) this.colocarNubes(t);
-    return Boolean(this.palomas) || this.nubes.visible;
+    return Boolean(this.palomas || this.agua || this.paseantes) || this.nubes.visible;
   }
 
   liberar(): void {

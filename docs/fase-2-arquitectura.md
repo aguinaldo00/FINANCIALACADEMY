@@ -477,6 +477,27 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
 - **Por qué en CSS y no en la escena 3D:** las nubes no cargan la GPU.
 - **Estilos:** `src/styles/intro.css`.
 
+## Esculturas, vida en la ciudad y nubes atravesables (02/10)
+
+- **Escultura del icono en cada edificio** (`architecture.ts`):
+  - el primer glifo del concepto en DATA, macizo (`glifoSolido`: caras y contorno extruidos), sobre
+    un mástil en la cubierta;
+  - construido, en el color del concepto con brillo metálico; en obra, a medio color; sin estudiar,
+    en maqueta blanca;
+  - se mueve: el ojo y la lupa de los organismos que vigilan barren la ciudad, el euro, el globo y
+    el reloj giran, y el resto se mece;
+  - los rótulos quedan por encima.
+- **Vida:**
+  - chorros de agua en las fuentes (`Points` animado);
+  - paseantes en plazas y patios;
+  - palomas y nubes, como antes.
+  - Nada se anima con movimiento reducido.
+- **Menos monedas:** la lluvia de la entrada pasa de 70 a 14 monedas.
+- **Intro:**
+  - nubes realistas más grandes (cúmulos de metabolas con luz desde arriba);
+  - cuatro nubes cercanas que cruzan la cámara, con un velo blanco al atravesarlas;
+  - las texturas se generan en ratos libres mientras carga la escena 3D (`prepararNubesIntro`).
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y
