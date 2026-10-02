@@ -3,6 +3,7 @@ import type { EstadoEstudio } from '../../app/store.ts';
 import type { Concepto, Pregunta } from '../../content/schema.ts';
 import { dominioSeccion } from '../../domain/mastery.ts';
 import { fichaConcepto } from '../components/conceptCard.ts';
+import { infografiasDe } from '../components/infographic.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -25,7 +26,7 @@ export function pintarSeccion(ctx: ContextoVista, estado: EstadoEstudio, seccion
 
   ctx.pagina.innerHTML = `<div data-sec="${seccionId}"><header class="sh"><div class="kick"><span class="pill k">${s.id}</span><span class="pill">Peso estimado en examen: ${s.pesoExamen} %</span><span class="pill" style="border-color:${colorDominio(d)}">Dominio ${porcentaje(d)}</span></div><h1>${s.titulo}</h1><p>${s.descripcion}</p></header>
  ${pretest(estado, conceptos)}
- ${conceptos.map((c) => fichaConcepto(c, progreso)).join('')}
+ ${conceptos.map((c) => fichaConcepto(c, progreso, infografiasDe(tema.ampliacion?.infografias, c.id).length > 0)).join('')}
  <nav class="pager">${enlaceAnterior}${enlaceSiguiente}</nav></div>`;
   ctx.tituloMovil.textContent = `${s.id} · ${s.titulo}`;
   conectarPretest(ctx.pagina.querySelector<HTMLElement>('[data-pretest]'), estado, conceptos);

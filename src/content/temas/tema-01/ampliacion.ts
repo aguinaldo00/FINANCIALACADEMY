@@ -5,6 +5,7 @@
 // tipos de unidades económicas, ahorradores e inversores, caso práctico INST, SA, razón de ser del
 // sistema financiero, sistema de pagos y vocabulario.
 
+import { infografias } from './infografias.ts';
 import type { AmpliacionTema, BloqueExamen, EsquemaConcepto, Flashcard, NodoEsquema, PreguntaExtra } from '../../schema.ts';
 
 const bloques: BloqueExamen[] = [
@@ -393,4 +394,5 @@ export const ampliacion: AmpliacionTema = {
   preguntas,
   flashcards,
   esquemas,
+  infografias,
 };

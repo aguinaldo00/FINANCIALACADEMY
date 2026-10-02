@@ -22,6 +22,7 @@ describe('rutas hash', () => {
     expect(resolverRuta('#simulacro', tema01)).toEqual({ vista: 'simulacro', scrollArriba: true });
     expect(resolverRuta('#repaso', tema01)).toEqual({ vista: 'repaso', scrollArriba: true });
     expect(resolverRuta('#repaso', { ...tema01, ampliacion: undefined })).toEqual({ vista: 'inicio', scrollArriba: true });
+    expect(resolverRuta('#visual', tema01)).toEqual({ vista: 'visual', scrollArriba: true });
   });
 
   it('ids desconocidos llevan al inicio', () => {

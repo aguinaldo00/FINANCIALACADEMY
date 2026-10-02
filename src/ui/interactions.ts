@@ -4,11 +4,13 @@ import { idPregunta, idTarjetaFrase } from '../domain/practice.ts';
 import { dominioConcepto } from '../domain/mastery.ts';
 import { actualizarEtiquetaDominio } from './components/conceptCard.ts';
 import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintarPreguntaConConfianza, pintarRecuerdo, tarjetasDe } from './components/conceptPanels.ts';
+import { infografiasDe, montarInfografia } from './components/infographic.ts';
 import { pintarRail } from './components/rail.ts';
 import type { ContextoVista } from './views/context.ts';
 
 /** Delegación de clics de las fichas: otra forma (cicla modos), trampa y compruébalo. */
 export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
+  const cierres = new WeakMap<HTMLElement, () => void>();
   ctx.pagina.addEventListener('click', (e) => {
     const destino = e.target as Element;
     // Controles internos de los paneles de flashcards y de preguntas de práctica.
@@ -60,6 +62,21 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practi
     const abierto = !panel.hidden;
     panel.hidden = abierto;
     boton.setAttribute('aria-expanded', String(!abierto));
+    if (accion === 'v') {
+      // Se desmonta al cerrar (para el cronómetro de reproducción y el observador de tamaño).
+      cierres.get(panel)?.();
+      cierres.delete(panel);
+      if (!abierto) {
+        panel.innerHTML = '';
+        const fin: (() => void)[] = [];
+        for (const info of infografiasDe(estado.tema.ampliacion?.infografias, concepto.id)) {
+          const caja = document.createElement('div');
+          panel.append(caja);
+          fin.push(montarInfografia(caja, info));
+        }
+        cierres.set(panel, () => fin.forEach((f) => f()));
+      }
+    }
     if (accion === 'w') {
       if (abierto) ficha.classList.remove('recordando');
       else pintarRecuerdo(panel, concepto, ficha, (sabia) => practica?.calificar(idTarjetaFrase(concepto.id), sabia));

@@ -178,6 +178,29 @@ describe('app en el navegador', () => {
     expect(localStorage.getItem(CLAVE_PROGRESO)).toBe(antes);
   });
 
+  it('Visualízalo: infografía paso a paso del ICO en su ficha', () => {
+    navegar('#s/4.2A');
+    expect($('#c-bancos .ab.v')).toBeNull(); // solo los conceptos con infografía
+    const ficha = $('#c-ico');
+    $<HTMLButtonElement>('.ab.v', ficha).click();
+    const panel = $('.pn.v', ficha);
+    expect(panel.hidden).toBe(false);
+    expect($('.ig-titulo', panel).textContent).toContain('ICO');
+    expect($('.ig-texto', panel).textContent).toMatch(/^Paso 1 de 5/);
+    expect($$('.ig-actor.activo', panel).map((a) => a.dataset.actor)).toEqual(['estado', 'mercados', 'ico']);
+    $<HTMLButtonElement>('[data-ig="siguiente"]', panel).click();
+    expect($('.ig-texto', panel).textContent).toMatch(/^Paso 2 de 5.*mediación/);
+    $<HTMLButtonElement>('[data-ig-paso="4"]', panel).click();
+    expect($<HTMLButtonElement>('[data-ig="siguiente"]', panel).disabled).toBe(true);
+  });
+
+  it('#visual: galería con todas las infografías', () => {
+    navegar('#visual');
+    expect($('#mt').textContent).toBe('Infografías');
+    expect($$('.ig')).toHaveLength(tema01.ampliacion!.infografias!.length);
+    expect($('.sl.on').getAttribute('href')).toBe('#visual');
+  });
+
   it('#c/<id> abre la sección del concepto y lo muestra', () => {
     navegar('#c/bce');
     expect($('[data-sec]').dataset.sec).toBe('4.1');
@@ -189,7 +212,7 @@ describe('app en el navegador', () => {
     expect($('#mt').textContent).toBe('Predicción de examen');
     expect($('.sl.on').getAttribute('href')).toBe('#examen');
     // La predicción va al final del índice.
-    expect($$('#rail a').slice(-5).map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#simulacro', '#repaso', '#progreso']);
+    expect($$('#rail a').slice(-6).map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#visual', '#simulacro', '#repaso', '#progreso']);
     expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
     // Cada concepto del tema aparece una vez en el mapa.
     expect($$('.ex-chip')).toHaveLength(tema01.conceptos.length);

@@ -1,4 +1,4 @@
-import { hrefExamen, hrefProgreso, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro } from '../../app/router.ts';
+import { hrefExamen, hrefProgreso, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro, hrefVisual } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { seccionesPrioritarias } from '../../domain/priority.ts';
@@ -44,5 +44,5 @@ function tarjetaExamen(estado: EstadoEstudio): string {
   const bloques = estado.tema.ampliacion?.bloques ?? [];
   if (!bloques.length) return '';
   const barras = bloques.map((b) => `<i style="flex-grow:${b.probabilidad}" title="${b.titulo}: ${b.probabilidad} %"></i>`).join('');
-  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">📊 Predicción de examen</span><b>¿Qué caerá en el examen?</b><span class="he-t">Los ${bloques.length} bloques ordenados por probabilidad, tu dominio en cada uno y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver la predicción →</span></a><p class="home-practica"><a class="principal" href="${hrefSesion()}">🎯 Estudiar hoy</a><a href="${hrefSimulacro()}">📝 Hacer un simulacro</a><a href="${hrefRepaso()}">🔁 Mi repaso de hoy</a><a href="${hrefProgreso()}">📈 Mi progreso</a></p>`;
+  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">📊 Predicción de examen</span><b>¿Qué caerá en el examen?</b><span class="he-t">Los ${bloques.length} bloques ordenados por probabilidad, tu dominio en cada uno y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver la predicción →</span></a><p class="home-practica"><a class="principal" href="${hrefSesion()}">🎯 Estudiar hoy</a><a href="${hrefVisual()}">🎬 Infografías</a><a href="${hrefSimulacro()}">📝 Hacer un simulacro</a><a href="${hrefRepaso()}">🔁 Mi repaso de hoy</a><a href="${hrefProgreso()}">📈 Mi progreso</a></p>`;
 }

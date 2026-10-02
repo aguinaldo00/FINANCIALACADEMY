@@ -383,6 +383,34 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
   `pintarPreguntaConConfianza` (práctica, repaso, simulacros de bloque y sesión). El simulacro del
   tema pide la confianza de forma opcional y muestra la calibración.
 
+## Infografías y correcciones (02/10, tarde)
+
+- **Infografías animadas** (`content/temas/tema-01/infografias.ts`, `ui/components/infographic.ts`):
+  12 conceptos difíciles contados paso a paso:
+  - ICO, EDE, SGR, EFC, FGD;
+  - fondo de inversión y sociedad de inversión;
+  - dealer y bróker;
+  - seguros;
+  - SEBC ⊃ Eurosistema ⊃ BCE;
+  - supervisores;
+  - MUS y MUR.
+
+  Los textos salen de DATA y de los apuntes.
+- **Cómo se dibujan:**
+  - actores en % del lienzo, recolocados para no salirse;
+  - flechas calculadas en píxeles de borde a borde, con un símbolo que viaja por las activas;
+  - grupos para los conjuntos.
+- **Dónde están:**
+  - "🎬 Visualízalo" en la ficha (solo en los conceptos con infografía);
+  - galería `#visual` en el índice.
+  - `validarTema` comprueba sus referencias.
+- **Correcciones:**
+  - En móvil se salta y se entra mientras se camina: botones con `pointerdown` (multitáctil).
+  - Volver de 2D a 3D no devuelve a la portada.
+  - Esc sube de nivel aunque el foco esté fuera del mapa.
+  - Barra del mapa en móvil con etiquetas cortas.
+  - Silueta del personaje cuando algo lo tapa.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

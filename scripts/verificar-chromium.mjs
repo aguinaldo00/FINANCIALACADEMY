@@ -40,7 +40,7 @@ const progreso = () => {
   ok('portada: barra lateral retirada', (await p.locator('.rail').boundingBox()).x < 0);
   ok('portada: botón flotante del índice', await p.locator('#ib').isVisible());
   ok('portada: título de marca sobre el mapa', (await p.locator('.portada-marca .marca').getAttribute('aria-label')) === 'Gestión financiera: La ciudad del dinero');
-  ok('índice: el grupo Estudio y examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-5).map((a) => a.getAttribute('href')))) === '["#sesion","#examen","#simulacro","#repaso","#progreso"]');
+  ok('índice: el grupo Estudio y examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-6).map((a) => a.getAttribute('href')))) === '["#sesion","#examen","#visual","#simulacro","#repaso","#progreso"]');
   await p.mouse.move(700, 500);
   await p.mouse.wheel(0, 800);
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
@@ -211,6 +211,24 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.fill('#c-fgd .rec-texto', 'Garantiza los depósitos hasta 100.000 euros');
   await p.click('#c-fgd [data-rec="comparar"]');
   ok(`escríbelo tú (${nombre}): oculta la definición y compara`, oculta && (await p.locator('#c-fgd .rec-ideas li').count()) > 0);
+  await p.close();
+}
+
+// 8. Infografías: galería y ficha (escritorio y móvil)
+for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móvil']]) {
+  const p = await pagina({ viewport: { width: ancho, height: alto } });
+  await p.goto('http://localhost:4173/#visual');
+  await p.waitForSelector('.ig');
+  const n = await p.locator('.ig').count();
+  const item = p.locator('#vis-ico');
+  await item.scrollIntoViewIfNeeded();
+  await item.locator('[data-ig="siguiente"]').click();
+  const flechas = await item.locator('.ig-flecha.activo').count();
+  // Ningún actor fuera del lienzo.
+  const fuera = await p.evaluate(() => [...document.querySelectorAll('.ig-lienzo')].some((l) => { const b = l.getBoundingClientRect(); return [...l.querySelectorAll('.ig-actor')].some((a) => { const r = a.getBoundingClientRect(); return r.left < b.left - 1 || r.right > b.right + 1 || r.top < b.top - 1 || r.bottom > b.bottom + 1; }); }));
+  ok(`infografías (${nombre}): ${n}, flechas animadas y actores dentro`, n >= 12 && flechas === 2 && !fuera, `flechas ${flechas} · fuera ${fuera}`);
+  ok(`infografías (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho + 2);
+  await item.screenshot({ path: `${SP}/ver-infografia-${ancho}.png` });
   await p.close();
 }
 

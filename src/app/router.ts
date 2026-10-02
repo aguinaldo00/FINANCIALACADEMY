@@ -2,7 +2,7 @@ import type { Tema } from '../content/schema.ts';
 
 export type Ruta =
   | { vista: 'inicio'; scrollArriba: boolean }
-  | { vista: 'examen' | 'simulacro' | 'repaso' | 'sesion' | 'progreso'; scrollArriba: boolean }
+  | { vista: 'examen' | 'simulacro' | 'repaso' | 'sesion' | 'progreso' | 'visual'; scrollArriba: boolean }
   | { vista: 'seccion'; seccionId: string; conceptoFoco: string | null; scrollArriba: boolean };
 
 /**
@@ -16,6 +16,7 @@ export function resolverRuta(hash: string, tema: Tema): Ruta {
   const scrollArriba = !h.startsWith('c/');
 
   if ((h === 'examen' || h === 'simulacro' || h === 'repaso' || h === 'sesion' || h === 'progreso') && tema.ampliacion?.bloques.length) return { vista: h, scrollArriba };
+  if (h === 'visual' && tema.ampliacion?.infografias?.length) return { vista: 'visual', scrollArriba };
   if (h.startsWith('s/')) {
     const id = h.slice(2);
     if (tema.secciones.some((s) => s.id === id)) return { vista: 'seccion', seccionId: id, conceptoFoco: null, scrollArriba };
@@ -34,3 +35,4 @@ export const hrefSimulacro = () => '#simulacro';
 export const hrefRepaso = () => '#repaso';
 export const hrefSesion = () => '#sesion';
 export const hrefProgreso = () => '#progreso';
+export const hrefVisual = () => '#visual';
