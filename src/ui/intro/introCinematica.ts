@@ -1,120 +1,104 @@
-import { tituloMarca } from '../components/brandTitle.ts';
-import { nubeRealista, TEXTURAS_INTRO } from '../components/nubesRealistas.ts';
+import type { Tema } from '../../content/schema.ts';
+import type { Progreso } from '../../domain/progress.ts';
+import { iconoSvg } from '../../icons/icon.ts';
+import { colorBloque } from '../blockColors.ts';
+import { MARCA, tituloMarca } from '../components/brandTitle.ts';
+import { skylineSeccion } from '../components/skyline.ts';
 
 /*
- * Intro cinemática: el primer acto de La Ciudad del Dinero, a pantalla completa y antes de ver el
- * mapa. Una sola toma continua:
- *   NEGRO → NUBES → (velo) → DESCENSO → CIUDAD → EXPLORACIÓN
- * La capa cuenta la parte de las nubes y la bienvenida; debajo, la escena 3D carga en paralelo y,
- * bajo el velo blanco, la cámara empieza a bajar (`alDescender`). Cuando el iris se abre la cámara
- * ya está en movimiento y atraviesa nubes 3D con la misma textura: no hay corte.
+ * Intro: tráiler de títulos a pantalla completa antes de ver el mapa.
+ *   título de la asignatura → "La ciudad del dinero" sobre el horizonte de la ciudad →
+ *   un plano por apartado del tema → morph a "Bienvenido a la Ciudad Financiera" → fly-out → mapa.
+ * Todo el guion es una única línea de tiempo CSS (retrasos absolutos) que solo anima `transform` y
+ * `opacity`: la mueve el compositor, así que no se congela aunque el hilo principal esté ocupado
+ * montando la 3D. El JS solo construye la capa, la cierra y la deja saltar.
+ * Los textos salen de DATA (grupos, conceptos y meta del tema) y de la marca: nada inventado.
  */
 
 export interface OpcionesIntro {
-  /** Se resuelve cuando la escena 3D está montada (o null si no hay 3D). */
+  tema: Tema;
+  progreso: Progreso;
+  /** Se resuelve cuando la escena 3D está montada (false si no hay 3D). */
   mundoListo: Promise<boolean>;
-  /** Arranca el descenso de la cámara (bajo el velo). */
-  alDescender: () => void;
-  /** Deja la cámara en el encuadre final (al saltar la intro). */
-  alSaltar: () => void;
-  /** La capa ha terminado (sola o saltada). */
-  alTerminar: () => void;
-  /** Subtítulo de la bienvenida (tema). */
-  subtitulo: string;
+  /** Empieza la salida (fly-out y fundido) del final natural: el mapa ya asoma debajo. */
+  alSalir: () => void;
+  /** La capa ha terminado (sola o saltada); `saltada` si fue el usuario. */
+  alTerminar: (saltada: boolean) => void;
 }
 
-/** Instantes del guion (ms desde que arranca la intro). */
+/** Instantes del guion, en ms (los retrasos del CSS de `intro.css` los siguen). */
 export const GUION = {
-  volar: 60,
-  blanco: 3300,
-  morph: 4200,
-  descenso: 4400,
-  presagio: 5200,
-  subtitulo: 5600,
-  iris: 6200,
-  vuelaFuera: 6300,
-  fin: 7700,
+  titulo: 1100,
+  planos: 3000,
+  plano: 850,
+  morph: 6600,
+  subtitulo: 8000,
+  /** Fin de la última animación de entrada: desde aquí se puede cerrar. */
+  listo: 9400,
+  /** Duración del fly-out y el fundido final. */
+  salida: 900,
 } as const;
 
-/** Espera máxima por la 3D antes de abrir el iris igualmente. */
-const ESPERA_MAXIMA = 4000;
+/** Espera máxima por la 3D una vez acabado el guion. */
+const ESPERA_MAXIMA = 3000;
 
-/**
- * Morph gooey entre dos textos: se cruzan desenfoque y opacidad bajo un filtro de umbral alfa, así
- * las letras de uno se "funden" en las del otro.
- */
-function morph(a: HTMLElement, b: HTMLElement, duracion: number, alAcabar: () => void): () => void {
-  let raf = 0;
-  const t0 = performance.now();
-  const paso = (ahora: number) => {
-    const t = Math.min(1, (ahora - t0) / duracion);
-    const k = t * t * (3 - 2 * t);
-    const fb = Math.min(8 / Math.max(k, 0.0001) - 8, 100);
-    const fa = Math.min(8 / Math.max(1 - k, 0.0001) - 8, 100);
-    b.style.filter = `blur(${fb}px)`;
-    b.style.opacity = `${Math.pow(k, 0.4) * 100}%`;
-    a.style.filter = `blur(${fa}px)`;
-    a.style.opacity = `${Math.pow(1 - k, 0.4) * 100}%`;
-    if (t < 1) raf = requestAnimationFrame(paso);
-    else {
-      a.style.opacity = '0';
-      b.style.filter = '';
-      b.style.opacity = '1';
-      alAcabar();
-    }
-  };
-  raf = requestAnimationFrame(paso);
-  return () => cancelAnimationFrame(raf);
-}
+const letras = (texto: string, clase: string, desde = 0): string => {
+  let i = desde;
+  return texto
+    .split(' ')
+    .map((p) => `<span class="pal">${[...p].map((l) => `<span class="${clase}" style="--i:${i++}">${l}</span>`).join('')}</span>`)
+    .join(' ');
+};
 
-/** Reproduce la intro. Devuelve una función para saltarla. */
+/** Reproduce la intro. Devuelve una función que la salta. */
 export function reproducirIntro(o: OpcionesIntro): () => void {
+  const { tema } = o;
+  const planos = tema.grupos
+    .map((g, k) => {
+      const secciones = new Set(tema.secciones.filter((s) => s.grupoId === g.id).map((s) => s.id));
+      const iconos = tema.conceptos
+        .filter((c) => secciones.has(c.seccionId))
+        .slice(0, 8)
+        .map((c, j) => `<i style="--j:${j}">${iconoSvg(c.iconos, c.color)}</i>`)
+        .join('');
+      const [numero, ...resto] = g.titulo.split(' · ');
+      return `<section class="intro-plano" style="--k:${k};--c:${colorBloque(k)}"><div class="intro-iconos" aria-hidden="true">${iconos}</div><p class="intro-num">${numero}</p><h2 class="intro-apartado">${resto.join(' · ') || g.titulo}</h2></section>`;
+    })
+    .join('');
+  const subtitulo = `${MARCA.asignatura} · Tema ${tema.meta.numero} · ${tema.meta.titulo}`
+    .split(' ')
+    .map((p, i) => `<span style="--i:${i}">${p}</span>`)
+    .join(' ');
+
   const capa = document.createElement('div');
   capa.className = 'intro';
   capa.setAttribute('role', 'dialog');
   capa.setAttribute('aria-label', 'Introducción: Bienvenido a la Ciudad Financiera');
-  const nube = (clase: string, variante: number, ancho: number) => {
-    const img = nubeRealista(variante, ancho);
-    return `<i class="nube ${clase}${img ? ' real' : ''}"${img ? ` style="--img:url(${img})"` : ''}></i>`;
-  };
-  const { lejanas, cercanas } = TEXTURAS_INTRO;
-  const nubes = Array.from({ length: 10 }, (_, i) => nube(`n${i + 1}`, lejanas[i % lejanas.length]![0], lejanas[i % lejanas.length]![1])).join('');
-  const cerca = Array.from({ length: 4 }, (_, i) => nube(`cerca c${i + 1}`, cercanas[i % cercanas.length]![0], cercanas[i % cercanas.length]![1])).join('');
-  // Las dos últimas nubes salen despedidas hacia los bordes al abrirse el iris (el vuelo sigue).
-  const salida = nube('salida s1', cercanas[0][0], cercanas[0][1]) + nube('salida s2', cercanas[1][0], cercanas[1][1]);
-  const palabras = o.subtitulo.split(' ').map((p, i) => `<span style="--i:${i}">${p}</span>`).join(' ');
-  capa.innerHTML = `<svg class="intro-filtros" aria-hidden="true" width="0" height="0"><filter id="intro-goo"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140"/></filter></svg>
-<div class="intro-cielo"></div>
-<div class="nubes" aria-hidden="true">${nubes}${cerca}</div>
-<div class="bruma" aria-hidden="true"></div>
-<div class="intro-titulo">${tituloMarca('entrada')}</div>
-<div class="intro-velo" aria-hidden="true"></div>
-<div class="nubes nubes-salida" aria-hidden="true">${salida}</div>
-<div class="intro-bienvenida"><div class="intro-morph"><span class="m-a">La ciudad del dinero</span><span class="m-b">Bienvenido a la Ciudad Financiera</span></div><p class="intro-sub">${palabras}</p></div>
+  capa.style.setProperty('--planos', String(tema.grupos.length));
+  capa.innerHTML = `<div class="intro-escena">
+<div class="intro-apertura"><i class="intro-linea"></i><p class="intro-ante">${letras(MARCA.asignatura.toUpperCase(), 'l')}</p></div>
+<div class="intro-titulo"><div class="intro-horizonte" aria-hidden="true">${skylineSeccion(tema.conceptos, o.progreso)}</div>${tituloMarca('entrada')}</div>
+${planos}
+<div class="intro-final"><div class="intro-morph"><p class="m-a" aria-hidden="true">${letras(MARCA.ciudad, 'la')}</p><h2 class="m-b">${letras('Bienvenido a la Ciudad Financiera', 'lb')}</h2></div><p class="intro-sub">${subtitulo}</p></div>
+</div>
 <button type="button" class="intro-saltar">Saltar intro</button>`;
   document.body.append(capa);
   document.body.classList.add('intro-activa');
 
   const temporizadores: number[] = [];
-  const despues = (ms: number, fn: () => void) => temporizadores.push(window.setTimeout(fn, ms));
-  let pararMorph: (() => void) | null = null;
   let terminada = false;
+  let cerrando = false;
 
-  const terminar = () => {
+  const terminar = (saltada: boolean) => {
     if (terminada) return;
     terminada = true;
     for (const t of temporizadores) clearTimeout(t);
-    pararMorph?.();
     document.removeEventListener('keydown', alTeclado);
     capa.remove();
     document.body.classList.remove('intro-activa');
-    o.alTerminar();
+    o.alTerminar(saltada);
   };
-  const saltar = () => {
-    if (terminada) return;
-    o.alSaltar();
-    terminar();
-  };
+  const saltar = () => terminar(true);
   const alTeclado = (e: KeyboardEvent) => {
     if (e.key === 'Escape') saltar();
   };
@@ -124,49 +108,19 @@ export function reproducirIntro(o: OpcionesIntro): () => void {
     if (!(e.target as Element).closest('button')) saltar();
   });
 
-  // El guion se encadena paso a paso: cada fase se programa desde que la anterior ha ocurrido de
-  // verdad. Si el hilo principal se bloquea (la 3D compila sus sombreadores), el guion se retrasa,
-  // pero sus fases nunca se amontonan.
-  const secuencia = (pasos: [number, () => void][], alAcabar?: () => void) => {
-    let i = 0;
-    const siguiente = () => {
-      if (terminada) return;
-      const paso = pasos[i++];
-      if (!paso) return alAcabar?.();
-      despues(paso[0], () => {
-        if (terminada) return;
-        paso[1]();
-        siguiente();
-      });
-    };
-    siguiente();
+  // Cierre: guion terminado y 3D lista (o pasado el tope). Fly-out del texto, fundido de la capa
+  // y, debajo, el acercamiento de la cámara.
+  const cerrar = () => {
+    if (cerrando || terminada) return;
+    cerrando = true;
+    capa.classList.add('fuera');
+    o.alSalir();
+    temporizadores.push(window.setTimeout(() => terminar(false), GUION.salida));
   };
-
-  // Acto 3: descenso. La cámara empieza a bajar bajo el velo cuando la bienvenida ya está en marcha
-  // y la 3D está lista; si tarda, la bienvenida respira mientras tanto (como mucho ESPERA_MAXIMA).
+  let guionAcabado = false;
   let hay3d: boolean | null = null;
-  let enPunto = false;
-  let decidido = false;
-  const descender = (con3d: boolean) => {
-    if (decidido || terminada) return;
-    decidido = true;
-    capa.classList.remove('espera');
-    const seguir = () =>
-      secuencia([
-        [GUION.presagio - GUION.descenso, () => capa.classList.add('presagio')],
-        [GUION.subtitulo - GUION.presagio, () => capa.classList.add('subtitulo')],
-        [GUION.iris - GUION.subtitulo, () => capa.classList.add('iris')],
-        [GUION.vuelaFuera - GUION.iris, () => capa.classList.add('fuera')],
-        [GUION.fin - GUION.vuelaFuera, terminar],
-      ]);
-    if (!con3d) return seguir();
-    o.alDescender();
-    // El primer fotograma del descenso puede tardar (sombreadores, texturas): el guion de la capa
-    // sigue cuando ya se ha dibujado, para que el iris y la cámara vayan a la par.
-    requestAnimationFrame(() => requestAnimationFrame(seguir));
-  };
   const probar = () => {
-    if (enPunto && hay3d !== null) descender(hay3d);
+    if (guionAcabado && hay3d !== null) cerrar();
   };
   void o.mundoListo.then(
     (ok) => {
@@ -178,30 +132,17 @@ export function reproducirIntro(o: OpcionesIntro): () => void {
       probar();
     },
   );
-
-  // Acto 1: negro → cielo y vuelo entre nubes con el título.
-  // Acto 2: una nube cercana llena la pantalla (velo blanco) y el título se funde en la bienvenida.
-  requestAnimationFrame(() => capa.classList.add('en'));
-  secuencia(
-    [
-      [GUION.volar, () => capa.classList.add('volando')],
-      [GUION.blanco - GUION.volar, () => capa.classList.add('blanco')],
-      [
-        GUION.morph - GUION.blanco,
-        () => {
-          capa.classList.add('morph');
-          pararMorph = morph(capa.querySelector<HTMLElement>('.m-a')!, capa.querySelector<HTMLElement>('.m-b')!, 1500, () => capa.classList.add('bienvenida'));
-        },
-      ],
-      [GUION.descenso - GUION.morph, () => (enPunto = true)],
-    ],
-    () => {
-      probar();
-      if (decidido) return;
-      capa.classList.add('espera');
-      despues(ESPERA_MAXIMA, () => descender(false));
-    },
-  );
+  const acabarGuion = () => {
+    if (guionAcabado) return;
+    guionAcabado = true;
+    capa.classList.add('espera');
+    probar();
+    temporizadores.push(window.setTimeout(cerrar, ESPERA_MAXIMA));
+  };
+  // El final del guion lo marca la última palabra del subtítulo (animationend) o, si el navegador
+  // no la anima (pestaña oculta), el reloj.
+  capa.querySelector('.intro-sub span:last-child')?.addEventListener('animationend', acabarGuion);
+  temporizadores.push(window.setTimeout(acabarGuion, GUION.listo + 400));
 
   return saltar;
 }

@@ -248,7 +248,7 @@ body.menu .indice-flotante{display:none!important}
 .mundo.portada .mundo-acciones{justify-content:center;pointer-events:auto}
 .mundo.portada .mb-btn{background:rgba(14,13,12,.72);backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .mundo.portada .mb-btn:hover:not(:disabled){background:rgba(14,13,12,.9)}
-@media (max-width:600px){.mundo.portada>.mundo-barra{bottom:86px}}
+@media (max-width:600px){.mundo.portada>.mundo-barra{bottom:132px}}
 
 /* Ambiente: día (por defecto), atardecer y noche. El cielo es el fondo del visor; la niebla de la
    escena 3D usa el mismo color de borde para que la maqueta se funda con él. */

@@ -1,130 +1,88 @@
-/* Intro cinemática: el primer acto de La Ciudad del Dinero, a pantalla completa y antes del mapa.
-   NEGRO → NUBES → velo blanco con la bienvenida → (la cámara 3D ya baja debajo) → IRIS → CIUDAD.
-   Solo en la primera visita (o con "Ver la intro") y nunca con movimiento reducido. */
+/* Intro: tráiler de títulos a pantalla completa, antes del mapa (ver `ui/intro/introCinematica.ts`).
+   Una única línea de tiempo con retrasos absolutos; solo se animan transform y opacity (las mueve
+   el compositor: no se congelan mientras la 3D se monta). Instantes en `GUION`. */
 
-@property --iris{syntax:'<percentage>';inherits:false;initial-value:0%}
-
-.intro{position:fixed;inset:0;z-index:1000;overflow:hidden;background:#000;transition:background .6s ease}
-.intro.blanco{background:transparent;transition-delay:.9s}
+.intro{--oro:#e8b84a;--tinta:#f3eee4;--tinta2:#b9b1a3;--display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+  position:fixed;inset:0;z-index:1000;overflow:hidden;color:var(--tinta);
+  background:radial-gradient(ellipse 90% 70% at 50% 45%,#221d18 0%,#0d0b09 70%,#050403 100%);
+  transition:opacity .6s ease .3s}
 body.intro-activa{overflow:hidden}
 /* Lo que hay debajo (la portada) no compite con la intro mientras dura. */
 .intro-activa .mundo-barra,.intro-activa .mundo-etiquetas,.intro-activa .ficha,.intro-activa .portada-marca,.intro-activa .portada-pista{opacity:0;pointer-events:none}
 
-/* Acto 1: cielo. */
-.intro-cielo{position:absolute;inset:0;background:linear-gradient(180deg,#3d9be9 0%,#69b8f5 45%,#bfe4ff 100%);opacity:0;transition:opacity .7s ease}
-.intro.en .intro-cielo{opacity:1}
-.intro.blanco .intro-cielo{opacity:0;transition:opacity .4s ease .9s}
+.intro-escena{position:absolute;inset:0;transition:transform .9s cubic-bezier(.5,0,.75,0),opacity .7s ease-in}
+.intro-escena>*{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;padding:0 max(16px,6vw);text-align:center;opacity:0}
+.intro .pal{display:inline-block;white-space:nowrap}
 
-/* Escenario con perspectiva: las nubes avanzan en Z hacia la cámara. */
-.nubes{position:absolute;inset:0;perspective:700px;perspective-origin:50% 45%;pointer-events:none;transition:opacity .5s ease .8s}
-.intro.blanco .nubes:not(.nubes-salida){opacity:0}
-.nube{position:absolute;left:var(--x);top:var(--y);width:var(--w);aspect-ratio:2.1;margin-left:calc(var(--w) / -2);
-  background:
-    radial-gradient(circle at 28% 62%,#fff 0 21%,rgba(255,255,255,0) 22.5%),
-    radial-gradient(circle at 47% 40%,#fff 0 27%,rgba(255,255,255,0) 28.5%),
-    radial-gradient(circle at 68% 52%,#fff 0 23%,rgba(255,255,255,0) 24.5%),
-    radial-gradient(circle at 84% 66%,#fff 0 15%,rgba(255,255,255,0) 16.5%),
-    radial-gradient(ellipse 46% 26% at 52% 72%,#fff 0 98%,rgba(255,255,255,0) 100%);
-  transform:translate3d(0,0,var(--z));opacity:0;will-change:transform,opacity}
-.nube.real{background:var(--img) center/100% 100% no-repeat;filter:drop-shadow(0 18px 30px rgba(40,90,160,.16))}
-.nube.real:not(.cerca):not(.salida){width:calc(var(--w) * 1.3);margin-left:calc(var(--w) * -.65)}
-.intro.volando .nube{animation:nube-vuela 3.4s cubic-bezier(.35,.05,.6,1) var(--d,0s) both}
-@keyframes nube-vuela{
-  0%{transform:translate3d(0,0,var(--z));opacity:0}
-  12%{opacity:1}
-  80%{opacity:1}
-  100%{transform:translate3d(var(--dx),var(--dy),calc(var(--z) + 900px));opacity:0}
-}
-.n1{--x:16%;--y:24%;--w:46vmin;--z:-1300px;--dx:-70vmin;--dy:-12vmin;--d:0s}
-.n2{--x:84%;--y:30%;--w:52vmin;--z:-1200px;--dx:70vmin;--dy:-8vmin;--d:.2s}
-.n3{--x:50%;--y:72%;--w:60vmin;--z:-1400px;--dx:0vmin;--dy:50vmin;--d:.35s}
-.n4{--x:28%;--y:56%;--w:44vmin;--z:-1000px;--dx:-60vmin;--dy:24vmin;--d:.55s}
-.n5{--x:72%;--y:62%;--w:46vmin;--z:-1050px;--dx:60vmin;--dy:28vmin;--d:.7s}
-.n6{--x:62%;--y:14%;--w:40vmin;--z:-1350px;--dx:50vmin;--dy:-36vmin;--d:.9s}
-.n7{--x:12%;--y:78%;--w:50vmin;--z:-1250px;--dx:-65vmin;--dy:36vmin;--d:1.1s}
-.n8{--x:88%;--y:80%;--w:48vmin;--z:-1150px;--dx:65vmin;--dy:36vmin;--d:1.3s}
-.n9{--x:38%;--y:18%;--w:38vmin;--z:-1450px;--dx:-36vmin;--dy:-40vmin;--d:1.5s}
-.n10{--x:60%;--y:86%;--w:44vmin;--z:-1500px;--dx:24vmin;--dy:46vmin;--d:1.7s}
+/* 1 · Apertura: línea dorada y la asignatura letra a letra. */
+.intro-apertura{gap:14px;animation:acto .1s linear 0s both,acto-sale .35s ease-in 1s forwards}
+.intro-linea{display:block;width:min(220px,50vw);height:2px;background:linear-gradient(90deg,transparent,var(--oro),transparent);transform:scaleX(0);animation:linea .7s cubic-bezier(.2,.7,.2,1) .15s forwards}
+.intro-ante{margin:0;font-weight:700;font-size:clamp(.8rem,2.6vw,1.05rem);letter-spacing:.42em;color:var(--tinta)}
+.intro-ante .l{display:inline-block;opacity:0;animation:letra-entra .5s cubic-bezier(.2,.8,.3,1) calc(.3s + var(--i) * 35ms) both}
 
-/* Nubes cercanas: cruzan por delante de la cámara y llenan la pantalla (se atraviesan). */
-.nube.cerca{--w:70vmin}
-.intro.volando .nube.cerca{animation:nube-cruza 1.7s cubic-bezier(.45,0,.75,.6) var(--d) both}
-@keyframes nube-cruza{
-  0%{transform:translate3d(0,0,-700px);opacity:0}
-  18%{opacity:1}
-  78%{opacity:1}
-  100%{transform:translate3d(var(--dx),var(--dy),660px);opacity:0}
-}
-.c1{--x:40%;--y:46%;--dx:-30vmin;--dy:6vmin;--d:.5s}
-.c2{--x:62%;--y:52%;--dx:34vmin;--dy:-4vmin;--d:1.15s}
-.c3{--x:46%;--y:60%;--dx:-10vmin;--dy:22vmin;--d:1.8s}
-.c4{--x:56%;--y:40%;--dx:20vmin;--dy:-18vmin;--d:2.4s}
+/* 2 · Título sobre el horizonte de la ciudad (Ken Burns: el horizonte se desplaza y se acerca). */
+.intro-titulo{animation:titulo-entra .8s cubic-bezier(.2,.75,.25,1) 1.1s both,acto-sale-grande .4s ease-in 2.75s forwards}
+.intro-titulo .marca{position:relative;z-index:1;filter:drop-shadow(0 6px 22px rgba(0,0,0,.7))}
+.intro-titulo .marca-ante{display:none}
+.intro .marca-l{animation-delay:calc(var(--i) * 45ms + 1.15s),calc(var(--i) * 45ms + 3s)}
+.intro-horizonte{position:absolute;left:0;right:0;bottom:6vh;height:34vh;overflow:hidden;opacity:.55;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+.intro-horizonte .sk-ed>rect:first-of-type,.intro-horizonte .sk-ed>path:not(.sk-andamio):not(.sk-bandera),.intro-horizonte .sk-ed>rect:not([class]){fill:#241e18;stroke:var(--c);stroke-dasharray:none;opacity:1}
+.intro-horizonte .sk-suelo{stroke:rgba(232,184,74,.4)}
+.intro-horizonte svg{display:block;height:100%;width:auto;max-width:none;transform-origin:0 100%;animation:horizonte 3.2s linear 1s both}
 
-/* Velo al cruzar cada nube cercana. */
-.bruma{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.92),rgba(236,244,252,.75) 60%,rgba(220,234,248,.5));opacity:0}
-.intro.volando .bruma{animation:bruma 3.4s linear both}
-@keyframes bruma{
-  0%,24%{opacity:0} 34%{opacity:.75} 42%{opacity:0}
-  52%{opacity:0} 61%{opacity:.7} 68%{opacity:0}
-  80%{opacity:0} 88%{opacity:.6} 95%,100%{opacity:0}
-}
+/* 3 · Un plano por apartado: entra desde la derecha, se acerca y sale por la izquierda. */
+.intro-plano{gap:6px;animation:plano 1s cubic-bezier(.45,.05,.55,.95) calc(3s + var(--k) * .85s) both}
+.intro-num{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(4rem,22vw,9rem);line-height:.9;color:var(--c)}
+.intro-apartado{margin:0;max-width:16ch;font-family:var(--display);font-weight:800;font-size:clamp(1.7rem,7vw,3.4rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.intro-iconos{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:min(520px,86vw);margin-bottom:14px}
+.intro-iconos i{display:block;width:clamp(36px,10vw,54px);opacity:0;animation:icono .9s cubic-bezier(.2,.8,.3,1) calc(3.05s + var(--k) * .85s + var(--j) * 40ms) both}
+.intro-iconos svg{display:block;width:100%;height:auto}
 
-/* El título llega desde el fondo, entre las nubes. */
-.intro-titulo{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-.intro-titulo .marca{color:#fff;filter:drop-shadow(0 4px 0 rgba(30,70,130,.45)) drop-shadow(0 10px 22px rgba(20,50,100,.35));opacity:0;transform:scale(.18)}
-.intro.volando .intro-titulo .marca{animation:titulo-llega 2.6s cubic-bezier(.2,.75,.25,1) .7s both}
-@keyframes titulo-llega{0%{opacity:0;transform:scale(.18) translateY(30px)}25%{opacity:1}100%{opacity:1;transform:none}}
-.intro.volando .intro-titulo{animation:titulo-sale 1s ease 3.24s both}
-@keyframes titulo-sale{to{opacity:0;transform:scale(1.25)}}
-
-/* Acto 2: velo blanco (la nube que lo llena todo). Desde el presagio es bruma: se intuye la ciudad
-   (volúmenes, luces, nubes 3D) detrás. Con el iris se abre desde el centro. */
-.intro-velo{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .9s ease,background-color 1.2s ease,backdrop-filter 1.2s ease;--iris:0%}
-.intro.blanco .intro-velo{opacity:1}
-/* El velo llega por animación con retraso (y no solo por la clase): así llega a su hora aunque el
-   hilo principal esté ocupado montando la 3D. 3,24 s = GUION.blanco − GUION.volar. */
-.intro.volando .intro-velo{animation:velo-llega .9s ease 3.24s both}
-@keyframes velo-llega{from{opacity:0}to{opacity:1}}
-.intro.presagio .intro-velo{background-color:rgba(250,252,255,.8);-webkit-backdrop-filter:blur(16px) saturate(1.15);backdrop-filter:blur(16px) saturate(1.15)}
-.intro.iris .intro-velo{
-  -webkit-mask-image:radial-gradient(circle at 50% 52%,transparent var(--iris),#000 calc(var(--iris) + 16%));
-  mask-image:radial-gradient(circle at 50% 52%,transparent var(--iris),#000 calc(var(--iris) + 16%));
-  animation:iris 1.4s cubic-bezier(.55,0,.35,1) forwards}
-@keyframes iris{from{--iris:0%}to{--iris:130%}}
-
-/* Las dos últimas nubes salen despedidas hacia los bordes al abrirse el iris: el vuelo continúa. */
-.nubes-salida .nube.salida{--w:80vmin;left:50%;top:44%;opacity:0}
-.intro.iris .nube.s1{animation:sale-izq 1.3s cubic-bezier(.3,0,.6,1) forwards}
-.intro.iris .nube.s2{animation:sale-der 1.3s cubic-bezier(.3,0,.6,1) .08s forwards}
-@keyframes sale-izq{0%{opacity:.95;transform:translate3d(-10vmin,4vmin,-100px) scale(.8)}100%{opacity:0;transform:translate3d(-90vmax,10vmin,500px) scale(1.6)}}
-@keyframes sale-der{0%{opacity:.95;transform:translate3d(10vmin,-2vmin,-100px) scale(.8)}100%{opacity:0;transform:translate3d(90vmax,-6vmin,500px) scale(1.6)}}
-
-/* Bienvenida: morph del título, Ken Burns lento, fly-in del subtítulo y fly-out hacia la cámara. */
-.intro-bienvenida{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;padding:0 6vw;text-align:center;pointer-events:none;opacity:0;transition:opacity .5s ease}
-.intro.morph .intro-bienvenida{opacity:1;animation:ken-burns 3.4s ease-out both}
-@keyframes ken-burns{from{transform:scale(1)}to{transform:scale(1.06)}}
-.intro-morph{position:relative;display:grid;filter:url(#intro-goo);font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:800;font-size:clamp(2rem,6.2vw,5.2rem);line-height:1.02;letter-spacing:-.025em;color:#a8700e}
-.intro-morph span{grid-area:1/1;max-width:16ch;text-wrap:balance}
-.intro-morph .m-b{opacity:0}
+/* 4 · Final: morph letra a letra, Ken Burns lento y subtítulo palabra a palabra. */
+.intro-final{gap:20px;animation:acto .3s ease 6.3s both,ken-burns 4.5s ease-out 6.3s both}
+.intro-morph{display:grid}
+.intro-morph>*{grid-area:1/1;margin:0;font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,9vw,5.2rem);line-height:1.02;letter-spacing:-.025em;max-width:16ch;text-wrap:balance}
+.intro-morph .m-a{color:var(--tinta)}
+.intro-morph .m-b{color:var(--oro)}
+.intro .la,.intro .lb{display:inline-block}
+.intro .la{animation:letra-entra .35s ease-out calc(6.3s + var(--i) * 18ms) both,letra-sale .45s cubic-bezier(.5,0,.75,0) calc(6.9s + var(--i) * 22ms) forwards}
+.intro .lb{animation:letra-llega .5s cubic-bezier(.2,.8,.3,1.2) calc(7.05s + var(--i) * 22ms) both}
+.intro-sub{margin:0;max-width:34ch;font-size:clamp(.78rem,2.8vw,1.02rem);font-weight:700;letter-spacing:.2em;text-transform:uppercase;line-height:1.7;color:var(--tinta2)}
+.intro-sub span{display:inline-block;animation:palabra-entra .55s cubic-bezier(.2,.8,.3,1) calc(8s + var(--i) * 90ms) both}
+/* Si la 3D aún no está, el plano final respira. */
 .intro.espera .intro-morph{animation:respira 1.8s ease-in-out infinite}
-@keyframes respira{50%{transform:scale(1.025)}}
-.intro-sub{margin:0;font-size:clamp(.82rem,1.6vw,1.05rem);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#4c3c22;perspective:600px}
-.intro-sub span{display:inline-block;opacity:0;transform:translateY(26px) rotateX(70deg);filter:blur(8px)}
-.intro.subtitulo .intro-sub span{animation:palabra-entra .7s cubic-bezier(.2,.8,.3,1) calc(var(--i) * 85ms) both}
-@keyframes palabra-entra{to{opacity:1;transform:none;filter:none}}
-/* Fly-out: el texto vuela hacia la cámara mientras el iris se abre. */
-.intro.fuera .intro-bienvenida{animation:none;opacity:0;transform:scale(1.7);filter:blur(10px);letter-spacing:.12em;transition:opacity 1.1s ease-in .15s,transform 1.3s cubic-bezier(.5,0,.75,0),filter 1.1s ease-in,letter-spacing 1.3s ease-in}
+/* Salida: el texto vuela hacia la cámara y la capa se funde sobre el mapa. */
+.intro.fuera{opacity:0;pointer-events:none}
+.intro.fuera .intro-escena{transform:scale(1.6);opacity:0}
 
-.intro-saltar{position:absolute;right:18px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2;cursor:pointer;border:1px solid rgba(255,255,255,.6);border-radius:999px;background:rgba(20,40,70,.35);color:#fff;padding:7px 14px;font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.08em;backdrop-filter:blur(6px)}
-.intro.blanco .intro-saltar{border-color:rgba(60,45,20,.4);background:rgba(255,255,255,.6);color:#4c3c22}
-.intro-filtros{position:absolute}
+.intro-saltar{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2;cursor:pointer;border:1px solid rgba(243,238,228,.35);border-radius:999px;background:rgba(20,16,12,.55);color:var(--tinta);padding:8px 14px;font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.08em}
+
+@keyframes acto{from{opacity:0}to{opacity:1}}
+@keyframes acto-sale{from{opacity:1}to{opacity:0;transform:translateY(-18px) scale(.94)}}
+@keyframes acto-sale-grande{from{opacity:1}to{opacity:0;transform:scale(1.18)}}
+@keyframes linea{to{transform:scaleX(1)}}
+@keyframes letra-entra{from{opacity:0;transform:translateY(.7em) scale(.7)}to{opacity:1;transform:none}}
+@keyframes titulo-entra{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:none}}
+@keyframes horizonte{from{transform:translateX(0) scale(1)}to{transform:translateX(-28%) scale(1.12)}}
+@keyframes plano{
+  0%{opacity:0;transform:translateX(38vw) scale(.9)}
+  22%{opacity:1;transform:translateX(0) scale(1)}
+  78%{opacity:1;transform:translateX(-3vw) scale(1.04)}
+  100%{opacity:0;transform:translateX(-38vw) scale(1.12)}
+}
+@keyframes icono{from{opacity:0;transform:translateY(24px) scale(.5) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes ken-burns{from{transform:scale(1)}to{transform:scale(1.06)}}
+@keyframes letra-sale{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-.6em) scale(1.5) rotate(-8deg)}}
+@keyframes letra-llega{from{opacity:0;transform:translateY(.6em) scale(.4) rotate(10deg)}to{opacity:1;transform:none}}
+@keyframes palabra-entra{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes respira{50%{transform:scale(1.03)}}
 
 @media (max-width:600px){
-  .n9,.n10{display:none}
-  .nube.cerca{--w:110vmin}
-  .intro-sub{letter-spacing:.14em}
+  .intro-horizonte{height:19vh;bottom:12vh}
+  .intro-iconos{max-width:220px}
 }
 
-/* Botón para volver a ver la intro, en la pista de la portada. */
-.ver-intro{pointer-events:auto;cursor:pointer;border:0;background:none;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--m-oro);text-shadow:inherit}
-.ver-intro:hover{color:#ffe7b0}
+/* Botón para volver a ver la intro: una píldora propia en la pista de la portada. */
+.ver-intro{pointer-events:auto;cursor:pointer;border:1px solid rgba(232,184,74,.55);border-radius:999px;background:rgba(14,13,12,.6);padding:6px 14px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--m-oro);text-shadow:none}
+.ver-intro:hover{color:#ffe7b0;border-color:#ffe7b0}

@@ -11,7 +11,6 @@ import {
   BoxGeometry,
   CanvasTexture,
   DirectionalLight,
-  Color,
   Fog,
   HemisphereLight,
   Mesh,
@@ -63,7 +62,6 @@ import { NIVEL, PALETA } from './palette.ts';
 import type { Ambiente } from '../../world/ambiente.ts';
 import { AMBIENTES, mezclarPreajustes, type Preajuste } from './ambiente.ts';
 import { Decorado, texturaHalo } from './decorado.ts';
-import { CapaNubes } from './capaNubes.ts';
 
 /*
  * Renderer de la Ciudad del Dinero. Solo dibuja el modelo visual y avisa de lo que el usuario
@@ -103,11 +101,6 @@ interface Transicion {
   desplazamientoHacia: number;
   /** Elevación extra a mitad de recorrido: la cámara "vuela" entre lugares alejados. */
   arco: number;
-  /**
-   * Curvas propias por componente (descenso de la intro): distancia, inclinación y giro avanzan a
-   * ritmos distintos para que el movimiento sea arquitectónico y sin brusquedades.
-   */
-  curvas?: { radio: (t: number) => number; phi: (t: number) => number; giro: (t: number) => number };
 }
 
 /**
@@ -167,7 +160,6 @@ export class Mundo3D {
   private crecimientos: { datos: DatosArquitectura; desde: number; inicio: number }[] = [];
   /** Edificios que se levantan durante la entrada cinematográfica. */
   private apariciones: { grupo: Object3D; inicio: number }[] = [];
-  private ultimoFotograma = 0;
   private finEntrada: (() => void) | null = null;
   private focoActual: Foco = { nivel: 'ciudad' };
   private distanciaCiudad = 0;
@@ -203,15 +195,6 @@ export class Mundo3D {
   private cambioAmbiente: { desde: Preajuste; via: Preajuste; hacia: Preajuste; inicio: number } | null = null;
   private readonly decorado: Decorado;
   private texturaFaro: CanvasTexture | null = null;
-  /** Nubes que la cámara atraviesa en el descenso de la intro. */
-  private capaNubes: { capa: CapaNubes; inicio: number; duracion: number; ultimo: number; compensado: number } | null = null;
-  /**
-   * Atmósfera del descenso (0–1): la ciudad sale del mismo blanco que el velo de la intro. Fondo y
-   * niebla toman ese color y se ciñen; al posarse la cámara vuelven a los del ambiente.
-   */
-  private bruma = 0;
-  private readonly colorBruma = new Color('#eaf1f7');
-  private readonly colorNiebla = new Color('#2a2521');
   private ultimoDecorado = 0;
   /** Modo noche (repaso): lo pendiente de cada concepto; null de día. */
   private pendientes: ReadonlyMap<string, { total: number; sorpresas: number }> | null = null;
@@ -385,8 +368,7 @@ export class Mundo3D {
     this.sol.position.set(-lado * 0.55 * f, lado * 0.62 * Math.max(0.25, p.solAltura), lado * 0.62 * f);
     this.relleno.color.set(p.relleno);
     this.relleno.intensity = p.relleno_i;
-    this.colorNiebla.set(p.niebla);
-    if (this.escena.fog instanceof Fog) this.escena.fog.color.copy(this.colorNiebla).lerp(this.colorBruma, this.bruma);
+    if (this.escena.fog instanceof Fog) this.escena.fog.color.set(p.niebla);
     this.escena.environmentIntensity = p.entorno;
     this.renderer.toneMappingExposure = p.exposicion;
     this.decorado.fijarNoche(p.noche);
@@ -563,7 +545,7 @@ export class Mundo3D {
    * Entrada de la primera visita: la cámara desciende sobre la peana mientras los barrios se
    * levantan uno tras otro. Devuelve una función para saltarla (deja la escena en su estado final).
    */
-  entrada(alTerminar: () => void, { retraso = 700, intro = false }: { retraso?: number; intro?: boolean } = {}): () => void {
+  entrada(alTerminar: () => void, { retraso = 700 }: { retraso?: number } = {}): () => void {
     const ahora = performance.now();
     const foco: Foco = { nivel: 'ciudad' };
     this.focoActual = foco;
@@ -572,53 +554,22 @@ export class Mundo3D {
     const objetivo = this.objetivoFoco(foco);
     const theta = this.thetaInicial();
     const final = new Spherical(this.distanciaAjustada(foco, objetivo, OPTICA.ciudad.phi, theta, OPTICA.ciudad.fov), OPTICA.ciudad.phi, theta);
-    // Intro: descenso desde muy alto, en picado (nunca cenital pura) y con un giro amplio y lento;
-    // la distancia frena al final (sin rebote) y el giro se concentra en la mitad del recorrido.
-    const inicio = intro ? new Spherical(final.radius * 3, 0.25, theta - 0.6) : new Spherical(final.radius * 2.3, 0.2, theta - 0.85);
-    const duracion = intro ? 5600 : 5600;
+    const inicio = new Spherical(final.radius * 2.3, 0.2, theta - 0.85);
     this.camara.fov = 24;
     this.fijarDesplazamiento(0);
-    // Los controles limitan la distancia: durante el descenso el límite deja salir desde lo alto.
-    if (intro) this.controles.maxDistance = Math.max(600, inicio.radius * 1.05);
     this.colocarCamara(objetivo, inicio);
-    const suave5 = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
     this.transicion = {
-      inicio: ahora + retraso, duracion, desdeObjetivo: objetivo.clone(), haciaObjetivo: objetivo,
+      inicio: ahora + retraso, duracion: 5600, desdeObjetivo: objetivo.clone(), haciaObjetivo: objetivo,
       desde: inicio, hacia: final, fovDesde: 24, fovHacia: OPTICA.ciudad.fov, desplazamientoDesde: 0, desplazamientoHacia: 0, arco: 0,
-      curvas: intro
-        ? { radio: (t) => 1 - (1 - t) ** 3, phi: (t) => 1 - (1 - t) ** 2, giro: suave5 }
-        : undefined,
     };
-    this.capaNubes?.capa.liberar();
-    this.capaNubes = null;
-    if (intro) {
-      // Capa atmosférica que la cámara atraviesa al bajar.
-      const paso: Vector3[] = [];
-      for (let k = 0.26; k <= 0.62; k += 0.06) {
-        const tr = this.transicion;
-        const sp = new Spherical(
-          inicio.radius + (final.radius - inicio.radius) * tr.curvas!.radio(k),
-          inicio.phi + (final.phi - inicio.phi) * tr.curvas!.phi(k),
-          inicio.theta + (final.theta - inicio.theta) * tr.curvas!.giro(k),
-        );
-        paso.push(new Vector3().setFromSpherical(sp).add(objetivo));
-      }
-      const alto = (sp: Spherical) => Math.cos(sp.phi) * sp.radius + objetivo.y;
-      const suelo = alto(final) * 1.35;
-      const techo = Math.max(suelo + 30, alto(inicio) * 0.62);
-      const capa = new CapaNubes(objetivo, this.modelo.lado * 0.95, suelo, techo, paso);
-      this.escena.add(capa.raiz);
-      this.capaNubes = { capa, inicio: ahora + retraso, duracion, ultimo: ahora, compensado: 0 };
-    }
     const orden = new Map(this.modelo.barrios.map((b, i) => [b.grupoId, i]));
     this.apariciones = this.modelo.edificios.map((e, k) => {
       const grupo = this.dinamica.edificios.get(e.conceptoId)!;
       grupo.scale.y = 0.0001;
-      // Con la intro, la ciudad empieza a levantarse cuando el iris se abre (≈1,8 s de descenso).
-      return { grupo, inicio: ahora + retraso + (intro ? 1700 : 1000) + (orden.get(e.grupoId) ?? 0) * (intro ? 600 : 750) + (k % 7) * 110 };
+      return { grupo, inicio: ahora + retraso + 1000 + (orden.get(e.grupoId) ?? 0) * 750 + (k % 7) * 110 };
     });
     // Lluvia de monedas mientras la ciudad se levanta.
-    this.decorado.llover(ahora + retraso + (intro ? 1900 : 600));
+    this.decorado.llover(ahora + retraso + 600);
     let terminado = false;
     const terminar = () => {
       if (terminado) return;
@@ -632,10 +583,6 @@ export class Mundo3D {
       for (const a of this.apariciones) a.grupo.scale.y = 1;
       this.apariciones = [];
       this.decorado.terminarLluvia();
-      this.capaNubes?.capa.liberar();
-      this.capaNubes = null;
-      this.fijarBruma(0);
-      this.controles.maxDistance = 600;
       this.sombrasSucias = true;
       this.transicion = null;
       this.camara.fov = OPTICA.ciudad.fov;
@@ -770,6 +717,21 @@ export class Mundo3D {
     });
     this.sombrasSucias = true;
     return true;
+  }
+
+  /**
+   * Al terminar la intro: la ciudad aparece con un acercamiento corto (desde algo más lejos, más
+   * alta y girada) hasta el encuadre de la portada.
+   */
+  acercar(): void {
+    const foco: Foco = { nivel: 'ciudad' };
+    this.enfocar(foco, 'maqueta', false);
+    if (this.reducido) return;
+    const objetivo = this.controles.target.clone();
+    const s = new Spherical().setFromVector3(this.camara.position.clone().sub(objetivo));
+    this.colocarCamara(objetivo, new Spherical(Math.min(s.radius * 1.35, this.controles.maxDistance * 0.98), s.phi * 0.8, s.theta - 0.3));
+    this.aplicarEncuadre(foco, true, 1900);
+    this.sucio = true;
   }
 
   enfocar(foco: Foco, vista: VistaMundo, animar: boolean): void {
@@ -1096,16 +1058,13 @@ export class Mundo3D {
     if (!tr) return false;
     const t = Math.min(1, Math.max(0, (ahora - tr.inicio) / tr.duracion));
     const k = suavizar(t);
-    const kr = tr.curvas ? tr.curvas.radio(t) : k;
-    const kp = tr.curvas ? tr.curvas.phi(t) : k;
-    const kg = tr.curvas ? tr.curvas.giro(t) : k;
     const objetivo = tr.desdeObjetivo.clone().lerp(tr.haciaObjetivo, k);
     const s = new Spherical(
-      tr.desde.radius + (tr.hacia.radius - tr.desde.radius) * kr + Math.sin(Math.PI * k) * tr.arco,
-      tr.desde.phi + (tr.hacia.phi - tr.desde.phi) * kp,
-      tr.desde.theta + (tr.hacia.theta - tr.desde.theta) * kg,
+      tr.desde.radius + (tr.hacia.radius - tr.desde.radius) * k + Math.sin(Math.PI * k) * tr.arco,
+      tr.desde.phi + (tr.hacia.phi - tr.desde.phi) * k,
+      tr.desde.theta + (tr.hacia.theta - tr.desde.theta) * k,
     );
-    this.camara.fov = tr.fovDesde + (tr.fovHacia - tr.fovDesde) * kr;
+    this.camara.fov = tr.fovDesde + (tr.fovHacia - tr.fovDesde) * k;
     this.fijarDesplazamiento(tr.desplazamientoDesde + (tr.desplazamientoHacia - tr.desplazamientoDesde) * k);
     this.colocarCamara(objetivo, s);
     if (t >= 1) {
@@ -1169,8 +1128,8 @@ export class Mundo3D {
     if (this.escena.fog instanceof Fog) {
       // Maqueta: niebla ceñida a la distancia de la cámara (atmósfera de maqueta). Paseando, la
       // distancia de visión es larga para ver la ciudad a lo lejos.
-      this.escena.fog.near = this.paseo ? 60 : d * 0.95 * (1 - 0.75 * this.bruma);
-      this.escena.fog.far = this.paseo ? 240 : d * 2.8 * (1 - 0.45 * this.bruma);
+      this.escena.fog.near = this.paseo ? 60 : d * 0.95;
+      this.escena.fog.far = this.paseo ? 240 : d * 2.8;
     }
     const near = Math.min(40, Math.max(0.2, d * 0.04));
     const far = Math.max(d * 3 + this.modelo.lado * 2, 400);
@@ -1185,18 +1144,15 @@ export class Mundo3D {
 
   private fotograma = (ahora: number): void => {
     this.raf = requestAnimationFrame(this.fotograma);
-    this.compensarParon(ahora);
     let cambio = this.avanzarTransicion(ahora);
     cambio = this.avanzarPaseoFotograma(ahora) || cambio;
     cambio = this.controles.update() || cambio;
     cambio = this.animarCrecimientos(ahora) || cambio;
     cambio = this.animarApariciones(ahora) || cambio;
     cambio = this.avanzarAmbiente(ahora) || cambio;
-    cambio = this.avanzarCapaNubes(ahora) || cambio;
     cambio = this.decorado.animarLluvia(ahora) || cambio;
     this.lienzo.dataset.lluvia = this.decorado.lloviendo ? '1' : '';
-    this.lienzo.dataset.descenso = this.capaNubes ? '1' : '';
-    // Distancia de la cámara a su objetivo (la leen las pruebas del descenso de la intro).
+    // Distancia de la cámara a su objetivo (la leen las pruebas de la intro).
     this.lienzo.dataset.distancia = this.camara.position.distanceTo(this.controles.target).toFixed(1);
     if (!this.reducido) cambio = this.animarAmbiente(ahora / 1000) || cambio;
     // Palomas y nubes: vida de fondo, a ~30 fps y solo si no hay nada más que dibujar.
@@ -1224,54 +1180,6 @@ export class Mundo3D {
     this.sucio = false;
     this.opciones.alFotograma();
   };
-
-  /** Nubes del descenso: deriva y disolución; al acabar el descenso se apagan y se liberan. */
-  private avanzarCapaNubes(ahora: number): boolean {
-    const c = this.capaNubes;
-    if (!c) return false;
-    const dt = Math.min(0.1, (ahora - c.ultimo) / 1000);
-    c.ultimo = ahora;
-    const t = (ahora - c.inicio) / c.duracion;
-    // En el último tercio del descenso la capa se va apagando del todo.
-    const apagado = Math.min(1, Math.max(0, (t - 0.62) / 0.3));
-    this.camara.updateMatrixWorld();
-    c.capa.actualizar(this.camara, dt, apagado);
-    // La bruma se disipa entre el 28 % y el 68 % del descenso (el iris se abre hacia el 32 %): así
-    // las nubes, blancas, se recortan sobre la ciudad mientras la cámara las cruza.
-    const k = Math.min(1, Math.max(0, (t - 0.28) / 0.4));
-    this.fijarBruma(t < 0 ? 1 : 1 - k * k * (3 - 2 * k));
-    if (t >= 1) {
-      c.capa.liberar();
-      this.capaNubes = null;
-      this.fijarBruma(0);
-      this.controles.maxDistance = 600;
-    }
-    return true;
-  }
-
-  /**
-   * Si en el descenso de la intro un fotograma llega muy tarde (el navegador compila sombreadores
-   * o sube texturas), el descenso se desplaza lo que sobra: el parón lo pausa en vez de saltárselo.
-   * Con un tope, para que un equipo lento de verdad no lo deje congelado.
-   */
-  private compensarParon(ahora: number): void {
-    const sobra = Math.min(ahora - this.ultimoFotograma - 250, 2500);
-    this.ultimoFotograma = ahora;
-    const c = this.capaNubes;
-    if (!c || sobra <= 0 || c.compensado >= 2500) return;
-    const d = Math.min(sobra, 2500 - c.compensado);
-    c.compensado += d;
-    c.inicio += d;
-    c.ultimo += d;
-    if (this.transicion) this.transicion.inicio += d;
-    for (const a of this.apariciones) a.inicio += d;
-  }
-
-  private fijarBruma(b: number): void {
-    this.bruma = b;
-    this.renderer.setClearColor(this.colorBruma, b);
-    if (this.escena.fog instanceof Fog) this.escena.fog.color.copy(this.colorNiebla).lerp(this.colorBruma, b);
-  }
 
   private animarCrecimientos(ahora: number): boolean {
     if (!this.crecimientos.length) return false;

@@ -44,7 +44,7 @@ async function pagina(opts, init) {
 }
 const progreso = () => {
   localStorage.setItem('cdd-t1', JSON.stringify({ dom: { bde: 1, bancos: 0.5, cnmv: 1 }, tries: {} }));
-  localStorage.setItem('financial-academy:entrada', '"vista"');
+  localStorage.setItem('financial-academy:entrada', '"trailer-1"');
 };
 
 // 1. Escritorio
@@ -187,45 +187,52 @@ const progreso = () => {
   await p.close();
 }
 
-// 1b. Intro cinemática (primera visita): a pantalla completa ANTES del mapa, termina sola, se
-// repite con "Ver la intro" y se salta con el botón o con Escape.
+// 1b. Intro (tráiler de títulos): a pantalla completa ANTES del mapa, también para quien vio una
+// intro anterior; no se congela con el hilo principal ocupado; termina sola, se repite con
+// "Ver la intro" y se salta con el botón o con Escape.
 {
   const p = await pagina({ viewport: { width: 1300, height: 860 } }, () => {
-    // Antes que nada: ¿aparece la intro antes que el lienzo 3D?
+    if (!sessionStorage.getItem('ya')) {
+      sessionStorage.setItem('ya', '1');
+      localStorage.setItem('financial-academy:entrada', '"vista"'); // intro antigua ya vista
+    }
     new MutationObserver(() => {
       if (!window.__orden && document.querySelector('.intro')) window.__orden = document.querySelector('.mundo-lienzo') ? 'lienzo-primero' : 'intro-primero';
     }).observe(document, { childList: true, subtree: true });
   });
   await p.goto('http://localhost:4173/');
   const capa = await p.waitForSelector('.intro', { state: 'attached', timeout: 30000 }).then(() => true).catch(() => false);
-  ok('intro: aparece antes que el mapa', capa && (await p.evaluate(() => window.__orden)) === 'intro-primero');
+  ok('intro: sale aunque se viera la intro anterior, antes que el mapa', capa && (await p.evaluate(() => window.__orden)) === 'intro-primero');
   ok('intro: a pantalla completa', await p.evaluate(() => { const r = document.querySelector('.intro')?.getBoundingClientRect(); return Boolean(r && r.width >= innerWidth && r.height >= innerHeight && getComputedStyle(document.querySelector('.intro')).position === 'fixed'); }));
-  ok('intro: nubes, morph y bienvenida', (await p.locator('.intro .nube').count()) >= 14 && (await p.locator('.intro .m-b').textContent()) === 'Bienvenido a la Ciudad Financiera' && (await p.locator('.intro-sub span').count()) >= 5);
+  ok('intro: un plano por apartado, morph y bienvenida', (await p.locator('.intro-plano').count()) === 4 && (await p.locator('.intro .m-b').textContent()).replace(/\s+/g, ' ').trim() === 'Bienvenido a la Ciudad Financiera' && (await p.locator('.intro-sub span').count()) >= 5);
   ok('intro: la barra no se ve durante la intro', (await p.evaluate(() => document.body.classList.contains('intro-activa') && getComputedStyle(document.querySelector('.mundo-barra')).opacity === '0')));
+  // El guion entero está programado en CSS desde el principio (retrasos absolutos): no depende
+  // de temporizadores de JS, que se retrasan cuando la 3D ocupa el hilo principal.
+  ok('intro: el guion completo está programado en CSS desde el inicio', await p.evaluate(() => {
+    const retraso = (sel) => Math.max(...getComputedStyle(document.querySelector(sel)).animationDelay.split(',').map((d) => parseFloat(d)));
+    return retraso('.intro-plano:last-of-type') >= 5 && retraso('.intro .lb') >= 7 && retraso('.intro-sub span') >= 8;
+  }));
   await p.waitForSelector('.intro', { state: 'detached', timeout: 90000 }).catch(() => {});
-  ok('intro: termina sola y queda vista', (await p.locator('.intro').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-activa'))) && (await p.evaluate(() => localStorage.getItem('financial-academy:entrada'))) === '"vista"');
-  await p.waitForFunction(() => { const d = document.querySelector('.mundo-lienzo')?.dataset; return d && !d.lluvia && !d.descenso; }, null, { timeout: 90000 }).catch(() => {});
-  await p.waitForTimeout(1000);
-  const distanciaFinal = Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
+  ok('intro: termina sola y queda vista', (await p.locator('.intro').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-activa'))) && (await p.evaluate(() => localStorage.getItem('financial-academy:entrada'))) === '"trailer-1"');
+  // Distancia de la cámara cuando deja de moverse (el acercamiento final tarda en SwiftShader).
+  const estable = async () => {
+    let previa = -1;
+    for (let k = 0; k < 40; k++) {
+      await p.waitForTimeout(500);
+      const d = Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
+      if (d === previa) return d;
+      previa = d;
+    }
+    return previa;
+  };
+  const distanciaFinal = await estable();
   await pulsar(p, '[data-ver-intro]');
   await p.waitForSelector('.intro', { state: 'attached', timeout: 10000 }).catch(() => {});
   ok('intro: "Ver la intro" la repite sin abrir pantalla completa', (await p.locator('.intro').count()) === 1 && !(await p.evaluate(() => Boolean(document.fullscreenElement))));
-  // La cámara sube para el descenso: se mide desde la propia página (la distancia máxima vista).
-  await p.evaluate(() => {
-    window.__maxDist = 0;
-    window.__medidor = setInterval(() => { window.__maxDist = Math.max(window.__maxDist, Number(document.querySelector('.mundo-lienzo')?.dataset.distancia) || 0); }, 50);
-  });
-  await p.waitForSelector('.intro', { state: 'detached', timeout: 90000 }).catch(() => {});
-  await p.waitForFunction(() => !document.querySelector('.mundo-lienzo')?.dataset.descenso, null, { timeout: 90000 }).catch(() => {});
-  const maxDist = await p.evaluate(() => { clearInterval(window.__medidor); return window.__maxDist; });
-  ok('intro: el descenso arranca desde lo alto y se posa en el encuadre de la portada', maxDist > distanciaFinal * 1.3 && Math.abs(Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia)) - distanciaFinal) / distanciaFinal < 0.05, `máx ${maxDist} · final ${distanciaFinal}`);
-  // Saltarla a mitad del descenso: la cámara vuelve al encuadre final.
-  await pulsar(p, '[data-ver-intro]');
-  await p.waitForFunction(() => document.querySelector('.mundo-lienzo')?.dataset.descenso === '1', null, { timeout: 60000 }).catch(() => {});
+  await p.waitForTimeout(1500);
   await p.locator('.intro-saltar').click({ force: true }).catch(() => {});
-  await p.waitForTimeout(800);
-  const tras = Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
-  ok('intro: se salta con el botón y deja la cámara en el encuadre final', (await p.locator('.intro').count()) === 0 && (await p.locator('.mundo.portada').count()) === 1 && Math.abs(tras - distanciaFinal) / distanciaFinal < 0.05, `${tras} vs ${distanciaFinal}`);
+  const tras = await estable();
+  ok('intro: se salta con el botón y deja la ciudad en su encuadre', (await p.locator('.intro').count()) === 0 && (await p.locator('.mundo.portada').count()) === 1 && Math.abs(tras - distanciaFinal) / distanciaFinal < 0.05, `${tras} vs ${distanciaFinal}`);
   await pulsar(p, '[data-ver-intro]');
   await p.waitForSelector('.intro', { state: 'attached', timeout: 10000 }).catch(() => {});
   await p.keyboard.press('Escape');

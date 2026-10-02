@@ -1,4 +1,3 @@
-import { prepararNubesIntro } from '../components/nubesRealistas.ts';
 import { reproducirIntro } from '../intro/introCinematica.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
 import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
@@ -36,8 +35,10 @@ import { atlasHtml, barraMundo, esqueletoMundo, historiaHtml, type Miga, separar
 export const CLAVE_VISTA = 'financial-academy:vista';
 /** Zoom con la rueda fuera de pantalla completa (comodidad local). */
 export const CLAVE_ZOOM = 'financial-academy:zoom-rueda';
-/** La entrada cinematográfica solo se muestra completa la primera vez. */
+/** La intro solo se muestra sola la primera vez. */
 export const CLAVE_ENTRADA = 'financial-academy:entrada';
+/** Valor de la intro actual: quien vio una intro anterior (otro valor) ve el tráiler una vez. */
+export const INTRO_VISTA = 'trailer-1';
 
 /**
  * Orquesta el mundo de la portada: un único foco compartido por la cámara 3D, las etiquetas
@@ -137,7 +138,7 @@ export class ControladorMundo {
     this.pintarPanel();
     // Primera visita: la intro va ANTES del mapa, a pantalla completa, mientras la 3D carga debajo.
     let avisar: (ok: boolean) => void = () => {};
-    if (this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') {
+    if (this.foco.nivel === 'ciudad' && !this.vistaAtlas && !this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== INTRO_VISTA) {
       this.lanzarIntro(new Promise<boolean>((r) => (avisar = r)));
     }
     void this.prepararVista().then(avisar, () => avisar(false));
@@ -254,25 +255,21 @@ export class ControladorMundo {
   }
 
   /**
-   * Intro cinemática (primera visita o "Ver la intro"): el primer acto de la ciudad, a pantalla
-   * completa. Bajo su velo la cámara empieza a descender y, al abrirse el iris, sigue bajando entre
-   * nubes hasta posarse en el encuadre de la portada. Se salta con el botón, Escape o un toque.
+   * Intro (primera visita o "Ver la intro"): tráiler de títulos a pantalla completa antes del
+   * mapa, mientras la 3D se monta debajo. Se salta con el botón, Escape o un toque.
    */
   private lanzarIntro(mundoListo: Promise<boolean>): void {
     this.cerrarEntrada?.();
-    const { numero, titulo } = this.estado.tema.meta;
-    let saltarDescenso: (() => void) | null = null;
     this.cerrarEntrada = reproducirIntro({
+      tema: this.estado.tema,
+      progreso: this.estado.progreso,
       mundoListo,
-      subtitulo: `Gestión financiera · Tema ${numero} · ${titulo}`,
-      alDescender: () => {
-        if (!this.activo3d) return;
-        this.foco = FOCO_CIUDAD;
-        saltarDescenso = this.mundo!.entrada(() => {}, { retraso: 0, intro: true });
+      // Mientras la capa se funde, la ciudad recibe al usuario con un acercamiento corto.
+      alSalir: () => {
+        if (this.activo3d && this.foco.nivel === 'ciudad' && !this.vistaAtlas) this.mundo!.acercar();
       },
-      alSaltar: () => saltarDescenso?.(),
       alTerminar: () => {
-        escribirJson(this.almacen, CLAVE_ENTRADA, 'vista');
+        escribirJson(this.almacen, CLAVE_ENTRADA, INTRO_VISTA);
         this.cerrarEntrada = null;
       },
     });
@@ -280,7 +277,6 @@ export class ControladorMundo {
 
   private async crearMundo(): Promise<Mundo3D> {
     // Si la intro va a sonar, sus nubes se generan mientras se descarga y monta la escena 3D.
-    if (!this.reducido && leerJson(this.almacen, CLAVE_ENTRADA) !== 'vista') prepararNubesIntro();
     // Three.js va en un fragmento aparte: la portada 2D no lo descarga.
     const { Mundo3D } = await import('../../scene/three/cityScene.ts');
     return new Mundo3D(this.modelo, {
