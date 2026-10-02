@@ -39,4 +39,4 @@ clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
   fecha de examen opcional.
 - [x] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.
 - [x] 16. Mi progreso: racha, actividad, simulacros, calibración y acierto por bloque.
-- [ ] 17. Auditoría visual final, docs, PR y artefacto. Resumen en `docs/resumen-noche.md`.
+- [x] 17. Auditoría visual final, docs, PR y artefacto. Resumen en `docs/resumen-noche.md`.

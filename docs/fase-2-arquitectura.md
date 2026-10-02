@@ -367,6 +367,22 @@ con barra fina y dominio alineados a la derecha. La leyenda tiene cuatro claves.
   - Un test vigila la cobertura y que la respuesta correcta no esté siempre en la misma posición.
 - **Móvil:** joystick táctil para pasear. La portada ya no muestra el texto de fases del prototipo.
 
+## Métodos de estudio (noche 2)
+
+Evidencia y criterios en `docs/metodos-estudio.md`.
+
+- **`domain/practice.ts`:** confianza (`Seguro`, `Dudo`, `Adivino`) con calibración, repetición
+  espaciada de preguntas, actividad diaria, acierto por concepto y fecha de examen
+  (`intervaloAjustado`: ≤ 20 % de los días que faltan). `registrarRespuesta` reúne todo; la lectura
+  de datos de la versión anterior es compatible.
+- **`domain/session.ts`:** `construirSesion` mezcla repaso (primero las sorpresas), preguntas
+  vencidas, flashcards y nuevas por `prioridadBloques`, e intercala por concepto y bloque.
+- **`domain/recall.ts`:** "Escríbelo tú" compara el texto con las ideas clave (las negritas de DATA)
+  por raíces de palabra.
+- **Vistas:** `#sesion` (Estudiar hoy), `#progreso` (Mi progreso), pretest en cada sección y
+  `pintarPreguntaConConfianza` (práctica, repaso, simulacros de bloque y sesión). El simulacro del
+  tema pide la confianza de forma opcional y muestra la calibración.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

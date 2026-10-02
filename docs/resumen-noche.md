@@ -1,3 +1,60 @@
+# Resumen de la noche 2 (02/10)
+
+**Peticiones:**
+- "Dedícate la noche entera a pensar y solucionar errores: no se muestran correctamente los menús ni
+  los cuadros están bien situados".
+- "Trabajar en automático toda la noche en investigar e implementar métodos más óptimos de estudio".
+
+**Dónde está:**
+- Cola: `docs/cola-trabajo.md` (tareas 11–17), todas hechas.
+- Vista previa en el mismo enlace: https://claude.ai/artifact/Xkte8QVBzTan8pEMPuKg1i
+- PR: https://github.com/giorgioangelo57/FINANCIALACADEMY/pull/1
+
+## 1. Menús y cuadros
+Auditoría con capturas a 1400, 1024, 820 y 390 px de portada, exploración, barrio, zona, secciones,
+predicción, simulacro, repaso, menú móvil y modo 2D. Fallos encontrados y corregidos:
+
+| Fallo | Corrección |
+|---|---|
+| La barra del mapa (migas + 5 botones) se partía en 2–3 líneas, y en móvil ocupaba media pantalla | Dos filas fijas, cada una desplazable en horizontal. En móvil, solo el nivel actual, y sin "Zoom con rueda" en pantallas táctiles |
+| Rótulos de edificios fuera del visor, amontonados o tapados por la ficha | Se colocan dentro del visor, sin pisarse, y nunca debajo de la ficha. En móvil, los secundarios que no caben se ocultan |
+| En móvil la ficha tapaba medio mapa | Ficha compacta: título, estado y acción |
+| Pista de la portada pegada al borde en móvil | Centrada y con margen |
+| En Examen, Simulacro o Repaso el índice no mostraba dónde estabas (grupo al final) | El índice lleva a la vista el apartado activo |
+| Desplazamiento horizontal de 2 px en algunas secciones en móvil | Recorte horizontal a nivel de página |
+
+## 2. Métodos de estudio (investigación en `docs/metodos-estudio.md`)
+
+| Técnica (evidencia) | Qué hay ahora en la app |
+|---|---|
+| **Práctica de recuperación** y **espaciado** (las de mayor utilidad, Dunlosky et al. 2013) | **🎯 Estudiar hoy** (`#sesion`): sesión de 10, 15 o 25 min que mezcla tu repaso, lo que toca repasar hoy, preguntas nuevas de lo que más cae y menos dominas, y flashcards. La repetición espaciada se aplica también a las preguntas |
+| **Espaciado según la fecha del examen** (Cepeda et al. 2008: intervalo ≈ 10–20 % del plazo) | Fecha de examen opcional: los intervalos nunca superan el 20 % de los días que faltan |
+| **Intercalado** (g = 0,42) | La sesión nunca pone dos preguntas seguidas del mismo concepto y alterna bloques |
+| **Confianza / hipercorrección** (Butterfield y Metcalfe 2001) | Antes de corregir: "Seguro / Dudo / Adivino" en práctica, repaso, sesión y simulacros. Los errores con seguridad se avisan y se repasan primero; los aciertos sin seguridad vuelven al repaso. En el simulacro hay un gráfico "¿Sabías lo que sabías?" |
+| **Pretest** (Richland, Kornell y Kao 2009) | 3 preguntas rápidas al abrir cada sección, antes de las fichas |
+| **Generación / recuerdo libre** | **✍️ Escríbelo tú** en cada ficha: la definición se oculta, escribes de memoria y se compara con las ideas clave de DATA |
+| **Metacognición y constancia** | **📈 Mi progreso** (`#progreso`): racha, actividad de 4 semanas, memoria a largo plazo, fiabilidad de tu seguridad (con lectura de exceso o falta de confianza), acierto por bloque y evolución de los simulacros |
+
+## Garantías
+- DATA y el formato del progreso no cambian.
+- La práctica se guarda en `financial-academy:practica`, ampliada de forma compatible (los datos
+  anteriores se leen bien; hay test).
+- El dominio solo sube con "Compruébalo".
+
+## Verificación
+- 170 tests, typecheck y build correctos.
+- `scripts/verificar-chromium.mjs` en verde, con comprobaciones nuevas de sesión, progreso, pretest y
+  "Escríbelo tú" en escritorio y móvil, y sin errores de consola.
+
+## Commits
+- `3f120a3 Escríbelo tú (recuerdo libre) y pretest al abrir una sección`
+- `b67587f Estudiar hoy (práctica espaciada e intercalada) y Mi progreso`
+- `23b3a20 Confianza antes de corregir y calibración (metacognición)`
+- `58afddc Investigación de métodos de estudio y cola de la noche 2`
+- `c77172b Corrige menús y cuadros mal situados`
+
+---
+
 # Resumen de la noche (01→02/10)
 
 Cola completada: tareas 1–7, 9 y 10. La tarea 8 (extender la gramática urbana a los barrios 1–3) es

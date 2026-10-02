@@ -176,6 +176,44 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.close();
 }
 
+// 7. Métodos de estudio: sesión de hoy, mi progreso, escríbelo tú y pretest
+for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móvil']]) {
+  const p = await pagina({ viewport: { width: ancho, height: alto } });
+  await p.goto('http://localhost:4173/#sesion');
+  await p.waitForSelector('[data-ses-empezar]');
+  await p.click('.sim-op:has(input[value="10"])');
+  await p.waitForSelector('[data-ses-empezar]');
+  await p.click('[data-ses-empezar]');
+  for (let i = 0; i < 10; i++) {
+    if (await p.locator('[data-ses-girar]').count()) {
+      await p.click('[data-ses-girar]');
+      await p.click('[data-sabia="1"]');
+      continue;
+    }
+    const opciones = p.locator('[data-ses-panel] .opt');
+    await opciones.nth(i % (await opciones.count())).click();
+    await p.click(['[data-conf="seguro"]', '[data-conf="dudo"]', '[data-conf="adivino"]'][i % 3]);
+    await p.click('[data-ses-sig]');
+  }
+  ok(`sesión de hoy (${nombre}): completada`, (await p.locator('.ses-fin h2').textContent()).includes('de 10 bien'));
+  ok(`sesión de hoy (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho + 2);
+  await p.goto('http://localhost:4173/#progreso');
+  await p.waitForSelector('.prog-tiles');
+  ok(`mi progreso (${nombre}): racha y memoria`, (await p.locator('.prog-tile').first().locator('b').textContent()) === '1' && (await p.locator('.prog-memoria i').count()) > 1);
+  await p.screenshot({ path: `${SP}/ver-progreso-${ancho}.png` });
+  await p.goto('http://localhost:4173/#s/4.2A');
+  await p.waitForSelector('#c-fgd');
+  await p.click('[data-pre="empezar"]');
+  await p.locator('[data-pretest] .opt').first().click();
+  ok(`pretest (${nombre}): corrige y orienta a la ficha`, (await p.locator('[data-pretest] .opt.ok').count()) === 1);
+  await p.click('#c-fgd .ab.w');
+  const oculta = await p.locator('#c-fgd .corta').evaluate((e) => getComputedStyle(e).filter.includes('blur'));
+  await p.fill('#c-fgd .rec-texto', 'Garantiza los depósitos hasta 100.000 euros');
+  await p.click('#c-fgd [data-rec="comparar"]');
+  ok(`escríbelo tú (${nombre}): oculta la definición y compara`, oculta && (await p.locator('#c-fgd .rec-ideas li').count()) > 0);
+  await p.close();
+}
+
 // 6. Paseo táctil
 {
   const p = await pagina({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, progreso);
