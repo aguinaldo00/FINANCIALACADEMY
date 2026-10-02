@@ -56,6 +56,8 @@ const progreso = () => {
   ok('escritorio: lienzo 3D montado', await p.locator('.mundo-lienzo').count() === 1);
   ok('historia: la ciudad 2D del prototipo está al final de la página', await p.evaluate(() => { const h = document.querySelector('.historia .skyline'); const m = document.querySelector('.mundo'); return Boolean(h && m && h.getBoundingClientRect().top > m.getBoundingClientRect().bottom); }));
   ok('sin botón de modo 2D', (await p.locator('[data-mundo-modo]').count()) === 0);
+  ok('línea de tiempo: entre el mapa y el bloque del tema, con los 12 subpuntos', await p.evaluate(() => { const hijos = [...document.querySelector('#page').children].map((e) => e.classList[0]); return hijos.indexOf('tl') === hijos.indexOf('mundo') + 1 && hijos.indexOf('hero') === hijos.indexOf('tl') + 1; }) && (await p.locator('.tl-parada').count()) === 12 && (await p.locator('.tl-tramo').count()) === 12);
+  ok('línea de tiempo: la siguiente recomendación destacada', (await p.locator('.tl-parada.siguiente').count()) === 1);
   const rotulos = await p.locator('.m-etq').allTextContents();
   ok('escritorio: solo los 4 barrios rotulados', rotulos.length === 4, rotulos.join(' | '));
   ok('escritorio: sin porcentajes ni pines en el mundo', !rotulos.join('').includes('%') && !(await p.locator('.mundo-vista').textContent()).includes('📌'));

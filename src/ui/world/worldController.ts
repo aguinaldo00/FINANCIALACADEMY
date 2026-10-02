@@ -227,6 +227,9 @@ export class ControladorMundo {
     // Con la ciudad 3D funcionando, el mundo pasa a ser lo primero de la portada. Se vuelve a la
     // portada (landing) cuando se llega a la vista general; desde un lugar estudiado, a explorar.
     raiz.parentElement?.prepend(raiz);
+    // La línea de tiempo del tema acompaña al mapa: queda entre su leyenda y el bloque del tema.
+    const linea = raiz.parentElement?.querySelector('.tl');
+    if (linea) raiz.after(linea);
     this.fijarPortada(!explorando && this.foco.nivel === 'ciudad' && !this.vistaAtlas);
     this.vigilarInmersion(vista);
     this.aplicarZoom();
@@ -590,7 +593,7 @@ export class ControladorMundo {
         { passive: false },
       );
       vista.addEventListener('pointerup', (e) => {
-        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.entrada, button')) {
+        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.entrada, .ver-intro, .mundo-acciones')) {
           // Clic en el mapa de la portada: pantalla completa y exploración.
           void this.entrarPantallaCompleta();
         }

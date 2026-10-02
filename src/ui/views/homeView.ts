@@ -7,6 +7,7 @@ import { LEYENDA_GLIFOS } from '../../icons/legend.ts';
 import { ciudadPixel } from '../../scene/pixelCity.ts';
 import { MARCA, MARCA_COMPLETA, tituloMarca } from '../components/brandTitle.ts';
 import { anilloDominio } from '../components/ring.ts';
+import { lineaTemporal } from '../components/timeline.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -30,6 +31,7 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
 
   ctx.pagina.innerHTML = `<section class="hero rev"><span class="pill k">Tema ${tema.meta.numero} · ${tema.meta.titulo}</span>${tituloMarca('hero', 'h1')}<p>Cada entidad del sistema financiero es un edificio con su símbolo. Lee la ficha, pide que te lo expliquen de otra forma, desactiva la trampa del examen y compruébalo.</p></section>
  <section class="mundo" data-mundo aria-label="Mapa explorable de ${MARCA.ciudad}"></section>
+ ${lineaTemporal(tema, progreso)}
 
  <div class="dash rev"><div class="big">${anilloDominio(dominioGlobal(tema, progreso), 130)}</div><div><h3>📌 Estudia ya: lo que más pesa y menos dominas</h3><div class="ya">${estudiaYa}</div></div></div>
  <h2 class="h2 rev">Subpuntos del tema</h2><div class="tiles">${tiles}</div>

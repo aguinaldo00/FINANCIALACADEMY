@@ -518,6 +518,18 @@ Evidencia y criterios en `docs/metodos-estudio.md`.
   - Sigue sirviendo de alternativa si no hay WebGL.
   - La preferencia antigua `financial-academy:vista` se ignora.
 
+## Línea de tiempo del tema (02/10)
+
+- **Ubicación:** entre el mapa (su leyenda) y el bloque "Tema 1" (`ui/components/timeline.ts`).
+  - El controlador del mundo la coloca justo detrás del mapa al anteponerlo; sin 3D queda tras el
+    Atlas.
+- **Barra:** un tramo por subpunto, de ancho proporcional al peso en el examen, rellenado con tu
+  dominio y con el color de su apartado.
+- **Debajo:** los 4 apartados en columnas (apiladas en móvil), cada uno con su color, su peso y sus
+  subpuntos como paradas, rellenas con tu dominio.
+- **Siguiente recomendación:** destacada; su parada late.
+- **Navegación:** todo lleva a la sección.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y
