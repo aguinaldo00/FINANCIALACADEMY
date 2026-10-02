@@ -666,6 +666,11 @@ export class Mundo3D {
     const base = avatar.raiz.position.y - (paseo.altura ?? 0);
     const y = base + (suelo - base) * Math.min(1, dt * 14);
     avatar.raiz.position.set(nuevo.posicion.x, y + (nuevo.altura ?? 0), nuevo.posicion.z);
+    // Estado observable (pruebas y accesibilidad): en el aire o en el suelo, y si se desplaza.
+    const enAire = (nuevo.altura ?? 0) > 0.01 ? '1' : '0';
+    if (this.lienzo.dataset.enAire !== enAire) this.lienzo.dataset.enAire = enAire;
+    const andando = nuevo.velocidad > 0.05 ? '1' : '0';
+    if (this.lienzo.dataset.andando !== andando) this.lienzo.dataset.andando = andando;
     avatar.raiz.rotation.y = nuevo.rumbo;
     // Se anima también el fotograma en que se detiene: así vuelve a la pose de reposo.
     animarAvatar(

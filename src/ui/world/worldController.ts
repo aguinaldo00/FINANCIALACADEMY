@@ -372,8 +372,24 @@ export class ControladorMundo {
     });
     joy.addEventListener('pointerup', soltar);
     joy.addEventListener('pointercancel', soltar);
-    raiz.querySelector<HTMLButtonElement>('[data-paseo-saltar]')?.addEventListener('click', () => this.paseando && this.saltarODash());
-    raiz.querySelector<HTMLButtonElement>('[data-paseo-entrar]')?.addEventListener('click', () => {
+    // Con un dedo en el joystick, el navegador no genera `click` para el segundo dedo: los botones
+    // responden a `pointerdown` (multitáctil) y se ignora el `click` posterior para no repetir.
+    const pulsar = (sel: string, accion: () => void) => {
+      const b = raiz.querySelector<HTMLButtonElement>(sel);
+      if (!b) return;
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        b.classList.add('pulsado');
+        accion();
+      });
+      for (const fin of ['pointerup', 'pointercancel', 'pointerleave'] as const) b.addEventListener(fin, () => b.classList.remove('pulsado'));
+      // Teclado y lectores de pantalla (sin puntero): `click` con `detail === 0`.
+      b.addEventListener('click', (e) => {
+        if (e.detail === 0) accion();
+      });
+    };
+    pulsar('[data-paseo-saltar]', () => this.paseando && this.saltarODash());
+    pulsar('[data-paseo-entrar]', () => {
       if (this.paseando && this.cercano) location.hash = hrefConcepto(this.cercano);
     });
   }

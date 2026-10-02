@@ -238,6 +238,19 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.locator('[data-joy]').dispatchEvent('pointerup', { pointerId: 7, clientX: cx, clientY: cy - 50, bubbles: true });
   const despues = await p.locator('.mundo-lienzo').screenshot();
   ok('móvil: el joystick mueve al personaje', !antes.equals(despues));
+  // Dos dedos: uno mantiene el joystick y el otro pulsa «Saltar» (salto caminando).
+  const cdp = await p.context().newCDPSession(p);
+  const sal = await p.locator('[data-paseo-saltar]').boundingBox();
+  const dedoJoy = { x: cx, y: cy - 50, id: 1 };
+  const dedoSalto = { x: sal.x + sal.width / 2, y: sal.y + sal.height / 2, id: 2 };
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [dedoJoy] });
+  await p.waitForTimeout(500);
+  const andando = await p.evaluate(() => document.querySelector('.mundo-lienzo').dataset.andando);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [dedoJoy, dedoSalto] });
+  let enAire = '0';
+  for (let i = 0; i < 20 && enAire !== '1'; i++) { await p.waitForTimeout(50); enAire = await p.evaluate(() => document.querySelector('.mundo-lienzo').dataset.enAire); }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  ok('móvil: salta mientras camina (dos dedos)', andando === '1' && enAire === '1', `andando ${andando} · en el aire ${enAire}`);
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-joystick.png` });
   await p.close();
 }

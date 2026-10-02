@@ -207,7 +207,8 @@ body.portada-inmersiva .mundo>:not(.mundo-vista){padding-inline:max(16px,calc(50
 .joy-botones{display:flex;gap:12px;pointer-events:auto}
 .joy-btn{display:grid;place-items:center;width:70px;height:70px;border-radius:50%;border:2px solid var(--m-linea);background:rgba(14,13,12,.6);color:var(--m-tinta);font-size:1.4rem;line-height:1;touch-action:manipulation;cursor:pointer}
 .joy-btn small{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.joy-btn:active{background:var(--m-oro);color:var(--m-noche)}
+.joy-btn:active,.joy-btn.pulsado{background:var(--m-oro);color:var(--m-noche)}
+.joy-btn{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .joy-btn[data-paseo-entrar]:disabled{opacity:.35}
 
 /* Pantalla completa del mapa (API nativa o capa de reserva). */
