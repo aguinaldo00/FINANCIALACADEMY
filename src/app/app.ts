@@ -5,7 +5,9 @@ import { pintarRail } from '../ui/components/rail.ts';
 import { activarAparicion, conectarFichas, conectarMenuMovil } from '../ui/interactions.ts';
 import type { ContextoVista } from '../ui/views/context.ts';
 import { pintarExamen } from '../ui/views/examView.ts';
+import { pintarProgreso } from '../ui/views/progresoView.ts';
 import { pintarRepaso } from '../ui/views/repasoView.ts';
+import { pintarSesion } from '../ui/views/sesionView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
@@ -39,11 +41,13 @@ export function iniciarApp(tema: Tema): void {
     const ruta = resolverRuta(location.hash, tema);
     seccionActual = null;
     detenerSimulacro();
-    if (ruta.vista === 'examen' || ruta.vista === 'simulacro' || ruta.vista === 'repaso') {
+    if (ruta.vista !== 'inicio' && ruta.vista !== 'seccion') {
       seccionActual = ruta.vista;
       mundo.desmontar();
       if (ruta.vista === 'examen') pintarExamen(ctx, estado, practica);
       else if (ruta.vista === 'simulacro') pintarSimulacro(ctx, estado, practica);
+      else if (ruta.vista === 'sesion') pintarSesion(ctx, estado, practica);
+      else if (ruta.vista === 'progreso') pintarProgreso(ctx, estado, practica);
       else pintarRepaso(ctx, estado, practica);
     } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;

@@ -40,7 +40,7 @@ const progreso = () => {
   ok('portada: barra lateral retirada', (await p.locator('.rail').boundingBox()).x < 0);
   ok('portada: botón flotante del índice', await p.locator('#ib').isVisible());
   ok('portada: título de marca sobre el mapa', (await p.locator('.portada-marca .marca').getAttribute('aria-label')) === 'Gestión financiera: La ciudad del dinero');
-  ok('índice: el grupo Examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-3).map((a) => a.getAttribute('href')))) === '["#examen","#simulacro","#repaso"]');
+  ok('índice: el grupo Estudio y examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-5).map((a) => a.getAttribute('href')))) === '["#sesion","#examen","#simulacro","#repaso","#progreso"]');
   await p.mouse.move(700, 500);
   await p.mouse.wheel(0, 800);
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});

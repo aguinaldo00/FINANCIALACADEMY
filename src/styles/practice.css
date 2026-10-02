@@ -107,3 +107,64 @@
 .sim-c-conf{display:inline-block;margin:6px 0 0 1.9em;font-size:.75rem;font-weight:700;border-radius:999px;padding:1px 10px;border:1px solid #3b82f6;color:#cfe0ff}
 .sim-c-conf.sorpresa{border-color:var(--y);color:var(--y)}
 .sim-correccion li.sorpresa{border-left-color:var(--y)}
+
+/* Estudiar hoy */
+.ses-plan{display:grid;gap:16px;margin-top:22px;padding:22px;border-radius:24px;background:var(--bg2);border:1px solid var(--line)}
+.ses-plan[hidden]{display:none}
+.ses-resumen{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.ses-resumen li{display:flex;gap:6px;align-items:baseline;padding:6px 14px;border-radius:999px;background:#000;border:1px solid var(--line);font-size:.92rem}
+.ses-resumen b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.15rem}
+.ses-resumen .ses-repaso{border-color:#ff5a5a88}.ses-resumen .ses-espaciada{border-color:#60a5fa88}.ses-resumen .ses-nueva{border-color:#4ade8088}.ses-resumen .ses-tarjeta{border-color:#a78bfa88}
+.ses-ops{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
+.ses-ops fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.ses-ops legend{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;margin-bottom:8px}
+.ses-ops .sim-op span{display:grid;justify-items:center;line-height:1.1}
+.ses-ops .sim-op small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:.7rem;font-weight:400;color:var(--mut)}
+.ses-fecha{display:grid;gap:6px;font-weight:700}
+.ses-fecha input{font:inherit;color:#fff;background:#000;border:2px solid var(--line);border-radius:12px;padding:8px 10px;color-scheme:dark}
+.ses-fecha .fc-btn{justify-self:start}
+.ses-examen{margin:0;color:var(--mut)}
+.ses-empezar{justify-self:start;font-size:1.1rem;padding:12px 22px}
+.ses-empezar:disabled{opacity:.4;cursor:default}
+.ses-motivo{font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 12px;background:#000;border:1px solid var(--line)}
+.ses-motivo.ses-repaso{border-color:#ff5a5a;color:#ffb3b3}.ses-motivo.ses-espaciada{border-color:#60a5fa;color:#cfe0ff}.ses-motivo.ses-nueva{border-color:#4ade80;color:#c8f5d8}.ses-motivo.ses-tarjeta{border-color:#a78bfa;color:#e0d6ff}
+.ses-tarjeta{margin-top:16px}
+.ses-tarjeta .pn{margin-top:0}
+.ses-fin{display:grid;gap:12px;margin-top:22px;padding:26px;border-radius:24px;background:var(--bg2);border:1px solid var(--line)}
+.ses-fin h2{font-size:clamp(1.6rem,4vw,2.4rem)}
+.ses-fin p{margin:0;color:var(--mut)}
+.ses-fin .acts a.ab{text-decoration:none;display:inline-flex;align-items:center}
+.home-practica a.principal{background:var(--g);color:#000;border-color:var(--g)}
+
+/* Mi progreso */
+.prog-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:22px 0 18px}
+.prog-tile{display:grid;gap:4px;padding:14px 16px;border-radius:18px;background:var(--bg2);border:1px solid var(--line)}
+.prog-tile b{font-family:"Bricolage Grotesque",sans-serif;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.prog-tile b small{font-size:.5em;color:var(--mut)}
+.prog-tile span{font-size:.8rem;color:var(--mut);line-height:1.25}
+.prog-cal{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;max-width:520px}
+.prog-dia{display:block;aspect-ratio:1;border-radius:4px;background:#1b1b1b;border:1px solid #262626}
+.prog-dia.n1{background:#14361f}.prog-dia.n2{background:#1d6b38}.prog-dia.n3{background:#2fa35a}.prog-dia.n4{background:#4ade80}
+.prog-cal-ley{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:.72rem;color:var(--mut)}
+.prog-cal-ley .prog-dia{width:12px}
+.prog-memoria{display:flex;gap:2px;height:22px}
+.prog-memoria i{display:block;min-width:4px}
+.prog-memoria i:first-child{border-radius:6px 0 0 6px}.prog-memoria i:last-child{border-radius:0 6px 6px 0}
+.prog-memoria .c0,.prog-ley .c0{background:#ff5a5a}
+.prog-memoria .c1,.prog-ley .c1{background:#1e3a66}
+.prog-memoria .c2,.prog-ley .c2{background:#2563a8}
+.prog-memoria .c3,.prog-ley .c3{background:#3b82f6}
+.prog-memoria .c4,.prog-ley .c4{background:#93c5fd}
+.prog-memoria .sin,.prog-ley .sin{background:#2b2b2b}
+.prog-ley{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:10px 0 0;padding:0;font-size:.78rem;color:#ddd}
+.prog-ley i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.prog-ley b{color:var(--mut)}
+.prog-sims{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:6px}
+.prog-sim{flex:1;max-width:56px;height:100%;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;gap:4px}
+.prog-sim b{font-size:.82rem;font-variant-numeric:tabular-nums}
+.prog-sim i{align-self:end;width:100%;border-radius:4px 4px 0 0}
+.prog-sim i.apr{background:var(--g)}.prog-sim i.sus{background:var(--r)}
+.prog-sim small{font-size:.68rem;color:var(--mut)}
+.ex-val small{color:var(--mut);font-weight:400}
+.ses .sim-cab{justify-content:flex-start}
+.ses .sim-cab .sim-bloque{margin-left:auto}

@@ -1,6 +1,6 @@
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
-import { hrefExamen, hrefInicio, hrefRepaso, hrefSeccion, hrefSimulacro } from '../../app/router.ts';
+import { hrefExamen, hrefInicio, hrefProgreso, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro } from '../../app/router.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { MARCA } from './brandTitle.ts';
@@ -27,7 +27,7 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
   const n = practica?.pendientes() ?? 0;
   const insignia = n ? `<span class="pw insignia" aria-label="${n} pendientes">${n}</span>` : '';
   const examen = tema.ampliacion?.bloques.length
-    ? `<div class="grp">Examen</div>${enlace('examen', hrefExamen(), '📊', 'Predicción de examen', 'Qué es más probable que caiga')}${enlace('simulacro', hrefSimulacro(), '📝', 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), '🔁', 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}`
+    ? `<div class="grp">Estudio y examen</div>${enlace('sesion', hrefSesion(), '🎯', 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), '📊', 'Predicción de examen', 'Qué es más probable que caiga')}${enlace('simulacro', hrefSimulacro(), '📝', 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), '🔁', 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), '📈', 'Mi progreso', 'Racha, calibración y evolución')}`
     : '';
   const scroll = rail.scrollTop;
   rail.innerHTML = cabecera + grupos + examen;

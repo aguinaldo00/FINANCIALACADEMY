@@ -2,19 +2,20 @@ import type { Tema } from '../content/schema.ts';
 
 export type Ruta =
   | { vista: 'inicio'; scrollArriba: boolean }
-  | { vista: 'examen' | 'simulacro' | 'repaso'; scrollArriba: boolean }
+  | { vista: 'examen' | 'simulacro' | 'repaso' | 'sesion' | 'progreso'; scrollArriba: boolean }
   | { vista: 'seccion'; seccionId: string; conceptoFoco: string | null; scrollArriba: boolean };
 
 /**
  * Rutas del prototipo: `#inicio`, `#s/<sección>`, `#c/<concepto>`; y `#examen` (predicción),
- * `#simulacro` y `#repaso`, solo si el tema tiene ampliación con bloques.
+ * `#simulacro`, `#repaso`, `#sesion` (estudiar hoy) y `#progreso`, solo si el tema tiene ampliación
+ * con bloques.
  * Un id desconocido lleva al inicio. Con `#c/…` no se vuelve arriba porque se hace scroll al concepto.
  */
 export function resolverRuta(hash: string, tema: Tema): Ruta {
   const h = (hash || '#inicio').slice(1);
   const scrollArriba = !h.startsWith('c/');
 
-  if ((h === 'examen' || h === 'simulacro' || h === 'repaso') && tema.ampliacion?.bloques.length) return { vista: h, scrollArriba };
+  if ((h === 'examen' || h === 'simulacro' || h === 'repaso' || h === 'sesion' || h === 'progreso') && tema.ampliacion?.bloques.length) return { vista: h, scrollArriba };
   if (h.startsWith('s/')) {
     const id = h.slice(2);
     if (tema.secciones.some((s) => s.id === id)) return { vista: 'seccion', seccionId: id, conceptoFoco: null, scrollArriba };
@@ -31,3 +32,5 @@ export const hrefConcepto = (conceptoId: string) => `#c/${conceptoId}`;
 export const hrefExamen = () => '#examen';
 export const hrefSimulacro = () => '#simulacro';
 export const hrefRepaso = () => '#repaso';
+export const hrefSesion = () => '#sesion';
+export const hrefProgreso = () => '#progreso';

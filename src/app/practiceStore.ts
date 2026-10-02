@@ -69,7 +69,12 @@ export class EstadoPractica {
 
   /** Ids de todas las tarjetas del tema, en el orden de los conceptos. */
   idsTarjetas(): string[] {
-    return this.tema.conceptos.flatMap((c) => tarjetasDe(c, this.tema).map((t) => t.id));
+    return this.tarjetasDelTema().map((t) => t.id);
+  }
+
+  /** Tarjetas del tema con su concepto (para intercalarlas en la sesión). */
+  tarjetasDelTema(): { id: string; conceptoId: string }[] {
+    return this.tema.conceptos.flatMap((c) => tarjetasDe(c, this.tema).map((t) => ({ id: t.id, conceptoId: c.id })));
   }
 
   tarjetasDeHoy(): string[] {

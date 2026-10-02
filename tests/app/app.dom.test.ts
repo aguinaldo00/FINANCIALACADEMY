@@ -159,7 +159,7 @@ describe('app en el navegador', () => {
     expect($('#mt').textContent).toBe('Predicción de examen');
     expect($('.sl.on').getAttribute('href')).toBe('#examen');
     // La predicción va al final del índice.
-    expect($$('#rail a').slice(-3).map((a) => a.getAttribute('href'))).toEqual(['#examen', '#simulacro', '#repaso']);
+    expect($$('#rail a').slice(-5).map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#simulacro', '#repaso', '#progreso']);
     expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
     // Cada concepto del tema aparece una vez en el mapa.
     expect($$('.ex-chip')).toHaveLength(tema01.conceptos.length);
@@ -225,6 +225,43 @@ describe('app en el navegador', () => {
     $<HTMLButtonElement>('[data-rep-sabia="1"]').click();
     $<HTMLButtonElement>('.rep-tab[data-tab="tarjetas"]').click();
     expect(Number($('.rep-tab[data-tab="tarjetas"] b').textContent)).toBe(antes - 1);
+  });
+
+  it('Estudiar hoy: sesión mezclada con confianza, tarjetas y resumen final', () => {
+    navegar('#sesion');
+    expect($('#mt').textContent).toBe('Estudiar hoy');
+    expect($('.sl.on').getAttribute('href')).toBe('#sesion');
+    // Fecha de examen: se guarda en la práctica.
+    const fecha = $<HTMLInputElement>('[data-ses-fecha]');
+    fecha.value = '2026-12-01';
+    fecha.dispatchEvent(new Event('change'));
+    expect(JSON.parse(localStorage.getItem('financial-academy:practica')!).temas['1'].fechaExamen).toBe('2026-12-01');
+    expect($('.ses-examen').textContent).toMatch(/Faltan \d+ días/);
+    $<HTMLInputElement>('input[name="ses-n"][value="10"]').click();
+    $<HTMLInputElement>('input[name="ses-n"][value="10"]').dispatchEvent(new Event('change'));
+    $<HTMLButtonElement>('[data-ses-empezar]').click();
+    for (let i = 0; i < 10; i++) {
+      const panel = $('[data-ses-panel]');
+      if ($('[data-ses-girar]', panel)) {
+        $<HTMLButtonElement>('[data-ses-girar]', panel).click();
+        $<HTMLButtonElement>('[data-sabia="1"]', panel).click();
+      } else {
+        $<HTMLButtonElement>('.opt[data-k="0"]', panel).click();
+        $<HTMLButtonElement>('[data-conf="seguro"]', panel).click();
+        $<HTMLButtonElement>('[data-ses-sig]', panel).click();
+      }
+    }
+    expect($('.ses-fin h2').textContent).toMatch(/de 10 bien/);
+  });
+
+  it('Mi progreso: racha, memoria, calibración, bloques y simulacros', () => {
+    navegar('#progreso');
+    expect($('#mt').textContent).toBe('Mi progreso');
+    expect($$('.prog-tile').length).toBeGreaterThanOrEqual(4);
+    expect($('.prog-tile b').textContent).toBe('1');
+    expect($$('.prog-dia').length).toBeGreaterThanOrEqual(28);
+    expect($$('.prog-memoria i').length).toBeGreaterThan(1);
+    expect($$('.prog-sim').length).toBeGreaterThan(0);
   });
 
   it('un id desconocido vuelve a la portada', () => {
