@@ -23,3 +23,20 @@ Rutina horaria: `trig_01EsNSKvi2kqpUXensnJE3Xn` (00:25–08:25, Europe/Madrid). 
 - [ ] 8. (Opcional, solo con aprobación del usuario) Extender la gramática urbana a los demás barrios.
 
 Al terminar: `docs/resumen-noche.md` y desactivar la rutina.
+
+## Noche 2 (02/10): menús y cuadros, y métodos de estudio
+
+Petición: "Dedícate la noche entera a pensar y solucionar errores: no se muestran correctamente los
+menús ni los cuadros están bien situados" y "trabajar en automático toda la noche en investigar e
+implementar métodos más óptimos de estudio". Mismas reglas que arriba; la práctica se amplía en su
+clave aparte, de forma compatible. Detalle en `docs/metodos-estudio.md`.
+
+- [x] 11. Auditoría visual a 1400, 1024, 820 y 390 px; corregir la barra del mapa, los rótulos, la
+  ficha en móvil, la pista de la portada, el índice activo y el desborde horizontal.
+- [x] 12. Investigación de métodos de estudio con evidencia (`docs/metodos-estudio.md`).
+- [ ] 13. Confianza y calibración (Seguro / Dudo / Adivino) en simulacro, repaso y práctica.
+- [ ] 14. Sesión de estudio de hoy: espaciada (también para preguntas), intercalada y por prioridad;
+  fecha de examen opcional.
+- [ ] 15. Pretest al abrir una sección y "Escríbelo tú" en la ficha.
+- [ ] 16. Mi progreso: racha, actividad, simulacros, calibración y acierto por bloque.
+- [ ] 17. Auditoría visual final, docs, PR y artefacto. Resumen en `docs/resumen-noche.md`.
