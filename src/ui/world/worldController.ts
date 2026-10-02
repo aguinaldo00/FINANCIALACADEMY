@@ -650,6 +650,9 @@ export class ControladorMundo {
     const objetivo = (e.target as Element).closest<HTMLButtonElement>('button');
     if (!objetivo || objetivo.disabled) return;
     const { dataset } = objetivo;
+    // Desde la portada, cualquier acción de la barra (salvo la pantalla completa, que lo hace sola)
+    // entra en la exploración, para que se vean la barra completa, los rótulos y la ficha.
+    if (this.enPortada && objetivo.closest('.mundo-acciones') && !('mundoCompleta' in dataset)) this.fijarPortada(false);
     if (dataset.foco) {
       const foco = decodificarFoco(this.modelo, dataset.foco);
       if (foco) this.enfocar(foco);
