@@ -5,6 +5,7 @@ import type { NivelDominio } from '../../domain/mastery.ts';
 import type { Historia, PasoHistoria } from '../../experiences/schema.ts';
 import type { EntradaAtlas, VistaAtlas } from '../../world/atlas.ts';
 import type { FaseObra } from '../../world/cityModel.ts';
+import { type IconoUi, iconoUi } from '../../icons/ui.ts';
 import { type Ambiente, ICONO_AMBIENTE, NOMBRE_AMBIENTE, siguienteAmbiente } from '../../world/ambiente.ts';
 import { codificarFoco, type Foco } from '../../world/focus.ts';
 import { colorDominio } from '../format.ts';
@@ -73,16 +74,18 @@ export function barraMundo(e: EstadoBarra): string {
     })
     .join('');
   // Texto largo en pantallas anchas; icono + palabra en móvil (todas caben sin desplazar).
-  const btn = (atributos: string, largo: string, corto: string) =>
-    `<button type="button" class="mb-btn" ${atributos} aria-label="${largo}"><span class="mb-largo">${largo}</span><span class="mb-corto" aria-hidden="true">${corto}</span></button>`;
+  const btn = (atributos: string, largo: string, corto: string, icono?: IconoUi) => {
+    const i = icono ? iconoUi(icono) : '';
+    return `<button type="button" class="mb-btn" ${atributos} aria-label="${largo}"><span class="mb-largo">${i}${largo}</span><span class="mb-corto" aria-hidden="true">${i}${corto}</span></button>`;
+  };
   const con3d = e.modo3d && e.disponible3d;
   const acciones = [
     e.puedeSubir ? btn('data-mundo-subir', 'Subir de nivel', '↑ Subir') : '',
-    con3d ? btn(`data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}"`, e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa', e.pantallaCompleta ? '✕ Salir' : '⛶ Completa') : '',
+    con3d ? btn(`data-mundo-completa aria-pressed="${Boolean(e.pantallaCompleta)}"`, e.pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa', e.pantallaCompleta ? 'Salir' : 'Completa', e.pantallaCompleta ? 'cerrar' : 'ampliar') : '',
     con3d && !e.pantallaCompleta ? btn(`data-mundo-zoom aria-pressed="${Boolean(e.zoomRueda)}"`, 'Zoom con rueda', 'Zoom') : '',
-    con3d ? btn(`data-mundo-paseo aria-pressed="${Boolean(e.paseando)}"`, e.paseando ? 'Dejar de pasear' : 'Pasear', e.paseando ? '■ Parar' : '🚶 Pasear') : '',
-    con3d ? btn(`data-mundo-recorrido aria-pressed="${Boolean(e.recorrido)}" title="Ruta guiada por el barrio 4, en el orden de estudio"`, e.recorrido ? 'Salir del recorrido' : '🧭 Recorrido del barrio 4', e.recorrido ? '✕ Ruta' : '🧭 Ruta') : '',
-    con3d && e.ambiente ? btn(`data-mundo-ambiente aria-pressed="${e.ambiente === 'noche'}" aria-label="Modo ${NOMBRE_AMBIENTE[e.ambiente].toLowerCase()} (${e.ambiente === 'dia' ? 'día' : 'noche'}). Cambiar a ${NOMBRE_AMBIENTE[siguienteAmbiente(e.ambiente)].toLowerCase()}" title="${e.ambiente === 'dia' ? 'De noche solo se encienden los edificios con algo que repasar hoy' : 'De día, la ciudad completa del temario'}"`, `${ICONO_AMBIENTE[e.ambiente]} ${NOMBRE_AMBIENTE[e.ambiente]}`, ICONO_AMBIENTE[e.ambiente]) : '',
+    con3d ? btn(`data-mundo-paseo aria-pressed="${Boolean(e.paseando)}"`, e.paseando ? 'Dejar de pasear' : 'Pasear', e.paseando ? 'Parar' : 'Pasear', e.paseando ? 'parar' : 'paseante') : '',
+    con3d ? btn(`data-mundo-recorrido aria-pressed="${Boolean(e.recorrido)}" title="Ruta guiada por el barrio 4, en el orden de estudio"`, e.recorrido ? 'Salir del recorrido' : 'Recorrido del barrio 4', 'Ruta', e.recorrido ? 'cerrar' : 'brujula') : '',
+    con3d && e.ambiente ? btn(`data-mundo-ambiente aria-pressed="${e.ambiente === 'noche'}" aria-label="Modo ${NOMBRE_AMBIENTE[e.ambiente].toLowerCase()} (${e.ambiente === 'dia' ? 'día' : 'noche'}). Cambiar a ${NOMBRE_AMBIENTE[siguienteAmbiente(e.ambiente)].toLowerCase()}" title="${e.ambiente === 'dia' ? 'De noche solo se encienden los edificios con algo que repasar hoy' : 'De día, la ciudad completa del temario'}"`, NOMBRE_AMBIENTE[e.ambiente], '', ICONO_AMBIENTE[e.ambiente]) : '',
     con3d ? btn(`data-mundo-atlas aria-pressed="${e.vistaAtlas}"`, e.vistaAtlas ? 'Ver maqueta' : 'Ver Atlas', e.vistaAtlas ? 'Maqueta' : 'Atlas') : '',
   ].join('');
   return `<nav aria-label="Nivel del mapa"><ol class="migas">${migas}</ol></nav><div class="mundo-acciones">${acciones}</div>`;

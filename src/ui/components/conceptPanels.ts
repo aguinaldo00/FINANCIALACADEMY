@@ -4,6 +4,7 @@ import { type Confianza, CONFIANZAS, idTarjetaFrase } from '../../domain/practic
 import { compararRecuerdo, ideasClave } from '../../domain/recall.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
 import { resaltarAviso } from '../format.ts';
+import { iconoModo, iconoUi, sinEmoji } from '../../icons/ui.ts';
 
 /** Panel "Explícamelo de otra forma" en el modo indicado. */
 export function pintarOtraForma(panel: HTMLElement, concepto: Concepto, modos: ModoExplicacion[], indice: number): void {
@@ -11,7 +12,8 @@ export function pintarOtraForma(panel: HTMLElement, concepto: Concepto, modos: M
   const texto = resaltarAviso(concepto.explicaciones[indice] ?? '');
   const puntos = modos.map((_, k) => `<i class="${k === indice ? 'on' : ''}"></i>`).join('');
   const cuerpo = modo?.formato === 'esquema' ? `<div class="esq">${texto}</div>` : `<p>${texto}</p>`;
-  panel.innerHTML = `<div class="md"><b>${modo?.etiqueta ?? ''}</b><span class="dots">${puntos}</span></div>${cuerpo}`;
+  const etiqueta = modo ? `${iconoUi(iconoModo(modo.etiqueta))} ${sinEmoji(modo.etiqueta)}` : '';
+  panel.innerHTML = `<div class="md"><b>${etiqueta}</b><span class="dots">${puntos}</span></div>${cuerpo}`;
   // Reinicia la animación de entrada en cada cambio de modo.
   panel.style.animation = 'none';
   void panel.offsetWidth;
@@ -45,10 +47,10 @@ export function pintarPreguntaEn(
         boton.classList.add('ok');
         saltarMonedas(boton);
         for (const b of botones) b.disabled = true;
-        feedback.innerHTML = `✅ <b>Correcto.</b> ${explicacion}`;
+        feedback.innerHTML = `${iconoUi('sello')} <b>Correcto.</b> ${explicacion}`;
       } else {
         boton.classList.add('no', 'shake');
-        feedback.innerHTML = '❌ No es esa. Pulsa "Explícamelo de otra forma" y vuelve a intentarlo.';
+        feedback.innerHTML = `${iconoUi('tachado')} No es esa. Pulsa "Explícamelo de otra forma" y vuelve a intentarlo.`;
       }
     };
   }
@@ -109,11 +111,11 @@ export function pintarPreguntaConConfianza(
       const exp = resaltarAviso(explicacion);
       feedback.innerHTML = correcta
         ? confianza === 'seguro'
-          ? `✅ <b>Correcto.</b> ${exp}`
-          : `✅ <b>Correcto, pero sin seguridad:</b> volverá pronto a tu repaso para afianzarla. ${exp}`
+          ? `${iconoUi('sello')} <b>Correcto.</b> ${exp}`
+          : `${iconoUi('sello')} <b>Correcto, pero sin seguridad:</b> volverá pronto a tu repaso para afianzarla. ${exp}`
         : confianza === 'seguro'
-          ? `⚡ <b>Error con seguridad.</b> Son los que mejor se corrigen si te fijas ahora: la correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`
-          : `❌ <b>No es esa.</b> La correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`;
+          ? `${iconoUi('rayo')} <b>Error con seguridad.</b> Son los que mejor se corrigen si te fijas ahora: la correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`
+          : `${iconoUi('tachado')} <b>No es esa.</b> La correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`;
       feedback.classList.toggle('sorpresa', !correcta && confianza === 'seguro');
       alTerminar(correcta, confianza);
     };
@@ -211,7 +213,7 @@ export function pintarEsquema(panel: HTMLElement, concepto: Concepto, tema: Tema
   const desplegables = propios
     .map((e) => `<div class="esq-arbol"><div class="esq-arbol-h"><h5>${e.titulo} <small>· de tus apuntes</small></h5><span class="esq-ctrl"><button type="button" data-arbol="abrir">Desplegar todo</button><button type="button" data-arbol="cerrar">Plegar todo</button></span></div><ul class="esq-raiz">${arbol(e.raiz, 0)}</ul></div>`)
     .join('');
-  panel.innerHTML = `<div class="md"><b>🗺️ Esquema visual</b></div>${diagramaFlujo(filas)}${aviso}${desplegables}`;
+  panel.innerHTML = `<div class="md"><b>${iconoUi('plano')} Esquema visual</b></div>${diagramaFlujo(filas)}${aviso}${desplegables}`;
   for (const boton of panel.querySelectorAll<HTMLButtonElement>('[data-arbol]')) {
     boton.onclick = () => {
       const abrir = boton.dataset.arbol === 'abrir';
@@ -242,7 +244,7 @@ export function tarjetasDe(concepto: Concepto, tema: Tema): Tarjeta[] {
 export function pintarFlashcard(panel: HTMLElement, tarjetas: Tarjeta[], indice: number, girada: boolean): void {
   const t = tarjetas[indice];
   if (!t) return;
-  panel.innerHTML = `<div class="md"><b>🃏 Flashcards</b><span class="fc-n">${indice + 1} / ${tarjetas.length}</span></div>
+  panel.innerHTML = `<div class="md"><b>${iconoUi('naipes')} Flashcards</b><span class="fc-n">${indice + 1} / ${tarjetas.length}</span></div>
  <button type="button" class="fc${girada ? ' girada' : ''}" data-fc="girar" aria-pressed="${girada}">
   <span class="fc-cara fc-anverso"><small>${t.fuente}</small>${t.anverso}<em>Pulsa para ver la respuesta</em></span>
   <span class="fc-cara fc-reverso">${resaltarAviso(t.reverso)}</span>
@@ -257,7 +259,7 @@ export function pintarFlashcard(panel: HTMLElement, tarjetas: Tarjeta[], indice:
  */
 export function pintarRecuerdo(panel: HTMLElement, concepto: Concepto, ficha: HTMLElement, alCalificar: (sabia: boolean) => void): void {
   ficha.classList.add('recordando');
-  panel.innerHTML = `<div class="md"><b>✍️ Escríbelo tú</b><span class="fc-n">sin mirar</span></div>
+  panel.innerHTML = `<div class="md"><b>${iconoUi('pluma')} Escríbelo tú</b><span class="fc-n">sin mirar</span></div>
 <label class="rec-preg" for="rec-${concepto.id}">¿Qué es <b>${concepto.nombre}</b>? Escríbelo con tus palabras.</label>
 <textarea id="rec-${concepto.id}" class="rec-texto" rows="4" placeholder="Lo que recuerdes, aunque sea poco: intentarlo ya ayuda a fijarlo."></textarea>
 <div class="fc-ctrl"><span class="pq-pie"><span>La definición está oculta mientras escribes.</span></span><button type="button" class="fc-btn" data-rec="comparar">Comparar con la definición →</button></div>`;
@@ -268,17 +270,17 @@ export function pintarRecuerdo(panel: HTMLElement, concepto: Concepto, ficha: HT
     const ideas = ideasClave(concepto.definicion);
     const r = compararRecuerdo(texto.value, ideas);
     const pct = Math.round(r.cobertura * 100);
-    const lista = [...r.encontradas.map((i) => `<li class="si">✓ ${i}</li>`), ...r.faltan.map((i) => `<li class="no">✗ ${i}</li>`)].join('');
-    panel.innerHTML = `<div class="md"><b>✍️ Escríbelo tú</b><span class="fc-n">${r.encontradas.length} de ${ideas.length} ideas clave</span></div>
+    const lista = [...r.encontradas.map((i) => `<li class="si">${iconoUi('visto')} ${i}</li>`), ...r.faltan.map((i) => `<li class="no">${iconoUi('aspa')} ${i}</li>`)].join('');
+    panel.innerHTML = `<div class="md"><b>${iconoUi('pluma')} Escríbelo tú</b><span class="fc-n">${r.encontradas.length} de ${ideas.length} ideas clave</span></div>
 <div class="rec-barra" role="img" aria-label="Has recordado el ${pct} % de las ideas clave"><i style="width:${Math.max(pct, 2)}%"></i></div>
 <div class="rec-comp"><div><h5>Lo que escribiste</h5><p class="rec-tuyo">${texto.value.trim() ? escaparHtml(texto.value.trim()) : '<em>(nada)</em>'}</p></div><div><h5>Ideas clave de la definición</h5><ul class="rec-ideas">${lista}</ul></div></div>
 <p class="rec-nota">La comparación es orientativa (busca las palabras clave). Decide tú:</p>
-<div class="fc-ctrl rep-calif"><button type="button" class="fc-btn rep-no" data-rec="no">✗ No la sabía</button><button type="button" class="fc-btn rep-si" data-rec="si">✓ La sabía</button></div>`;
+<div class="fc-ctrl rep-calif"><button type="button" class="fc-btn rep-no" data-rec="no">${iconoUi('aspa')} No la sabía</button><button type="button" class="fc-btn rep-si" data-rec="si">${iconoUi('visto')} La sabía</button></div>`;
     for (const b of panel.querySelectorAll<HTMLButtonElement>('[data-rec="si"], [data-rec="no"]')) {
       b.onclick = () => {
         const sabia = b.dataset.rec === 'si';
         alCalificar(sabia);
-        panel.querySelector('.rep-calif')!.outerHTML = `<p class="rec-nota">${sabia ? '✅ Anotado: volverá más espaciada.' : '🔁 Anotado: volverá pronto en tu repaso de flashcards.'}</p>`;
+        panel.querySelector('.rep-calif')!.outerHTML = `<p class="rec-nota">${sabia ? `${iconoUi('sello')} Anotado: volverá más espaciada.` : `${iconoUi('repaso')} Anotado: volverá pronto en tu repaso de flashcards.`}</p>`;
       };
     }
   };

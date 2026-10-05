@@ -2,6 +2,7 @@ import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { montarInfografia } from '../components/infographic.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 let desmontar: (() => void)[] = [];
 
@@ -21,7 +22,7 @@ export function pintarVisual(ctx: ContextoVista, estado: EstadoEstudio): void {
   ctx.tituloMovil.textContent = 'Infografías';
   const infos = estado.tema.ampliacion?.infografias ?? [];
   const nombre = (id: string) => estado.tema.conceptos.find((c) => c.id === id)?.nombre ?? id;
-  ctx.pagina.innerHTML = `<div class="vis"><header class="sh"><div class="kick"><span class="pill k">🎬 Infografías</span><span class="pill">${infos.length} conceptos difíciles, paso a paso</span></div><h1>Entiéndelo viéndolo</h1><p>Quién da el dinero, quién asume el riesgo y quién vigila. Pulsa «Siguiente» o «Reproducir»; cada infografía enlaza con su ficha.</p>
+  ctx.pagina.innerHTML = `<div class="vis"><header class="sh"><div class="kick"><span class="pill k">${iconoUi('proyector')} Infografías</span><span class="pill">${infos.length} conceptos difíciles, paso a paso</span></div><h1>Entiéndelo viéndolo</h1><p>Quién da el dinero, quién asume el riesgo y quién vigila. Pulsa «Siguiente» o «Reproducir»; cada infografía enlaza con su ficha.</p>
 <nav class="vis-indice" aria-label="Infografías">${infos.map((i) => `<a href="#vis-${i.id}" data-vis="${i.id}">${i.titulo}</a>`).join('')}</nav></header>
 ${infos.map((i) => `<section class="vis-item" id="vis-${i.id}"><div data-vis-caja="${i.id}"></div><p class="vis-fichas">Fichas: ${i.conceptoIds.map((c) => `<a href="${hrefConcepto(c)}">${nombre(c)}</a>`).join(' · ')}</p></section>`).join('')}</div>`;
   for (const i of infos) {

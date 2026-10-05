@@ -8,6 +8,7 @@ import { ETIQUETA_CONFIANZA } from '../components/conceptPanels.ts';
 import { anilloDominio } from '../components/ring.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 /** Segundos por pregunta con el modo "con tiempo". */
 export const SEGUNDOS_POR_PREGUNTA = 60;
@@ -51,7 +52,7 @@ function inicio(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
         .join('')}</ol></div>`
     : '';
   const bloques = estado.tema.ampliacion?.bloques ?? [];
-  raiz.innerHTML = `<header class="sh"><div class="kick"><span class="pill k">📝 Simulacro</span><span class="pill">No cambia tu dominio · los fallos van a tu repaso</span></div><h1>Simulacro de examen</h1><p>Preguntas tipo test de todo el tema, repartidas según la predicción (${bloques.map((b) => `${nombreCortoBloque(b)} ${b.probabilidad} %`).join(' · ')}). La corrección llega al final.</p></header>
+  raiz.innerHTML = `<header class="sh"><div class="kick"><span class="pill k">${iconoUi('examen')} Simulacro</span><span class="pill">No cambia tu dominio · los fallos van a tu repaso</span></div><h1>Simulacro de examen</h1><p>Preguntas tipo test de todo el tema, repartidas según la predicción (${bloques.map((b) => `${nombreCortoBloque(b)} ${b.probabilidad} %`).join(' · ')}). La corrección llega al final.</p></header>
 <div class="sim-config"><fieldset><legend>Número de preguntas</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="sim-n" value="${n}"${n === config.total ? ' checked' : ''}><span>${n}</span></label>`).join('')}</fieldset>
 <label class="sim-tiempo"><input type="checkbox" name="sim-t"${config.conTiempo ? ' checked' : ''}><span>Con tiempo (${SEGUNDOS_POR_PREGUNTA} s por pregunta)</span></label>
 <label class="sim-tiempo"><input type="checkbox" name="sim-c"${config.conConfianza ? ' checked' : ''}><span>Decir cómo de seguro estoy en cada respuesta</span></label>
@@ -135,11 +136,11 @@ function resultado(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPra
       const tuya = elegida === null || elegida === undefined ? '<em>En blanco</em>' : p.opciones[elegida];
       const c = confianzas[i];
       const sorpresa = !bien && c === 'seguro';
-      const etiquetaC = c ? `<span class="sim-c-conf ${c}${sorpresa ? ' sorpresa' : ''}">${sorpresa ? '⚡ ' : ''}${ETIQUETA_CONFIANZA[c]}</span>` : '';
-      return `<li class="${bien ? 'bien' : 'mal'}${sorpresa ? ' sorpresa' : ''}"><div class="sim-c-h"><span class="sim-c-n">${i + 1}</span><b>${p.enunciado}</b><span class="sim-c-r" aria-label="${bien ? 'Correcta' : 'Incorrecta'}">${bien ? '✓' : '✗'}</span></div>${etiquetaC}${bien ? '' : `<p class="sim-tuya">Tu respuesta: ${tuya}</p>`}<p class="sim-ok">Correcta: <b>${p.opciones[p.indiceCorrecta]}</b></p><p class="sim-exp">${resaltarAviso(p.explicacion)}</p><a class="sim-ficha" href="${hrefConcepto(p.conceptoId)}">Ir a la ficha: ${conceptoNombre(p.conceptoId)} →</a></li>`;
+      const etiquetaC = c ? `<span class="sim-c-conf ${c}${sorpresa ? ' sorpresa' : ''}">${sorpresa ? `${iconoUi('rayo')} ` : ''}${ETIQUETA_CONFIANZA[c]}</span>` : '';
+      return `<li class="${bien ? 'bien' : 'mal'}${sorpresa ? ' sorpresa' : ''}"><div class="sim-c-h"><span class="sim-c-n">${i + 1}</span><b>${p.enunciado}</b><span class="sim-c-r" aria-label="${bien ? 'Correcta' : 'Incorrecta'}">${bien ? `${iconoUi('visto')}` : `${iconoUi('aspa')}`}</span></div>${etiquetaC}${bien ? '' : `<p class="sim-tuya">Tu respuesta: ${tuya}</p>`}<p class="sim-ok">Correcta: <b>${p.opciones[p.indiceCorrecta]}</b></p><p class="sim-exp">${resaltarAviso(p.explicacion)}</p><a class="sim-ficha" href="${hrefConcepto(p.conceptoId)}">Ir a la ficha: ${conceptoNombre(p.conceptoId)} →</a></li>`;
     })
     .join('');
-  raiz.innerHTML = `<header class="sim-nota"><div class="sim-anillo">${anilloDominio(r.aciertos / (r.total || 1), 150)}</div><div>${medalla(r.nota)}<span class="pill k">📝 Resultado</span><h1><span data-sim-nota>${r.nota.toLocaleString('es-ES')}</span><small>/10</small></h1><p>${r.aciertos} de ${r.total} correctas · ${veredicto}</p><div class="acts"><button type="button" class="ab q" data-sim-repetir>Otro simulacro</button>${r.fallos.length ? `<a class="ab p" href="${hrefRepaso()}">Repasar mis fallos (${r.fallos.length})</a>` : ''}</div></div></header>
+  raiz.innerHTML = `<header class="sim-nota"><div class="sim-anillo">${anilloDominio(r.aciertos / (r.total || 1), 150)}</div><div>${medalla(r.nota)}<span class="pill k">${iconoUi('examen')} Resultado</span><h1><span data-sim-nota>${r.nota.toLocaleString('es-ES')}</span><small>/10</small></h1><p>${r.aciertos} de ${r.total} correctas · ${veredicto}</p><div class="acts"><button type="button" class="ab q" data-sim-repetir>Otro simulacro</button>${r.fallos.length ? `<a class="ab p" href="${hrefRepaso()}">Repasar mis fallos (${r.fallos.length})</a>` : ''}</div></div></header>
 ${calibracionSimulacro(preguntas, respuestas, confianzas)}<figure class="ex-graf"><figcaption><h3>Aciertos por bloque</h3><small>Dónde has fallado más</small></figcaption><div class="ex-plot">${barras}</div></figure>
 <section class="sim-correccion"><h2>Corrección</h2><div class="sim-filtro"><button type="button" class="fc-btn on" data-ver="todas">Todas</button><button type="button" class="fc-btn" data-ver="mal">Solo fallos (${r.fallos.length})</button></div><ol>${correccion}</ol></section>`;
   raiz.querySelector<HTMLButtonElement>('[data-sim-repetir]')!.onclick = () => inicio(raiz, estado, practica, config);
@@ -167,7 +168,7 @@ function calibracionSimulacro(preguntas: PreguntaExamen[], respuestas: (number |
   }).join('');
   const sorpresas = confianzas.filter((c, i) => c === 'seguro' && respuestas[i] !== preguntas[i]!.indiceCorrecta).length;
   const nota = sorpresas
-    ? `<p class="sim-cal-nota">⚡ <b>${sorpresas} ${sorpresas === 1 ? 'error' : 'errores'} con seguridad.</b> Revísalos en la corrección: son los que mejor se fijan si los entiendes ahora.</p>`
+    ? `<p class="sim-cal-nota">${iconoUi('rayo')} <b>${sorpresas} ${sorpresas === 1 ? 'error' : 'errores'} con seguridad.</b> Revísalos en la corrección: son los que mejor se fijan si los entiendes ahora.</p>`
     : '<p class="sim-cal-nota">Sin errores con seguridad: tu confianza es fiable.</p>';
   return `<figure class="ex-graf sim-cal"><figcaption><h3>¿Sabías lo que sabías?</h3><small>% de aciertos según tu seguridad</small></figcaption><div class="ex-plot">${filas}</div>${nota}</figure>`;
 }

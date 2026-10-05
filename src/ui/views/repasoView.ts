@@ -7,6 +7,7 @@ import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
 import { pintarPreguntaConConfianza, type Tarjeta, tarjetasDe } from '../components/conceptPanels.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 type Pestana = 'fallos' | 'tarjetas';
 
@@ -21,8 +22,8 @@ export function pintarRepaso(ctx: ContextoVista, estado: EstadoEstudio, practica
   const tarjetas = colaTarjetas(estado, practica, concepto?.id).length;
   const activa: Pestana = pestana ?? (fallos || !tarjetas ? 'fallos' : 'tarjetas');
   const cabecera = concepto
-    ? `<header class="sh"><div class="kick"><span class="pill k">🌙 Repaso de esta noche</span><span class="pill">No cambia tu dominio</span></div><h1>${concepto.nombre}</h1><p>Solo lo que este concepto tiene pendiente hoy: sus fallos, las preguntas cuyo repaso vence y sus flashcards. <a href="${hrefRepaso()}">Ver todo el repaso</a> · <a href="${hrefConcepto(concepto.id)}">Ir a la ficha</a></p></header>`
-    : `<header class="sh"><div class="kick"><span class="pill k">🔁 Repaso</span><span class="pill">No cambia tu dominio</span></div><h1>Tu repaso de hoy</h1><p>Lo que has fallado vuelve hasta que lo aciertas ${ACIERTOS_PARA_SALIR} veces seguidas. Las flashcards vuelven cada vez más espaciadas si te las sabes.</p></header>`;
+    ? `<header class="sh"><div class="kick"><span class="pill k">${iconoUi('luna')} Repaso de esta noche</span><span class="pill">No cambia tu dominio</span></div><h1>${concepto.nombre}</h1><p>Solo lo que este concepto tiene pendiente hoy: sus fallos, las preguntas cuyo repaso vence y sus flashcards. <a href="${hrefRepaso()}">Ver todo el repaso</a> · <a href="${hrefConcepto(concepto.id)}">Ir a la ficha</a></p></header>`
+    : `<header class="sh"><div class="kick"><span class="pill k">${iconoUi('repaso')} Repaso</span><span class="pill">No cambia tu dominio</span></div><h1>Tu repaso de hoy</h1><p>Lo que has fallado vuelve hasta que lo aciertas ${ACIERTOS_PARA_SALIR} veces seguidas. Las flashcards vuelven cada vez más espaciadas si te las sabes.</p></header>`;
   ctx.pagina.innerHTML = `<div class="rep" data-repaso${concepto ? ` data-repaso-concepto="${concepto.id}"` : ''}>${cabecera}
 <div class="rep-tabs" role="tablist"><button type="button" role="tab" class="rep-tab" data-tab="fallos" aria-selected="${activa === 'fallos'}">${concepto ? 'Preguntas' : 'Mis fallos'} <b>${fallos}</b></button><button type="button" role="tab" class="rep-tab" data-tab="tarjetas" aria-selected="${activa === 'tarjetas'}">Flashcards de hoy <b>${tarjetas}</b></button></div>
 <div class="rep-cuerpo" data-rep-cuerpo></div></div>`;
@@ -62,7 +63,7 @@ function colaTarjetas(estado: EstadoEstudio, practica: EstadoPractica, foco?: st
 }
 
 function vacio(texto: string): string {
-  return `<div class="rep-vacio"><b>✨ ${texto}</b><a class="ab q" href="${hrefSimulacro()}">Hacer un simulacro</a></div>`;
+  return `<div class="rep-vacio"><b>${iconoUi('brillo')} ${texto}</b><a class="ab q" href="${hrefSimulacro()}">Hacer un simulacro</a></div>`;
 }
 
 function pintarFallos(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoEstudio, practica: EstadoPractica, foco?: string): void {
@@ -87,8 +88,8 @@ function pintarFallos(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoEst
     const p: PreguntaExamen = banco.get(id)!;
     const estadoFallo = practica.practica.fallos[id];
     const concepto = estado.tema.conceptos.find((c) => c.id === p.conceptoId);
-    const motivo = estadoFallo?.sorpresa ? '⚡ Fallada con seguridad · ' : estadoFallo?.dudosa && !estadoFallo.veces ? 'Acertada sin seguridad · ' : '';
-    const racha = estadoFallo ? `${motivo}${estadoFallo.veces ? `Fallada ${estadoFallo.veces} ${estadoFallo.veces === 1 ? 'vez' : 'veces'} · ` : ''}aciertos seguidos ${estadoFallo.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada';
+    const motivo = estadoFallo?.sorpresa ? `${iconoUi('rayo')} Fallada con seguridad · ` : estadoFallo?.dudosa && !estadoFallo.veces ? 'Acertada sin seguridad · ' : '';
+    const racha = estadoFallo ? `${motivo}${estadoFallo.veces ? `Fallada ${estadoFallo.veces} ${estadoFallo.veces === 1 ? 'vez' : 'veces'} · ` : ''}aciertos seguidos ${estadoFallo.racha}/${ACIERTOS_PARA_SALIR}` : `${iconoUi('visto')} Superada`;
     const pie = `<div class="pq-pie"><span>Repaso ${(i % cola.length) + 1} / ${cola.length} · ${racha} · <a href="${hrefConcepto(p.conceptoId)}">${concepto?.nombre ?? ''}</a></span><button type="button" class="fc-btn" data-rep-sig>Siguiente →</button></div>`;
     pintarPreguntaConConfianza(
       panel,
@@ -98,7 +99,7 @@ function pintarFallos(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoEst
         const pieTexto = panel.querySelector('.pq-pie span');
         const f = practica.practica.fallos[p.id];
         if (pieTexto) {
-          const estadoTexto = f ? `Fallada ${f.veces} ${f.veces === 1 ? 'vez' : 'veces'} · aciertos seguidos ${f.racha}/${ACIERTOS_PARA_SALIR}` : '✓ Superada: sale de tu repaso';
+          const estadoTexto = f ? `Fallada ${f.veces} ${f.veces === 1 ? 'vez' : 'veces'} · aciertos seguidos ${f.racha}/${ACIERTOS_PARA_SALIR}` : `${iconoUi('visto')} Superada: sale de tu repaso`;
           pieTexto.innerHTML = `Repaso ${(i % cola.length) + 1} / ${cola.length} · ${estadoTexto} · <a href="${hrefConcepto(p.conceptoId)}">${concepto?.nombre ?? ''}</a>`;
         }
       },
@@ -139,12 +140,12 @@ function pintarTarjetas(cuerpo: HTMLElement, ctx: ContextoVista, estado: EstadoE
     const id = sesion[0];
     if (!id) return pintarRepaso(ctx, estado, practica, 'tarjetas', foco);
     const t = todas.get(id)!;
-    panel.innerHTML = `<div class="md"><b>🃏 Flashcards de hoy</b><span class="fc-n">${hechas} hechas · quedan ${sesion.length}</span></div>
+    panel.innerHTML = `<div class="md"><b>${iconoUi('naipes')} Flashcards de hoy</b><span class="fc-n">${hechas} hechas · quedan ${sesion.length}</span></div>
  <button type="button" class="fc${girada ? ' girada' : ''}" data-rep-girar aria-pressed="${girada}">
   <span class="fc-cara fc-anverso"><small>${t.fuente}</small>${t.anverso}<em>Pulsa para ver la respuesta</em></span>
   <span class="fc-cara fc-reverso">${resaltarAviso(t.reverso)}</span>
  </button>
- <div class="fc-ctrl rep-calif"${girada ? '' : ' hidden'}><button type="button" class="fc-btn rep-no" data-rep-sabia="0">✗ No la sabía</button><button type="button" class="fc-btn rep-si" data-rep-sabia="1">✓ La sabía</button></div>`;
+ <div class="fc-ctrl rep-calif"${girada ? '' : ' hidden'}><button type="button" class="fc-btn rep-no" data-rep-sabia="0">${iconoUi('aspa')} No la sabía</button><button type="button" class="fc-btn rep-si" data-rep-sabia="1">${iconoUi('visto')} La sabía</button></div>`;
     panel.querySelector<HTMLButtonElement>('[data-rep-girar]')!.onclick = () => mostrar(!girada);
     for (const b of panel.querySelectorAll<HTMLButtonElement>('[data-rep-sabia]')) {
       b.onclick = () => {

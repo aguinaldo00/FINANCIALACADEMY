@@ -55,16 +55,19 @@ describe('app en el navegador', () => {
     const panel = $('.pn.o', ficha);
     boton.click();
     expect(panel.hidden).toBe(false);
-    expect(boton.textContent).toBe('🔄 Otra forma (1/5)');
-    expect($('.md b', panel).textContent).toBe(tema01.modos[0]!.etiqueta);
+    expect(boton.textContent!.trim()).toBe('Otra forma (1/5)');
+    // Icono propio en vez del emoji: el texto de la etiqueta de DATA sin su emoji.
+    expect(boton.querySelector('svg.iu')).not.toBeNull();
+    expect($('.md b', panel).textContent!.trim()).toBe(tema01.modos[0]!.etiqueta.replace(/^\S+\s/, ''));
+    expect($('.md b svg.iu', panel)).not.toBeNull();
     boton.click();
     boton.click();
-    expect(boton.textContent).toBe('🔄 Otra forma (3/5)');
+    expect(boton.textContent!.trim()).toBe('Otra forma (3/5)');
     expect($('.esq', panel).textContent).toBe(tema01.conceptos.find((c) => c.id === 'fgd')!.explicaciones[2]);
     boton.click();
     boton.click();
     boton.click();
-    expect(boton.textContent).toBe('🔄 Otra forma (1/5)');
+    expect(boton.textContent!.trim()).toBe('Otra forma (1/5)');
   });
 
   it('"Trampa de examen" se abre y se cierra', () => {

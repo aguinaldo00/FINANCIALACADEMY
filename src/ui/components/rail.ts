@@ -5,6 +5,7 @@ import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { MARCA } from './brandTitle.ts';
 import { anilloDominio } from './ring.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 /** Índice lateral: dominio global, una barra de dominio por sección y, al final, el grupo Examen. */
 export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActual: string | null, practica?: EstadoPractica): void {
@@ -27,7 +28,7 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
   const n = practica?.pendientes() ?? 0;
   const insignia = n ? `<span class="pw insignia" aria-label="${n} pendientes">${n}</span>` : '';
   const examen = tema.ampliacion?.bloques.length
-    ? `<div class="grp">Estudio y examen</div>${enlace('sesion', hrefSesion(), '🎯', 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), '📊', 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), '🎬', 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), '📝', 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), '🔁', 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), '📈', 'Mi progreso', 'Racha, calibración y evolución')}`
+    ? `<div class="grp">Estudio y examen</div>${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}`
     : '';
   const scroll = rail.scrollTop;
   rail.innerHTML = cabecera + grupos + examen;

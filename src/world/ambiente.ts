@@ -9,7 +9,8 @@
 export type Ambiente = 'dia' | 'noche';
 
 export const NOMBRE_AMBIENTE: Record<Ambiente, string> = { dia: 'Aprender', noche: 'Repasar' };
-export const ICONO_AMBIENTE: Record<Ambiente, string> = { dia: '☀️', noche: '🌙' };
+/** Icono propio de cada ambiente (ver `icons/ui.ts`). */
+export const ICONO_AMBIENTE: Record<Ambiente, 'sol' | 'luna'> = { dia: 'sol', noche: 'luna' };
 
 export function siguienteAmbiente(a: Ambiente): Ambiente {
   return a === 'dia' ? 'noche' : 'dia';

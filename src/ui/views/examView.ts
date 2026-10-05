@@ -10,6 +10,7 @@ import { anilloDominio } from '../components/ring.ts';
 import { COLORES_BLOQUE, nombreCortoBloque } from '../blockColors.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 interface DatosBloque {
   bloque: BloqueExamen;
@@ -147,7 +148,7 @@ function fichaBloque(d: DatosBloque, i: number, estado: EstadoEstudio): string {
   const chips = d.conceptos
     .map((c) => `<a class="ex-chip" href="${hrefConcepto(c.id)}" style="--d:${colorDominio(dominioConcepto(estado.progreso, c.id))}">${c.nombre}</a>`)
     .join('');
-  return `<article class="cc ex-ficha rev" id="ex-${b.id}" data-bloque="${b.id}" style="--c:${d.color}"><header class="ex-fh"><div class="ex-fpct"><b>${b.probabilidad}<small>%</small></b><span>#${i + 1} más probable</span></div><div><h2>${b.titulo}</h2><p class="ex-formato">${b.formato}</p></div><div class="ex-fdom">${anilloDominio(d.dominio, 64)}<small>tu dominio</small></div></header><h5>Qué te preguntarán</h5><ul class="ex-claves">${b.claves.map((k) => `<li>${k}</li>`).join('')}</ul><h5>Conceptos del bloque</h5><div class="ex-chips">${chips}</div><div class="acts"><button type="button" class="ab p" data-sim="abrir" aria-expanded="false">🎯 Simulacro del bloque (${n} preguntas)</button></div><div class="pn p" hidden></div></article>`;
+  return `<article class="cc ex-ficha rev" id="ex-${b.id}" data-bloque="${b.id}" style="--c:${d.color}"><header class="ex-fh"><div class="ex-fpct"><b>${b.probabilidad}<small>%</small></b><span>#${i + 1} más probable</span></div><div><h2>${b.titulo}</h2><p class="ex-formato">${b.formato}</p></div><div class="ex-fdom">${anilloDominio(d.dominio, 64)}<small>tu dominio</small></div></header><h5>Qué te preguntarán</h5><ul class="ex-claves">${b.claves.map((k) => `<li>${k}</li>`).join('')}</ul><h5>Conceptos del bloque</h5><div class="ex-chips">${chips}</div><div class="acts"><button type="button" class="ab p" data-sim="abrir" aria-expanded="false">${iconoUi('diana')} Simulacro del bloque (${n} preguntas)</button></div><div class="pn p" hidden></div></article>`;
 }
 
 /**
@@ -158,7 +159,7 @@ function fichaBloque(d: DatosBloque, i: number, estado: EstadoEstudio): string {
 export function pintarExamen(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
   const datos = datosDe(estado);
   const fuente = estado.tema.ampliacion?.fuente ?? '';
-  ctx.pagina.innerHTML = `<div class="ex" data-examen><header class="sh ex-cab"><div class="kick"><span class="pill k">📊 Predicción de examen</span><span class="pill">Fuente: ${fuente}</span></div><h1>¿Qué caerá en el examen?</h1><p>Los cinco bloques del tema, ordenados por la probabilidad de que salgan. Es una estimación de tus apuntes, no un dato oficial.</p>${reparto(datos)}</header>
+  ctx.pagina.innerHTML = `<div class="ex" data-examen><header class="sh ex-cab"><div class="kick"><span class="pill k">${iconoUi('barras')} Predicción de examen</span><span class="pill">Fuente: ${fuente}</span></div><h1>¿Qué caerá en el examen?</h1><p>Los cinco bloques del tema, ordenados por la probabilidad de que salgan. Es una estimación de tus apuntes, no un dato oficial.</p>${reparto(datos)}</header>
 <section class="ex-sec"><h2>Por dónde empezar</h2><p class="ex-intro">Lo que más cae y menos dominas.</p>${porDondeEmpezar(datos)}</section>
 ${mapa(datos, estado)}
 <section class="ex-sec"><h2>En cifras</h2><div class="ex-grafs">${graficoProbabilidad(datos)}${graficoPreguntas(datos)}${graficoDominio(datos)}</div>${tabla(datos)}</section>

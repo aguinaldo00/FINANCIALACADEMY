@@ -568,6 +568,47 @@ montaba.
   realistas.
 - **Portada en móvil:** la barra flotante sube (`bottom: 132px`) para no pisar la pista.
 
+## Iconos propios de la interfaz (05/10)
+
+- **Qué cambia:** los emojis genéricos de botones, etiquetas y avisos (🔄 ⚠️ ✅ 🗺️ 🃏 🧠 ✍️ 🎬 🌍 🎯 📊 📝 🔁
+  📈 🌙 ⚡ 🔥 …) pasan a ser iconos propios de la ciudad (`src/icons/ui.ts`).
+- **Gramática:** trazos SVG originales en 64×64, como los glifos de DATA, dentro de un medallón tipo
+  moneda: disco oscuro y canto dorado con grafilas, como los emblemas de los edificios.
+- **Objetos de la ciudad**, no símbolos genéricos:
+
+  | Acción | Icono |
+  |---|---|
+  | Otra forma | calle que se bifurca |
+  | Trampa | anzuelo con moneda de cebo |
+  | Compruébalo | sello de lacre |
+  | Esquema | plano de calles |
+  | Flashcards | naipes con € |
+  | Más preguntas | interrogante sobre monedas |
+  | Escríbelo tú | plumilla |
+  | Visualízalo | pantalla con gráfica |
+  | En la vida real | fachada de tienda |
+  | Estudiar hoy | diana |
+  | Predicción | barras |
+  | Simulacro | hoja de test |
+  | Repaso | flechas alrededor de una moneda |
+  | Progreso | edificio con grúa |
+  | Estudia ya | farola |
+  | Recorrido | brújula |
+  | Pasear | paseante |
+  | Día / noche | sol / luna |
+
+- **Color con significado:**
+  - dorado por defecto;
+  - dentro de un botón, el color de su acción;
+  - verde, correcto; rojo, error; naranja, "con seguridad" y racha.
+- **Modos de "otra forma":** el icono se elige por las palabras de la etiqueta de DATA (`iconoModo`)
+  y el emoji se quita al pintarla (`sinEmoji`). DATA no cambia.
+- **Fuera de alcance:** el contenido (actores de las infografías, ejemplos) y las flechas
+  tipográficas de los esquemas.
+- **Pruebas:**
+  - `tests/ui/iconosUi.test.ts`, que incluye que `src/ui` no tenga emojis;
+  - el bloque de iconos de `verificar-chromium.mjs`.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

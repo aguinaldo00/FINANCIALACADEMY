@@ -6,6 +6,7 @@ import { CONFIANZAS, diasEntre, INTERVALOS, racha, type Recuento, sumarDias } fr
 import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
 import { ETIQUETA_CONFIANZA } from '../components/conceptPanels.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 const DIAS_CALENDARIO = 28;
 const pct = (r: Recuento | undefined) => (r && r.total ? Math.round((r.aciertos / r.total) * 100) : null);
@@ -27,7 +28,7 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
   const dias = p.fechaExamen ? diasEntre(hoy, p.fechaExamen) : null;
 
   if (!total && !p.simulacros.length) {
-    ctx.pagina.innerHTML = `<div class="prog"><header class="sh"><div class="kick"><span class="pill k">📈 Mi progreso</span></div><h1>Aún no hay datos</h1><p>Haz tu primera sesión de estudio: aquí verás tu racha, lo que ya tienes fijado en la memoria y si tu seguridad es fiable.</p></header><a class="ab q" href="${hrefSesion()}">🎯 Empezar a estudiar hoy</a></div>`;
+    ctx.pagina.innerHTML = `<div class="prog"><header class="sh"><div class="kick"><span class="pill k">${iconoUi('progreso')} Mi progreso</span></div><h1>Aún no hay datos</h1><p>Haz tu primera sesión de estudio: aquí verás tu racha, lo que ya tienes fijado en la memoria y si tu seguridad es fiable.</p></header><a class="ab q" href="${hrefSesion()}">${iconoUi('diana')} Empezar a estudiar hoy</a></div>`;
     return;
   }
 
@@ -70,10 +71,10 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
   const lectura = !filasCal
     ? 'Responde indicando tu seguridad para ver si es fiable.'
     : seguro.n >= 5 && (seguro.v ?? 100) < 75
-      ? '⚠️ <b>Exceso de confianza:</b> fallas bastantes de las que das por seguras. Antes de responder, intenta justificar por qué.'
+      ? `${iconoUi('trampa')} <b>Exceso de confianza:</b> fallas bastantes de las que das por seguras. Antes de responder, intenta justificar por qué.`
       : dudo.n >= 5 && (dudo.v ?? 0) > 80
-        ? '💡 <b>Sabes más de lo que crees:</b> aciertas casi todas las que dudas. Confía un poco más.'
-        : '✅ <b>Buena calibración:</b> tu seguridad se corresponde con tus aciertos.';
+        ? `${iconoUi('bombilla')} <b>Sabes más de lo que crees:</b> aciertas casi todas las que dudas. Confía un poco más.`
+        : `${iconoUi('sello')} <b>Buena calibración:</b> tu seguridad se corresponde con tus aciertos.`;
 
   // Acierto por bloque en la práctica.
   const bloques = estado.tema.ampliacion?.bloques ?? [];
@@ -96,7 +97,7 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
         .join('')}</div>`
     : '<p class="ex-intro">Aún no has hecho ningún simulacro.</p>';
 
-  ctx.pagina.innerHTML = `<div class="prog"><header class="sh"><div class="kick"><span class="pill k">📈 Mi progreso</span></div><h1>Mi progreso</h1><p>Constancia, memoria a largo plazo y fiabilidad de tu seguridad. El dominio de cada concepto está en el índice.</p></header>
+  ctx.pagina.innerHTML = `<div class="prog"><header class="sh"><div class="kick"><span class="pill k">${iconoUi('progreso')} Mi progreso</span></div><h1>Mi progreso</h1><p>Constancia, memoria a largo plazo y fiabilidad de tu seguridad. El dominio de cada concepto está en el índice.</p></header>
 <div class="prog-tiles">${tiles}</div>
 <div class="ex-grafs">
 <figure class="ex-graf"><figcaption><h3>Actividad</h3><small>Respuestas por día · últimas 4 semanas</small></figcaption><div class="prog-cal">${celdas}</div><div class="prog-cal-ley"><span>Menos</span>${[0, 1, 2, 3, 4].map((n) => `<i class="prog-dia n${n}"></i>`).join('')}<span>Más</span></div></figure>
@@ -104,5 +105,5 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
 <figure class="ex-graf"><figcaption><h3>¿Es fiable tu seguridad?</h3><small>% de aciertos según lo seguro que estabas</small></figcaption><div class="ex-plot">${filasCal}</div><p class="sim-cal-nota">${lectura}</p></figure>
 <figure class="ex-graf"><figcaption><h3>Acierto por bloque</h3><small>En la práctica (sesiones, repaso y simulacros)</small></figcaption><div class="ex-plot">${filasBloque}</div></figure>
 <figure class="ex-graf"><figcaption><h3>Simulacros</h3><small>Nota sobre 10 · últimos ${sims.length || ''}</small></figcaption>${simulacros}</figure>
-</div><p class="home-practica"><a class="principal" href="${hrefSesion()}">🎯 Estudiar hoy</a></p></div>`;
+</div><p class="home-practica"><a class="principal" href="${hrefSesion()}">${iconoUi('diana')} Estudiar hoy</a></p></div>`;
 }

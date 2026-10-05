@@ -4,6 +4,7 @@ import type { ModeloCiudad } from '../../world/cityModel.ts';
 import { buscarBarrio, buscarEdificio, buscarZona, type Foco } from '../../world/focus.ts';
 import { colorDominio } from '../format.ts';
 import { separarTitulo, TEXTO_FASE } from './worldPanel.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 /*
  * Ficha contextual: la información aparece porque el usuario la pide (pasa por encima o
@@ -88,9 +89,9 @@ export function fichaNocturna(m: ModeloCiudad, foco: Foco, modo: ModoFicha, pend
     case 'ciudad': {
       const pares = dentro(m.edificios.map((e) => e.conceptoId));
       if (!pares.length) {
-        return `<p class="ficha-antetitulo llamada">🌙 Repaso de esta noche</p><h3 class="ficha-titulo">Nada pendiente hoy</h3><p class="ficha-texto">La ciudad se encenderá cuando tengas fallos, preguntas o flashcards que repasar. De día se aprende: estudia un concepto o haz un simulacro.</p><button type="button" class="ficha-accion" data-mundo-ambiente>☀️ Volver al día</button>`;
+        return `<p class="ficha-antetitulo llamada">${iconoUi('luna')} Repaso de esta noche</p><h3 class="ficha-titulo">Nada pendiente hoy</h3><p class="ficha-texto">La ciudad se encenderá cuando tengas fallos, preguntas o flashcards que repasar. De día se aprende: estudia un concepto o haz un simulacro.</p><button type="button" class="ficha-accion" data-mundo-ambiente>${iconoUi('sol')} Volver al día</button>`;
       }
-      return `<p class="ficha-antetitulo llamada">🌙 Repaso de esta noche</p><h3 class="ficha-titulo">Los edificios encendidos te esperan</h3>${resumen(pares)}${modo === 'seleccion' ? lista(pares) : ''}<a class="ficha-accion" href="${hrefRepaso()}">Repasar todo</a>`;
+      return `<p class="ficha-antetitulo llamada">${iconoUi('luna')} Repaso de esta noche</p><h3 class="ficha-titulo">Los edificios encendidos te esperan</h3>${resumen(pares)}${modo === 'seleccion' ? lista(pares) : ''}<a class="ficha-accion" href="${hrefRepaso()}">Repasar todo</a>`;
     }
     case 'barrio':
     case 'zona': {
@@ -99,7 +100,7 @@ export function fichaNocturna(m: ModeloCiudad, foco: Foco, modo: ModoFicha, pend
         : buscarZona(m, foco.seccionId)?.conceptoIds ?? [];
       const titulo = foco.nivel === 'barrio' ? separarTitulo(buscarBarrio(m, foco.grupoId)?.titulo ?? '')[1] : buscarZona(m, foco.seccionId)?.titulo ?? '';
       const pares = dentro(ids);
-      return `<p class="ficha-antetitulo llamada">🌙 Repaso · ${foco.nivel === 'barrio' ? `Barrio ${foco.grupoId}` : `Zona ${foco.seccionId}`}</p><h3 class="ficha-titulo">${titulo}</h3>${pares.length ? `${resumen(pares)}${lista(pares)}` : '<p class="ficha-texto">Nada pendiente aquí esta noche.</p>'}${modo === 'vistazo' ? '<p class="ficha-pista">Pulsa para acercarte</p>' : ''}`;
+      return `<p class="ficha-antetitulo llamada">${iconoUi('luna')} Repaso · ${foco.nivel === 'barrio' ? `Barrio ${foco.grupoId}` : `Zona ${foco.seccionId}`}</p><h3 class="ficha-titulo">${titulo}</h3>${pares.length ? `${resumen(pares)}${lista(pares)}` : '<p class="ficha-texto">Nada pendiente aquí esta noche.</p>'}${modo === 'vistazo' ? '<p class="ficha-pista">Pulsa para acercarte</p>' : ''}`;
     }
     case 'edificio': {
       const e = buscarEdificio(m, foco.conceptoId);
@@ -110,8 +111,8 @@ export function fichaNocturna(m: ModeloCiudad, foco: Foco, modo: ModoFicha, pend
         : p?.total
           ? `<a class="ficha-accion" href="${hrefRepaso(e.conceptoId)}">Repasar ahora</a>`
           : `<a class="ficha-accion" href="${hrefConcepto(e.conceptoId)}">Ir a la ficha</a>`;
-      return `<p class="ficha-antetitulo llamada">🌙 Repaso · Zona ${e.seccionId}</p><h3 class="ficha-titulo grande">${e.nombre}</h3>${p?.total
-        ? `<p class="ficha-texto">${p.sorpresas ? '⚡ ' : ''}${resumenPendiente(p)}${p.sorpresas ? ` · ${p.sorpresas} con seguridad: repásalo primero` : ''}</p>`
+      return `<p class="ficha-antetitulo llamada">${iconoUi('luna')} Repaso · Zona ${e.seccionId}</p><h3 class="ficha-titulo grande">${e.nombre}</h3>${p?.total
+        ? `<p class="ficha-texto">${p.sorpresas ? `${iconoUi('rayo')} ` : ''}${resumenPendiente(p)}${p.sorpresas ? ` · ${p.sorpresas} con seguridad: repásalo primero` : ''}</p>`
         : '<p class="ficha-texto">Nada pendiente hoy en este edificio.</p>'}${accion}`;
     }
   }
@@ -123,7 +124,7 @@ export function fichaRecorrido(m: ModeloCiudad, ids: readonly string[], i: numbe
   if (!e) return '';
   const z = buscarZona(m, e.seccionId);
   const puntos = ids.map((_, k) => `<i class="${k === i ? 'on' : k < i ? 'hecho' : ''}"></i>`).join('');
-  return `<p class="ficha-antetitulo llamada">🧭 Recorrido · Paso ${i + 1} de ${ids.length}</p><h3 class="ficha-titulo grande">${e.nombre}</h3>
+  return `<p class="ficha-antetitulo llamada">${iconoUi('brujula')} Recorrido · Paso ${i + 1} de ${ids.length}</p><h3 class="ficha-titulo grande">${e.nombre}</h3>
  <p class="ficha-texto">Zona ${e.seccionId}${z ? ` · ${z.titulo}` : ''}</p>
  <div class="rec-puntos" aria-hidden="true">${puntos}</div>
  <div class="rec-ctrl"><button type="button" class="rec-btn" data-recorrido="-1"${i === 0 ? ' disabled' : ''}>← Anterior</button><button type="button" class="rec-btn principal" data-recorrido="1"${i === ids.length - 1 ? ' disabled' : ''}>Siguiente →</button></div>

@@ -9,6 +9,7 @@ import { pintarPreguntaConConfianza, type Tarjeta, tarjetasDe } from '../compone
 import { ocultarNombre } from '../../domain/recall.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 const TAMANOS = [10, 15, 25];
 const MOTIVO: Record<MotivoSesion, string> = {
@@ -51,7 +52,7 @@ export function pintarSesion(ctx: ContextoVista, estado: EstadoEstudio, practica
   const racha_ = racha(p, hoy);
   const hechasHoy = p.actividad[hoy]?.total ?? 0;
   const etiqueta = (m: MotivoSesion, n: number) => (n ? `<li class="ses-${m}"><b>${n}</b>${PLAN[m][n === 1 ? 0 : 1]}</li>` : '');
-  ctx.pagina.innerHTML = `<div class="ses" data-sesion><header class="sh"><div class="kick"><span class="pill k">🎯 Estudiar hoy</span>${racha_ ? `<span class="pill">🔥 Racha de ${racha_} ${racha_ === 1 ? 'día' : 'días'}</span>` : ''}${hechasHoy ? `<span class="pill">${hechasHoy} respuestas hoy</span>` : ''}</div><h1>Tu sesión de hoy</h1><p>Preguntas mezcladas de todo el tema: primero lo que fallaste, después lo que toca repasar y lo nuevo que más cae en el examen. Antes de cada corrección, di cómo de seguro estás.</p></header>
+  ctx.pagina.innerHTML = `<div class="ses" data-sesion><header class="sh"><div class="kick"><span class="pill k">${iconoUi('diana')} Estudiar hoy</span>${racha_ ? `<span class="pill">${iconoUi('llama')} Racha de ${racha_} ${racha_ === 1 ? 'día' : 'días'}</span>` : ''}${hechasHoy ? `<span class="pill">${hechasHoy} respuestas hoy</span>` : ''}</div><h1>Tu sesión de hoy</h1><p>Preguntas mezcladas de todo el tema: primero lo que fallaste, después lo que toca repasar y lo nuevo que más cae en el examen. Antes de cada corrección, di cómo de seguro estás.</p></header>
 <section class="ses-plan"><ul class="ses-resumen">${etiqueta('repaso', r.repaso)}${etiqueta('espaciada', r.espaciada)}${etiqueta('nueva', r.nueva)}${etiqueta('identifica', r.identifica)}${etiqueta('tarjeta', r.tarjeta)}</ul>
 <div class="ses-ops"><fieldset><legend>Duración</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="ses-n" value="${n}"${n === tamano ? ' checked' : ''}><span>${n}<small>≈ ${n} min</small></span></label>`).join('')}</fieldset>
 <label class="ses-fecha"><span>Fecha del examen</span><input type="date" data-ses-fecha value="${p.fechaExamen ?? ''}" min="${hoy}">${p.fechaExamen ? '<button type="button" class="fc-btn" data-ses-borrar>Borrar</button>' : ''}</label></div>
@@ -160,12 +161,12 @@ function jugar(juego: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
 }
 
 function pintarTarjeta(panel: HTMLElement, t: Tarjeta, girada: boolean, alCalificar: (sabia: boolean) => void): void {
-  panel.innerHTML = `<div class="md"><b>🃏 ${t.fuente}</b></div>
+  panel.innerHTML = `<div class="md"><b>${iconoUi('naipes')} ${t.fuente}</b></div>
  <button type="button" class="fc${girada ? ' girada' : ''}" data-ses-girar aria-pressed="${girada}">
   <span class="fc-cara fc-anverso"><small>Intenta recordarlo antes de girar</small>${t.anverso}<em>Pulsa para ver la respuesta</em></span>
   <span class="fc-cara fc-reverso">${resaltarAviso(t.reverso)}</span>
  </button>
- <div class="fc-ctrl rep-calif"${girada ? '' : ' hidden'}><button type="button" class="fc-btn rep-no" data-sabia="0">✗ No la sabía</button><button type="button" class="fc-btn rep-si" data-sabia="1">✓ La sabía</button></div>`;
+ <div class="fc-ctrl rep-calif"${girada ? '' : ' hidden'}><button type="button" class="fc-btn rep-no" data-sabia="0">${iconoUi('aspa')} No la sabía</button><button type="button" class="fc-btn rep-si" data-sabia="1">${iconoUi('visto')} La sabía</button></div>`;
   panel.querySelector<HTMLButtonElement>('[data-ses-girar]')!.onclick = () => pintarTarjeta(panel, t, !girada, alCalificar);
   for (const b of panel.querySelectorAll<HTMLButtonElement>('[data-sabia]')) b.onclick = () => alCalificar(b.dataset.sabia === '1');
 }
@@ -175,7 +176,7 @@ function final(juego: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
   const pct = m.hechas ? Math.round((m.aciertos / m.hechas) * 100) : 0;
   const r = racha(practica.practica, practica.fecha);
   const pendientes = Object.keys(practica.practica.fallos).length;
-  juego.innerHTML = `<section class="ses-fin"><span class="pill k">✅ Sesión completada</span><h2>${m.aciertos} de ${m.hechas} bien · ${pct} %</h2><p>${minutos} ${minutos === 1 ? 'minuto' : 'minutos'} de práctica${r ? ` · 🔥 racha de ${r} ${r === 1 ? 'día' : 'días'}` : ''}. Lo que has fallado o acertado sin seguridad volverá en las próximas sesiones; lo que sabes, cada vez más espaciado.</p>
+  juego.innerHTML = `<section class="ses-fin"><span class="pill k">${iconoUi('sello')} Sesión completada</span><h2>${m.aciertos} de ${m.hechas} bien · ${pct} %</h2><p>${minutos} ${minutos === 1 ? 'minuto' : 'minutos'} de práctica${r ? ` · ${iconoUi('llama')} racha de ${r} ${r === 1 ? 'día' : 'días'}` : ''}. Lo que has fallado o acertado sin seguridad volverá en las próximas sesiones; lo que sabes, cada vez más espaciado.</p>
 <div class="acts"><button type="button" class="ab q" data-ses-otra>Otra sesión</button>${pendientes ? `<a class="ab p" href="${hrefRepaso()}">Repasar fallos (${pendientes})</a>` : ''}<a class="ab e" href="${hrefSimulacro()}">Hacer un simulacro</a><a class="ab f" href="${hrefProgreso()}">Ver mi progreso</a></div></section>`;
   juego.querySelector<HTMLButtonElement>('[data-ses-otra]')!.onclick = () => pintarSesion(ctx, estado, practica);
 }

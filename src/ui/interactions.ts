@@ -7,6 +7,7 @@ import { pintarEsquema, pintarFlashcard, pintarOtraForma, pintarPregunta, pintar
 import { infografiasDe, montarInfografia } from './components/infographic.ts';
 import { pintarRail } from './components/rail.ts';
 import type { ContextoVista } from './views/context.ts';
+import { iconoUi } from '../icons/ui.ts';
 
 /** Delegación de clics de las fichas: otra forma (cicla modos), trampa y compruébalo. */
 export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
@@ -55,7 +56,7 @@ export function conectarFichas(ctx: ContextoVista, estado: EstadoEstudio, practi
       pintarOtraForma(panel, concepto, estado.tema.modos, indice);
       panel.hidden = false;
       boton.setAttribute('aria-expanded', 'true');
-      boton.textContent = `🔄 Otra forma (${indice + 1}/${totalModos})`;
+      boton.innerHTML = `${iconoUi('otraForma')} Otra forma (${indice + 1}/${totalModos})`;
       return;
     }
 

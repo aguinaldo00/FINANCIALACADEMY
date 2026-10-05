@@ -8,6 +8,7 @@ import { fichaConcepto } from '../components/conceptCard.ts';
 import { infografiasDe } from '../components/infographic.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
+import { iconoUi } from '../../icons/ui.ts';
 
 export function pintarSeccion(ctx: ContextoVista, estado: EstadoEstudio, seccionId: string, conceptoFoco: string | null): void {
   const { tema, progreso } = estado;
@@ -60,7 +61,7 @@ function preguntasPretest(estado: EstadoEstudio, conceptos: Concepto[]): (Pregun
 function pretest(estado: EstadoEstudio, conceptos: Concepto[]): string {
   const n = preguntasPretest(estado, conceptos).length;
   if (!n) return '';
-  return `<section class="pre" data-pretest><div class="pre-cab"><div><h3>🔮 Antes de leer: ${n} ${n === 1 ? 'pregunta rápida' : 'preguntas rápidas'}</h3><p>Intentar responder antes de estudiar ayuda a recordar después, aunque falles. No cuenta para nada.</p></div><button type="button" class="ab o" data-pre="empezar">Probar</button></div><div class="pre-panel" hidden></div></section>`;
+  return `<section class="pre" data-pretest><div class="pre-cab"><div><h3>${iconoUi('lupa')} Antes de leer: ${n} ${n === 1 ? 'pregunta rápida' : 'preguntas rápidas'}</h3><p>Intentar responder antes de estudiar ayuda a recordar después, aunque falles. No cuenta para nada.</p></div><button type="button" class="ab o" data-pre="empezar">Probar</button></div><div class="pre-panel" hidden></div></section>`;
 }
 
 function conectarPretest(raiz: HTMLElement | null, estado: EstadoEstudio, conceptos: Concepto[]): void {
@@ -86,7 +87,7 @@ function conectarPretest(raiz: HTMLElement | null, estado: EstadoEstudio, concep
         if (!bien) b.classList.add('no');
         if (bien) saltarMonedas(b);
         else sacudir(b);
-        panel.querySelector('.fb')!.innerHTML = `${bien ? '✅ ¡Bien!' : '🔎 Lo verás en la ficha'} <a href="#c-${q.conceptoId}" data-pre-ir>${nombre}</a>. <button type="button" class="fc-btn" data-pre="sig">${i + 1 < preguntas.length ? 'Siguiente →' : 'Terminar'}</button>`;
+        panel.querySelector('.fb')!.innerHTML = `${bien ? `${iconoUi('sello')} ¡Bien!` : `${iconoUi('lupa')} Lo verás en la ficha`} <a href="#c-${q.conceptoId}" data-pre-ir>${nombre}</a>. <button type="button" class="fc-btn" data-pre="sig">${i + 1 < preguntas.length ? 'Siguiente →' : 'Terminar'}</button>`;
         panel.querySelector<HTMLButtonElement>('[data-pre="sig"]')!.onclick = () => mostrar(i + 1);
         panel.querySelector<HTMLAnchorElement>('[data-pre-ir]')!.onclick = (e) => {
           e.preventDefault();

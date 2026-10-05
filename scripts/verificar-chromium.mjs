@@ -216,11 +216,14 @@ const progreso = () => {
   ok('intro: termina sola y queda vista', (await p.locator('.intro').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-activa'))) && (await p.evaluate(() => localStorage.getItem('financial-academy:entrada'))) === '"trailer-1"');
   // Distancia de la cámara cuando deja de moverse (el acercamiento final tarda en SwiftShader).
   const estable = async () => {
+    // Quieta = la misma distancia durante 2,5 s (en SwiftShader un fotograma puede tardar ~1 s).
     let previa = -1;
-    for (let k = 0; k < 40; k++) {
+    let iguales = 0;
+    for (let k = 0; k < 80; k++) {
       await p.waitForTimeout(500);
       const d = Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
-      if (d === previa) return d;
+      iguales = d === previa ? iguales + 1 : 0;
+      if (iguales >= 5) return d;
       previa = d;
     }
     return previa;
@@ -415,6 +418,21 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   ok('móvil: salta mientras camina (dos dedos)', andando === '1' && enAire === '1', `andando ${andando} · en el aire ${enAire}`);
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-joystick.png` }).catch(() => {});
+  await p.close();
+}
+
+// 3c. Iconos propios: los botones y el índice usan los medallones de la ciudad, no emojis.
+{
+  const p = await pagina({ viewport: { width: 1400, height: 900 } }, progreso);
+  await p.goto('http://localhost:4173/#s/3.2B');
+  await p.waitForSelector('.cc .acts .ab', { timeout: 30000 });
+  const emoji = /\p{Emoji_Presentation}|\p{Extended_Pictographic}\uFE0F/u;
+  const r = await p.evaluate(() => {
+    const botones = [...document.querySelectorAll('.cc')][0].querySelectorAll('.acts .ab');
+    return { n: botones.length, conIcono: [...botones].filter((b) => b.querySelector('svg.iu-medallon')).length, acts: document.querySelector('.cc .acts').textContent, rail: document.querySelector('.rail')?.textContent ?? '' };
+  });
+  ok('iconos: cada botón de la ficha lleva su medallón propio', r.n >= 7 && r.conIcono === r.n, `${r.conIcono}/${r.n}`);
+  ok('iconos: sin emojis en los botones ni en el índice', !emoji.test(r.acts) && !emoji.test(r.rail));
   await p.close();
 }
 
