@@ -31,3 +31,61 @@
 .gram div{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px 10px;font-size:.92rem;line-height:1.2}
 .gram svg{width:40px;height:40px;flex:none}
 .next{margin-top:30px;color:var(--mut);font-size:.95rem;border-top:1px solid var(--line);padding-top:14px}
+
+/* Historia del proyecto: la ciudad 2D del prototipo, al final de la portada. */
+.historia{margin-top:56px;padding-top:26px;border-top:1px dashed var(--line)}
+.historia .h2{margin-top:10px}
+.historia-p{color:var(--mut);max-width:62ch;margin:0 0 6px}
+.historia .skyline{filter:sepia(.25) saturate(.9)}
+
+/* "El tema, de principio a fin": gráfico circular de dos anillos (apartados y subpuntos; tamaño =
+   peso en el examen, relleno = tu dominio) y su leyenda con todos los valores en texto. */
+.tl{margin:34px 0 10px}
+.tl-encabezado p{color:var(--mut);margin:4px 0 18px;max-width:64ch;font-size:1rem}
+.tl-cuerpo{display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:20px 32px;align-items:start}
+.tl-figura{position:sticky;top:16px}
+.tl-grafico{display:block;width:100%;height:auto;max-width:340px;margin:0 auto;overflow:visible}
+/* Anillo interior: apartados. */
+.tl-grupo path{fill:var(--c);transition:opacity .2s}
+.tl-rot{fill:#0b0b0b;font:800 17px "Bricolage Grotesque",system-ui,sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+/* Anillo exterior: subpuntos. Base en el tono suave del apartado; relleno radial = dominio. */
+.tl-seg{outline:none}
+.tl-base{fill:color-mix(in srgb,var(--c) 26%,var(--bg2));transition:opacity .2s}
+.tl-dom{fill:var(--c);pointer-events:none;transition:opacity .2s}
+.tl-seg:focus-visible .tl-base{stroke:var(--ink);stroke-width:2}
+.tl-seg.siguiente .tl-base{stroke:var(--ink);stroke-width:2;animation:tl-late 1.6s ease-in-out infinite}
+@keyframes tl-late{50%{stroke-opacity:.25}}
+/* Centro. */
+.tl-c1,.tl-c3{fill:var(--mut);font:700 11px "Atkinson Hyperlegible",system-ui,sans-serif;text-anchor:middle;letter-spacing:.06em}
+.tl-c1{text-transform:uppercase}
+.tl-c2{fill:var(--ink);font:800 30px "Bricolage Grotesque",system-ui,sans-serif;text-anchor:middle;font-variant-numeric:tabular-nums}
+/* Resaltado: lo señalado queda pleno, el resto se atenúa. */
+.tl.resaltando .tl-grupo:not(.activo) path,.tl.resaltando .tl-seg:not(.activo) .tl-base,.tl.resaltando .tl-seg:not(.activo) .tl-dom{opacity:.28}
+.tl.resaltando .tl-seg.activo .tl-base{stroke:var(--ink);stroke-width:2}
+
+/* Leyenda: 2 columnas equilibradas. Un apartado largo puede seguir en la otra columna, pero su
+   cabecera nunca se queda sola y ningún subpunto se parte. */
+.tl-leyenda{list-style:none;margin:0;padding:0;columns:2;column-gap:22px}
+.tl-apartado{margin:0 0 16px;min-width:0}
+.tl-apartado li{break-inside:avoid}
+.tl-cab{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;align-items:center;padding:0 0 6px;border-bottom:3px solid var(--c);margin-bottom:6px;break-inside:avoid;break-after:avoid}
+.tl-num{grid-row:span 2;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--c);color:#0b0b0b;font:800 1.05rem/1 "Bricolage Grotesque",system-ui,sans-serif}
+.tl-tit{font-weight:800;font-size:.98rem;line-height:1.2;color:var(--ink)}
+.tl-peso{font-size:.78rem;color:var(--mut);font-variant-numeric:tabular-nums}
+.tl-apartado.activo .tl-cab{background:color-mix(in srgb,var(--c) 14%,transparent);border-radius:8px 8px 0 0}
+.tl-paradas{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.tl-parada{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:0 8px;align-items:baseline;padding:6px 8px;border-radius:8px;border-left:3px solid var(--c);text-decoration:none;color:inherit}
+.tl-parada:hover,.tl-parada:focus-visible,.tl-parada.activo{background:color-mix(in srgb,var(--c) 18%,transparent)}
+.tl-parada b{font-variant-numeric:tabular-nums;font-size:.86rem;color:var(--ink)}
+.tl-nombre{font-weight:700;font-size:.9rem;line-height:1.25}
+.tl-parada small{grid-column:2;color:var(--mut);font-size:.76rem;font-variant-numeric:tabular-nums}
+.tl-parada.siguiente{box-shadow:inset 0 0 0 1px var(--ink);background:rgba(255,255,255,.06)}
+.tl-parada.siguiente small::after{content:" · siguiente";color:var(--ink);font-weight:700}
+@media (prefers-reduced-motion:reduce){.tl-seg.siguiente .tl-base{animation:none}}
+/* En pantallas estrechas: gráfico arriba y la leyenda debajo, en una columna. */
+@media (max-width:760px){
+  .tl-cuerpo{grid-template-columns:1fr}
+  .tl-figura{position:static}
+  .tl-grafico{max-width:300px}
+  .tl-leyenda{columns:1}
+}
