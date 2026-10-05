@@ -7,7 +7,7 @@ import { LEYENDA_GLIFOS } from '../../icons/legend.ts';
 import { ciudadPixel } from '../../scene/pixelCity.ts';
 import { MARCA, MARCA_COMPLETA, tituloMarca } from '../components/brandTitle.ts';
 import { anilloDominio } from '../components/ring.ts';
-import { lineaTemporal } from '../components/timeline.ts';
+import { conectarLineaTemporal, lineaTemporal } from '../components/timeline.ts';
 import { colorDominio, porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 import { iconoUi } from '../../icons/ui.ts';
@@ -42,6 +42,7 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
  ${ciudadPixel(tema, progreso, { iconosSobreTejado: true })}<p class="legend">Luces de cada edificio = tu dominio: <b style="color:#ff5a5a">rojo</b> flojo · <b style="color:#ffd23f">amarillo</b> regular · <b style="color:#4ade80">verde</b> dominado · apagado = sin estudiar. Pulsa un edificio para entrar.</p></section>
 `;
   ctx.tituloMovil.textContent = MARCA_COMPLETA;
+  conectarLineaTemporal(ctx.pagina.querySelector<HTMLElement>('.tl'));
 }
 
 /** Al final de la portada: acceso a la predicción de examen (si el tema tiene ampliación). */

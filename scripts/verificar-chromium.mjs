@@ -56,7 +56,7 @@ const progreso = () => {
   ok('escritorio: lienzo 3D montado', await p.locator('.mundo-lienzo').count() === 1);
   ok('historia: la ciudad 2D del prototipo está al final de la página', await p.evaluate(() => { const h = document.querySelector('.historia .skyline'); const m = document.querySelector('.mundo'); return Boolean(h && m && h.getBoundingClientRect().top > m.getBoundingClientRect().bottom); }));
   ok('sin botón de modo 2D', (await p.locator('[data-mundo-modo]').count()) === 0);
-  ok('línea de tiempo: entre el mapa y el bloque del tema, con los 12 subpuntos', await p.evaluate(() => { const hijos = [...document.querySelector('#page').children].map((e) => e.classList[0]); return hijos.indexOf('tl') === hijos.indexOf('mundo') + 1 && hijos.indexOf('hero') === hijos.indexOf('tl') + 1; }) && (await p.locator('.tl-parada').count()) === 12 && (await p.locator('.tl-tramo').count()) === 12);
+  ok('gráfico del tema: entre el mapa y el bloque del tema, con los 12 subpuntos', await p.evaluate(() => { const hijos = [...document.querySelector('#page').children].map((e) => e.classList[0]); return hijos.indexOf('tl') === hijos.indexOf('mundo') + 1 && hijos.indexOf('hero') === hijos.indexOf('tl') + 1; }) && (await p.locator('.tl-parada').count()) === 12 && (await p.locator('.tl-seg').count()) === 12);
   ok('línea de tiempo: la siguiente recomendación destacada', (await p.locator('.tl-parada.siguiente').count()) === 1);
   const rotulos = await p.locator('.m-etq').allTextContents();
   ok('escritorio: solo los 4 barrios rotulados', rotulos.length === 4, rotulos.join(' | '));
@@ -214,19 +214,10 @@ const progreso = () => {
   }));
   await p.waitForSelector('.intro', { state: 'detached', timeout: 90000 }).catch(() => {});
   ok('intro: termina sola y queda vista', (await p.locator('.intro').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-activa'))) && (await p.evaluate(() => localStorage.getItem('financial-academy:entrada'))) === '"trailer-1"');
-  // Distancia de la cámara cuando deja de moverse (el acercamiento final tarda en SwiftShader).
+  // Distancia de la cámara cuando ha terminado su movimiento (la escena lo marca en el lienzo).
   const estable = async () => {
-    // Quieta = la misma distancia durante 2,5 s (en SwiftShader un fotograma puede tardar ~1 s).
-    let previa = -1;
-    let iguales = 0;
-    for (let k = 0; k < 80; k++) {
-      await p.waitForTimeout(500);
-      const d = Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
-      iguales = d === previa ? iguales + 1 : 0;
-      if (iguales >= 5) return d;
-      previa = d;
-    }
-    return previa;
+    await p.waitForFunction(() => { const d = document.querySelector('.mundo-lienzo')?.dataset; return d && d.distancia && !d.moviendo; }, null, { timeout: 60000 }).catch(() => {});
+    return Number(await p.evaluate(() => document.querySelector('.mundo-lienzo')?.dataset.distancia));
   };
   const distanciaFinal = await estable();
   await pulsar(p, '[data-ver-intro]');

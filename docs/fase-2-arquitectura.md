@@ -609,6 +609,48 @@ montaba.
   - `tests/ui/iconosUi.test.ts`, que incluye que `src/ui` no tenga emojis;
   - el bloque de iconos de `verificar-chromium.mjs`.
 
+## Publicación en GitHub Pages (05/10)
+
+- **Problema:** GitHub Pages servía el `index.html` del repositorio sin compilar. Carga
+  `/src/main.ts`, TypeScript que el navegador no ejecuta, y por eso solo se veía el HTML suelto.
+- **Solución:**
+  - `.github/workflows/pages.yml` compila (`npm ci`, `npm test`, `npm run build`) y publica `dist/`
+    con las acciones oficiales de Pages, en cada push a `main` o a mano;
+  - `public/.nojekyll`;
+  - `base: './'` ya hacía que el build funcione en `/<repo>/`.
+- **Requisito en el repositorio:** *Settings → Pages → Build and deployment → Source = GitHub
+  Actions*.
+- **Aviso:** si la página se sirve sin compilar, un aviso dentro de `#page` (en `index.html`)
+  explica cómo arreglarlo. La aplicación lo sustituye al montar.
+
+## "El tema, de principio a fin" como gráfico circular (05/10)
+
+Sustituye a las 4 columnas, que dejaban un hueco porque el apartado 3 tiene 8 subpuntos.
+
+- **Gráfico** (`ui/components/timeline.ts`): dos anillos en SVG, sin librerías.
+  - **Anillo interior:** los apartados, con un ángulo proporcional a su peso en el examen y su
+    color.
+  - **Anillo exterior:** los subpuntos, dentro del arco de su apartado. Su ángulo es su peso y el
+    relleno radial es tu dominio.
+  - **Centro:** tu dominio global.
+  - Sin rótulos dentro de las porciones, salvo el número del apartado si cabe: nada se solapa.
+  - 2 px de separación entre porciones.
+- **Leyenda:**
+  - todos los valores en texto, enlaces a cada sección;
+  - 2 columnas equilibradas: un apartado largo puede seguir en la otra, con su color al margen;
+  - 1 columna en móvil.
+- **Interacción:** al pasar o enfocar una porción o una fila se resaltan las dos
+  (`conectarLineaTemporal`).
+- **Siguiente recomendación:** su porción lleva un contorno que late, salvo con movimiento
+  reducido.
+- **Colores:** los del mapa (`COLORES_BLOQUE`), validados con la skill *dataviz* sobre el fondo
+  oscuro. Todos los pares que se tocan en el anillo pasan. El 2 y el 4 (naranja y dorado) no se
+  tocan y además se distinguen por número e id en la leyenda.
+- **Tests:** `tests/ui/timeline.test.ts` comprueba:
+  - que los ángulos suman 360°;
+  - que cada subpunto queda dentro de su apartado;
+  - que hay 12 porciones y 12 filas, y una sola recomendación.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

@@ -1154,6 +1154,7 @@ export class Mundo3D {
     this.lienzo.dataset.lluvia = this.decorado.lloviendo ? '1' : '';
     // Distancia de la cámara a su objetivo (la leen las pruebas de la intro).
     this.lienzo.dataset.distancia = this.camara.position.distanceTo(this.controles.target).toFixed(1);
+    this.lienzo.dataset.moviendo = this.transicion ? '1' : '';
     if (!this.reducido) cambio = this.animarAmbiente(ahora / 1000) || cambio;
     // Palomas y nubes: vida de fondo, a ~30 fps y solo si no hay nada más que dibujar.
     if (!this.reducido && (cambio || this.sucio || ahora - this.ultimoDecorado > 33)) {
