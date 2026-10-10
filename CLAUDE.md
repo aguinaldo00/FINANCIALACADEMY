@@ -34,6 +34,7 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 - `src/styles/`: `base.css` es el sistema visual (colores, tipos, botones); las demás hojas solo colocan.
 - `src/assets/fuentes/`: fuentes propias (Fraunces, IBM Plex, Barlow Condensed, Big Shoulders); no usar Google Fonts.
 - `docs/`: decisiones y planes; las dudas abiertas van en `docs/decisiones-pendientes.md`.
+- `docs/fuentes/`: análisis de los apuntes de cada tema (conceptos, fórmulas, errores típicos, orden de enseñanza). Son la referencia para contrastar `src/content/`; no se cargan solos, se leen cuando haga falta.
 
 ## Diseño
 - Usar los tokens y botones de `base.css` (`--bg`, `--ink`, `--oro`, `.btn-principal`…); no inventar colores ni botones.
