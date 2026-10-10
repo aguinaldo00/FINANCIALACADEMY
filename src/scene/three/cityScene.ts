@@ -268,7 +268,7 @@ export class Mundo3D {
     this.hemi = new HemisphereLight('#fff1dc', '#4a3c30', 0.4);
     this.escena.add(this.hemi);
     // Profundidad atmosférica: lo lejano se funde con el fondo del visor.
-    this.escena.fog = new Fog('#2a2521', 200, 600);
+    this.escena.fog = new Fog('#1d2536', 200, 600);
     // Sol bajo desde la izquierda de la vista inicial: fachadas con luz y sombra, sombras largas visibles.
     const sol = new DirectionalLight('#ffd9a8', 3.3);
     sol.position.set(-lado * 0.55, lado * 0.62, lado * 0.62);

@@ -57,7 +57,7 @@ export function pintarSesion(ctx: ContextoVista, estado: EstadoEstudio, practica
 <div class="ses-ops"><fieldset><legend>Duración</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="ses-n" value="${n}"${n === tamano ? ' checked' : ''}><span>${n}<small>≈ ${n} min</small></span></label>`).join('')}</fieldset>
 <label class="ses-fecha"><span>Fecha del examen</span><input type="date" data-ses-fecha value="${p.fechaExamen ?? ''}" min="${hoy}">${p.fechaExamen ? '<button type="button" class="fc-btn" data-ses-borrar>Borrar</button>' : ''}</label></div>
 <p class="ses-examen">${examen}</p>
-<button type="button" class="ab q ses-empezar" data-ses-empezar ${items.length ? '' : 'disabled'}>Empezar (${items.length}) →</button></section>
+<button type="button" class="ab q ses-empezar" data-ses-empezar ${items.length ? '' : 'disabled'}>Empezar (${items.length})</button></section>
 <div class="ses-juego" data-ses-juego hidden></div></div>`;
   const raiz = ctx.pagina.querySelector<HTMLElement>('[data-sesion]')!;
   for (const i of raiz.querySelectorAll<HTMLInputElement>('input[name="ses-n"]')) i.onchange = () => pintarSesion(ctx, estado, practica, Number(i.value));

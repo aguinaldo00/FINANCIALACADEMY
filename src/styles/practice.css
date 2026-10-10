@@ -1,17 +1,17 @@
 /* Simulacro del tema y repaso (fallos y flashcards espaciadas). Mismo lenguaje que las fichas. */
-.sl.exn .insignia{margin-left:auto;opacity:1;min-width:1.6em;text-align:center;border-radius:999px;background:var(--r);color:#000;font-weight:800;padding:0 6px}
-.sl.exn.on .insignia{background:#000;color:#fff}
+.sl.exn .insignia{margin-left:auto;opacity:1;min-width:1.6em;text-align:center;border-radius:6px;background:var(--r);color:#000;font-weight:600;padding:0 6px}
+.sl.exn.on .insignia{background:var(--bg);color:var(--ink)}
 
 /* Configuración */
 .sim-config{display:grid;gap:16px;margin-top:22px;padding:22px;border-radius:24px;background:var(--bg2);border:1px solid var(--line)}
 .sim-config fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.sim-config legend{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;margin-bottom:8px}
+.sim-config legend{font-family:var(--f-texto);font-weight:600;margin-bottom:8px}
 .sim-op input,.sim-tiempo input{position:absolute;opacity:0;pointer-events:none}
-.sim-op span{display:grid;place-items:center;min-width:64px;padding:10px 16px;border-radius:14px;border:2px solid var(--line);background:#000;font-family:"Bricolage Grotesque",sans-serif;font-size:1.3rem;font-weight:800;cursor:pointer}
+.sim-op span{display:grid;place-items:center;min-width:64px;padding:10px 16px;border-radius:14px;border:2px solid var(--line);background:var(--bg);font-family:var(--f-texto);font-size:1.3rem;font-weight:600;cursor:pointer}
 .sim-op input:checked+span{border-color:var(--g);background:#0f2e1c}
 .sim-op input:focus-visible+span,.sim-tiempo input:focus-visible+span{outline:3px solid var(--y);outline-offset:3px}
 .sim-tiempo{position:relative;display:inline-flex;align-items:center;gap:10px;cursor:pointer}
-.sim-tiempo span::before{content:"";display:inline-block;width:22px;height:22px;margin-right:10px;vertical-align:-5px;border-radius:6px;border:2px solid var(--line);background:#000}
+.sim-tiempo span::before{content:"";display:inline-block;width:22px;height:22px;margin-right:10px;vertical-align:-5px;border-radius:6px;border:2px solid var(--line);background:var(--bg)}
 .sim-tiempo input:checked+span::before{background:var(--g);border-color:var(--g);box-shadow:inset 0 0 0 4px #000}
 .sim-empezar{justify-self:start;font-size:1.1rem;padding:12px 22px}
 .sim-hist{margin-top:28px}
@@ -19,18 +19,18 @@
 .sim-hist ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .sim-hist li{display:grid;grid-template-columns:6em 1fr 3em 3.4em;gap:10px;align-items:center;font-size:.88rem;font-variant-numeric:tabular-nums}
 .sim-hist li span,.sim-hist li small{color:var(--mut)}
-.sim-hist li i{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--g) var(--p),#262626 var(--p))}
-.sim-hist li b{text-align:right;font-family:"Bricolage Grotesque",sans-serif}
+.sim-hist li i{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--g) var(--p),var(--bg4) var(--p))}
+.sim-hist li b{text-align:right;font-family:var(--f-texto)}
 
 /* Durante el simulacro */
 .sim-cab{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 .sim-n{font-size:.95rem;color:var(--mut)}
-.sim-n b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.4rem;color:#fff}
-.sim-bloque{font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 12px;border:1px solid var(--c);color:#fff;background:color-mix(in srgb,var(--c) 22%,#000)}
+.sim-n b{font-family:var(--f-texto);font-size:1.4rem;color:var(--ink)}
+.sim-bloque{font-size:.78rem;font-weight:600;border-radius:6px;padding:3px 12px;border:1px solid var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 22%,#000)}
 .sim-cab .fc-btn{margin-left:auto}
-.sim-progreso{height:8px;border-radius:4px;background:#262626;margin:12px 0 0;overflow:hidden}
+.sim-progreso{height:8px;border-radius:4px;background:var(--bg4);margin:12px 0 0;overflow:hidden}
 .sim-progreso i{display:block;height:100%;background:var(--g);transition:width .3s}
-.sim-reloj{height:4px;border-radius:2px;background:#262626;margin-top:6px;overflow:hidden;display:inline-block;width:calc(100% - 4em);vertical-align:middle}
+.sim-reloj{height:4px;border-radius:2px;background:var(--bg4);margin-top:6px;overflow:hidden;display:inline-block;width:calc(100% - 4em);vertical-align:middle}
 .sim-reloj i{display:block;height:100%;width:100%;background:var(--y);transition:width .25s linear}
 .sim-seg{display:inline-block;width:3.6em;text-align:right;font-size:.8rem;color:var(--mut);font-variant-numeric:tabular-nums;vertical-align:middle}
 .sim-pregunta{margin-top:22px;background:var(--bg2);border:1px solid var(--line);border-radius:26px;padding:26px}
@@ -47,14 +47,14 @@
 .sim-correccion{margin-top:34px}
 .sim-correccion h2{font-size:1.5rem;margin-bottom:10px}
 .sim-filtro{display:flex;gap:8px;margin-bottom:12px}
-.sim-filtro .fc-btn.on{background:#fff;color:#000}
+.sim-filtro .fc-btn.on{background:rgba(224,178,94,.12);color:var(--oro2)}
 .sim-correccion ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .sim-correccion ol.solo-mal li.bien{display:none}
 .sim-correccion li{padding:14px 16px;border-radius:16px;background:var(--bg2);border:1px solid var(--line);border-left:5px solid var(--g)}
 .sim-correccion li.mal{border-left-color:var(--r)}
 .sim-c-h{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
-.sim-c-n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--mut)}
-.sim-c-r{font-weight:800;font-size:1.2rem;color:var(--g)}
+.sim-c-n{font-family:var(--f-texto);font-weight:600;color:var(--mut)}
+.sim-c-r{font-weight:600;font-size:1.2rem;color:var(--g)}
 .mal .sim-c-r{color:var(--r)}
 .sim-tuya{margin:8px 0 0;color:#ffb3b3;font-size:.95rem}
 .sim-ok{margin:6px 0 0;font-size:.95rem}
@@ -63,30 +63,30 @@
 
 /* Repaso */
 .rep-tabs{display:flex;gap:8px;margin:22px 0 16px;border-bottom:1px solid var(--line)}
-.rep-tab{cursor:pointer;border:0;background:none;padding:10px 14px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.05rem;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-1px}
-.rep-tab b{display:inline-grid;place-items:center;min-width:1.7em;margin-left:6px;border-radius:999px;background:var(--bg3);color:#fff;font-size:.8rem;padding:1px 6px}
-.rep-tab[aria-selected="true"]{color:#fff;border-bottom-color:var(--y)}
-.rep-resumen{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;margin:0 0 6px;padding:0;font-size:.85rem;color:#ddd}
+.rep-tab{cursor:pointer;border:0;background:none;padding:10px 14px;font-family:var(--f-texto);font-weight:600;font-size:1.05rem;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-1px}
+.rep-tab b{display:inline-grid;place-items:center;min-width:1.7em;margin-left:6px;border-radius:6px;background:var(--bg3);color:var(--ink);font-size:.8rem;padding:1px 6px}
+.rep-tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--y)}
+.rep-resumen{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;margin:0 0 6px;padding:0;font-size:.85rem;color:var(--ink)}
 .rep-resumen i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c);vertical-align:-1px}
 .rep-tarjeta{margin-top:12px}
 .rep-tarjeta .pn{margin-top:0}
 .pq-pie a{color:var(--c)}
 .rep-cajas{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;list-style:none;margin:0;padding:0}
 .rep-cajas li{display:grid;justify-items:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--bg2);border:1px solid var(--line);text-align:center}
-.rep-cajas b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.4rem;line-height:1}
+.rep-cajas b{font-family:var(--f-texto);font-size:1.4rem;line-height:1}
 .rep-cajas small{font-size:.72rem;color:var(--mut);line-height:1.2}
 .rep-calif[hidden]{display:none}
 .rep-calif{justify-content:center}
 .rep-calif .fc-btn{padding:9px 18px;font-size:1rem}
 .rep-no{border-color:#ff5a5a88}.rep-si{border-color:#4ade8088}
 .rep-vacio{display:grid;justify-items:center;gap:14px;margin-top:18px;padding:34px 20px;border-radius:24px;border:1px dashed var(--line);text-align:center}
-.rep-vacio b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.3rem}
+.rep-vacio b{font-family:var(--f-texto);font-size:1.3rem}
 .rep-vacio a.ab{text-decoration:none}
 
 /* Portada: accesos a simulacro y repaso (sustituye al texto de fases del prototipo). */
 .home-practica{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0}
-.home-practica a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#fff;border:1px solid var(--line);background:var(--bg2);border-radius:999px;padding:8px 16px;font-weight:700}
-.home-practica a:hover{border-color:#fff}
+.home-practica a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--bg2);border-radius:6px;padding:8px 16px;font-weight:600}
+.home-practica a:hover{border-color:var(--oro)}
 
 @media (max-width:600px){
   .sim-nota{grid-template-columns:1fr;justify-items:start;gap:10px}
@@ -104,7 +104,7 @@
 .ex-et small{color:var(--mut)}
 .sim-cal{margin-bottom:16px}
 .sim-cal-nota{margin:10px 0 0;font-size:.92rem;color:var(--mut)}
-.sim-c-conf{display:inline-block;margin:6px 0 0 1.9em;font-size:.75rem;font-weight:700;border-radius:999px;padding:1px 10px;border:1px solid #3b82f6;color:#cfe0ff}
+.sim-c-conf{display:inline-block;margin:6px 0 0 1.9em;font-size:.75rem;font-weight:600;border-radius:6px;padding:1px 10px;border:1px solid #3b82f6;color:#cfe0ff}
 .sim-c-conf.sorpresa{border-color:var(--y);color:var(--y)}
 .sim-correccion li.sorpresa{border-left-color:var(--y)}
 
@@ -112,21 +112,21 @@
 .ses-plan{display:grid;gap:16px;margin-top:22px;padding:22px;border-radius:24px;background:var(--bg2);border:1px solid var(--line)}
 .ses-plan[hidden]{display:none}
 .ses-resumen{display:flex;flex-wrap:wrap;align-items:center;gap:8px;list-style:none;margin:0;padding:0}
-.ses-resumen li{display:flex;gap:6px;align-items:baseline;white-space:nowrap;padding:6px 14px;border-radius:999px;background:#000;border:1px solid var(--line);font-size:.92rem}
-.ses-resumen b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.15rem}
+.ses-resumen li{display:flex;gap:6px;align-items:baseline;white-space:nowrap;padding:6px 14px;border-radius:6px;background:var(--bg);border:1px solid var(--line);font-size:.92rem}
+.ses-resumen b{font-family:var(--f-texto);font-size:1.15rem}
 .ses-resumen .ses-repaso{border-color:#ff5a5a88}.ses-resumen .ses-espaciada{border-color:#60a5fa88}.ses-resumen .ses-nueva{border-color:#4ade8088}.ses-resumen .ses-tarjeta{border-color:#a78bfa88}
 .ses-ops{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
 .ses-ops fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
-.ses-ops legend{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;margin-bottom:8px}
+.ses-ops legend{font-family:var(--f-texto);font-weight:600;margin-bottom:8px}
 .ses-ops .sim-op span{display:grid;justify-items:center;line-height:1.1}
-.ses-ops .sim-op small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:.7rem;font-weight:400;color:var(--mut)}
-.ses-fecha{display:grid;gap:6px;font-weight:700}
-.ses-fecha input{font:inherit;color:#fff;background:#000;border:2px solid var(--line);border-radius:12px;padding:8px 10px;color-scheme:dark}
+.ses-ops .sim-op small{font-family:var(--f-texto);font-size:.7rem;font-weight:400;color:var(--mut)}
+.ses-fecha{display:grid;gap:6px;font-weight:600}
+.ses-fecha input{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:8px 10px;color-scheme:dark}
 .ses-fecha .fc-btn{justify-self:start}
 .ses-examen{margin:0;color:var(--mut)}
 .ses-empezar{justify-self:start;font-size:1.1rem;padding:12px 22px}
 .ses-empezar:disabled{opacity:.4;cursor:default}
-.ses-motivo{font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 12px;background:#000;border:1px solid var(--line)}
+.ses-motivo{font-size:.78rem;font-weight:600;border-radius:6px;padding:3px 12px;background:var(--bg);border:1px solid var(--line)}
 .ses-motivo.ses-repaso{border-color:#ff5a5a;color:#ffb3b3}.ses-motivo.ses-espaciada{border-color:#60a5fa;color:#cfe0ff}.ses-motivo.ses-nueva{border-color:#4ade80;color:#c8f5d8}.ses-motivo.ses-tarjeta{border-color:#a78bfa;color:#e0d6ff}
 .ses-tarjeta{margin-top:16px}
 .ses-tarjeta .pn{margin-top:0}
@@ -139,11 +139,11 @@
 /* Mi progreso */
 .prog-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:22px 0 18px}
 .prog-tile{display:grid;gap:4px;padding:14px 16px;border-radius:18px;background:var(--bg2);border:1px solid var(--line)}
-.prog-tile b{font-family:"Bricolage Grotesque",sans-serif;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.prog-tile b{font-family:var(--f-texto);font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
 .prog-tile b small{font-size:.5em;color:var(--mut)}
 .prog-tile span{font-size:.8rem;color:var(--mut);line-height:1.25}
 .prog-cal{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;max-width:520px}
-.prog-dia{display:block;aspect-ratio:1;border-radius:4px;background:#1b1b1b;border:1px solid #262626}
+.prog-dia{display:block;aspect-ratio:1;border-radius:4px;background:var(--bg4);border:1px solid var(--bg4)}
 .prog-dia.n1{background:#14361f}.prog-dia.n2{background:#1d6b38}.prog-dia.n3{background:#2fa35a}.prog-dia.n4{background:#4ade80}
 .prog-cal-ley{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:.72rem;color:var(--mut)}
 .prog-cal-ley .prog-dia{width:12px}
@@ -155,8 +155,8 @@
 .prog-memoria .c2,.prog-ley .c2{background:#2563a8}
 .prog-memoria .c3,.prog-ley .c3{background:#3b82f6}
 .prog-memoria .c4,.prog-ley .c4{background:#93c5fd}
-.prog-memoria .sin,.prog-ley .sin{background:#2b2b2b}
-.prog-ley{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:10px 0 0;padding:0;font-size:.78rem;color:#ddd}
+.prog-memoria .sin,.prog-ley .sin{background:var(--line2)}
+.prog-ley{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin:10px 0 0;padding:0;font-size:.78rem;color:var(--ink)}
 .prog-ley i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .prog-ley b{color:var(--mut)}
 .prog-sims{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:6px}
@@ -170,7 +170,7 @@
 .ses .sim-cab .sim-bloque{margin-left:auto}
 
 /* ¿Cuál es? (discriminación de conceptos parecidos) */
-.ses-def{margin:8px 0 6px;padding:12px 16px;border-left:4px solid var(--c);background:#000;border-radius:0 12px 12px 0;font-size:1.02rem;line-height:1.5}
+.ses-def{margin:8px 0 6px;padding:12px 16px;border-left:4px solid var(--c);background:var(--bg);border-radius:0 12px 12px 0;font-size:1.02rem;line-height:1.5}
 .ses-def-pista{margin:0 0 4px;font-size:.85rem;color:var(--mut)}
 .ses-motivo.ses-identifica{border-color:#3ddbd9;color:#bff3f2}
 .ses-resumen .ses-identifica{border-color:#3ddbd988}

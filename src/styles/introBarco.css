@@ -16,8 +16,8 @@ body.intro-barco-activa{overflow:hidden}
 
 /* Título: aparece en la calma, antes del avance hacia la luz. */
 .ib-titulo{position:absolute;left:clamp(20px,6vw,88px);bottom:clamp(96px,18vh,170px);max-width:calc(100vw - 40px);opacity:0;pointer-events:none}
-.ib-titulo h1{margin:4px 0 0;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(2.3rem,6.4vw,5rem);line-height:.95;letter-spacing:-.03em;color:#fff4dc;text-shadow:0 4px 30px rgba(20,8,0,.65)}
-.ib-ante{margin:0;text-wrap:balance;font-size:clamp(.7rem,1.1vw,.86rem);font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:#f2c879;text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.ib-titulo h1{margin:4px 0 0;font-family:var(--f-titulo);font-weight:400;font-size:clamp(2.3rem,6.4vw,5rem);line-height:.95;letter-spacing:-.03em;color:#fff4dc;text-shadow:0 4px 30px rgba(20,8,0,.65)}
+.ib-ante{margin:0;text-wrap:balance;font-size:clamp(.7rem,1.1vw,.86rem);font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:#f2c879;text-shadow:0 2px 10px rgba(0,0,0,.7)}
 .intro-barco.en-marcha .ib-titulo{animation:ib-titulo 5.4s cubic-bezier(.2,.7,.2,1) 2.2s both}
 @keyframes ib-titulo{
   0%{opacity:0;transform:translateY(14px);filter:blur(6px)}
@@ -26,8 +26,8 @@ body.intro-barco-activa{overflow:hidden}
   100%{opacity:0;transform:translateY(-8px);filter:blur(4px)}
 }
 
-.ib-saltar{position:absolute;right:clamp(16px,3vw,36px);bottom:calc(clamp(16px,4vh,34px) + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;
-  border:1px solid rgba(255,226,170,.45);background:rgba(16,10,20,.45);color:#fbe7c2;font:700 .92rem/1 "Atkinson Hyperlegible",system-ui,sans-serif;cursor:pointer;
+.ib-saltar{position:absolute;right:clamp(16px,3vw,36px);bottom:calc(clamp(16px,4vh,34px) + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:6px;
+  border:1px solid rgba(255,226,170,.45);background:rgba(16,10,20,.45);color:#fbe7c2;font:600 .92rem/1 var(--f-texto);cursor:pointer;
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .ib-saltar:hover,.ib-saltar:focus-visible{background:rgba(255,214,140,.16);outline:2px solid #fff3da;outline-offset:3px}
 .intro-barco.ib-blanco .ib-saltar{opacity:0;transition:opacity .3s;pointer-events:none}
@@ -42,13 +42,11 @@ body.intro-barco-activa{overflow:hidden}
 }
 
 /* El selector, mientras la intro lo tapa y cuando se revela. */
-.academia.ac-llegada :is(.ac-cab,.ac-foco,.ac-nav,.ac-mundos){opacity:0}
-.academia.ac-revelando .ac-cab{transition:opacity .9s ease .7s}
+.academia.ac-llegada :is(.ac-top,.ac-cab,.ac-foco,.ac-nav,.ac-mundos){opacity:0}
+.academia.ac-revelando :is(.ac-top,.ac-cab){transition:opacity .9s ease .7s}
 .academia.ac-revelando .ac-mundos{transition:opacity .9s ease .9s}
 .academia.ac-revelando .ac-foco{transition:opacity .9s ease 1.05s}
 .academia.ac-revelando .ac-nav{transition:opacity .9s ease 1.25s}
-.ac-ver-intro{pointer-events:auto;margin-top:8px;padding:0;border:0;background:none;color:#f2c879;font:700 .8rem/1.2 "Atkinson Hyperlegible",system-ui,sans-serif;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.ac-ver-intro:hover,.ac-ver-intro:focus-visible{color:#fff3da}
 @media (prefers-reduced-motion:reduce){
   .ib-lienzo{transition:none}
   .academia.ac-revelando :is(.ac-cab,.ac-foco,.ac-nav,.ac-mundos){transition:none}

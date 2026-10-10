@@ -3,17 +3,17 @@
   .rail{transform:translateX(-102%);transition:transform .3s;width:min(320px,88vw)}
   body.menu .rail{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.72)}
   main{margin-left:0}
-  .topbar{display:flex;position:sticky;top:0;z-index:30;gap:10px;align-items:center;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:#000;border-bottom:1px solid var(--line)}
-  .topbar button{cursor:pointer;border:0;background:#fff;color:#000;border-radius:999px;padding:6px 14px;font-weight:800}
-  .topbar span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar{display:flex;position:sticky;top:0;z-index:30;gap:10px;align-items:center;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--line)}
+
+  .topbar span{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .page{padding:24px 16px 80px}
 }
 @media (max-width:600px){
-  body{font-size:17.5px}
+  body{font-size:17px}
   .cc{padding:18px}
   .cc-h{grid-template-columns:76px 1fr;gap:12px}
   .ico{width:76px;height:76px}
-  .ab{padding:9px 14px;font-size:.95rem}
+  .ab{padding:8px 12px;font-size:.92rem}
   .dash{grid-template-columns:1fr;justify-items:start}
   /* Corrección (no estaba en el prototipo): en móvil los enlaces de "Estudia ya" desbordaban la página. */
   .dash>div{min-width:0;width:100%}

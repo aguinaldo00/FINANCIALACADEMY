@@ -211,6 +211,7 @@ const progreso = () => {
   await p.waitForTimeout(1500);
   ok('intro barco: no se repite al volver al inicio', (await p.locator('.intro-barco').count()) === 0);
   await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
+  await p.locator('[data-ac-ajustes]').click();
   await p.locator('[data-ac-intro]').click();
   const otra = await p.waitForSelector('.intro-barco', { timeout: 5000 }).then(() => true).catch(() => false);
   await p.keyboard.press('Escape');
@@ -240,6 +241,18 @@ const progreso = () => {
   // Con WebGL el selector son islas flotantes: se entra con el botón del panel de la elegida.
   await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
   ok('academia: universo 3D de islas con la elegida en el centro', (await p.locator('.academia.ac-3d canvas.ac-lienzo').count()) === 1 && (await p.locator('.ac-foco h2').textContent()) === 'Gestión Financiera');
+  // Cabecera de la escena: marca, Temario (abre el índice), Ajustes (Ver intro, movimiento) y Mi progreso.
+  ok('academia: la cabecera del selector sustituye a la barra común', (await p.locator('.ac-top:visible .ac-logo').count()) === 1 && !(await p.locator('.topbar').isVisible()) && (await p.locator('.ac-top a.ac-acceso[href="#progreso"]').count()) === 1);
+  await p.locator('.ac-top [data-ac-ajustes]').click();
+  ok('academia: Ajustes abre su panel con "Ver la intro" y el movimiento', (await p.locator('[data-ac-ajustes-panel]').isVisible()) && (await p.locator('[data-ac-ajustes-panel] [data-ac-intro]').count()) === 1);
+  await p.keyboard.press('Escape');
+  ok('academia: Escape cierra Ajustes', !(await p.locator('[data-ac-ajustes-panel]').isVisible()));
+  await p.locator('.ac-top > .ac-accesos > [data-ac-temario]').click();
+  await p.waitForTimeout(600);
+  ok('academia: Temario abre el índice', await p.evaluate(() => document.body.classList.contains('menu')));
+  await p.keyboard.press('Escape');
+  await p.evaluate(() => document.body.classList.remove('menu'));
+  ok('academia: capítulo 03 con su número y el contador', (await p.locator('.ac-cap-num').textContent()) === '03' && (await p.locator('[data-ac-actual]').textContent()) === '03');
   await p.locator('[data-ac-paso="1"]').click();
   ok('academia: las flechas cambian de mundo (sin contenido: en preparación)', (await p.locator('.ac-foco h2').textContent()) === 'Recursos Humanos' && (await p.locator('.ac-foco .ac-cerrada').count()) === 1);
   await p.locator('[data-ac-ir="2"]').click();

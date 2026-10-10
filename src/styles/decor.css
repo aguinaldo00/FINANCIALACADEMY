@@ -23,7 +23,7 @@
 /* Monedas que saltan al acertar. */
 .monedas-salto{position:fixed;z-index:80;width:0;height:0;pointer-events:none}
 .monedas-salto i{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4 0 18%,#f2c94c 40%,#b8862b 100%);box-shadow:inset 0 0 0 2px #9a6d1d;animation:moneda-salta .8s cubic-bezier(.2,.7,.4,1) forwards}
-.monedas-salto i::after{content:"€";position:absolute;inset:0;display:grid;place-items:center;font:800 10px/1 system-ui,sans-serif;color:#7a5410}
+.monedas-salto i::after{content:"€";position:absolute;inset:0;display:grid;place-items:center;font:600 10px/1 system-ui,sans-serif;color:#7a5410}
 @keyframes moneda-salta{
   0%{transform:translate(0,0) scale(.4) rotateY(0)}
   45%{transform:translate(var(--dx),var(--dy)) scale(1) rotateY(calc(var(--giro) / 2));opacity:1}
@@ -32,11 +32,11 @@
 
 /* Sello "¡Lo sabías!" al acertar con seguridad. */
 .pn{position:relative}
-.sello{position:absolute;right:14px;top:10px;padding:4px 12px;border:3px double var(--g);border-radius:8px;color:var(--g);font-weight:800;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;transform:rotate(-9deg);opacity:.9;animation:sello .35s cubic-bezier(.3,1.6,.5,1) both;pointer-events:none}
+.sello{position:absolute;right:14px;top:10px;padding:4px 12px;border:3px double var(--g);border-radius:8px;color:var(--g);font-weight:600;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;transform:rotate(-9deg);opacity:.9;animation:sello .35s cubic-bezier(.3,1.6,.5,1) both;pointer-events:none}
 @keyframes sello{from{transform:rotate(-9deg) scale(2.2);opacity:0}}
 
 /* Medalla de la nota del simulacro. */
-.medalla{display:inline-grid;place-items:center;width:44px;height:44px;margin-right:10px;vertical-align:middle;border-radius:50%;font-weight:900;font-size:1.2rem;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.4);animation:medalla 1s ease-out both}
+.medalla{display:inline-grid;place-items:center;width:44px;height:44px;margin-right:10px;vertical-align:middle;border-radius:50%;font-weight:600;font-size:1.2rem;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.4);animation:medalla 1s ease-out both}
 .medalla i{font-style:normal}
 .m-oro{background:radial-gradient(circle at 35% 30%,#fff6cf,#f2c94c 45%,#a8761b);color:#5f4108}
 .m-plata{background:radial-gradient(circle at 35% 30%,#ffffff,#c9ced6 45%,#7c838e);color:#3a3f47}
