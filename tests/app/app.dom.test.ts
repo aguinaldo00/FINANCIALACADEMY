@@ -25,7 +25,7 @@ beforeAll(() => {
   localStorage.clear();
   localStorage.setItem('cdd-t1', LEGACY);
   document.body.innerHTML = `<nav class="rail" id="rail"></nav><main><div class="topbar"><button id="mb">Índice</button><span id="mt">La Ciudad del Dinero</span></div><div class="page" id="page"></div></main>`;
-  location.hash = '';
+  location.hash = '#inicio';
   iniciarApp(tema01);
 });
 
@@ -197,11 +197,58 @@ describe('app en el navegador', () => {
     expect($<HTMLButtonElement>('[data-ig="siguiente"]', panel).disabled).toBe(true);
   });
 
-  it('#visual: galería con todas las infografías', () => {
+  it('#visual: galería del Tema 1 conserva sus infografías', () => {
     navegar('#visual');
     expect($('#mt').textContent).toBe('Infografías');
+    expect($('.vis-capitalizacion')).toBeNull();
+    expect($('.vis').textContent).not.toContain('Capitalización compuesta');
     expect($$('.ig')).toHaveLength(tema01.ampliacion!.infografias!.length);
     expect($('.sl.on').getAttribute('href')).toBe('#visual');
+  });
+
+  it('la asignatura separa el Tema 2 de la ciudad del Tema 1', () => {
+    navegar('#temas');
+    expect($('#mt').textContent).toBe('Gestión Financiera');
+    expect($$('.as-puerta')).toHaveLength(2);
+    expect($$('.as-puerta')[0]!.getAttribute('href')).toBe('#inicio');
+    expect($$('.as-puerta')[1]!.textContent).toContain('Matemática financiera');
+    expect($$('.as-puerta')[1]!.getAttribute('href')).toBe('#tema/2');
+  });
+
+  it('el Tema 2 abre su propia experiencia y mantiene una ruta separada', () => {
+    navegar('#tema/2');
+    expect($('#mt').textContent).toBe('Tema 2 · Capitalización compuesta');
+    expect($('.tema-matematica h1').textContent).toBe('Capitalización compuesta');
+    expect($('.vis')).toBeNull();
+    expect($('.mat-parametros').textContent).toContain('1.000,00');
+    expect($('.mat-notacion-lista').textContent).toContain('Intereses totales');
+    expect($('.rail').textContent).toContain('Gestión Financiera · todos los temas');
+  });
+
+  it('el Tema 2 enseña primero los símbolos y después el ejemplo, los errores y la práctica', () => {
+    navegar('#tema/2');
+    const partes = $$('.mat-parte').map((p) => p.id);
+    expect(partes).toEqual(['mat-simbolos', 'mat-leccion', 'mat-errores', 'mat-papel', 'mat-reconocer']);
+    // El índice lateral lista las cinco partes y marca la que se abre por ruta.
+    expect($$('.rail .sl-sub')).toHaveLength(5);
+    navegar('#tema/2/capitalizacion-compuesta/papel');
+    expect($('.rail .sl.on').getAttribute('href')).toBe('#tema/2/capitalizacion-compuesta/papel');
+  });
+
+  it('cambiar de parte dentro del Tema 2 no reinicia lo ya hecho', () => {
+    navegar('#tema/2');
+    $<HTMLButtonElement>('[data-mat-solucion]').click();
+    expect($('.mat-papel-solucion').hidden).toBe(false);
+    navegar('#tema/2/capitalizacion-compuesta/errores');
+    expect($('.mat-papel-solucion').hidden).toBe(false);
+  });
+
+  it('el menú vuelve al de cada tema y el enlace a la asignatura está siempre arriba', () => {
+    navegar('#tema/2');
+    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#a/gestion-financiera');
+    navegar('#inicio');
+    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#a/gestion-financiera');
+    expect($('.rail').textContent).toContain('dominio global');
   });
 
   it('#c/<id> abre la sección del concepto y lo muestra', () => {

@@ -9,11 +9,14 @@ import './styles/study.css';
 import './styles/exam.css';
 import './styles/practice.css';
 import './styles/infographic.css';
+import './styles/capitalizacion.css';
 import './styles/decor.css';
 import './styles/iconos.css';
 import './styles/intro.css';
 import './styles/responsive.css';
+import './styles/academia.css';
+import './styles/introBarco.css';
 import { iniciarApp } from './app/app.ts';
-import { temaActivo } from './content/temas/index.ts';
+import { TEMAS, temaActivo } from './content/temas/index.ts';
 
-iniciarApp(temaActivo);
+iniciarApp(temaActivo, TEMAS);

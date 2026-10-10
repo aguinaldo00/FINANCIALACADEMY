@@ -67,3 +67,33 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Animación continua:** las palomas y las nubes hacen que la escena se redibuje (a unos 30 fps)
   mientras el mapa está a la vista. Con movimiento reducido no se anima nada.
 
+
+## Academia y navegación (10/10)
+
+- **Segmentación en unidades:** el selector y el temario usan lo que hay ("Tema 1", "Tema 2" y,
+  dentro del Tema 1, sus 4 grupos de DATA).
+  - **¿Unidades por encima de los temas?** Decidirlo. La arquitectura lo admite: un nivel más en
+    el árbol del temario.
+- **Asignaturas sin contenido:** Contabilidad, Gestión Logística, Recursos Humanos, IPE y
+  Simulación Empresarial aparecen como "Todavía sin contenido". No tienen temas, estado ni
+  progreso inventados.
+- **Zonas de la ciudad:** el boceto mostraba 6 zonas (Política monetaria, Mercados
+  internacionales…) que no existen en DATA. Se usan los 4 grupos reales; cambiarlo requiere
+  decidir antes la estructura académica.
+- **Islas del selector (prueba de Gestión Financiera):**
+  - **Moneda de la cúpula:** la ilustración generada lleva un símbolo parecido a "$". ¿Se
+    regenera con "€", o se retoca?
+  - **Las otras 5 islas:** pendientes de aprobar esta. Para mantener la coherencia, hay que
+    generarlas con el mismo estilo, luz y encuadre.
+  - **Derechos de las imágenes:** son imágenes generadas con Figma AI, con el plan del usuario.
+    Antes de publicarlas de forma comercial, conviene confirmar las condiciones de uso de Figma
+    para lo que se genera.
+  - **Calidad en pantallas grandes:** la isla mide 1024 px. En pantallas 4K o al acercarse al
+    entrar se nota algo de suavizado. Si se aprueba, conviene regenerarla a 2048 px.
+- **Intro del barco (prototipo):**
+  - **Imágenes:** el barco y el remolino son los recortes que aportó el usuario. Confirmar sus
+    derechos de uso antes de publicar.
+  - **Barco:** es una ilustración plana, así que no puede girar. Si se quiere que vire o se vea
+    desde otro ángulo, hacen falta más vistas o un modelo 3D de calidad.
+  - **Título:** "Financial Academy" con el lema "Ciclo de Administración y Finanzas". ¿Otro texto?
+  - **Sonido:** no tiene. Si se añade, tendría que empezar tras un gesto del usuario.

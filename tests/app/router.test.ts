@@ -1,11 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { resolverRuta } from '../../src/app/router.ts';
+import { hrefTema2, resolverRuta } from '../../src/app/router.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 
 describe('rutas hash', () => {
-  it('sin hash o #inicio va al inicio', () => {
-    expect(resolverRuta('', tema01)).toEqual({ vista: 'inicio', scrollArriba: true });
+  it('sin hash se entra por el selector de asignaturas; #temas es Gestión Financiera; #inicio, la portada del tema 1', () => {
+    expect(resolverRuta('', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
+    expect(resolverRuta('#academia', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
+    expect(resolverRuta('#temas', tema01)).toEqual({ vista: 'asignatura', asignaturaId: 'gestion-financiera', scrollArriba: true });
+    expect(resolverRuta('#a/gestion-financiera', tema01)).toEqual({ vista: 'asignatura', asignaturaId: 'gestion-financiera', scrollArriba: true });
+    // Una asignatura desconocida vuelve al selector.
+    expect(resolverRuta('#a/astrologia', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
     expect(resolverRuta('#inicio', tema01)).toEqual({ vista: 'inicio', scrollArriba: true });
+  });
+
+  it('#tema/2 con lección y parte; lo desconocido cae en la portada del tema 2', () => {
+    expect(resolverRuta('#tema/2', tema01)).toEqual({ vista: 'tema2', leccion: null, parte: null, scrollArriba: true });
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta', tema01))
+      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: null, scrollArriba: true });
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta/papel', tema01))
+      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: 'papel', scrollArriba: false });
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta/nada', tema01))
+      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: null, scrollArriba: true });
+    expect(resolverRuta('#tema/2/otra', tema01)).toEqual({ vista: 'tema2', leccion: null, parte: null, scrollArriba: true });
+    expect(hrefTema2('capitalizacion-compuesta', 'errores')).toBe('#tema/2/capitalizacion-compuesta/errores');
   });
 
   it('#s/<id> abre la sección', () => {

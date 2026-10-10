@@ -651,6 +651,168 @@ Sustituye a las 4 columnas, que dejaban un hueco porque el apartado 3 tiene 8 su
   - que cada subpunto queda dentro de su apartado;
   - que hay 12 porciones y 12 filas, y una sola recomendación.
 
+## Academia: asignaturas, temas y experiencias (10/10)
+
+Financial Academy reúne las asignaturas del ciclo. La ciudad 3D **no** es el sistema visual común:
+es la experiencia del Tema 1 de Gestión Financiera. Cada tema declara la suya.
+
+**Capas** (de fuera hacia dentro, cada una independiente de la siguiente):
+
+1. **Selector global de asignaturas** (`content/academia.ts`, `ui/views/academiaView.ts`, ruta
+   `#academia`, que también es la entrada sin hash).
+   - `ASIGNATURAS` define 6 asignaturas, cada una con identidad (nombre, icono propio en medallón y
+     color) y temas.
+   - La disponibilidad **se deriva** de que tenga temas, no se declara. Hoy solo Gestión
+     Financiera tiene temas; las demás aparecen como "Todavía sin contenido".
+   - **Colores:** paleta categórica validada sobre fondo oscuro con la skill *dataviz*. Pasa cada
+     par de mundos vecinos, en el arco de escritorio y en la rejilla de 3×2 de móvil. El color
+     nunca va solo: siempre acompaña al nombre y al icono.
+2. **Navegación y temario de cada asignatura** (`ui/views/asignaturaView.ts`, `#a/<id>`; `#temas`
+   lleva a Gestión Financiera).
+   - Los temas aparecen como puertas, cada uno con su experiencia.
+   - Debajo, los botones de estudio y examen del Tema 1 de siempre.
+   - El temario jerárquico (`ui/components/temario.ts`) se genera a partir de los datos de cada
+     tema: Tema 1 con sus grupos, secciones y conceptos; Tema 2 con su lección y sus partes. Tiene
+     buscador por número o nombre y lleva a cualquier apartado sin pasar por el 3D.
+3. **Experiencias por tema.** `TemaCatalogo.experiencia` vale `'ciudad-3d'` o `'leccion'`.
+   - Cada tema conserva su vista y sus rutas: `#inicio` y `#s/…` para la ciudad del Tema 1;
+     `#tema/2/…` para la lección del Tema 2.
+   - No hay un renderer común impuesto.
+4. **Infraestructura compartida:**
+   - barra de orientación con migas "Academia › Gestión Financiera › Tema N"
+     (`ui/components/barraAcademia.ts`);
+   - router, almacén, iconos (`icons/ui.ts`) y estilos base.
+5. **Contenido y progreso independientes de la vista.** `EstadoEstudio`, `EstadoPractica` y sus
+   claves no cambian. El temario y la ciudad leen los mismos ids y el mismo dominio.
+   `financial-academy:ultimo` solo recuerda el último sitio de cada asignatura, para "Continuar
+   donde lo dejaste".
+
+**Índice lateral:** bajo demanda (botón "Temario") en el selector, en la asignatura y en la
+portada de la ciudad; fijo al estudiar un apartado o la lección.
+
+**Ciudad del Tema 1:**
+- los barrios, que son los grupos de DATA, tienen un límite luminoso de su color;
+- un panel "Zonas de la ciudad" con esos mismos grupos lleva la cámara a cada uno;
+- los botones del mapa se agrupan abajo a la derecha;
+- **no se han inventado zonas.** Si la segmentación cambia, las zonas se regeneran a partir de los
+  grupos.
+
+**Cómo añadir:**
+- **Una asignatura:** una entrada en `ASIGNATURAS`.
+- **Un tema:**
+  - su entrada en el catálogo de temas, con su `experiencia`;
+  - su árbol en `ARBOLES` (`temario.ts`);
+  - sus rutas y su vista.
+
+**Pendiente de decisión:**
+- **Segmentación definitiva** en unidades y temas. Hoy es "Tema N" y, dentro del Tema 1, los
+  grupos de DATA.
+- **Contenido de las otras 5 asignaturas.**
+- **Rediseño de la vista de zona** (nivel 2): los rótulos de un barrio grande, como el 3, siguen
+  siendo muchos.
+
+## Selector de mundos: islas pintadas en 2,5D (10/10)
+
+Prueba visual aprobada como enfoque ("híbrida"), **solo con la isla de Gestión Financiera**. Se
+descartó la versión procedural (islas de primitivas: conos, cajas y cilindros), porque el
+resultado parecía de juguete y no se acerca a la referencia de dioramas de fantasía.
+
+**Qué es cada cosa:**
+
+| Elemento | Naturaleza |
+|---|---|
+| Isla de Gestión Financiera (banco, torres, plaza, roca, cascadas) | Imagen prerrenderizada: ilustración generada con Figma AI y recortada; un plano en la escena 3D |
+| Cielo de atardecer (nubes, sol, islas lejanísimas) | Imagen prerrenderizada; un plano "en el infinito" que acompaña a la mirada |
+| Bancos de niebla (4 capas a distintas profundidades) | Imagen prerrenderizada (vetas de niebla); planos 3D que se desplazan |
+| Espacio, cámara, carrusel y paralaje | 3D real (Three.js): cada capa está a su profundidad y la cámara se mueve con el puntero y respira sola |
+| Ventanas que laten, algunas que se apagan y encienden | Animado en el shader de la isla, con una máscara derivada de la propia imagen |
+| Agua de las cascadas que cae | Animado en el shader: vetas que bajan, solo donde la máscara marca agua |
+| Bruma al pie de las cascadas | Plano de niebla que respira (opacidad y escala) |
+| Luz de la elegida y atmósfera de las demás | Halo aditivo de su color; las no elegidas se desaturan y se funden con el cielo |
+| Entrada | La cámara vuela hacia la plaza del banco y se pasa a la asignatura |
+
+**Archivos:**
+- `src/scene/three/mundosScene.ts`: escena y shader; `ARTE` declara qué asignaturas tienen
+  ilustración.
+- `src/assets/mundos/*.webp`: isla, máscaras, cielo y niebla (unos 430 kB en total).
+- `scripts/recortar-isla.mjs`: recorte y máscaras; las zonas de agua son propias de esta imagen.
+
+Si no hay WebGL o falla la carga de alguna imagen, se queda el selector plano de medallones.
+
+**Las otras 5 asignaturas** no tienen ilustración. Solo muestran su rótulo y un halo tenue; no se
+inventa una isla para ellas. Cada una necesita su propia isla con su oficio. Se harán solo cuando
+se apruebe la calidad de esta.
+
+## Intro del barco y llegada al selector (10/10, prototipo)
+
+Introducción oficial antes del selector de mundos: un galeón de velas oscuras cruza una tormenta
+hacia un resplandor dorado. En el blanco de esa luz aparece debajo la isla de Gestión Financiera.
+
+**Cuándo se ve:**
+- Solo la primera vez que se entra al selector (`financial-academy:intro-barco`). Luego, con el
+  enlace "Ver intro" de la cabecera.
+- Se salta con "Saltar intro" o con Escape: el avance hacia la luz se abrevia (unos 1,5 s), pero
+  no hay corte.
+- Nunca en un enlace directo (`#inicio`, `#s/…`, `#a/…`) ni sin WebGL.
+- Con movimiento reducido no se reproduce sola. Si se pide, es una imagen fija con un fundido.
+- Si la escena tarda más de 4,5 s en cargar o falla, la intro se retira y queda el selector, que
+  se monta debajo desde el principio.
+
+**Recursos:**
+
+| Recurso | Origen | Uso |
+|---|---|---|
+| `assets/intro/barco.webp` | Recorte con transparencia aportado por el usuario | Capa independiente del barco |
+| `assets/intro/cielo-tormenta.webp` | Remolino aportado por el usuario; bordes del óvalo completados con una copia desenfocada | Cielo a pantalla completa |
+| `assets/mundos/niebla.webp` | Ya existía (selector) | 6 bancos de nubes a distintas profundidades |
+| `assets/mundos/isla-gestion-financiera.webp` | Ya existía (selector) | El destino, casi disuelto en la bruma junto al sol |
+| Papeles, motas, ráfagas, rayos | Código (canvas y Three.js) | Sin imágenes por partícula |
+
+**Qué se mueve de verdad y qué se simula:**
+
+- **Real, en 3D:**
+  - cámara: respira, sigue al puntero y avanza hacia la luz;
+  - paralaje de las capas;
+  - papeles girando sobre sus tres ejes, cada uno con su trayectoria, tamaño y velocidad (al salir
+    de la vista renacen con valores nuevos);
+  - motas;
+  - ráfagas;
+  - el barco: entra, cabecea, se balancea y, al final, se aleja hacia el sol.
+- **Real, en el shader:**
+  - giro diferencial del remolino (el centro gira más rápido que el borde);
+  - banderas que ondean, más hacia su punta;
+  - velas que respiran;
+  - faroles que titilan;
+  - luz del rayo dentro de las nubes;
+  - crecimiento del resplandor.
+- **Simulado:**
+  - el barco es una ilustración plana: no gira ni muestra otro lado;
+  - las nubes son vetas pintadas que se deslizan; no son volumétricas;
+  - el rayo es un dibujo nuevo en cada descarga, no una simulación eléctrica.
+
+**Transición:**
+1. Desde los 7,2 s la luz crece alrededor del sol, la cámara avanza y el barco se aleja hacia él.
+2. A los 10,6 s la luz cubre la pantalla.
+3. Debajo, el selector espera con la cámara cerca de la ciudad (`EscenaMundos.esperarLlegada`).
+4. Al apagarse la luz (1,5 s), la cámara retrocede hasta su encuadre (`llegar`, 2,6 s) y la
+   interfaz aparece en cascada: título, rótulos, panel y flechas.
+
+**Rendimiento:**
+- Three.js comparte el fragmento con el selector.
+- La escena del barco es un fragmento aparte de unos 15 kB; las imágenes suman unos 420 kB nuevos.
+- Calidad "baja" (móvil o equipos de 4 núcleos o 4 GB): menos papeles, motas, ráfagas y bancos de
+  nubes, y menos resolución.
+- Si en los primeros segundos va a menos de 28 fps, baja la resolución de dibujo.
+- El guion avanza en tiempo real, así que en equipos lentos dura lo mismo, con menos fotogramas.
+
+**Archivos:**
+- `scene/three/introBarcoScene.ts`: escena y shaders.
+- `ui/intro/introBarco.ts`: capa, control y almacenamiento.
+- `styles/introBarco.css`.
+- Enganche en `ui/views/academiaView.ts`.
+
+Para retirarlo basta con quitar la llamada en `academiaView` y el enlace "Ver intro".
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

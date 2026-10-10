@@ -289,3 +289,19 @@ button.ficha-accion{cursor:pointer;background:none;border-top:0;border-left:0;bo
 .rec-btn:disabled{opacity:.35;cursor:default}
 .rec-pie{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .rec-salir{cursor:pointer;border:0;background:none;color:var(--m-tinta3);font:inherit;font-size:.78rem;text-decoration:underline;padding:0}
+
+/* Portada: "Zonas de la ciudad" (los grupos del tema) y botones del mapa agrupados abajo a la
+   derecha, para que la ciudad mande y no parezca un panel de control. */
+.portada-zonas{display:none}
+.mundo.portada .portada-zonas{display:block;position:absolute;left:20px;top:50%;translate:0 -50%;z-index:3;width:min(270px,30vw);padding:14px 12px;border-radius:18px;background:rgba(12,11,10,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--m-linea);animation:pista 1.2s .8s ease both}
+.pz-cab{margin:0 6px 8px;font-family:var(--m-display);font-weight:800;font-size:.95rem;color:var(--m-tinta)}
+.portada-zonas ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.portada-zonas button{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;width:100%;padding:8px;border:0;border-radius:12px;background:none;color:var(--m-tinta);font:inherit;text-align:left;cursor:pointer}
+.portada-zonas button:hover,.portada-zonas button:focus-visible{background:color-mix(in srgb,var(--c) 18%,transparent);outline:none}
+.pz-num{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--c);color:#0b0b0b;font:800 1rem/1 var(--m-display)}
+.pz-txt b{display:block;font-size:.9rem;line-height:1.2}
+.pz-txt small{color:var(--m-tinta2);font-size:.74rem}
+@media (min-width:1001px){
+  .mundo.portada>.mundo-barra .mundo-acciones{justify-content:flex-end}
+}
+@media (max-width:700px){.mundo.portada .portada-zonas{display:none}}

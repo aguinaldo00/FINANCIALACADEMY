@@ -45,12 +45,13 @@ async function pagina(opts, init) {
 const progreso = () => {
   localStorage.setItem('cdd-t1', JSON.stringify({ dom: { bde: 1, bancos: 0.5, cnmv: 1 }, tries: {} }));
   localStorage.setItem('financial-academy:entrada', '"trailer-1"');
+  localStorage.setItem('financial-academy:intro-barco', 'vista');
 };
 
 // 1. Escritorio
 {
   const p = await pagina({ viewport: { width: 1400, height: 1000 } }, progreso);
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2500);
   ok('escritorio: lienzo 3D montado', await p.locator('.mundo-lienzo').count() === 1);
@@ -64,7 +65,7 @@ const progreso = () => {
   ok('portada: el mapa es lo primero y ocupa la pantalla', await p.locator('.page > .mundo.portada:first-child').count() === 1 && (await p.locator('[data-mundo-vista]').boundingBox()).height >= 880);
   // Se comprueba el estado (la clase) y no la posición: con SwiftShader la transición CSS puede tardar.
   ok('portada: barra lateral retirada', await p.evaluate(() => document.body.classList.contains('portada-inmersiva')));
-  ok('portada: botón flotante del índice', await p.locator('#ib').isVisible());
+  ok('portada: el temario se abre desde la barra (índice bajo demanda)', await p.locator('#mb').isVisible() && (await p.locator('.rail').boundingBox()).x < 0);
   ok('portada: título de marca sobre el mapa', (await p.locator('.portada-marca .marca').getAttribute('aria-label')) === 'Gestión financiera: La ciudad del dinero');
   ok('índice: el grupo Estudio y examen va al final', JSON.stringify(await p.locator('#rail a').evaluateAll((as) => as.slice(-6).map((a) => a.getAttribute('href')))) === '["#sesion","#examen","#visual","#simulacro","#repaso","#progreso"]');
   await p.mouse.move(700, 500);
@@ -85,7 +86,7 @@ const progreso = () => {
   if (enCompleta) await p.click('[data-mundo-completa]');
   await p.waitForFunction(() => !document.fullscreenElement && !document.querySelector('.mundo.en-pantalla-completa'), null, { timeout: 8000 }).catch(() => {});
   await p.waitForFunction(() => document.querySelector('.rail').getBoundingClientRect().x >= 0, null, { timeout: 8000 }).catch(() => {});
-  ok('explorando: el índice vuelve a verse', (await p.locator('.rail').boundingBox()).x >= 0 && !(await p.locator('#ib').isVisible()));
+  ok('explorando: el índice vuelve a verse', (await p.locator('.rail').boundingBox()).x >= 0 && !(await p.locator('#mb').isVisible()));
   // Navegación: barrio → zona → edificio por el Atlas, y migas para volver.
   await p.mouse.move(5, 5);
   await aLaCiudad(p);
@@ -187,6 +188,81 @@ const progreso = () => {
   await p.close();
 }
 
+// 0a. Intro del barco: sola la primera vez, se salta (abreviada, sin corte) y deja el selector; no se
+// repite al volver; "Ver intro" la repite y Escape la salta; nunca en enlaces directos ni con
+// movimiento reducido.
+{
+  const p = await pagina({ viewport: { width: 1280, height: 800 } });
+  await p.goto('http://localhost:4173/');
+  const hay = await p.waitForSelector('.intro-barco', { timeout: 5000 }).then(() => true).catch(() => false);
+  ok('intro barco: se reproduce la primera vez, a pantalla completa y con botón de saltar', hay && (await p.evaluate(() => { const r = document.querySelector('.intro-barco').getBoundingClientRect(); return r.width >= innerWidth && r.height >= innerHeight; })) && (await p.locator('.ib-saltar').isVisible()));
+  await p.waitForFunction(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0) >= 1, null, { timeout: 30000 }).catch(() => {});
+  const t1 = await p.evaluate(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0));
+  await p.waitForTimeout(1500);
+  const t2 = await p.evaluate(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0));
+  ok('intro barco: la escena del barco se anima', (await p.locator('.intro-barco canvas.ib-lienzo').count()) === 1 && t2 > t1, `${t1} → ${t2}`);
+  await p.screenshot({ path: `${SP}/ver-intro-barco.png` }).catch(() => {});
+  await p.locator('.ib-saltar').click();
+  await p.waitForSelector('.intro-barco', { state: 'detached', timeout: 20000 }).catch(() => {});
+  await p.waitForTimeout(2800);
+  ok('intro barco: al saltarla queda el selector con Gestión Financiera elegida', (await p.locator('.intro-barco').count()) === 0 && (await p.locator('.academia.ac-3d:not(.ac-llegada)').count()) === 1 && (await p.locator('.ac-foco h2').textContent()) === 'Gestión Financiera' && (await p.evaluate(() => getComputedStyle(document.querySelector('.ac-foco')).opacity)) === '1');
+  await p.reload();
+  await p.waitForSelector('.ac-mundo', { timeout: 30000 });
+  await p.waitForTimeout(1500);
+  ok('intro barco: no se repite al volver al inicio', (await p.locator('.intro-barco').count()) === 0);
+  await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
+  await p.locator('[data-ac-intro]').click();
+  const otra = await p.waitForSelector('.intro-barco', { timeout: 5000 }).then(() => true).catch(() => false);
+  await p.keyboard.press('Escape');
+  await p.waitForSelector('.intro-barco', { state: 'detached', timeout: 20000 }).catch(() => {});
+  ok('intro barco: "Ver intro" la repite y Escape la salta', otra && (await p.locator('.intro-barco').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-barco-activa'))));
+  await p.close();
+  const directa = await pagina({ viewport: { width: 1280, height: 800 } });
+  await directa.goto('http://localhost:4173/#inicio');
+  await directa.waitForTimeout(2000);
+  ok('intro barco: nunca en un enlace directo a un tema', (await directa.locator('.intro-barco').count()) === 0);
+  await directa.close();
+  const quieta = await pagina({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+  await quieta.goto('http://localhost:4173/');
+  await quieta.waitForSelector('.ac-mundo', { timeout: 30000 });
+  await quieta.waitForTimeout(1500);
+  ok('intro barco: con movimiento reducido no se reproduce sola', (await quieta.locator('.intro-barco').count()) === 0);
+  await quieta.close();
+}
+
+// 0. Financial Academy: selector de mundos → asignatura → temario, sin pasar por el 3D.
+{
+  const p = await pagina({ viewport: { width: 1400, height: 900 } }, progreso);
+  await p.goto('http://localhost:4173/');
+  await p.waitForSelector('.ac-mundo', { timeout: 30000 });
+  ok('academia: sin hash se entra por el selector de mundos', (await p.locator('.ac-mundo').count()) === 6 && (await p.locator('.mundo-lienzo').count()) === 0);
+  ok('academia: solo Gestión Financiera está abierta', (await p.locator('.ac-mundo a[data-entrar]').count()) === 1 && (await p.locator('.ac-mundo.pendiente').count()) === 5);
+  // Con WebGL el selector son islas flotantes: se entra con el botón del panel de la elegida.
+  await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
+  ok('academia: universo 3D de islas con la elegida en el centro', (await p.locator('.academia.ac-3d canvas.ac-lienzo').count()) === 1 && (await p.locator('.ac-foco h2').textContent()) === 'Gestión Financiera');
+  await p.locator('[data-ac-paso="1"]').click();
+  ok('academia: las flechas cambian de mundo (sin contenido: en preparación)', (await p.locator('.ac-foco h2').textContent()) === 'Recursos Humanos' && (await p.locator('.ac-foco .ac-cerrada').count()) === 1);
+  await p.locator('[data-ac-ir="2"]').click();
+  await p.screenshot({ path: `${SP}/ver-academia-islas.png` }).catch(() => {});
+  await p.locator('a.ac-entrar').click();
+  await p.waitForSelector('.asignatura', { timeout: 10000 }).catch(() => {});
+  ok('academia: entrar en Gestión Financiera muestra sus 2 temas y el temario', (await p.locator('.as-puerta').count()) === 2 && (await p.locator('.as-temario a.tm-fila[href^="#s/"]').count()) >= 12 && (await p.locator('.as-temario a.tm-n1[href^="#s/"]').count()) === 12);
+  ok('academia: los botones de estudio y examen siguen ahí', (await p.locator('.as-herramientas a.ab').count()) === 6);
+  await p.locator('.as-temario a[href="#s/3.2B"]').first().click();
+  await p.waitForSelector('.cc', { timeout: 10000 }).catch(() => {});
+  ok('academia: el temario abre un apartado sin pasar por la ciudad', (await p.evaluate(() => location.hash)) === '#s/3.2B' && (await p.locator('.mundo-lienzo').count()) === 0);
+  await p.locator('#migas a[href="#academia"]').click();
+  await p.waitForSelector('.ac-mundo', { timeout: 10000 }).catch(() => {});
+  ok('academia: las migas vuelven al selector y recuerdan por dónde ibas', (await p.locator('.ac-continuar').first().getAttribute('href').catch(() => null)) === '#s/3.2B');
+  await p.waitForSelector('a.ac-entrar', { timeout: 30000 }).catch(() => {});
+  await p.locator('a.ac-entrar').click();
+  await p.locator('.as-puerta[href="#tema/2"]').click();
+  await p.waitForSelector('.tema-matematica', { timeout: 10000 }).catch(() => {});
+  ok('academia: el Tema 2 (lección) se abre desde la asignatura', (await p.locator('.mat-parte').count()) === 5);
+  await p.screenshot({ path: `${SP}/ver-academia-tema2.png` }).catch(() => {});
+  await p.close();
+}
+
 // 1b. Intro (tráiler de títulos): a pantalla completa ANTES del mapa, también para quien vio una
 // intro anterior; no se congela con el hilo principal ocupado; termina sola, se repite con
 // "Ver la intro" y se salta con el botón o con Escape.
@@ -200,7 +276,7 @@ const progreso = () => {
       if (!window.__orden && document.querySelector('.intro')) window.__orden = document.querySelector('.mundo-lienzo') ? 'lienzo-primero' : 'intro-primero';
     }).observe(document, { childList: true, subtree: true });
   });
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   const capa = await p.waitForSelector('.intro', { state: 'attached', timeout: 30000 }).then(() => true).catch(() => false);
   ok('intro: sale aunque se viera la intro anterior, antes que el mapa', capa && (await p.evaluate(() => window.__orden)) === 'intro-primero');
   ok('intro: a pantalla completa', await p.evaluate(() => { const r = document.querySelector('.intro')?.getBoundingClientRect(); return Boolean(r && r.width >= innerWidth && r.height >= innerHeight && getComputedStyle(document.querySelector('.intro')).position === 'fixed'); }));
@@ -238,7 +314,7 @@ const progreso = () => {
 // 2. Móvil
 {
   const p = await pagina({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }, progreso);
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2500);
   const anchoPagina = await p.evaluate(() => document.documentElement.scrollWidth);
@@ -260,7 +336,7 @@ const progreso = () => {
       return ctx;
     };
   });
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2500);
   ok('reduced motion: sin intro', await p.locator('.intro').count() === 0);
@@ -374,7 +450,7 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
 // 6. Paseo táctil
 {
   const p = await pagina({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, progreso);
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   await p.waitForSelector('.mundo-lienzo', { timeout: 30000 });
   await p.waitForTimeout(2000);
   const vista = await p.locator('[data-mundo-vista]').boundingBox();
@@ -430,7 +506,7 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
 // 4. Sin WebGL
 {
   const p = await pagina({ viewport: { width: 1200, height: 900 } }, () => { HTMLCanvasElement.prototype.getContext = () => null; });
-  await p.goto('http://localhost:4173/');
+  await p.goto('http://localhost:4173/#inicio');
   // Sin 3D la intro se cuenta igual y el iris se abre sobre la página.
   const huboIntro = await p.waitForSelector('.intro', { state: 'attached', timeout: 10000 }).then(() => true).catch(() => false);
   await p.waitForSelector('.intro', { state: 'detached', timeout: 30000 }).catch(() => {});

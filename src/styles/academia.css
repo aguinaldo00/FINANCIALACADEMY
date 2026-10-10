@@ -1,0 +1,232 @@
+/* Financial Academy: barra de orientación, índice bajo demanda, selector de mundos y página de
+   asignatura. Misma gramática que el resto (medallones de canto dorado, negro cálido, pills y
+   botones redondeados); el color de cada asignatura es solo su identidad. */
+
+:root{--alto-topbar:53px}
+
+/* ── Barra superior: marca, migas, página actual y "Temario" (en todas las anchuras) ── */
+.topbar{display:flex;position:sticky;top:0;z-index:30;gap:10px;align-items:center;min-height:var(--alto-topbar);box-sizing:border-box;padding:8px 18px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.fa-marca{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid #e8b84a;box-shadow:inset 0 0 0 3px #14110d,inset 0 0 0 4px rgba(232,184,74,.45);color:#e8b84a;font:800 .78rem/1 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:.02em;text-decoration:none;background:#14110d}
+.fa-marca:hover{color:#fff;border-color:#fff}
+.migas{display:flex;align-items:center;gap:6px;min-width:0;font-size:.88rem;white-space:nowrap}
+.migas a{color:var(--mut);text-decoration:none;font-weight:600}
+.migas a:hover{color:#fff;text-decoration:underline}
+.mg-sep{color:#555}
+.topbar #mt{min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar #mb{margin-left:auto;flex:none;cursor:pointer;border:0;background:#fff;color:#000;border-radius:999px;padding:6px 14px;font:inherit;font-weight:800}
+/* En escritorio, con el índice fijo a la vista (al estudiar), el botón sobra. */
+@media (min-width:1001px){
+  body:not(.rail-bajo-demanda):not(.portada-inmersiva) .topbar #mb{display:none}
+}
+/* El botón flotante del índice de la portada lo sustituye "Temario" de la barra. */
+.indice-flotante{display:none!important}
+@media (max-width:700px){
+  .topbar{padding-inline:12px;gap:8px}
+  /* En móvil, de las migas solo queda la del nivel anterior ("‹ Gestión Financiera"). */
+  .migas a:not(:nth-last-child(2)),.migas .mg-sep{display:none}
+  .migas a:nth-last-child(2){display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);font-size:0}
+  .migas a:nth-last-child(2)::before{content:"‹";font-size:1.4rem;line-height:1;color:#fff}
+}
+
+/* ── Índice bajo demanda (selector y asignatura), como en la portada inmersiva ── */
+@media (min-width:1001px){
+  body.rail-bajo-demanda .rail{transform:translateX(-102%);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  body.rail-bajo-demanda.menu .rail{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.6)}
+  body.rail-bajo-demanda main{margin-left:0}
+}
+.ra-asig .top{align-items:center}
+.ra-sello{width:30px;height:30px;flex:none}
+.ra-pendiente{opacity:.5;cursor:default}
+.ra-pendiente:hover{background:none;color:#ddd}
+.ra-tema{padding-left:24px}
+
+/* Medallón de asignatura (selector, índice y cabecera). */
+.ac-disco{fill:#14110d;stroke:var(--c);stroke-width:2.2}
+.ac-grafila{fill:none;stroke:var(--c);stroke-width:1.4;stroke-dasharray:1.1 2.3;opacity:.7}
+.ac-trazo{fill:none;stroke:var(--c);stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Selector de mundos ── */
+.academia{position:relative;width:100vw;margin:-42px 0 -90px calc(50% - 50vw);min-height:calc(100svh - var(--alto-topbar));padding:clamp(28px,6vh,64px) 16px 56px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:clamp(24px,5vh,48px);
+  background:radial-gradient(ellipse 70% 55% at 50% 60%,#211b13 0%,#0d0b09 60%,#050403 100%)}
+.ac-fondo{position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(1px 1px at 12% 20%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 80% 12%,rgba(255,255,255,.4),transparent),radial-gradient(1.5px 1.5px at 66% 78%,rgba(232,184,74,.5),transparent),radial-gradient(1px 1px at 30% 70%,rgba(255,255,255,.35),transparent),radial-gradient(1px 1px at 90% 55%,rgba(255,255,255,.35),transparent),radial-gradient(1.5px 1.5px at 8% 85%,rgba(232,184,74,.4),transparent)}
+.ac-orbita{position:absolute;left:50%;top:62%;border:1px solid rgba(232,184,74,.13);border-radius:50%;translate:-50% -50%;rotate:-8deg;animation:ac-gira 90s linear infinite}
+.ac-orbita.o1{width:min(1300px,140vw);height:min(420px,60vw)}
+.ac-orbita.o2{width:min(980px,110vw);height:min(300px,44vw);border-style:dashed;animation-duration:140s;animation-direction:reverse}
+.ac-orbita.o3{width:min(640px,80vw);height:min(190px,28vw);border-color:rgba(232,184,74,.2)}
+@keyframes ac-gira{to{rotate:352deg}}
+.ac-cab{position:relative;text-align:center;max-width:44rem}
+.ac-ante{margin:0 0 8px;color:#e8b84a;font-weight:800;font-size:.8rem;letter-spacing:.32em;text-transform:uppercase}
+.ac-cab h1{margin:0;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1;letter-spacing:-.03em;text-wrap:balance}
+.ac-lema{margin:12px 0 0;color:var(--mut);font-size:1rem}
+.ac-mundos{position:relative;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(10px,2vw,28px);width:min(1180px,100%);align-items:start;
+  transform:translate(calc(var(--px,0) * -10px),calc(var(--py,0) * -6px));transition:transform .4s ease-out}
+/* Arco: los extremos más bajos, como si el conjunto girara alrededor de la academia. */
+.ac-mundo:nth-child(1),.ac-mundo:nth-child(6){margin-top:64px}
+.ac-mundo:nth-child(2),.ac-mundo:nth-child(5){margin-top:22px}
+.ac-mundo{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0;opacity:0;animation:ac-llega .8s cubic-bezier(.2,.8,.2,1) calc(var(--i) * 90ms + .1s) both}
+@keyframes ac-llega{from{opacity:0;transform:translateY(30px) scale(.85)}to{opacity:1;transform:none}}
+.ac-puerta{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:10px 6px 14px;border-radius:24px;color:inherit;text-decoration:none;outline:none}
+.ac-sello{position:relative;width:clamp(92px,10.5vw,148px);height:auto;filter:drop-shadow(0 12px 22px rgba(0,0,0,.6));animation:ac-flota 5.5s ease-in-out calc(var(--i) * -.9s) infinite;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes ac-flota{50%{translate:0 -9px}}
+.ac-halo{position:absolute;top:10px;left:50%;width:clamp(92px,10.5vw,148px);aspect-ratio:1;translate:-50% 0;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 55%,transparent) 0%,transparent 68%);opacity:.35;filter:blur(14px);transition:opacity .35s,transform .35s}
+.ac-nombre{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(.98rem,1.4vw,1.15rem);line-height:1.15;text-wrap:balance}
+.ac-estado{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.ac-mundo.abierta .ac-puerta:hover .ac-sello,.ac-mundo.abierta .ac-puerta:focus-visible .ac-sello{transform:scale(1.1)}
+.ac-mundo.abierta .ac-puerta:hover .ac-halo,.ac-mundo.abierta .ac-puerta:focus-visible .ac-halo{opacity:.9;transform:scale(1.25)}
+.ac-mundo.abierta .ac-puerta:focus-visible{box-shadow:0 0 0 2px var(--c)}
+.ac-mundo.pendiente .ac-sello{filter:saturate(.15) brightness(.75) drop-shadow(0 12px 22px rgba(0,0,0,.6))}
+.ac-mundo.pendiente .ac-halo{opacity:0}
+.ac-mundo.pendiente .ac-nombre{color:var(--mut)}
+.ac-mundo.pendiente .ac-estado{color:#777;text-transform:none;letter-spacing:0;font-style:italic;font-weight:600}
+/* Detalle de los mundos abiertos: sus temas y por dónde ibas. */
+.ac-detalle{display:grid;gap:8px;width:min(260px,100%);margin-top:2px;padding:12px 14px;border-radius:16px;background:rgba(20,17,13,.88);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);text-align:left;opacity:.0;translate:0 -6px;transition:opacity .3s,translate .3s}
+.ac-mundo:hover .ac-detalle,.ac-mundo:focus-within .ac-detalle{opacity:1;translate:0 0}
+@media (hover:none){.ac-detalle{opacity:1;translate:0 0}}
+.ac-temas{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ac-temas li{font-size:.86rem;line-height:1.3}
+.ac-temas b{color:var(--c);margin-right:4px}
+.ac-temas small{display:block;color:var(--mut);font-size:.74rem}
+.ac-continuar{font-size:.82rem;color:#e8b84a;text-decoration:none}
+.ac-continuar:hover{text-decoration:underline}
+/* Entrada: el mundo elegido se acerca; los demás se apagan. */
+.academia.saliendo .ac-mundo:not(.entrando){opacity:0;transition:opacity .35s}
+.academia.saliendo .ac-cab{opacity:0;transition:opacity .3s}
+.ac-mundo.entrando .ac-sello{transform:scale(3.4);opacity:0;transition:transform .5s cubic-bezier(.5,0,.75,0),opacity .5s ease-in}
+@media (max-width:820px){
+  .ac-mundos{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:22px}
+  .ac-mundo:nth-child(n){margin-top:0}
+  .ac-detalle{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .ac-orbita,.ac-sello,.ac-mundo{animation:none!important;opacity:1}
+  .ac-mundos{transform:none}
+}
+
+/* ── Selector en 3D: islas flotantes (si hay WebGL) ── */
+.ac-escena{display:none}
+.academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:520px;padding:0;gap:0;justify-content:flex-start;
+  background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+.academia.ac-3d .ac-fondo{display:none}
+.academia.ac-3d .ac-escena{display:block;position:absolute;inset:0}
+.ac-lienzo{display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab}
+.academia.ac-3d .ac-cab{position:absolute;top:clamp(12px,3vh,28px);left:0;right:0;margin:0 auto;z-index:2;pointer-events:none}
+.academia.ac-3d .ac-cab h1{font-size:clamp(1.4rem,2.6vw,2.1rem)}
+.academia.ac-3d .ac-lema{margin-top:6px;font-size:.88rem}
+/* En horizontal el título va arriba a la izquierda: el centro es de la isla elegida. */
+@media (min-width:701px){
+  .academia.ac-3d .ac-cab{left:clamp(20px,3vw,44px);right:auto;text-align:left;max-width:30ch}
+  .academia.ac-3d .ac-cab h1{text-shadow:0 2px 14px rgba(0,0,0,.6)}
+  .academia.ac-3d .ac-lema{color:#c9d3e2;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+}
+/* Al entrar, la cámara vuela a la isla y el texto se retira. */
+.academia.ac-3d.saliendo :is(.ac-foco,.ac-nav,.ac-mundos){opacity:0;transition:opacity .3s}
+/* La isla ya es la identidad: el panel no repite el medallón. */
+.academia.ac-3d .ac-foco-sello{display:none}
+/* Rótulos: los mismos elementos de la lista, colocados bajo cada isla por la escena. */
+.academia.ac-3d .ac-mundos{position:absolute;inset:0;display:block;width:auto;transform:none;pointer-events:none;z-index:2}
+.academia.ac-3d .ac-mundo{position:absolute;left:0;top:0;width:170px;margin:0;opacity:1;animation:none;pointer-events:auto;transition:opacity .35s;will-change:transform}
+.academia.ac-3d .ac-mundo.elegida{opacity:0;pointer-events:none}
+.academia.ac-3d .ac-puerta{padding:6px 4px;gap:4px;cursor:pointer}
+.academia.ac-3d .ac-sello{width:54px;animation:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.7))}
+.academia.ac-3d .ac-halo,.academia.ac-3d .ac-detalle{display:none}
+.academia.ac-3d .ac-nombre{font-size:1rem;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.academia.ac-3d .ac-estado{text-shadow:0 2px 6px rgba(0,0,0,.9)}
+.academia.ac-3d .ac-mundo.pendiente .ac-sello{filter:saturate(.35) brightness(.85) drop-shadow(0 6px 10px rgba(0,0,0,.7))}
+/* Panel de la isla elegida. */
+.ac-foco{position:absolute;left:50%;bottom:clamp(78px,11vh,104px);translate:-50% 0;z-index:3;display:grid;justify-items:center;gap:8px;width:min(560px,calc(100% - 32px));text-align:center;animation:ac-foco-llega .45s ease both}
+@keyframes ac-foco-llega{from{opacity:0;translate:-50% 12px}to{opacity:1;translate:-50% 0}}
+.ac-foco-sello{width:60px;height:auto;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--c) 60%,transparent))}
+.ac-foco h2{margin:0;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(1.8rem,3.6vw,2.8rem);line-height:1.05;color:#f6e3b4;text-shadow:0 4px 18px rgba(0,0,0,.8)}
+.ac-foco p{margin:0;max-width:46ch;color:#d3d9e4;font-size:.95rem;line-height:1.45;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.ac-entrar{display:inline-flex;align-items:center;gap:10px;margin-top:6px;padding:12px 34px;border-radius:999px;background:linear-gradient(180deg,#f2cd78,#d9a440);color:#1a1206;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.1rem;text-decoration:none;box-shadow:0 8px 26px rgba(217,164,64,.35)}
+.ac-entrar:hover,.ac-entrar:focus-visible{filter:brightness(1.08);outline:2px solid #fff;outline-offset:3px}
+.ac-entrar.ac-cerrada{background:rgba(255,255,255,.06);color:#aab3c2;box-shadow:none;border:1px solid rgba(255,255,255,.18);cursor:default}
+.academia.ac-3d .ac-continuar{text-shadow:0 2px 6px rgba(0,0,0,.9)}
+/* Flechas y puntos. */
+.ac-nav{position:absolute;left:50%;bottom:clamp(18px,4vh,34px);translate:-50% 0;z-index:3;display:flex;align-items:center;gap:clamp(18px,6vw,90px)}
+.ac-flecha{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(232,184,74,.7);background:rgba(6,13,24,.6);color:#f2cd78;font-size:1.6rem;line-height:1;cursor:pointer}
+.ac-flecha:hover:not(:disabled),.ac-flecha:focus-visible{background:rgba(232,184,74,.15);outline:none}
+.ac-flecha:disabled{opacity:.3;cursor:default}
+.ac-puntos{display:flex;gap:10px}
+.ac-punto{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.3);cursor:pointer}
+.ac-punto[aria-current="true"]{background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 30%,transparent)}
+@media (max-width:700px){
+  .academia.ac-3d .ac-lema{display:none}
+  .academia.ac-3d .ac-mundo{width:120px}
+  .academia.ac-3d .ac-sello{width:40px}
+  .academia.ac-3d .ac-nombre{font-size:.84rem}
+  .academia.ac-3d .ac-estado{font-size:.68rem}
+  .ac-foco{bottom:84px}
+  .ac-foco p{font-size:.86rem}
+}
+
+/* ── Página de asignatura ── */
+.asignatura{display:grid;gap:34px}
+.as-cab{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center}
+.as-sello{width:clamp(78px,12vw,112px);height:auto;filter:drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+.as-ante{margin:0;color:var(--c);font-weight:800;font-size:.78rem;letter-spacing:.24em;text-transform:uppercase}
+.as-cab h1{margin:2px 0 6px}
+.as-cab p{margin:0;color:var(--mut)}
+.as-continuar{display:inline-block;margin-top:10px;color:#e8b84a;text-decoration:none;font-weight:600}
+.as-continuar:hover{text-decoration:underline}
+.as-temas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.as-puerta{position:relative;display:grid;gap:6px;align-content:end;min-height:250px;padding:136px 20px 20px;border-radius:24px;overflow:hidden;text-decoration:none;color:#fff;background:linear-gradient(180deg,rgba(10,9,8,.15) 0%,rgba(10,9,8,.92) 62%),#15120e;border:1px solid var(--line);transition:transform .25s,border-color .25s,box-shadow .25s}
+.as-puerta:hover,.as-puerta:focus-visible{transform:translateY(-4px);border-color:var(--c);box-shadow:0 18px 40px rgba(0,0,0,.45);outline:none}
+/* Escena: una silueta que anuncia la experiencia (manzanas de ciudad o el capital que crece). */
+.as-escena{position:absolute;inset:18px 20px auto auto;display:flex;align-items:flex-end;gap:6px;height:100px;opacity:.85}
+.as-escena i{display:block;width:26px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--c),color-mix(in srgb,var(--c) 30%,#15120e))}
+.as-ciudad-3d .as-escena i:nth-child(1){height:52%}.as-ciudad-3d .as-escena i:nth-child(2){height:92%}.as-ciudad-3d .as-escena i:nth-child(3){height:64%}.as-ciudad-3d .as-escena i:nth-child(4){height:78%}
+.as-ciudad-3d .as-escena i{box-shadow:inset 0 -60px 0 -52px rgba(255,213,154,.35)}
+.as-leccion .as-escena i{width:18px;border-radius:4px}
+.as-leccion .as-escena i:nth-child(1){height:30%}.as-leccion .as-escena i:nth-child(2){height:42%}.as-leccion .as-escena i:nth-child(3){height:60%}.as-leccion .as-escena i:nth-child(4){height:88%}
+.as-tema{color:var(--c);font-weight:800;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase}
+.as-titulo{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.5rem;line-height:1.1;max-width:15ch}
+.as-desc{color:#cfcac0;font-size:.95rem;line-height:1.4;max-width:46ch}
+.as-pie{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:8px;font-size:.88rem}
+.as-dom{color:var(--mut)}
+.as-dom b{color:#fff}
+.as-ir{margin-left:auto;color:var(--c);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800}
+/* Herramientas de estudio y examen: los botones redondeados de siempre, en una fila. */
+.as-herramientas h2 small{color:var(--mut);font-weight:700;font-size:.6em}
+.as-herramientas .acts{display:flex;flex-wrap:wrap;gap:10px}
+.as-herramientas a.ab{display:inline-flex;align-items:center;text-decoration:none}
+.as-insignia{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin-left:6px;padding:0 4px;border-radius:999px;background:#000;color:#fff;font-size:.78rem}
+/* Temario. */
+.as-temario-cab{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.as-temario-cab h2{margin:0}
+.as-buscar{display:flex;align-items:center;gap:8px;flex:1 1 280px;max-width:440px;padding:8px 14px;border-radius:999px;background:var(--bg3);border:1px solid var(--line)}
+.as-buscar:focus-within{border-color:#e8b84a}
+.as-buscar .iu{margin:0}
+.as-buscar input{flex:1;min-width:0;border:0;background:none;color:#fff;font:inherit;font-size:.95rem;outline:none}
+.as-vacio{color:var(--mut)}
+.tm-tema{margin:0 0 14px;border:1px solid var(--line);border-radius:20px;background:#0d0d0d;overflow:hidden}
+.tm-tema>summary{display:flex;gap:12px;align-items:baseline;padding:14px 18px;cursor:pointer;list-style:none;background:#141414}
+.tm-tema>summary::-webkit-details-marker{display:none}
+.tm-tema>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+.tm-tema:not([open])>summary::after{content:"▸"}
+.tm-num{color:#e8b84a;font-weight:800;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase}
+.tm-nombre{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.15rem}
+.tm-raiz,.tm-hijos{list-style:none;margin:0;padding:0}
+.tm-raiz{padding:8px 10px 12px}
+.tm-hijos{margin-left:16px;border-left:2px solid color-mix(in srgb,var(--c,#555) 55%,transparent)}
+.tm-fila{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:baseline;padding:8px 12px;border-radius:12px;color:#ddd;text-decoration:none}
+.tm-fila:hover,.tm-fila:focus-visible{background:var(--bg3);color:#fff}
+.tm-id{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;color:var(--c,#e8b84a);min-width:2.4em}
+.tm-tit{font-weight:700;line-height:1.3}
+.tm-det{grid-column:2;color:var(--mut);font-size:.8rem}
+.tm-dom{grid-column:3;grid-row:1;align-self:center;width:64px;height:6px;border-radius:3px;background:#262626;overflow:hidden}
+.tm-dom i{display:block;height:100%;border-radius:3px}
+.tm-n0>.tm-tit{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.05rem}
+.tm-n2,.tm-n3{padding-block:5px}
+.tm-n2 .tm-tit,.tm-n3 .tm-tit{font-weight:400;font-size:.92rem}
+.tm-plegable>summary{display:flex;align-items:center;list-style:none;cursor:pointer}
+.tm-plegable>summary::-webkit-details-marker{display:none}
+.tm-plegable>summary .tm-fila{flex:1;min-width:0}
+.tm-mas{flex:none;margin-right:10px;padding:2px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mut);font-size:.74rem}
+.tm-plegable[open]>summary .tm-mas{color:#fff;border-color:#555}
+@media (max-width:600px){
+  .as-cab{grid-template-columns:1fr;text-align:left}
+  .tm-dom{width:44px}
+  .tm-hijos{margin-left:8px}
+}
