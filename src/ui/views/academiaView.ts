@@ -96,6 +96,12 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
   ctx.tituloMovil.textContent = 'Financial Academy';
 
   const raiz = ctx.pagina.querySelector<HTMLElement>('[data-academia]')!;
+  // Con WebGL, mientras carga la escena se muestra su fondo (no el selector plano de reserva).
+  const hay3d = webglDisponible();
+  if (hay3d) {
+    raiz.classList.add('ac-cargando');
+    document.body.classList.add('ac-cabecera-escena');
+  }
   let raf = 0;
   let temporizador = 0;
   let activo = true;
@@ -255,6 +261,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           escena = nueva;
           nueva.seleccionar(elegida);
           raiz.classList.add('ac-3d');
+          raiz.classList.remove('ac-cargando');
           // En 3D la cabecera es parte de la escena: sustituye a la barra común.
           raiz.querySelector<HTMLElement>('[data-ac-top]')!.hidden = false;
           document.body.classList.add('ac-cabecera-escena');
@@ -268,6 +275,9 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
         console.error('No se pudo iniciar el universo 3D', error);
         pendiente?.destruir();
         pendiente = null;
+        // Sin escena: aparece el selector plano de reserva, con la barra común.
+        raiz.classList.remove('ac-cargando');
+        document.body.classList.remove('ac-cabecera-escena');
         avisarListo(false);
       });
     limpiarPendiente = () => pendiente?.destruir();

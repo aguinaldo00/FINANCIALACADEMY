@@ -147,11 +147,11 @@ export function reproducirIntroBarco(o: OpcionesIntroBarcoUi): () => void {
         calidad: calidad(),
         alFotograma: (sol, luz, t) => {
           capa.dataset.t = t.toFixed(1);
-          luzEl.style.setProperty('--sx', `${(sol.x * 100).toFixed(1)}%`);
-          luzEl.style.setProperty('--sy', `${(sol.y * 100).toFixed(1)}%`);
-          luzEl.style.setProperty('--a', Math.min(1, luz * 1.25).toFixed(3));
-          luzEl.style.setProperty('--r', `${(18 + luz * luz * 160).toFixed(1)}vmax`);
-          luzEl.style.setProperty('--b', Math.max(0, (luz - 0.8) / 0.2).toFixed(3));
+          luzEl.style.setProperty('--ib-sx', `${(sol.x * 100).toFixed(1)}%`);
+          luzEl.style.setProperty('--ib-sy', `${(sol.y * 100).toFixed(1)}%`);
+          luzEl.style.setProperty('--ib-a', Math.min(1, luz * 1.25).toFixed(3));
+          luzEl.style.setProperty('--ib-r', `${(18 + luz * luz * 160).toFixed(1)}vmax`);
+          luzEl.style.setProperty('--ib-b', Math.max(0, (luz - 0.8) / 0.2).toFixed(3));
         },
         alDeslumbrar: revelar,
       });

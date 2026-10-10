@@ -1,9 +1,16 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="arrancando">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gestión financiera · La ciudad del dinero</title>
+<title>Financial Academy</title>
+<style>
+/* Arranque: hasta que la app pinta no se ve la maqueta vacía; el aviso de "sin compilar" solo aparece si tarda. */
+html.arrancando body{background:#070b14}
+html.arrancando .rail,html.arrancando .rail-plegar,html.arrancando .topbar{visibility:hidden}
+.sin-compilar{opacity:0;animation:sin-compilar .3s 5s forwards}
+@keyframes sin-compilar{to{opacity:1}}
+</style>
 </head>
 <body>
 <nav class="rail" id="rail" aria-label="Índice del tema"></nav>

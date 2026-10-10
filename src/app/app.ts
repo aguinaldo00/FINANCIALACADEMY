@@ -174,4 +174,5 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
   conectarMenuMovil(flotante ? [elemento('#mb'), flotante] : [elemento('#mb')], ctx.rail);
   addEventListener('hashchange', pintar);
   pintar();
+  document.documentElement.classList.remove('arrancando');
 }

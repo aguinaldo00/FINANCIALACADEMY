@@ -121,6 +121,9 @@
   --ac-marca:"Big Shoulders Display",var(--f-texto);
 }
 .ac-escena{display:none}
+/* Cargando la escena: solo su fondo (el selector plano es la reserva sin WebGL, no un paso previo). */
+.academia.ac-cargando{height:100svh;padding:0;background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+.academia.ac-cargando>:not(.ac-escena){visibility:hidden}
 .academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:560px;padding:0;gap:0;justify-content:flex-start;color:var(--ac-blanco);
   background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
 /* La cabecera del selector sustituye a la barra común (solo aquí). */
