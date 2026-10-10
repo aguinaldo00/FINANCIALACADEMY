@@ -96,3 +96,55 @@ describe('lección visual de capitalización compuesta', () => {
     desmontar();
   });
 });
+
+describe('modo cuaderno (predecir antes de ver)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    document.body.innerHTML = '';
+  });
+
+  it('oculta cada cálculo, también en el gráfico, hasta que se pide verlo', () => {
+    prepararMovimiento(false);
+    const contenedor = document.createElement('div');
+    document.body.append(contenedor);
+    montarCapitalizacionCompuesta(contenedor);
+    const q = <T extends HTMLElement>(s: string) => contenedor.querySelector<T>(s)!;
+
+    // La regla no tiene nada que calcular.
+    expect(q('[data-mat-reto]').hidden).toBe(true);
+    // En modo cuaderno no hay reproducción automática: el ritmo lo marca el alumno.
+    expect(q('[data-mat-accion="reproducir"]').hidden).toBe(true);
+
+    q<HTMLButtonElement>('[data-mat-accion="siguiente"]').click();
+    expect(q('[data-mat-reto]').hidden).toBe(false);
+    expect(q('[data-mat-reto-texto]').textContent).toContain('interés del año 1');
+    expect(q('[data-mat-ecuaciones]').hidden).toBe(true);
+    expect(q('.mat-etiqueta-delta').textContent).toBe('+?');
+
+    q<HTMLButtonElement>('[data-mat-accion="revelar"]').click();
+    expect(q('[data-mat-reto]').hidden).toBe(true);
+    expect(q('[data-mat-ecuaciones]').hidden).toBe(false);
+    expect(q('.mat-etiqueta-delta').textContent).toContain('50,00');
+    // Los símbolos llevan su color fijo.
+    expect(q('[data-mat-ecuaciones] .s-c0').textContent).toBe('C₀');
+
+    // Al volver a una etapa ya hecha, sigue visible.
+    q<HTMLButtonElement>('[data-mat-accion="anterior"]').click();
+    q<HTMLButtonElement>('[data-mat-accion="siguiente"]').click();
+    expect(q('[data-mat-ecuaciones]').hidden).toBe(false);
+  });
+
+  it('sin modo cuaderno se ve todo y se puede reproducir', () => {
+    prepararMovimiento(false);
+    const contenedor = document.createElement('div');
+    document.body.append(contenedor);
+    montarCapitalizacionCompuesta(contenedor);
+    const q = <T extends HTMLElement>(s: string) => contenedor.querySelector<T>(s)!;
+    q<HTMLButtonElement>('[data-mat-accion="cuaderno"]').click();
+    expect(q('[data-mat-accion="cuaderno"]').getAttribute('aria-pressed')).toBe('false');
+    expect(q('[data-mat-accion="reproducir"]').hidden).toBe(false);
+    q<HTMLButtonElement>('[data-mat-accion="siguiente"]').click();
+    expect(q('[data-mat-reto]').hidden).toBe(true);
+    expect(q('[data-mat-ecuaciones]').hidden).toBe(false);
+  });
+});

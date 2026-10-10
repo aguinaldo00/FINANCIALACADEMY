@@ -20,7 +20,7 @@ export const TEMAS: TemaCatalogo[] = [
   {
     numero: tema02.numero,
     titulo: tema02.titulo,
-    descripcion: 'Matemática financiera. Primera lección: capitalización compuesta.',
+    descripcion: 'Capitalización compuesta: los símbolos, un ejemplo paso a paso, errores típicos y práctica en papel.',
     href: '#tema/2',
   },
 ];

@@ -7,6 +7,10 @@ import { MARCA } from './brandTitle.ts';
 import { anilloDominio } from './ring.ts';
 import { iconoUi } from '../../icons/ui.ts';
 
+/** Enlace al índice de temas, igual en el menú de todos los temas. */
+export const enlaceTodosLosTemas = (): string =>
+  `<a class="sl tema-cambio" href="#temas"><div class="top"><span class="id" aria-hidden="true">←</span><span>Todos los temas</span></div></a>`;
+
 /** Índice lateral: dominio global, una barra de dominio por sección y, al final, el grupo Examen. */
 export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActual: string | null, practica?: EstadoPractica): void {
   const { tema, progreso } = estado;
@@ -31,7 +35,7 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
     ? `<div class="grp">Estudio y examen</div>${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}`
     : '';
   const scroll = rail.scrollTop;
-  rail.innerHTML = cabecera + `<a class="sl tema-cambio" href="#temas"><div class="top"><span class="id">↗</span><span>Todos los temas</span></div></a>` + grupos + examen;
+  rail.innerHTML = enlaceTodosLosTemas() + cabecera + grupos + examen;
   rail.scrollTop = scroll;
   // El apartado activo siempre a la vista dentro del índice (p. ej. el grupo Examen, al final).
   const activo = rail.querySelector<HTMLElement>('.sl.on');

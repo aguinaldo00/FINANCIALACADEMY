@@ -24,7 +24,7 @@ beforeAll(() => {
   localStorage.clear();
   localStorage.setItem('cdd-t1', JSON.stringify({ dom: { bancos: 1 }, tries: {} }));
   document.body.innerHTML = `<nav class="rail" id="rail"></nav><main><div class="topbar"><button id="mb">Índice</button><span id="mt"></span></div><div class="page" id="page"></div></main>`;
-  location.hash = '';
+  location.hash = '#inicio';
   iniciarApp(tema01);
 });
 
