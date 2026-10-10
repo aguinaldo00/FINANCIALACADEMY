@@ -1,4 +1,5 @@
 import type { Tema } from '../content/schema.ts';
+import { TEMAS, type TemaCatalogo } from '../content/temas/index.ts';
 import { validarTema } from '../content/validate.ts';
 import { almacenNavegador } from '../persistence/storage.ts';
 import { pintarRail } from '../ui/components/rail.ts';
@@ -12,6 +13,7 @@ import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
+import { detenerTemaDos, pintarIndiceTemas, pintarTemaDos, pintarRailTemaDos, pintarRailTemas } from '../ui/views/topicsView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
 import { resolverRuta } from './router.ts';
 import { EstadoPractica } from './practiceStore.ts';
@@ -23,7 +25,7 @@ function elemento(selector: string): HTMLElement {
   return el;
 }
 
-export function iniciarApp(tema: Tema): void {
+export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS): void {
   if (import.meta.env.DEV) {
     const errores = validarTema(tema);
     if (errores.length) console.error('Contenido del tema con errores:', errores);
@@ -39,10 +41,33 @@ export function iniciarApp(tema: Tema): void {
 
   function pintar(): void {
     document.body.classList.remove('menu');
+    const hash = location.hash || '#inicio';
     const ruta = resolverRuta(location.hash, tema);
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();
+    detenerTemaDos();
+    if (hash === '#temas') {
+      mundo.desmontar();
+      pintarIndiceTemas(ctx, catalogo);
+      pintarRailTemas(ctx.rail, catalogo);
+      ctx.tituloMovil.textContent = 'Todos los temas';
+      document.title = 'Gestión financiera · Temas';
+      if (ruta.scrollArriba) window.scrollTo(0, 0);
+      activarAparicion();
+      return;
+    }
+    if (hash === '#tema/2' || hash.startsWith('#tema/2/')) {
+      mundo.desmontar();
+      pintarTemaDos(ctx, hash);
+      pintarRailTemaDos(ctx.rail, hash);
+      ctx.tituloMovil.textContent = 'Tema 2 · Matemática financiera';
+      document.title = 'Matemática financiera · Tema 2';
+      if (hash === '#tema/2') window.scrollTo(0, 0);
+      activarAparicion();
+      return;
+    }
+    document.title = 'Gestión financiera · La ciudad del dinero';
     if (ruta.vista !== 'inicio' && ruta.vista !== 'seccion') {
       seccionActual = ruta.vista;
       mundo.desmontar();

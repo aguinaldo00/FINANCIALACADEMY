@@ -31,6 +31,7 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
   const gramatica = LEYENDA_GLIFOS.map(([glifo, texto]) => `<div>${iconoSvg([glifo], '#fff')}<span>${texto}</span></div>`).join('');
 
   ctx.pagina.innerHTML = `<section class="hero rev"><span class="pill k">Tema ${tema.meta.numero} · ${tema.meta.titulo}</span>${tituloMarca('hero', 'h1')}<p>Cada entidad del sistema financiero es un edificio con su símbolo. Lee la ficha, pide que te lo expliquen de otra forma, desactiva la trampa del examen y compruébalo.</p></section>
+ <p class="tema-cambio-home"><a href="#temas">Ver todos los temas →</a></p>
  <section class="mundo" data-mundo aria-label="Mapa explorable de ${MARCA.ciudad}"></section>
  ${lineaTemporal(tema, progreso)}
 

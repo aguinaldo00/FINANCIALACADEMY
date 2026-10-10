@@ -197,11 +197,31 @@ describe('app en el navegador', () => {
     expect($<HTMLButtonElement>('[data-ig="siguiente"]', panel).disabled).toBe(true);
   });
 
-  it('#visual: galería con todas las infografías', () => {
+  it('#visual: galería del Tema 1 conserva sus infografías', () => {
     navegar('#visual');
     expect($('#mt').textContent).toBe('Infografías');
+    expect($('.vis-capitalizacion')).toBeNull();
+    expect($('.vis').textContent).not.toContain('Capitalización compuesta');
     expect($$('.ig')).toHaveLength(tema01.ampliacion!.infografias!.length);
     expect($('.sl.on').getAttribute('href')).toBe('#visual');
+  });
+
+  it('el selector separa el Tema 2 de la ciudad del Tema 1', () => {
+    navegar('#temas');
+    expect($('#mt').textContent).toBe('Todos los temas');
+    expect($$('.tema-opcion')).toHaveLength(2);
+    expect($$('.tema-opcion')[1]!.textContent).toContain('Matemática financiera');
+    expect($$('.tema-opcion')[1]!.getAttribute('href')).toBe('#tema/2');
+  });
+
+  it('el Tema 2 abre su propia experiencia y mantiene una ruta separada', () => {
+    navegar('#tema/2');
+    expect($('#mt').textContent).toBe('Tema 2 · Matemática financiera');
+    expect($('.tema-matematica h1').textContent).toBe('Matemática financiera');
+    expect($('.vis')).toBeNull();
+    expect($('.mat-parametros').textContent).toContain('1.000,00');
+    expect($('.mat-notacion-lista').textContent).toContain('Intereses totales');
+    expect($('.rail').textContent).toContain('Todos los temas');
   });
 
   it('#c/<id> abre la sección del concepto y lo muestra', () => {
