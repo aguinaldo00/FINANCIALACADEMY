@@ -3,7 +3,6 @@ import {
   CanvasTexture,
   Color,
   Group,
-  LinearFilter,
   Mesh,
   MeshBasicMaterial,
   NoToneMapping,
@@ -192,8 +191,8 @@ export class EscenaMundos {
     const cargar = async (url: string, color = true) => {
       const t = await carga.loadAsync(url);
       if (color) t.colorSpace = SRGBColorSpace;
-      t.minFilter = LinearFilter;
-      t.generateMipmaps = false;
+      // Con mipmaps (por defecto): las islas lejanas, reducidas, no se ven granuladas.
+      t.anisotropy = 4;
       this.texturas.push(t);
       return t;
     };
