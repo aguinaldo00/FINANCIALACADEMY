@@ -711,6 +711,38 @@ portada de la ciudad; fijo al estudiar un apartado o la lección.
 - **Rediseño de la vista de zona** (nivel 2): los rótulos de un barrio grande, como el 3, siguen
   siendo muchos.
 
+## Selector de mundos: islas pintadas en 2,5D (10/10)
+
+Prueba visual aprobada como enfoque ("híbrida"), **solo con la isla de Gestión Financiera**. Se
+descartó la versión procedural (islas de primitivas: conos, cajas y cilindros), porque el
+resultado parecía de juguete y no se acerca a la referencia de dioramas de fantasía.
+
+**Qué es cada cosa:**
+
+| Elemento | Naturaleza |
+|---|---|
+| Isla de Gestión Financiera (banco, torres, plaza, roca, cascadas) | Imagen prerrenderizada: ilustración generada con Figma AI y recortada; un plano en la escena 3D |
+| Cielo de atardecer (nubes, sol, islas lejanísimas) | Imagen prerrenderizada; un plano "en el infinito" que acompaña a la mirada |
+| Bancos de niebla (4 capas a distintas profundidades) | Imagen prerrenderizada (vetas de niebla); planos 3D que se desplazan |
+| Espacio, cámara, carrusel y paralaje | 3D real (Three.js): cada capa está a su profundidad y la cámara se mueve con el puntero y respira sola |
+| Ventanas que laten, algunas que se apagan y encienden | Animado en el shader de la isla, con una máscara derivada de la propia imagen |
+| Agua de las cascadas que cae | Animado en el shader: vetas que bajan, solo donde la máscara marca agua |
+| Bruma al pie de las cascadas | Plano de niebla que respira (opacidad y escala) |
+| Luz de la elegida y atmósfera de las demás | Halo aditivo de su color; las no elegidas se desaturan y se funden con el cielo |
+| Entrada | La cámara vuela hacia la plaza del banco y se pasa a la asignatura |
+
+**Archivos:**
+- `src/scene/three/mundosScene.ts`: escena y shader; `ARTE` declara qué asignaturas tienen
+  ilustración.
+- `src/assets/mundos/*.webp`: isla, máscaras, cielo y niebla (unos 430 kB en total).
+- `scripts/recortar-isla.mjs`: recorte y máscaras; las zonas de agua son propias de esta imagen.
+
+Si no hay WebGL o falla la carga de alguna imagen, se queda el selector plano de medallones.
+
+**Las otras 5 asignaturas** no tienen ilustración. Solo muestran su rótulo y un halo tenue; no se
+inventa una isla para ellas. Cada una necesita su propia isla con su oficio. Se harán solo cuando
+se apruebe la calidad de esta.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

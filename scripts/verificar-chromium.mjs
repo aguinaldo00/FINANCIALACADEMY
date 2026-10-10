@@ -194,7 +194,14 @@ const progreso = () => {
   await p.waitForSelector('.ac-mundo', { timeout: 30000 });
   ok('academia: sin hash se entra por el selector de mundos', (await p.locator('.ac-mundo').count()) === 6 && (await p.locator('.mundo-lienzo').count()) === 0);
   ok('academia: solo Gestión Financiera está abierta', (await p.locator('.ac-mundo a[data-entrar]').count()) === 1 && (await p.locator('.ac-mundo.pendiente').count()) === 5);
-  await p.locator('.ac-mundo.abierta a[data-entrar]').click();
+  // Con WebGL el selector son islas flotantes: se entra con el botón del panel de la elegida.
+  await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
+  ok('academia: universo 3D de islas con la elegida en el centro', (await p.locator('.academia.ac-3d canvas.ac-lienzo').count()) === 1 && (await p.locator('.ac-foco h2').textContent()) === 'Gestión Financiera');
+  await p.locator('[data-ac-paso="1"]').click();
+  ok('academia: las flechas cambian de mundo (sin contenido: en preparación)', (await p.locator('.ac-foco h2').textContent()) === 'Recursos Humanos' && (await p.locator('.ac-foco .ac-cerrada').count()) === 1);
+  await p.locator('[data-ac-ir="2"]').click();
+  await p.screenshot({ path: `${SP}/ver-academia-islas.png` }).catch(() => {});
+  await p.locator('a.ac-entrar').click();
   await p.waitForSelector('.asignatura', { timeout: 10000 }).catch(() => {});
   ok('academia: entrar en Gestión Financiera muestra sus 2 temas y el temario', (await p.locator('.as-puerta').count()) === 2 && (await p.locator('.as-temario a.tm-fila[href^="#s/"]').count()) >= 12 && (await p.locator('.as-temario a.tm-n1[href^="#s/"]').count()) === 12);
   ok('academia: los botones de estudio y examen siguen ahí', (await p.locator('.as-herramientas a.ab').count()) === 6);
@@ -203,8 +210,9 @@ const progreso = () => {
   ok('academia: el temario abre un apartado sin pasar por la ciudad', (await p.evaluate(() => location.hash)) === '#s/3.2B' && (await p.locator('.mundo-lienzo').count()) === 0);
   await p.locator('#migas a[href="#academia"]').click();
   await p.waitForSelector('.ac-mundo', { timeout: 10000 }).catch(() => {});
-  ok('academia: las migas vuelven al selector y recuerdan por dónde ibas', (await p.locator('.ac-continuar').getAttribute('href').catch(() => null)) === '#s/3.2B');
-  await p.locator('.ac-mundo.abierta a[data-entrar]').click();
+  ok('academia: las migas vuelven al selector y recuerdan por dónde ibas', (await p.locator('.ac-continuar').first().getAttribute('href').catch(() => null)) === '#s/3.2B');
+  await p.waitForSelector('a.ac-entrar', { timeout: 30000 }).catch(() => {});
+  await p.locator('a.ac-entrar').click();
   await p.locator('.as-puerta[href="#tema/2"]').click();
   await p.waitForSelector('.tema-matematica', { timeout: 10000 }).catch(() => {});
   ok('academia: el Tema 2 (lección) se abre desde la asignatura', (await p.locator('.mat-parte').count()) === 5);

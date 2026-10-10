@@ -103,6 +103,64 @@
   .ac-mundos{transform:none}
 }
 
+/* ── Selector en 3D: islas flotantes (si hay WebGL) ── */
+.ac-escena{display:none}
+.academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:520px;padding:0;gap:0;justify-content:flex-start;
+  background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+.academia.ac-3d .ac-fondo{display:none}
+.academia.ac-3d .ac-escena{display:block;position:absolute;inset:0}
+.ac-lienzo{display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab}
+.academia.ac-3d .ac-cab{position:absolute;top:clamp(12px,3vh,28px);left:0;right:0;margin:0 auto;z-index:2;pointer-events:none}
+.academia.ac-3d .ac-cab h1{font-size:clamp(1.4rem,2.6vw,2.1rem)}
+.academia.ac-3d .ac-lema{margin-top:6px;font-size:.88rem}
+/* En horizontal el título va arriba a la izquierda: el centro es de la isla elegida. */
+@media (min-width:701px){
+  .academia.ac-3d .ac-cab{left:clamp(20px,3vw,44px);right:auto;text-align:left;max-width:30ch}
+  .academia.ac-3d .ac-cab h1{text-shadow:0 2px 14px rgba(0,0,0,.6)}
+  .academia.ac-3d .ac-lema{color:#c9d3e2;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+}
+/* Al entrar, la cámara vuela a la isla y el texto se retira. */
+.academia.ac-3d.saliendo :is(.ac-foco,.ac-nav,.ac-mundos){opacity:0;transition:opacity .3s}
+/* La isla ya es la identidad: el panel no repite el medallón. */
+.academia.ac-3d .ac-foco-sello{display:none}
+/* Rótulos: los mismos elementos de la lista, colocados bajo cada isla por la escena. */
+.academia.ac-3d .ac-mundos{position:absolute;inset:0;display:block;width:auto;transform:none;pointer-events:none;z-index:2}
+.academia.ac-3d .ac-mundo{position:absolute;left:0;top:0;width:170px;margin:0;opacity:1;animation:none;pointer-events:auto;transition:opacity .35s;will-change:transform}
+.academia.ac-3d .ac-mundo.elegida{opacity:0;pointer-events:none}
+.academia.ac-3d .ac-puerta{padding:6px 4px;gap:4px;cursor:pointer}
+.academia.ac-3d .ac-sello{width:54px;animation:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.7))}
+.academia.ac-3d .ac-halo,.academia.ac-3d .ac-detalle{display:none}
+.academia.ac-3d .ac-nombre{font-size:1rem;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.academia.ac-3d .ac-estado{text-shadow:0 2px 6px rgba(0,0,0,.9)}
+.academia.ac-3d .ac-mundo.pendiente .ac-sello{filter:saturate(.35) brightness(.85) drop-shadow(0 6px 10px rgba(0,0,0,.7))}
+/* Panel de la isla elegida. */
+.ac-foco{position:absolute;left:50%;bottom:clamp(78px,11vh,104px);translate:-50% 0;z-index:3;display:grid;justify-items:center;gap:8px;width:min(560px,calc(100% - 32px));text-align:center;animation:ac-foco-llega .45s ease both}
+@keyframes ac-foco-llega{from{opacity:0;translate:-50% 12px}to{opacity:1;translate:-50% 0}}
+.ac-foco-sello{width:60px;height:auto;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--c) 60%,transparent))}
+.ac-foco h2{margin:0;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(1.8rem,3.6vw,2.8rem);line-height:1.05;color:#f6e3b4;text-shadow:0 4px 18px rgba(0,0,0,.8)}
+.ac-foco p{margin:0;max-width:46ch;color:#d3d9e4;font-size:.95rem;line-height:1.45;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.ac-entrar{display:inline-flex;align-items:center;gap:10px;margin-top:6px;padding:12px 34px;border-radius:999px;background:linear-gradient(180deg,#f2cd78,#d9a440);color:#1a1206;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.1rem;text-decoration:none;box-shadow:0 8px 26px rgba(217,164,64,.35)}
+.ac-entrar:hover,.ac-entrar:focus-visible{filter:brightness(1.08);outline:2px solid #fff;outline-offset:3px}
+.ac-entrar.ac-cerrada{background:rgba(255,255,255,.06);color:#aab3c2;box-shadow:none;border:1px solid rgba(255,255,255,.18);cursor:default}
+.academia.ac-3d .ac-continuar{text-shadow:0 2px 6px rgba(0,0,0,.9)}
+/* Flechas y puntos. */
+.ac-nav{position:absolute;left:50%;bottom:clamp(18px,4vh,34px);translate:-50% 0;z-index:3;display:flex;align-items:center;gap:clamp(18px,6vw,90px)}
+.ac-flecha{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(232,184,74,.7);background:rgba(6,13,24,.6);color:#f2cd78;font-size:1.6rem;line-height:1;cursor:pointer}
+.ac-flecha:hover:not(:disabled),.ac-flecha:focus-visible{background:rgba(232,184,74,.15);outline:none}
+.ac-flecha:disabled{opacity:.3;cursor:default}
+.ac-puntos{display:flex;gap:10px}
+.ac-punto{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.3);cursor:pointer}
+.ac-punto[aria-current="true"]{background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 30%,transparent)}
+@media (max-width:700px){
+  .academia.ac-3d .ac-lema{display:none}
+  .academia.ac-3d .ac-mundo{width:120px}
+  .academia.ac-3d .ac-sello{width:40px}
+  .academia.ac-3d .ac-nombre{font-size:.84rem}
+  .academia.ac-3d .ac-estado{font-size:.68rem}
+  .ac-foco{bottom:84px}
+  .ac-foco p{font-size:.86rem}
+}
+
 /* ── Página de asignatura ── */
 .asignatura{display:grid;gap:34px}
 .as-cab{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center}

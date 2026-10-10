@@ -1,6 +1,7 @@
 import { hrefAsignatura } from '../../app/router.ts';
 import { ASIGNATURAS, type Asignatura, disponible, NOMBRE_EXPERIENCIA } from '../../content/academia.ts';
 import { ICONOS_UI } from '../../icons/ui.ts';
+import { webglDisponible } from '../../scene/webgl.ts';
 import type { ContextoVista } from './context.ts';
 
 /*
@@ -36,25 +37,43 @@ function mundo(a: Asignatura, i: number, ultimo: UltimoSitio | null): string {
   return `<li class="ac-mundo ${abierta ? 'abierta' : 'pendiente'}" style="--c:${a.color};--i:${i}">${puerta}${temas || continuar ? `<div class="ac-detalle">${temas}${continuar}</div>` : ''}</li>`;
 }
 
+/** Texto del panel de la isla elegida: lo que contiene según sus datos (nada inventado). */
+function resumenMundo(a: Asignatura): string {
+  if (!disponible(a)) return 'Todavía sin contenido: aparecerá aquí cuando se registren sus temas.';
+  return a.temas.map((t) => `Tema ${t.numero} · ${t.titulo} — ${NOMBRE_EXPERIENCIA[t.experiencia]}`).join(' · ');
+}
+
 export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<string, UltimoSitio>> = {}): () => void {
   const abiertas = ASIGNATURAS.filter(disponible).length;
   ctx.pagina.innerHTML = `<div class="academia" data-academia>
   <div class="ac-fondo" aria-hidden="true"><i class="ac-orbita o1"></i><i class="ac-orbita o2"></i><i class="ac-orbita o3"></i></div>
+  <div class="ac-escena" data-ac-escena aria-hidden="true"></div>
   <header class="ac-cab">
     <p class="ac-ante">Financial Academy</p>
     <h1>Elige un mundo</h1>
     <p class="ac-lema">Ciclo de Administración y Finanzas · ${ASIGNATURAS.length} asignaturas · ${abiertas} ${abiertas === 1 ? 'abierta' : 'abiertas'}</p>
   </header>
   <ul class="ac-mundos" aria-label="Asignaturas">${ASIGNATURAS.map((a, i) => mundo(a, i, ultimo[a.id] ?? null)).join('')}</ul>
+  <section class="ac-foco" data-ac-foco aria-live="polite" hidden></section>
+  <nav class="ac-nav" data-ac-nav aria-label="Cambiar de mundo" hidden>
+    <button type="button" class="ac-flecha" data-ac-paso="-1" aria-label="Mundo anterior">‹</button>
+    <span class="ac-puntos">${ASIGNATURAS.map((a, i) => `<button type="button" class="ac-punto" data-ac-ir="${i}" aria-label="${a.nombre}" style="--c:${a.color}"></button>`).join('')}</span>
+    <button type="button" class="ac-flecha" data-ac-paso="1" aria-label="Mundo siguiente">›</button>
+  </nav>
 </div>`;
   ctx.tituloMovil.textContent = 'Financial Academy';
 
   const raiz = ctx.pagina.querySelector<HTMLElement>('[data-academia]')!;
   const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let raf = 0;
-  // Paralaje: el puntero inclina levemente el conjunto (cada medallón se mueve según su fila).
+  let temporizador = 0;
+  let activo = true;
+  let escena: import('../../scene/three/mundosScene.ts').EscenaMundos | null = null;
+  let elegida = Math.max(0, ASIGNATURAS.findIndex(disponible));
+
+  // Paralaje del selector plano (sin 3D): el puntero inclina levemente el conjunto.
   const mover = (e: PointerEvent) => {
-    if (reducido || e.pointerType === 'touch') return;
+    if (reducido || e.pointerType === 'touch' || escena) return;
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
       const r = raiz.getBoundingClientRect();
@@ -63,19 +82,120 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     });
   };
   raiz.addEventListener('pointermove', mover);
-  // Entrada: el mundo elegido se acerca a la cámara y después se cambia de vista.
-  let temporizador = 0;
-  const entrar = (e: MouseEvent) => {
-    const enlace = (e.target as Element).closest<HTMLAnchorElement>('a[data-entrar]');
-    if (!enlace || reducido || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    e.preventDefault();
-    enlace.closest('.ac-mundo')?.classList.add('entrando');
+
+  const irA = (href: string, indice: number) => {
+    const fin = () => (location.hash = href);
+    if (escena) {
+      raiz.classList.add('saliendo');
+      return escena.entrar(indice, fin);
+    }
+    if (reducido) return fin();
+    raiz.querySelectorAll('.ac-mundo')[indice]?.classList.add('entrando');
     raiz.classList.add('saliendo');
-    temporizador = window.setTimeout(() => (location.hash = enlace.getAttribute('href') ?? ''), 520);
+    temporizador = window.setTimeout(fin, 520);
   };
-  raiz.addEventListener('click', entrar);
+
+  // Panel de la isla elegida (solo con la escena 3D).
+  const pintarFoco = () => {
+    const a = ASIGNATURAS[elegida]!;
+    const foco = raiz.querySelector<HTMLElement>('[data-ac-foco]')!;
+    const accion = disponible(a)
+      ? `<a class="ac-entrar" href="${hrefAsignatura(a.id)}" data-ac-entrar="${elegida}">Entrar <span aria-hidden="true">→</span></a>`
+      : `<span class="ac-entrar ac-cerrada" aria-disabled="true">En preparación</span>`;
+    const sigue = disponible(a) && ultimo[a.id] ? `<a class="ac-continuar" href="${ultimo[a.id]!.href}">Continuar: <b>${ultimo[a.id]!.titulo}</b> →</a>` : '';
+    foco.style.setProperty('--c', a.color);
+    foco.innerHTML = `${medallonAsignatura(a, 'ac-foco-sello')}<h2>${a.nombre}</h2><p>${resumenMundo(a)}</p>${accion}${sigue}`;
+    raiz.querySelectorAll<HTMLElement>('.ac-punto').forEach((p, i) => p.setAttribute('aria-current', String(i === elegida)));
+    raiz.querySelectorAll<HTMLElement>('.ac-mundo').forEach((m, i) => m.classList.toggle('elegida', i === elegida));
+    raiz.querySelector<HTMLButtonElement>('[data-ac-paso="-1"]')!.disabled = elegida === 0;
+    raiz.querySelector<HTMLButtonElement>('[data-ac-paso="1"]')!.disabled = elegida === ASIGNATURAS.length - 1;
+  };
+  const elegir = (i: number) => {
+    elegida = Math.max(0, Math.min(ASIGNATURAS.length - 1, i));
+    escena?.seleccionar(elegida);
+    pintarFoco();
+  };
+
+  raiz.addEventListener('click', (e) => {
+    const destino = e.target as Element;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
+    const paso = destino.closest<HTMLElement>('[data-ac-paso]');
+    if (paso) return elegir(elegida + Number(paso.dataset.acPaso));
+    const punto = destino.closest<HTMLElement>('[data-ac-ir]');
+    if (punto) return elegir(Number(punto.dataset.acIr));
+    const entrar = destino.closest<HTMLAnchorElement>('a[data-ac-entrar], a[data-entrar]');
+    if (entrar) {
+      e.preventDefault();
+      const indice = entrar.dataset.acEntrar ? Number(entrar.dataset.acEntrar) : [...raiz.querySelectorAll('.ac-mundo')].indexOf(entrar.closest('.ac-mundo')!);
+      return irA(entrar.getAttribute('href') ?? '', indice);
+    }
+    // En 3D, pulsar el rótulo de un mundo sin abrir lo elige (y muestra que está en preparación).
+    const rotulo = destino.closest<HTMLElement>('.ac-mundo');
+    if (rotulo && escena) elegir([...raiz.querySelectorAll('.ac-mundo')].indexOf(rotulo));
+  });
+  const teclado = (e: KeyboardEvent) => {
+    if (!escena || (e.target as Element).closest?.('input, textarea')) return;
+    if (e.key === 'ArrowLeft') elegir(elegida - 1);
+    else if (e.key === 'ArrowRight') elegir(elegida + 1);
+    else return;
+    e.preventDefault();
+  };
+  document.addEventListener('keydown', teclado);
+
+  // Universo 2,5D: islas flotantes pintadas. Se carga aparte (Three.js) y, si no hay WebGL o fallan
+  // las imágenes, queda el selector plano.
+  let limpiarPendiente = () => {};
+  if (webglDisponible()) {
+    let pendiente: import('../../scene/three/mundosScene.ts').EscenaMundos | null = null;
+    void import('../../scene/three/mundosScene.ts')
+      .then(({ EscenaMundos }) => {
+        if (!activo || !raiz.isConnected) return;
+        const rotulos = [...raiz.querySelectorAll<HTMLElement>('.ac-mundo')];
+        const nueva = new EscenaMundos(
+          ASIGNATURAS.map((a) => ({ id: a.id, color: a.color, abierta: disponible(a) })),
+          elegida,
+          {
+            reducido,
+            alElegir: elegir,
+            alEntrar: (i) => {
+              const a = ASIGNATURAS[i]!;
+              if (disponible(a)) irA(hrefAsignatura(a.id), i);
+            },
+            alFotograma: (pies) =>
+              pies.forEach((p, i) => {
+                const el = rotulos[i];
+                if (el) el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, 0) scale(${Math.min(1, 0.55 + p.escala * 0.4).toFixed(3)})`;
+              }),
+          },
+        );
+        pendiente = nueva;
+        // Hasta que cargan las ilustraciones sigue a la vista (y en uso) el selector plano.
+        return nueva.montarEn(raiz.querySelector<HTMLElement>('[data-ac-escena]')!).then(() => {
+          pendiente = null;
+          if (!activo) return nueva.destruir();
+          escena = nueva;
+          nueva.seleccionar(elegida);
+          raiz.classList.add('ac-3d');
+          raiz.querySelector<HTMLElement>('[data-ac-foco]')!.hidden = false;
+          raiz.querySelector<HTMLElement>('[data-ac-nav]')!.hidden = false;
+          pintarFoco();
+        });
+      })
+      .catch((error) => {
+        console.error('No se pudo iniciar el universo 3D', error);
+        pendiente?.destruir();
+        pendiente = null;
+      });
+    limpiarPendiente = () => pendiente?.destruir();
+  }
+
   return () => {
+    activo = false;
     cancelAnimationFrame(raf);
     clearTimeout(temporizador);
+    document.removeEventListener('keydown', teclado);
+    limpiarPendiente();
+    escena?.destruir();
+    escena = null;
   };
 }

@@ -80,3 +80,13 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Zonas de la ciudad:** el boceto mostraba 6 zonas (Política monetaria, Mercados
   internacionales…) que no existen en DATA. Se usan los 4 grupos reales; cambiarlo requiere
   decidir antes la estructura académica.
+- **Islas del selector (prueba de Gestión Financiera):**
+  - **Moneda de la cúpula:** la ilustración generada lleva un símbolo parecido a "$". ¿Se
+    regenera con "€", o se retoca?
+  - **Las otras 5 islas:** pendientes de aprobar esta. Para mantener la coherencia, hay que
+    generarlas con el mismo estilo, luz y encuadre.
+  - **Derechos de las imágenes:** son imágenes generadas con Figma AI, con el plan del usuario.
+    Antes de publicarlas de forma comercial, conviene confirmar las condiciones de uso de Figma
+    para lo que se genera.
+  - **Calidad en pantallas grandes:** la isla mide 1024 px. En pantallas 4K o al acercarse al
+    entrar se nota algo de suavizado. Si se aprueba, conviene regenerarla a 2048 px.
