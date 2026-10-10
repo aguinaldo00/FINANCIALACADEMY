@@ -2,6 +2,7 @@ import { hrefAsignatura } from '../../app/router.ts';
 import { ASIGNATURAS, type Asignatura, disponible, NOMBRE_EXPERIENCIA } from '../../content/academia.ts';
 import { ICONOS_UI } from '../../icons/ui.ts';
 import { webglDisponible } from '../../scene/webgl.ts';
+import { introBarcoPendiente, reproducirIntroBarco } from '../intro/introBarco.ts';
 import type { ContextoVista } from './context.ts';
 
 /*
@@ -52,6 +53,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     <p class="ac-ante">Financial Academy</p>
     <h1>Elige un mundo</h1>
     <p class="ac-lema">Ciclo de Administración y Finanzas · ${ASIGNATURAS.length} asignaturas · ${abiertas} ${abiertas === 1 ? 'abierta' : 'abiertas'}</p>
+    <button type="button" class="ac-ver-intro" data-ac-intro>Ver intro</button>
   </header>
   <ul class="ac-mundos" aria-label="Asignaturas">${ASIGNATURAS.map((a, i) => mundo(a, i, ultimo[a.id] ?? null)).join('')}</ul>
   <section class="ac-foco" data-ac-foco aria-live="polite" hidden></section>
@@ -70,6 +72,12 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
   let activo = true;
   let escena: import('../../scene/three/mundosScene.ts').EscenaMundos | null = null;
   let elegida = Math.max(0, ASIGNATURAS.findIndex(disponible));
+  let temporizadorRevela = 0;
+  let cancelarIntro: (() => void) | null = null;
+  // El selector avisa cuando está listo (3D o plano) para que la intro se retire sobre él.
+  let avisarListo: (es3d: boolean) => void = () => {};
+  const selectorListo = new Promise<boolean>((r) => (avisarListo = r));
+  const conIntro = introBarcoPendiente(reducido) && webglDisponible();
 
   // Paralaje del selector plano (sin 3D): el puntero inclina levemente el conjunto.
   const mover = (e: PointerEvent) => {
@@ -121,6 +129,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
     const paso = destino.closest<HTMLElement>('[data-ac-paso]');
     if (paso) return elegir(elegida + Number(paso.dataset.acPaso));
+    if (destino.closest('[data-ac-intro]')) return lanzarIntro();
     const punto = destino.closest<HTMLElement>('[data-ac-ir]');
     if (punto) return elegir(Number(punto.dataset.acIr));
     const entrar = destino.closest<HTMLAnchorElement>('a[data-ac-entrar], a[data-entrar]');
@@ -156,6 +165,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           elegida,
           {
             reducido,
+            llegada: conIntro,
             alElegir: elegir,
             alEntrar: (i) => {
               const a = ASIGNATURAS[i]!;
@@ -179,15 +189,39 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           raiz.querySelector<HTMLElement>('[data-ac-foco]')!.hidden = false;
           raiz.querySelector<HTMLElement>('[data-ac-nav]')!.hidden = false;
           pintarFoco();
+          avisarListo(true);
         });
       })
       .catch((error) => {
         console.error('No se pudo iniciar el universo 3D', error);
         pendiente?.destruir();
         pendiente = null;
+        avisarListo(false);
       });
     limpiarPendiente = () => pendiente?.destruir();
+  } else avisarListo(false);
+
+  // Intro del barco: sola la primera vez; después, con "Ver intro". Al deslumbrar se revela esto.
+  function lanzarIntro(): void {
+    if (cancelarIntro) return;
+    raiz.classList.add('ac-llegada');
+    escena?.esperarLlegada();
+    cancelarIntro = reproducirIntroBarco({
+      reducido,
+      selectorListo,
+      alRevelar: () => {
+        escena?.llegar();
+        raiz.classList.add('ac-revelando');
+        raiz.classList.remove('ac-llegada');
+        temporizadorRevela = window.setTimeout(() => raiz.classList.remove('ac-revelando'), 2600);
+      },
+      alTerminar: () => {
+        cancelarIntro = null;
+        raiz.classList.remove('ac-llegada');
+      },
+    });
   }
+  if (conIntro) lanzarIntro();
 
   return () => {
     activo = false;
@@ -195,6 +229,8 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     clearTimeout(temporizador);
     document.removeEventListener('keydown', teclado);
     limpiarPendiente();
+    clearTimeout(temporizadorRevela);
+    cancelarIntro?.();
     escena?.destruir();
     escena = null;
   };

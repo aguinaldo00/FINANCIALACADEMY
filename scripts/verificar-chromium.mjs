@@ -45,6 +45,7 @@ async function pagina(opts, init) {
 const progreso = () => {
   localStorage.setItem('cdd-t1', JSON.stringify({ dom: { bde: 1, bancos: 0.5, cnmv: 1 }, tries: {} }));
   localStorage.setItem('financial-academy:entrada', '"trailer-1"');
+  localStorage.setItem('financial-academy:intro-barco', 'vista');
 };
 
 // 1. Escritorio
@@ -185,6 +186,48 @@ const progreso = () => {
   ok('Atlas: vista cenital rotula las 12 zonas', await p.locator('.m-etq').count() === 12);
   await p.locator('[data-mundo-vista]').screenshot({ path: `${SP}/ver-atlas.png` }).catch(() => {});
   await p.close();
+}
+
+// 0a. Intro del barco: sola la primera vez, se salta (abreviada, sin corte) y deja el selector; no se
+// repite al volver; "Ver intro" la repite y Escape la salta; nunca en enlaces directos ni con
+// movimiento reducido.
+{
+  const p = await pagina({ viewport: { width: 1280, height: 800 } });
+  await p.goto('http://localhost:4173/');
+  const hay = await p.waitForSelector('.intro-barco', { timeout: 5000 }).then(() => true).catch(() => false);
+  ok('intro barco: se reproduce la primera vez, a pantalla completa y con botón de saltar', hay && (await p.evaluate(() => { const r = document.querySelector('.intro-barco').getBoundingClientRect(); return r.width >= innerWidth && r.height >= innerHeight; })) && (await p.locator('.ib-saltar').isVisible()));
+  await p.waitForFunction(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0) >= 1, null, { timeout: 30000 }).catch(() => {});
+  const t1 = await p.evaluate(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0));
+  await p.waitForTimeout(1500);
+  const t2 = await p.evaluate(() => Number(document.querySelector('.intro-barco')?.dataset.t ?? 0));
+  ok('intro barco: la escena del barco se anima', (await p.locator('.intro-barco canvas.ib-lienzo').count()) === 1 && t2 > t1, `${t1} → ${t2}`);
+  await p.screenshot({ path: `${SP}/ver-intro-barco.png` }).catch(() => {});
+  await p.locator('.ib-saltar').click();
+  await p.waitForSelector('.intro-barco', { state: 'detached', timeout: 20000 }).catch(() => {});
+  await p.waitForTimeout(2800);
+  ok('intro barco: al saltarla queda el selector con Gestión Financiera elegida', (await p.locator('.intro-barco').count()) === 0 && (await p.locator('.academia.ac-3d:not(.ac-llegada)').count()) === 1 && (await p.locator('.ac-foco h2').textContent()) === 'Gestión Financiera' && (await p.evaluate(() => getComputedStyle(document.querySelector('.ac-foco')).opacity)) === '1');
+  await p.reload();
+  await p.waitForSelector('.ac-mundo', { timeout: 30000 });
+  await p.waitForTimeout(1500);
+  ok('intro barco: no se repite al volver al inicio', (await p.locator('.intro-barco').count()) === 0);
+  await p.waitForSelector('.academia.ac-3d', { timeout: 30000 }).catch(() => {});
+  await p.locator('[data-ac-intro]').click();
+  const otra = await p.waitForSelector('.intro-barco', { timeout: 5000 }).then(() => true).catch(() => false);
+  await p.keyboard.press('Escape');
+  await p.waitForSelector('.intro-barco', { state: 'detached', timeout: 20000 }).catch(() => {});
+  ok('intro barco: "Ver intro" la repite y Escape la salta', otra && (await p.locator('.intro-barco').count()) === 0 && !(await p.evaluate(() => document.body.classList.contains('intro-barco-activa'))));
+  await p.close();
+  const directa = await pagina({ viewport: { width: 1280, height: 800 } });
+  await directa.goto('http://localhost:4173/#inicio');
+  await directa.waitForTimeout(2000);
+  ok('intro barco: nunca en un enlace directo a un tema', (await directa.locator('.intro-barco').count()) === 0);
+  await directa.close();
+  const quieta = await pagina({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+  await quieta.goto('http://localhost:4173/');
+  await quieta.waitForSelector('.ac-mundo', { timeout: 30000 });
+  await quieta.waitForTimeout(1500);
+  ok('intro barco: con movimiento reducido no se reproduce sola', (await quieta.locator('.intro-barco').count()) === 0);
+  await quieta.close();
 }
 
 // 0. Financial Academy: selector de mundos → asignatura → temario, sin pasar por el 3D.

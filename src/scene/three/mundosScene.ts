@@ -43,6 +43,8 @@ export interface MundoEscena {
 
 export interface OpcionesMundos {
   reducido: boolean;
+  /** Empieza esperando la llegada desde la intro (cámara cerca de la isla, hasta `llegar`). */
+  llegada?: boolean;
   /** Se pulsa una isla que no es la elegida. */
   alElegir: (indice: number) => void;
   /** Se pulsa la isla elegida. */
@@ -170,9 +172,12 @@ export class EscenaMundos {
   private pulsado: { x: number; y: number } | null = null;
   private readonly bruma = new Color('#2a4466');
   private destruida = false;
+  private esperandoLlegada: boolean;
+  private llegada: number | null = null;
 
   constructor(private readonly mundos: readonly MundoEscena[], inicial: number, private readonly op: OpcionesMundos) {
     this.objetivo = this.actual = inicial;
+    this.esperandoLlegada = op.llegada ?? false;
     this.renderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
     // La ilustración ya está "revelada": sin curva de tono encima.
@@ -311,6 +316,18 @@ export class EscenaMundos {
     this.entrando = { indice, inicio: performance.now(), alAcabar };
   }
 
+  /** La intro tapa el selector: la cámara espera cerca de la isla. */
+  esperarLlegada(): void {
+    this.esperandoLlegada = true;
+    this.llegada = null;
+  }
+
+  /** Sale de la luz de la intro: la cámara se aleja despacio hasta su encuadre y se estabiliza. */
+  llegar(): void {
+    this.esperandoLlegada = false;
+    this.llegada = this.op.reducido ? null : performance.now();
+  }
+
   destruir(): void {
     if (this.destruida) return;
     this.destruida = true;
@@ -418,6 +435,18 @@ export class EscenaMundos {
     );
     // La isla elegida queda por encima del panel con su nombre.
     const mira = new Vector3(0, vertical ? -3.6 : -1.9, 0);
+    // Llegada desde la intro: se parte de cerca de la ciudad y se retrocede hasta el encuadre.
+    let cerca = this.esperandoLlegada ? 1 : 0;
+    if (this.llegada !== null) {
+      const x = Math.min(1, (ahora - this.llegada) / 2600);
+      cerca = Math.pow(1 - x, 3);
+      if (x >= 1) this.llegada = null;
+    }
+    if (cerca > 0) {
+      base.z -= cerca * 10;
+      base.y += cerca * 1.2;
+      mira.y += cerca * 3;
+    }
     if (this.entrando) {
       const k = Math.min(1, (ahora - this.entrando.inicio) / 800);
       const e = k * k * (3 - 2 * k);

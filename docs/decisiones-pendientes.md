@@ -90,3 +90,10 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
     para lo que se genera.
   - **Calidad en pantallas grandes:** la isla mide 1024 px. En pantallas 4K o al acercarse al
     entrar se nota algo de suavizado. Si se aprueba, conviene regenerarla a 2048 px.
+- **Intro del barco (prototipo):**
+  - **Imágenes:** el barco y el remolino son los recortes que aportó el usuario. Confirmar sus
+    derechos de uso antes de publicar.
+  - **Barco:** es una ilustración plana, así que no puede girar. Si se quiere que vire o se vea
+    desde otro ángulo, hacen falta más vistas o un modelo 3D de calidad.
+  - **Título:** "Financial Academy" con el lema "Ciclo de Administración y Finanzas". ¿Otro texto?
+  - **Sonido:** no tiene. Si se añade, tendría que empezar tras un gesto del usuario.
