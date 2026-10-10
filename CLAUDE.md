@@ -11,7 +11,8 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 
 ## Publicación
 - La web se publica en GitHub Pages desde `main` (`.github/workflows/pages.yml`).
-- Se trabaja en una rama; cada cambio va en una PR hacia `main`.
+- **Rama única de trabajo: `claude/quirky-lovelace-79c6fm`**, en todas las conversaciones (aunque la sesión proponga otra).
+  Desde ella se abre la PR hacia `main`; si la PR anterior ya está fusionada, se reinicia la rama desde `main` y se abre otra.
 - Trabajo automático: al terminar un cambio y pasar las comprobaciones, Claude hace commit, push y
   abre o actualiza la PR sin esperar permiso. Si algo es ambiguo, decide lo más razonable y lo explica al final.
 - **Claude no fusiona** (el entorno lo bloquea). Fusiona el usuario.
