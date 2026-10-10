@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" class="arrancando">
+<html lang="es" class="arrancando quieto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -8,6 +8,8 @@
 /* Arranque: hasta que la app pinta no se ve la maqueta vacía; el aviso de "sin compilar" solo aparece si tarda. */
 html.arrancando body{background:#070b14}
 html.arrancando .rail,html.arrancando .rail-plegar,html.arrancando .topbar{visibility:hidden}
+/* Al arrancar, el índice se coloca sin animarse (si no, se ve un instante deslizándose fuera). */
+html.quieto .rail,html.quieto .rail-plegar{transition:none!important}
 .sin-compilar{opacity:0;animation:sin-compilar .3s 5s forwards}
 @keyframes sin-compilar{to{opacity:1}}
 </style>

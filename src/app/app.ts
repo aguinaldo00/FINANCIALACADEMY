@@ -175,4 +175,6 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
   addEventListener('hashchange', pintar);
   pintar();
   document.documentElement.classList.remove('arrancando');
+  // El índice ya está en su sitio: desde el segundo fotograma vuelve a animarse al abrir y cerrar.
+  requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('quieto')));
 }
