@@ -1,19 +1,95 @@
-/* Copiado literal del prototipo (legacy, lineas 11-28). */
+/*
+ * Sistema visual de Financial Academy: tokens, tipografía y controles compartidos.
+ * Todas las pantallas toman de aquí colores, tipos, escala y variantes de botón; los estilos de cada
+ * vista solo colocan y dan matices (un color de bloque, un tamaño), no redefinen el lenguaje.
+ */
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:dark;
-  --bg:#000;--bg2:#111;--bg3:#1b1b1b;--line:#2b2b2b;--ink:#fff;--mut:#bdbdbd;
-  --y:#ffd23f;--p:#ff4f8b;--c:#3ddbd9;--g:#4ade80;--o:#ff8a3d;--v:#a78bfa;--r:#ff5a5a;--b:#60a5fa;
+
+  /* Superficies: tinta azul noche, no negro plano (las ilustraciones son de noche azul y oro). */
+  --bg:#070b14;--bg2:#0d1321;--bg3:#141c2d;--bg4:#1b2539;
+  --line:rgba(222,200,160,.12);--line2:rgba(222,200,160,.24);
+  /* Tinta: blanco cálido para leer; secundario y terciario con contraste AA sobre --bg. */
+  --ink:#f1ebdf;--mut:#aab1be;--tenue:#848c9b;
+  /* Oro de la marca: acción principal, foco y acentos editoriales. */
+  --oro:#e0b25e;--oro2:#f2d48f;--oro3:#a87b32;--oro-tinta:#1d1405;
+  /* Acentos de bloque y estado (los del prototipo, menos estridentes). */
+  --y:#e8c062;--p:#e8789a;--c:#5cc6c1;--g:#6ccf96;--o:#ec9459;--v:#a796e8;--r:#e9725f;--b:#6fa9ea;
+
+  /* Tipos: serifa editorial para titular, sans de lectura para el estudio y la interfaz, y mono para
+     cifras y códigos de apartado (el "libro mayor" de la asignatura). */
+  --f-titulo:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-texto:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-cifra:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  /* Escala (1.25) y pesos: los títulos destacan por tamaño y serifa, no por negrita extrema. */
+  --t-mini:.75rem;--t-pie:.86rem;--t-base:1rem;--t-lect:1.0625rem;--t-sub:1.2rem;
+  --t-h3:1.45rem;--t-h2:clamp(1.75rem,3vw,2.25rem);--t-h1:clamp(2.3rem,4.6vw,3.3rem);--t-hero:clamp(2.6rem,6vw,4.4rem);
+  --p-normal:400;--p-medio:500;--p-fuerte:600;--p-titulo:500;
+  --radio:10px;--radio-g:16px;
+  --anim:.18s ease;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000}}
-:root[data-theme="dark"]{--bg:#000}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070b14}}
+:root[data-theme="dark"]{--bg:#070b14}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
 html,body{margin:0}
-body{background:#000;color:#fff;font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:19px;line-height:1.65}
-h1,h2,h3,h4{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;margin:0;line-height:1.1;letter-spacing:-.015em}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-texto);font-size:18px;line-height:1.6;font-weight:var(--p-normal);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2{font-family:var(--f-titulo);font-weight:var(--p-titulo);font-optical-sizing:auto;margin:0;line-height:1.08;letter-spacing:-.012em;text-wrap:balance}
+h3,h4,h5{font-family:var(--f-texto);font-weight:var(--p-fuerte);margin:0;line-height:1.25;letter-spacing:-.005em;text-wrap:balance}
+p{text-wrap:pretty}
 button{font:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--y);outline-offset:3px}
-b{color:#fff}
+:focus-visible{outline:2px solid var(--oro2);outline-offset:3px}
+b,strong{color:var(--ink);font-weight:var(--p-fuerte)}
+a{color:var(--oro2)}
+
+/* Antetítulo editorial (versalitas espaciadas en oro). */
+.antetitulo{margin:0;font-family:var(--f-texto);font-size:var(--t-mini);font-weight:var(--p-fuerte);letter-spacing:.2em;text-transform:uppercase;color:var(--oro)}
+
+/*
+ * Botones. Cuatro funciones, cuatro aspectos:
+ *  1. Principal: la acción más importante de la pantalla (pergamino sobre noche, una por vista).
+ *  2. Secundario: herramientas y acciones alternativas (borde fino, el icono lleva el color).
+ *  3. Control: navegación compacta (siguiente, anterior, pestañas, mostrar/ocultar).
+ *  4. Enlace: acciones de texto (continuar, ver intro, volver).
+ */
+.btn-principal,.ab.q:not(.cc *),.ac-entrar,.home-practica a.principal,.rec-btn.principal{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55em;cursor:pointer;text-decoration:none;
+  padding:12px 24px;border:0;border-radius:6px;
+  background:var(--ink);color:#0a1020;
+  font:var(--p-fuerte) 1rem/1.2 var(--f-texto);letter-spacing:.01em;box-shadow:none;
+  transition:filter var(--anim),transform var(--anim),box-shadow var(--anim)}
+.btn-principal:hover,.ab.q:not(.cc *):hover,.ac-entrar:hover,.home-practica a.principal:hover,.rec-btn.principal:hover:not(:disabled){background:#fff8ea;box-shadow:0 0 0 4px rgba(241,235,223,.12);transform:none;filter:none}
+.btn-principal:active,.ab.q:not(.cc *):active,.ac-entrar:active,.home-practica a.principal:active{transform:translateY(1px)}
+.btn-principal:focus-visible,.ab.q:not(.cc *):focus-visible,.ac-entrar:focus-visible{outline:2px solid var(--oro2);outline-offset:3px}
+
+.btn-secundario,.ab{
+  display:inline-flex;align-items:center;gap:.55em;cursor:pointer;text-decoration:none;
+  padding:9px 15px;border:1px solid var(--line2);border-radius:6px;
+  background:rgba(255,255,255,.025);color:var(--ink);
+  font:var(--p-fuerte) .95rem/1.2 var(--f-texto);
+  transition:border-color var(--anim),background var(--anim),color var(--anim)}
+.btn-secundario:hover,.ab:hover{border-color:color-mix(in srgb,var(--acento,var(--oro)) 70%,transparent);background:color-mix(in srgb,var(--acento,var(--oro)) 9%,transparent);transform:none;filter:none}
+.ab svg{color:var(--acento,var(--oro))}
+.ab.q:not(.cc *) svg{color:inherit}
+.ab[aria-expanded="true"]{border-color:var(--acento,var(--oro));background:color-mix(in srgb,var(--acento,var(--oro)) 14%,transparent);box-shadow:none}
+
+.btn-control,.fc-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4em;cursor:pointer;
+  min-height:36px;padding:0 13px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg3);color:var(--ink);font:var(--p-fuerte) .88rem/1 var(--f-texto);
+  transition:border-color var(--anim),background var(--anim)}
+.btn-control:hover:not(:disabled),.fc-btn:hover:not(:disabled){border-color:var(--line2);background:var(--bg4)}
+.btn-control[aria-pressed="true"],.btn-control.on,.fc-btn.on{border-color:var(--oro);color:var(--oro2);background:rgba(224,178,94,.1)}
+
+.btn-enlace,.ac-continuar,.as-continuar,.ac-ver-intro{
+  display:inline;padding:0;border:0;background:none;cursor:pointer;
+  color:var(--oro2);font:var(--p-medio) .95rem/1.4 var(--f-texto);
+  text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;text-decoration-color:rgba(242,212,143,.45);
+  transition:color var(--anim),text-decoration-color var(--anim)}
+.btn-enlace:hover,.ac-continuar:hover,.as-continuar:hover,.ac-ver-intro:hover{color:var(--ink);text-decoration-color:currentColor}
+.ac-continuar b,.as-continuar b{color:inherit;font-weight:var(--p-fuerte)}
+
+.btn-principal:disabled,.ab:disabled,.btn-control:disabled,.fc-btn:disabled,.rec-btn:disabled,[aria-disabled="true"].btn-principal{opacity:.42;cursor:default;filter:none}

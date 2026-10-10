@@ -56,7 +56,7 @@ function inicio(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
 <div class="sim-config"><fieldset><legend>Número de preguntas</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="sim-n" value="${n}"${n === config.total ? ' checked' : ''}><span>${n}</span></label>`).join('')}</fieldset>
 <label class="sim-tiempo"><input type="checkbox" name="sim-t"${config.conTiempo ? ' checked' : ''}><span>Con tiempo (${SEGUNDOS_POR_PREGUNTA} s por pregunta)</span></label>
 <label class="sim-tiempo"><input type="checkbox" name="sim-c"${config.conConfianza ? ' checked' : ''}><span>Decir cómo de seguro estoy en cada respuesta</span></label>
-<button type="button" class="ab q sim-empezar" data-sim-empezar>Empezar el simulacro →</button></div>${historial}`;
+<button type="button" class="ab q sim-empezar" data-sim-empezar>Empezar el simulacro</button></div>${historial}`;
   raiz.querySelector<HTMLButtonElement>('[data-sim-empezar]')!.onclick = () => {
     const total = Number(raiz.querySelector<HTMLInputElement>('input[name="sim-n"]:checked')?.value ?? 20);
     const conTiempo = Boolean(raiz.querySelector<HTMLInputElement>('input[name="sim-t"]')?.checked);

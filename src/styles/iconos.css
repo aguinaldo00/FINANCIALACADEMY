@@ -1,25 +1,27 @@
 /* Iconos propios de la interfaz (`src/icons/ui.ts`): medallón tipo moneda —disco oscuro, canto
    dorado con grafilas— y el trazo del objeto en dorado o en el color de la acción. */
-.iu{display:inline-block;width:1.35em;height:1.35em;vertical-align:-.36em;flex:none;margin-right:.32em;overflow:visible}
-.iu-disco{fill:#14110d;stroke:var(--iu-canto,#e8b84a);stroke-width:2.6}
-.iu-grafila{fill:none;stroke:var(--iu-canto,#e8b84a);stroke-width:1.6;stroke-dasharray:1.1 2.3;opacity:.75}
-.iu-trazo{fill:none;stroke:var(--iu-c,#e8b84a);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
-.iu-mini{width:1.05em;height:1.05em;vertical-align:-.16em;margin-right:.28em}
-.iu-mini .iu-trazo{stroke:var(--iu-c,currentColor);stroke-width:8}
+.iu{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.24em;flex:none;margin-right:.36em;overflow:visible}
+/* Sin medallón: el disco y la grafila ya no se dibujan; el objeto ocupa el icono entero en línea fina. */
+.iu-disco,.iu-grafila{display:none}
+.iu-medallon .iu-trazo{transform:translate(2px,2px) scale(.94)}
+.iu-trazo{fill:none;stroke:var(--iu-c,var(--oro));stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.iu-mini{width:1.05em;height:1.05em;vertical-align:-.16em;margin-right:.3em}
+.iu-mini .iu-trazo{stroke:var(--iu-c,currentColor);stroke-width:6}
 
 /* Significado por color (en cualquier sitio). */
-.iu-tachado,.iu-aspa{--iu-c:#ff6b5e}
-.iu-sello,.iu-visto{--iu-c:#4ade80}
-.iu-rayo,.iu-llama{--iu-c:#ff8a3d}
+.iu-tachado,.iu-aspa{--iu-c:var(--r)}
+.iu-sello,.iu-visto{--iu-c:var(--g)}
+.iu-rayo,.iu-llama{--iu-c:var(--o)}
 
 /* Botones de la ficha: el trazo toma el color de su acción. */
 .ab.o{--iu-c:var(--y)}.ab.t{--iu-c:var(--r)}.ab.q{--iu-c:var(--g)}.ab.e{--iu-c:var(--c)}
-.ab.f{--iu-c:var(--v)}.ab.p{--iu-c:var(--b)}.ab.w{--iu-c:#f5f5f4}.ab.v{--iu-c:#ffd23f}
-.ab .iu{width:1.45em;height:1.45em;vertical-align:-.4em}
+.ab.f{--iu-c:var(--v)}.ab.p{--iu-c:var(--b)}.ab.w{--iu-c:var(--ink)}.ab.v{--iu-c:var(--o)}
+.ab.q:not(.cc *){--iu-c:#0a1020}
+.ab .iu{width:1.15em;height:1.15em;vertical-align:-.2em;margin-right:0}
 .ej .lab{--iu-c:var(--c)}
 
 /* Índice lateral: el icono ocupa la columna del identificador. */
-.sl .id .iu{width:1.55em;height:1.55em;margin-right:0;vertical-align:-.42em}
+.sl .id .iu{width:1.2em;height:1.2em;margin-right:0;vertical-align:-.22em}
 
 /* Barra del mapa: icono más contenido. */
 .mb-btn .iu{width:1.25em;height:1.25em;vertical-align:-.33em;margin-right:.3em}

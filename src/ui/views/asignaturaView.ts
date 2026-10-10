@@ -29,7 +29,7 @@ function puerta(t: TemaCatalogo, estado: EstadoEstudio, color: string): string {
     <span class="as-tema">Tema ${t.numero}</span>
     <span class="as-titulo">${t.titulo}</span>
     <span class="as-desc">${t.descripcion}</span>
-    <span class="as-pie"><span class="pill">${iconoUi(ICONO_EXPERIENCIA[t.experiencia])} ${NOMBRE_EXPERIENCIA[t.experiencia]}</span>${dominio}<span class="as-ir">Entrar →</span></span>
+    <span class="as-pie"><span class="pill">${iconoUi(ICONO_EXPERIENCIA[t.experiencia])} ${NOMBRE_EXPERIENCIA[t.experiencia]}</span>${dominio}<span class="as-ir">Entrar</span></span>
   </a>`;
 }
 

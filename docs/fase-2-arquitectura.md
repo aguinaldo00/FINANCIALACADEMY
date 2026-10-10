@@ -813,6 +813,58 @@ hacia un resplandor dorado. En el blanco de esa luz aparece debajo la isla de Ge
 
 Para retirarlo basta con quitar la llamada en `academiaView` y el enlace "Ver intro".
 
+## Sistema visual compartido (10/10)
+
+La interfaz parecía genérica porque cada pantalla repetía los mismos valores sueltos:
+- negro puro y amarillo, verde y rosa neón;
+- una grotesca en negrita 800 en todos los títulos y etiquetas;
+- todos los botones como pastillas de color macizo con flecha;
+- el elemento activo del índice en blanco macizo;
+- iconos encerrados en medallones de moneda.
+
+Ahora esos valores salen de un solo sitio, `styles/base.css`, y las hojas de cada vista solo
+colocan y matizan.
+
+**Tokens:**
+- **Superficies:** `--bg`, `--bg2`, `--bg3` y `--bg4`, en azul noche.
+- **Líneas:** `--line` y `--line2`.
+- **Tinta:** `--ink`, `--mut` y `--tenue`, todas con contraste AA sobre el fondo.
+- **Oro de marca:** `--oro`, `--oro2` y `--oro3`, solo para foco, enlaces y acentos editoriales.
+- **Acentos de bloque:** `--y`, `--g`, `--r`, etc., algo menos estridentes.
+- **Escala:** `--t-mini` … `--t-hero` y los pesos `--p-*`.
+- **Radios:** `--radio` y `--radio-g`.
+
+**Tipos.** Están alojados en `assets/fuentes`, con `styles/fuentes.css` (SIL OFL), y no dependen
+de Google Fonts.
+- **Fraunces:** títulos editoriales en pesos 400–500.
+- **IBM Plex Sans:** lectura e interfaz.
+- **IBM Plex Mono:** cifras, porcentajes y códigos de apartado ("3.2B").
+- `h1` y `h2` usan la serifa; `h3`–`h5`, la sans.
+
+**Botones.** Cuatro funciones, cuatro aspectos:
+
+| Función | Clase | Dónde |
+|---|---|---|
+| Principal | `.btn-principal` | `.ab.q` fuera de la ficha, `.ac-entrar`, `.home-practica a.principal`, `.rec-btn.principal`. Pergamino sobre noche, una por vista y sin flecha. |
+| Secundario | `.btn-secundario` | `.ab` y sus tipos. Borde fino; el color de la herramienta va en el icono (`--acento` / `--iu-c`). |
+| Control | `.btn-control` | `.fc-btn`. Compacto; para siguiente, anterior y pestañas. |
+| Enlace | `.btn-enlace` | `.ac-continuar`, `.as-continuar`, `.ac-ver-intro`, `.ver-intro`. |
+
+Los estados (hover, focus-visible con contorno de oro, pulsado y desactivado) son comunes a todos.
+
+**Iconos.** Los iconos de la interfaz son ahora de línea: el disco y la grafila del medallón ya
+no se dibujan. Se ocultan por CSS y el marcado no cambia. Los iconos de concepto (las
+ilustraciones de cada ficha) no cambian.
+
+**Por pantalla:**
+- **Selector:** tratamiento cinematográfico, con velos de lectura sobre la ilustración, título
+  en serifa, temas en líneas cortas, una acción principal y navegación con chevrones finos.
+- **Estudio** (apartados, práctica, simulacro, repaso, sesión, progreso, infografías y Tema 2):
+  prioriza la lectura, con anchuras de 58–66 caracteres y paneles con el color de su herramienta
+  muy rebajado.
+- **Mapa:** usa los mismos tokens (`--m-*` apunta a los globales). El panel de zonas, la ficha y
+  la barra de botones se adaptan, y el fondo y la niebla de día pasan a azul noche.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

@@ -1,3 +1,4 @@
+import './styles/fuentes.css';
 import './styles/base.css';
 import './styles/layout.css';
 import './styles/section.css';

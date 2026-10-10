@@ -236,7 +236,7 @@ export class Decorado {
         ctx.arc(x, 64, 9, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.font = '700 62px "Bricolage Grotesque", "Atkinson Hyperlegible", system-ui, sans-serif';
+      ctx.font = '700 62px "Fraunces", Georgia, serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       // Grabado: sombra clara debajo y letra oscura encima.

@@ -38,11 +38,13 @@ function mundo(a: Asignatura, i: number, ultimo: UltimoSitio | null): string {
   return `<li class="ac-mundo ${abierta ? 'abierta' : 'pendiente'}" style="--c:${a.color};--i:${i}">${puerta}${temas || continuar ? `<div class="ac-detalle">${temas}${continuar}</div>` : ''}</li>`;
 }
 
-/** Texto del panel de la isla elegida: lo que contiene según sus datos (nada inventado). */
+/** Panel de la isla elegida: sus temas, uno por línea, según sus datos (nada inventado). */
 function resumenMundo(a: Asignatura): string {
-  if (!disponible(a)) return 'Todavía sin contenido: aparecerá aquí cuando se registren sus temas.';
-  return a.temas.map((t) => `Tema ${t.numero} · ${t.titulo} — ${NOMBRE_EXPERIENCIA[t.experiencia]}`).join(' · ');
+  if (!disponible(a)) return '<p class="ac-foco-vacio">Todavía sin contenido: aparecerá aquí cuando se registren sus temas.</p>';
+  return `<ul class="ac-foco-temas">${a.temas.map((t) => `<li><span class="ac-foco-n">Tema ${t.numero}</span><span class="ac-foco-t">${t.titulo}</span><span class="ac-foco-x">${NOMBRE_EXPERIENCIA[t.experiencia]}</span></li>`).join('')}</ul>`;
 }
+
+const CHEVRON = (d: string) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
 
 export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<string, UltimoSitio>> = {}): () => void {
   const abiertas = ASIGNATURAS.filter(disponible).length;
@@ -52,15 +54,15 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
   <header class="ac-cab">
     <p class="ac-ante">Financial Academy</p>
     <h1>Elige un mundo</h1>
-    <p class="ac-lema">Ciclo de Administración y Finanzas · ${ASIGNATURAS.length} asignaturas · ${abiertas} ${abiertas === 1 ? 'abierta' : 'abiertas'}</p>
+    <p class="ac-lema"><span>Ciclo de Administración y Finanzas</span><span class="ac-cifras">${ASIGNATURAS.length} asignaturas · ${abiertas} ${abiertas === 1 ? 'abierta' : 'abiertas'}</span></p>
     <button type="button" class="ac-ver-intro" data-ac-intro>Ver intro</button>
   </header>
   <ul class="ac-mundos" aria-label="Asignaturas">${ASIGNATURAS.map((a, i) => mundo(a, i, ultimo[a.id] ?? null)).join('')}</ul>
   <section class="ac-foco" data-ac-foco aria-live="polite" hidden></section>
   <nav class="ac-nav" data-ac-nav aria-label="Cambiar de mundo" hidden>
-    <button type="button" class="ac-flecha" data-ac-paso="-1" aria-label="Mundo anterior">‹</button>
+    <button type="button" class="ac-flecha" data-ac-paso="-1" aria-label="Mundo anterior">${CHEVRON('M14.5 5.5 8 12l6.5 6.5')}</button>
     <span class="ac-puntos">${ASIGNATURAS.map((a, i) => `<button type="button" class="ac-punto" data-ac-ir="${i}" aria-label="${a.nombre}" style="--c:${a.color}"></button>`).join('')}</span>
-    <button type="button" class="ac-flecha" data-ac-paso="1" aria-label="Mundo siguiente">›</button>
+    <button type="button" class="ac-flecha" data-ac-paso="1" aria-label="Mundo siguiente">${CHEVRON('M9.5 5.5 16 12l-6.5 6.5')}</button>
   </nav>
 </div>`;
   ctx.tituloMovil.textContent = 'Financial Academy';
@@ -108,11 +110,11 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     const a = ASIGNATURAS[elegida]!;
     const foco = raiz.querySelector<HTMLElement>('[data-ac-foco]')!;
     const accion = disponible(a)
-      ? `<a class="ac-entrar" href="${hrefAsignatura(a.id)}" data-ac-entrar="${elegida}">Entrar <span aria-hidden="true">→</span></a>`
-      : `<span class="ac-entrar ac-cerrada" aria-disabled="true">En preparación</span>`;
-    const sigue = disponible(a) && ultimo[a.id] ? `<a class="ac-continuar" href="${ultimo[a.id]!.href}">Continuar: <b>${ultimo[a.id]!.titulo}</b> →</a>` : '';
+      ? `<a class="ac-entrar" href="${hrefAsignatura(a.id)}" data-ac-entrar="${elegida}">Entrar</a>`
+      : `<span class="ac-cerrada">En preparación</span>`;
+    const sigue = disponible(a) && ultimo[a.id] ? `<a class="ac-continuar" href="${ultimo[a.id]!.href}">Seguir donde lo dejaste: <b>${ultimo[a.id]!.titulo}</b></a>` : '';
     foco.style.setProperty('--c', a.color);
-    foco.innerHTML = `${medallonAsignatura(a, 'ac-foco-sello')}<h2>${a.nombre}</h2><p>${resumenMundo(a)}</p>${accion}${sigue}`;
+    foco.innerHTML = `${medallonAsignatura(a, 'ac-foco-sello')}<h2>${a.nombre}</h2>${resumenMundo(a)}<div class="ac-foco-acciones">${accion}${sigue}</div>`;
     raiz.querySelectorAll<HTMLElement>('.ac-punto').forEach((p, i) => p.setAttribute('aria-current', String(i === elegida)));
     raiz.querySelectorAll<HTMLElement>('.ac-mundo').forEach((m, i) => m.classList.toggle('elegida', i === elegida));
     raiz.querySelector<HTMLButtonElement>('[data-ac-paso="-1"]')!.disabled = elegida === 0;
