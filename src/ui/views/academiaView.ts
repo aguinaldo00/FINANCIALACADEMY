@@ -260,15 +260,24 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           if (!activo) return nueva.destruir();
           escena = nueva;
           nueva.seleccionar(elegida);
-          raiz.classList.add('ac-3d');
-          raiz.classList.remove('ac-cargando');
-          // En 3D la cabecera es parte de la escena: sustituye a la barra común.
-          raiz.querySelector<HTMLElement>('[data-ac-top]')!.hidden = false;
-          document.body.classList.add('ac-cabecera-escena');
-          raiz.querySelector<HTMLElement>('[data-ac-foco]')!.hidden = false;
-          raiz.querySelector<HTMLElement>('[data-ac-nav]')!.hidden = false;
-          pintarFoco();
-          avisarListo(true);
+          // Se muestra cuando la escena ya ha dibujado sus primeros fotogramas (nunca el fondo vacío).
+          return new Promise<void>((listo) =>
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                listo();
+                if (!activo) return;
+                raiz.classList.add('ac-3d');
+                raiz.classList.remove('ac-cargando');
+                // En 3D la cabecera es parte de la escena: sustituye a la barra común.
+                raiz.querySelector<HTMLElement>('[data-ac-top]')!.hidden = false;
+                document.body.classList.add('ac-cabecera-escena');
+                raiz.querySelector<HTMLElement>('[data-ac-foco]')!.hidden = false;
+                raiz.querySelector<HTMLElement>('[data-ac-nav]')!.hidden = false;
+                pintarFoco();
+                avisarListo(true);
+              }),
+            ),
+          );
         });
       })
       .catch((error) => {

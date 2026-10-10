@@ -122,10 +122,18 @@
 }
 .ac-escena{display:none}
 /* Cargando la escena: solo su fondo (el selector plano es la reserva sin WebGL, no un paso previo). */
-.academia.ac-cargando{height:100svh;padding:0;background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+.academia.ac-cargando{height:100svh;padding:0;background:var(--bg)}
 .academia.ac-cargando>:not(.ac-escena){visibility:hidden}
+/* La escena se dibuja ya mientras carga (invisible) y aparece con un fundido, sin cortes. */
+.academia.ac-cargando .ac-escena{display:block;position:absolute;inset:0;opacity:0}
+.academia.ac-3d .ac-escena{animation:ac-aparece .6s ease both}
+.academia.ac-3d :is(.ac-top,.ac-cab){animation:ac-aparece .6s .1s ease both}
+.academia.ac-3d :is(.ac-mundos,.ac-foco){animation:ac-aparece .6s .2s ease both}
+.academia.ac-3d .ac-nav{animation:ac-aparece .6s .3s ease both}
+@keyframes ac-aparece{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.academia.ac-3d :is(.ac-escena,.ac-top,.ac-cab,.ac-mundos,.ac-foco,.ac-nav){animation:none}}
 .academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:560px;padding:0;gap:0;justify-content:flex-start;color:var(--ac-blanco);
-  background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+  background:var(--bg)}
 /* La cabecera del selector sustituye a la barra común (solo aquí). */
 body.ac-cabecera-escena .topbar{display:none}
 body.ac-cabecera-escena .page{padding:0}
