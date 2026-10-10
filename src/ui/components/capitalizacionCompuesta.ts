@@ -13,6 +13,7 @@ import {
   FORMULA_INTERESES_TOTALES,
   FORMULA_INTERESES_TOTALES_FACTOR,
 } from '../../content/temas/tema-02/index.ts';
+import { colorearSimbolos } from './simbolos.ts';
 
 const DURACION_ETAPA_MS = 5_000;
 const ANCHO_GRAFICO = 720;
@@ -154,6 +155,21 @@ function lecturaEtapa(etapa: EtapaCapitalizacion, modelo: ProyeccionCapitalizaci
   };
 }
 
+/** Lo que se pide hacer en papel antes de ver el cálculo de la etapa (modo cuaderno). */
+function retoEtapa(etapa: EtapaCapitalizacion, modelo: ProyeccionCapitalizacion): string | null {
+  if (etapa.tipo === 'regla') return null;
+  if (etapa.tipo === 'interes-del-periodo') {
+    return `Calcula en tu cuaderno el interés del año ${etapa.indicePeriodo + 1}: ${capitalSimbolo(etapa.indicePeriodo)} × i.`;
+  }
+  if (etapa.tipo === 'capital-al-cierre') {
+    return `¿Cuánto vale ${capitalSimbolo(etapa.indicePeriodo + 1)}? Suma a ${capitalSimbolo(etapa.indicePeriodo)} el interés que acabas de calcular.`;
+  }
+  if (etapa.tipo === 'formula-general') {
+    return `Escribe la fórmula general y sustituye C₀ = ${formatearEuros(modelo.capitalInicialCentimos)}, i = ${formatearTasaDecimal(modelo.tasaAnualPuntosBase)} y n = ${modelo.numeroPeriodos}. ¿Te da lo mismo que el C${subindice(modelo.numeroPeriodos)} que llevas?`;
+  }
+  return 'Calcula los intereses totales I de toda la operación.';
+}
+
 function formatearEurosSinRedondeo(modelo: ProyeccionCapitalizacion): string {
   const capitalInicial = modelo.capitalInicialCentimos / 100;
   const tasa = modelo.tasaAnualPuntosBase / 10_000;
@@ -184,7 +200,7 @@ function tramoCurvo(origen: PuntoGrafico, destino: PuntoGrafico): string {
   return `M ${origen.x.toFixed(2)} ${origen.y.toFixed(2)} C ${controlUnoX.toFixed(2)} ${controlUnoY.toFixed(2)}, ${controlDosX.toFixed(2)} ${controlDosY.toFixed(2)}, ${destino.x.toFixed(2)} ${destino.y.toFixed(2)}`;
 }
 
-function graficoCapital(modelo: ProyeccionCapitalizacion, etapa: EtapaCapitalizacion): string {
+function graficoCapital(modelo: ProyeccionCapitalizacion, etapa: EtapaCapitalizacion, ocultarNuevo = false): string {
   const puntos = puntosGrafico(modelo);
   const conocido = numeroCapitalConocido(etapa, modelo);
   const enGeneracion = etapa.tipo === 'interes-del-periodo';
@@ -208,7 +224,7 @@ function graficoCapital(modelo: ProyeccionCapitalizacion, etapa: EtapaCapitaliza
       <line class="mat-interes-tope" x1="${(destino.x - 5).toFixed(2)}" y1="${origen.y.toFixed(2)}" x2="${(destino.x + 5).toFixed(2)}" y2="${origen.y.toFixed(2)}" aria-hidden="true"></line>
       <line class="mat-interes-tope" x1="${(destino.x - 5).toFixed(2)}" y1="${destino.y.toFixed(2)}" x2="${(destino.x + 5).toFixed(2)}" y2="${destino.y.toFixed(2)}" aria-hidden="true"></line>
       <circle class="mat-nodo-previsto" cx="${destino.x.toFixed(2)}" cy="${destino.y.toFixed(2)}" r="6" aria-hidden="true"></circle>
-      <text class="mat-etiqueta-delta" x="${(destino.x - 10).toFixed(2)}" y="${puntoMedioY.toFixed(2)}" text-anchor="end">+${formatearEuros(periodo.interesGeneradoCentimos)}</text>`;
+      <text class="mat-etiqueta-delta" x="${(destino.x - 10).toFixed(2)}" y="${puntoMedioY.toFixed(2)}" text-anchor="end">+${ocultarNuevo ? '?' : formatearEuros(periodo.interesGeneradoCentimos)}</text>`;
   }
 
   const nodos = puntos.slice(0, conocido + 1).map((punto, indice) => {
@@ -216,9 +232,10 @@ function graficoCapital(modelo: ProyeccionCapitalizacion, etapa: EtapaCapitaliza
     const textoX = indice === puntos.length - 1 ? punto.x - 9 : punto.x + 9;
     const textoY = indice === 0 ? punto.y + 23 : punto.y - 12;
     const simbolo = capitalSimbolo(indice);
+    const oculto = ocultarNuevo && etapa.tipo === 'capital-al-cierre' && indice === conocido;
     return `<g class="mat-punto${indice === conocido && etapa.tipo === 'capital-al-cierre' ? ' mat-punto-actual' : ''}">
       <circle cx="${punto.x.toFixed(2)}" cy="${punto.y.toFixed(2)}" r="5.5" aria-hidden="true"></circle>
-      <text class="mat-etiqueta-punto" x="${textoX.toFixed(2)}" y="${textoY.toFixed(2)}" text-anchor="${ancla}">${simbolo} · ${formatearEuros(punto.capitalCentimos)}</text>
+      <text class="mat-etiqueta-punto" x="${textoX.toFixed(2)}" y="${textoY.toFixed(2)}" text-anchor="${ancla}">${simbolo} · ${oculto ? '?' : formatearEuros(punto.capitalCentimos)}</text>
     </g>`;
   }).join('');
 
@@ -227,7 +244,9 @@ function graficoCapital(modelo: ProyeccionCapitalizacion, etapa: EtapaCapitaliza
     <text x="${punto.x.toFixed(2)}" y="${Y_EJE_TIEMPO + 22}" text-anchor="middle">${punto.numeroPeriodo}</text>
   </g>`).join('');
 
-  const ariaEtapa = etapa.tipo === 'interes-del-periodo'
+  const ariaEtapa = ocultarNuevo
+    ? ', el último valor está oculto hasta que lo calcules'
+    : etapa.tipo === 'interes-del-periodo'
     ? `, interés del año ${etapa.indicePeriodo + 1} de ${formatearEuros(modelo.periodos[etapa.indicePeriodo]!.interesGeneradoCentimos)} pendiente de sumarse`
     : '';
 
@@ -259,6 +278,9 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
     : null;
   let indiceEtapa = 0;
   let reproduciendo = false;
+  /** Modo cuaderno: cada cálculo se oculta hasta que el alumno lo ha intentado en papel. */
+  let modoCuaderno = true;
+  const reveladas = new Set<number>();
   let temporizador: number | undefined;
 
   contenedor.innerHTML = `<section class="mat-experiencia" aria-label="Lección visual de capitalización compuesta">
@@ -267,9 +289,9 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
       <p>El interés se acumula al capital y pasa a producir nuevos intereses.</p>
     </div>
     <div class="mat-parametros" aria-label="Datos de la operación">
-      <p><span>Capital inicial · C₀</span><strong>${formatearEuros(modelo.capitalInicialCentimos)}</strong></p>
-      <p><span>Tipo anual · i</span><strong>${formatearPorcentaje(modelo.tasaAnualPuntosBase)} <small>(${formatearTasaDecimal(modelo.tasaAnualPuntosBase)})</small></strong></p>
-      <p><span>Duración · n</span><strong>${modelo.numeroPeriodos} años</strong></p>
+      <p><span>Capital inicial · <span class="s s-c0">C₀</span></span><strong>${formatearEuros(modelo.capitalInicialCentimos)}</strong></p>
+      <p><span>Tipo anual · <span class="s s-i">i</span></span><strong>${formatearPorcentaje(modelo.tasaAnualPuntosBase)} <small>(${formatearTasaDecimal(modelo.tasaAnualPuntosBase)})</small></strong></p>
+      <p><span>Duración · <span class="s s-n">n</span></span><strong>${modelo.numeroPeriodos} años</strong></p>
     </div>
     <div class="mat-aula">
       <figure class="mat-grafico-panel">
@@ -280,6 +302,10 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
       <section class="mat-relato" aria-live="polite" aria-atomic="true">
         <p class="mat-contador" data-mat-contador></p>
         <h3 data-mat-titulo></h3>
+        <div class="mat-reto" data-mat-reto hidden>
+          <p class="mat-reto-texto"><b>Tu turno.</b> <span data-mat-reto-texto></span></p>
+          <button type="button" class="ab o" data-mat-accion="revelar">Ya lo tengo: ver el cálculo</button>
+        </div>
         <div class="mat-ecuaciones" data-mat-ecuaciones></div>
         <p class="mat-explicacion" data-mat-explicacion></p>
         <aside class="mat-nota-etapa" data-mat-nota><strong data-mat-nota-titulo></strong><p data-mat-nota-texto></p></aside>
@@ -290,9 +316,11 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
       <button type="button" class="ab o" data-mat-accion="reproducir" aria-pressed="false">Reproducir</button>
       <button type="button" class="ab" data-mat-accion="siguiente">Siguiente →</button>
       <button type="button" class="ab" data-mat-accion="reiniciar">Volver al inicio</button>
+      <button type="button" class="ab mat-cuaderno" data-mat-accion="cuaderno" aria-pressed="true">Modo cuaderno: sí</button>
     </div>
     <nav class="mat-etapas" aria-label="Apartados de la explicación" data-mat-etapas></nav>
-    <p class="mat-redondeo">Cada cierre anual se expresa en euros y se redondea a céntimos.</p>
+    <p class="mat-redondeo">Para enseñar cada año, aquí se redondea cada cierre a céntimos. En el examen aplica la fórmula directa y redondea solo el resultado.</p>
+    <p class="mat-redondeo">Modo cuaderno: cada cálculo se oculta hasta que lo hayas hecho en papel. Si lo desactivas, se ve todo y puedes reproducirlo seguido.</p>
     <p class="mat-reducido" hidden data-mat-reducido>Movimiento reducido: avanza manualmente para ver cada paso del cálculo.</p>
   </section>`;
 
@@ -308,7 +336,15 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
     const etapa = etapas[indiceEtapa]!;
     const lectura = lecturaEtapa(etapa, modelo);
     const esFinal = etapa.tipo === 'formula-general' || etapa.tipo === 'intereses-totales';
-    visual.innerHTML = graficoCapital(modelo, etapa);
+    const reto = retoEtapa(etapa, modelo);
+    const oculta = modoCuaderno && reto !== null && !reveladas.has(indiceEtapa);
+    visual.innerHTML = graficoCapital(modelo, etapa, oculta);
+    const cajaReto = contenedor.querySelector<HTMLElement>('[data-mat-reto]')!;
+    cajaReto.hidden = !oculta;
+    contenedor.querySelector<HTMLElement>('[data-mat-reto-texto]')!.innerHTML = oculta && reto ? colorearSimbolos(reto) : '';
+    for (const selector of ['[data-mat-ecuaciones]', '[data-mat-explicacion]', '[data-mat-nota]']) {
+      contenedor.querySelector<HTMLElement>(selector)!.hidden = oculta;
+    }
     contenedor.querySelector<HTMLElement>('[data-mat-contador]')!.textContent =
       `PASO ${String(indiceEtapa + 1).padStart(2, '0')} / ${String(etapas.length).padStart(2, '0')}`;
     contenedor.querySelector<HTMLElement>('[data-mat-titulo]')!.textContent = lectura.titulo;
@@ -316,7 +352,7 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
       .map((_, indice) => `<p class="mat-ecuacion${indice === lectura.ecuaciones.length - 1 && esFinal ? ' mat-ecuacion-final' : ''}"></p>`)
       .join('');
     contenedor.querySelectorAll<HTMLElement>('[data-mat-ecuaciones] .mat-ecuacion').forEach((elemento, indice) => {
-      elemento.textContent = lectura.ecuaciones[indice]!;
+      elemento.innerHTML = colorearSimbolos(lectura.ecuaciones[indice]!);
     });
     contenedor.querySelector<HTMLElement>('[data-mat-explicacion]')!.textContent = lectura.explicacion;
     contenedor.querySelector<HTMLElement>('[data-mat-nota-titulo]')!.textContent = lectura.notaTitulo;
@@ -337,7 +373,11 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
     siguiente.disabled = indiceEtapa === etapas.length - 1;
     reproducir.textContent = reproduciendo ? 'Pausar' : 'Reproducir';
     reproducir.setAttribute('aria-pressed', String(reproduciendo));
-    reproducir.hidden = Boolean(movimientoReducido?.matches);
+    // En modo cuaderno el ritmo lo marca el alumno: no hay reproducción automática.
+    reproducir.hidden = Boolean(movimientoReducido?.matches) || modoCuaderno;
+    const cuaderno = contenedor.querySelector<HTMLButtonElement>('[data-mat-accion="cuaderno"]')!;
+    cuaderno.textContent = `Modo cuaderno: ${modoCuaderno ? 'sí' : 'no'}`;
+    cuaderno.setAttribute('aria-pressed', String(modoCuaderno));
     avisoReducido.hidden = !movimientoReducido?.matches;
   }
 
@@ -397,6 +437,12 @@ export function montarCapitalizacionCompuesta(contenedor: HTMLElement): () => vo
       case 'siguiente': seleccionar(indiceEtapa + 1); break;
       case 'reiniciar': seleccionar(0); break;
       case 'reproducir': alternarReproduccion(); break;
+      case 'revelar': reveladas.add(indiceEtapa); renderizar(); break;
+      case 'cuaderno':
+        detener();
+        modoCuaderno = !modoCuaderno;
+        renderizar();
+        break;
     }
   }
 

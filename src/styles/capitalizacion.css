@@ -14,7 +14,6 @@
 .tema-matematica>.sh{margin-bottom:30px}
 .tema-matematica>.sh h1{max-width:18ch}
 .tema-matematica>.sh p{max-width:58ch}
-.mat-leccion{scroll-margin-top:24px;margin-top:34px}
 .mat-leccion-cabecera{margin-bottom:18px}
 .mat-ceja{margin:0 0 5px;color:var(--y);font-family:"Bricolage Grotesque",sans-serif;font-size:.76rem;font-weight:800;letter-spacing:.12em}
 .mat-leccion-cabecera h2,.mat-notacion-cabecera h2{font-size:clamp(1.45rem,3vw,2rem)}
@@ -79,7 +78,6 @@
 .mat-paso:hover{border-color:var(--y);color:#fff}
 .mat-paso.activo{background:var(--y);border-color:var(--y);color:#000;font-weight:800}
 .mat-redondeo,.mat-reducido{margin:12px 0 0;color:var(--mut);font-size:.82rem}
-.mat-notacion{margin-top:46px;padding-top:24px;border-top:1px solid var(--line)}
 .mat-notacion-cabecera{margin-bottom:14px}
 .mat-notacion-lista{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0}
 .mat-notacion-lista>div{min-width:0;padding:11px;background:var(--bg2);border:1px solid var(--line);border-radius:12px}
@@ -90,7 +88,86 @@
 .mat-formulas span{color:var(--mut);font-size:.8rem}
 .mat-formulas strong{color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-size:1.05rem}
 .tema-anillo{display:grid;place-items:center;border:2px solid var(--y);border-radius:50%;color:var(--y);font-family:"Bricolage Grotesque",sans-serif;font-size:.85rem;font-weight:800}
-.tema-cambio{margin:7px 0 12px;border:1px solid #3d351e;color:#fff}
+.tema-cambio{margin:0 0 12px;border:1px solid #3d351e;color:#fff}
+.sl .sl-sub{display:block;margin:2px 0 0 2.92rem;font-size:.75rem;opacity:.7}
+
+
+/* Un color fijo por variable (Okabe-Ito, apta para daltonismo). El símbolo sigue escrito: el color es una ayuda, no la única pista. */
+.s{font-weight:800}
+.tema-matematica .s-c0{color:#56b4e9}.tema-matematica .s-cn{color:#e69f00}.tema-matematica .s-i{color:#2fc196}.tema-matematica .s-n{color:#d98cbc}.tema-matematica .s-I{color:#ef7a35}
+/* Lo oculto (modo cuaderno, soluciones) se oculta aunque el bloque tenga su propio display. */
+.tema-matematica [hidden]{display:none!important}
+
+/* Estructura de la lección en partes */
+.mat-indice{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 0;padding:0;list-style:none}
+.mat-indice a{display:inline-flex;gap:7px;align-items:baseline;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:#ddd;text-decoration:none;font-size:.86rem}
+.mat-indice a:hover{border-color:var(--y);color:#fff}
+.mat-indice span{color:var(--y);font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:.78rem}
+.mat-parte{scroll-margin-top:24px;margin-top:46px;padding-top:24px;border-top:1px solid var(--line)}
+.mat-parte-cabecera{margin-bottom:16px}
+.mat-parte-cabecera h2{font-size:clamp(1.45rem,3vw,2rem)}
+.mat-parte-cabecera>p:last-child{max-width:62ch;margin:8px 0 0;color:var(--mut)}
+.mat-aviso{margin:12px 0 0;color:var(--mut);font-size:.9rem}
+
+/* Modo cuaderno */
+.mat-reto{margin:13px 0 4px;padding:13px 14px;background:#14120a;border:1px dashed #62521b;border-radius:12px}
+.mat-reto-texto{margin:0 0 10px;color:#fff;line-height:1.45}
+.mat-reto-texto b{color:var(--y)}
+.mat-cuaderno[aria-pressed="true"]{border-color:var(--y)}
+
+/* Errores típicos */
+.mat-errores{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.mat-error{display:flex;flex-direction:column;gap:9px;padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:14px}
+.mat-error h3{margin:0;font-size:1rem}
+.mat-error p{margin:0;line-height:1.45}
+.mat-error p>span:first-child{display:block;margin-bottom:3px;font-family:"Bricolage Grotesque",sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.mat-error-mal{padding:9px 10px;background:#1a0d0d;border-left:3px solid var(--r);border-radius:0 9px 9px 0;font-variant-numeric:tabular-nums}
+.mat-error-mal>span:first-child{color:var(--r)}
+.mat-error-bien{padding:9px 10px;background:#0d1a12;border-left:3px solid var(--g);border-radius:0 9px 9px 0}
+.mat-error-bien>span:first-child{color:var(--g)}
+.mat-error .ab{align-self:flex-start;font-size:.86rem;padding:7px 11px}
+
+/* Tu turno, en papel */
+.mat-papel{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.mat-ejercicio{padding:16px;background:var(--bg2);border:1px solid var(--line);border-radius:16px}
+.mat-papel-nivel{margin:0 0 6px;font-family:"Bricolage Grotesque",sans-serif;font-size:.76rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.mat-nivel-completar{color:var(--g)}.mat-nivel-guiado{color:var(--y)}.mat-nivel-solo{color:var(--o)}
+.mat-papel-enunciado{margin:0;color:#fff;font-size:1.02rem;line-height:1.5}
+.mat-papel-fuente{margin:4px 0 0;color:var(--mut);font-size:.78rem}
+.mat-papel-datos{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.mat-papel-datos>div{display:flex;gap:6px;align-items:baseline;padding:6px 10px;background:var(--bg3);border-radius:9px}
+.mat-papel-datos dt{font-weight:800}.mat-papel-datos dd{margin:0}
+.mat-papel-formula{display:inline-block;margin:10px 0 0;padding:8px 11px;background:#090909;border:1px dashed #62521b;border-radius:10px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800}
+.mat-papel-pista{margin:10px 0 0;color:#ddd}
+.mat-papel-instruccion{margin:12px 0 10px;color:var(--mut);font-size:.88rem}
+.mat-papel-solucion{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.mat-papel-solucion ol{display:grid;gap:5px;margin:0;padding-left:1.3em}
+.mat-papel-solucion li{font-variant-numeric:tabular-nums;line-height:1.45}
+.mat-papel-calc{display:grid;gap:3px;margin:10px 0 0}
+.mat-papel-calc span{color:var(--mut);font-size:.78rem}
+.mat-papel-calc code{display:block;padding:8px 10px;background:#090909;border-radius:8px;color:#fff;font-size:.9rem;overflow-x:auto;white-space:nowrap}
+.mat-papel-resultado{margin:10px 0 0;color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-size:1.08rem;font-weight:800}
+.mat-autoevaluacion{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mat-autoevaluacion .ab{font-size:.86rem;padding:7px 11px}
+.mat-auto-respuesta{margin:8px 0 0;color:#ddd;font-size:.9rem}
+.mat-auto-respuesta:empty{display:none}
+
+/* ¿Qué fórmula toca? */
+.mat-reconocer{display:grid;gap:12px}
+.mat-pregunta{margin:0;padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;min-width:0}
+.mat-pregunta legend{float:left;width:100%;margin:0 0 10px;padding:0;color:#fff;line-height:1.5}
+.mat-pregunta legend span{display:block;color:var(--y);font-family:"Bricolage Grotesque",sans-serif;font-size:.76rem;font-weight:800}
+.mat-opciones{clear:both;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mat-opcion{display:grid;gap:3px;text-align:left;cursor:pointer;padding:9px 11px;background:#090909;border:1px solid var(--line);border-radius:11px;color:#fff;font:inherit}
+.mat-opcion small{color:var(--mut);font-size:.74rem}
+.mat-opcion span{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;overflow-wrap:anywhere}
+.mat-opcion:hover:not(:disabled){border-color:var(--y)}
+.mat-opcion:disabled{cursor:default;opacity:.55}
+.mat-opcion.correcta{opacity:1;border-color:var(--g);background:#0d1a12}
+.mat-opcion.incorrecta{opacity:1;border-color:var(--r);background:#1a0d0d}
+.mat-porque{margin:10px 0 0;color:#ddd;line-height:1.45}
+.mat-marcador{margin:0;color:var(--mut)}
+.mat-reconocer [data-mat-repetir]{justify-self:start}
 
 @media (max-width:760px){
   .mat-experiencia{padding:16px}
@@ -114,6 +191,7 @@
   .mat-etapas{flex-wrap:nowrap;overflow-x:auto;scrollbar-color:#444 #111}
   .mat-notacion-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mat-formulas{grid-template-columns:1fr}
+  .mat-opciones{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   .mat-tramo-actual,.mat-prevision{animation:none;stroke-dashoffset:0}

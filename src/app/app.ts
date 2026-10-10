@@ -13,7 +13,7 @@ import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
-import { detenerTemaDos, pintarIndiceTemas, pintarTemaDos, pintarRailTemaDos, pintarRailTemas } from '../ui/views/topicsView.ts';
+import { desplazarTemaDos, detenerTemaDos, pintarIndiceTemas, pintarTemaDos, pintarRailTemaDos, pintarRailTemas } from '../ui/views/topicsView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
 import { resolverRuta } from './router.ts';
 import { EstadoPractica } from './practiceStore.ts';
@@ -38,32 +38,33 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
   const mundo = new ControladorMundo(estado, almacen, practica);
 
   let seccionActual: string | null = null;
+  /** Si la vista actual es del tema 1 (el índice lateral es el suyo). */
+  let vistaTemaUno = true;
 
   function pintar(): void {
     document.body.classList.remove('menu');
-    const hash = location.hash || '#inicio';
     const ruta = resolverRuta(location.hash, tema);
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();
-    detenerTemaDos();
-    if (hash === '#temas') {
+    if (ruta.vista !== 'tema2') detenerTemaDos();
+    vistaTemaUno = ruta.vista !== 'temas' && ruta.vista !== 'tema2';
+    if (ruta.vista === 'temas') {
       mundo.desmontar();
       pintarIndiceTemas(ctx, catalogo);
       pintarRailTemas(ctx.rail, catalogo);
-      ctx.tituloMovil.textContent = 'Todos los temas';
       document.title = 'Gestión financiera · Temas';
-      if (ruta.scrollArriba) window.scrollTo(0, 0);
+      window.scrollTo(0, 0);
       activarAparicion();
       return;
     }
-    if (hash === '#tema/2' || hash.startsWith('#tema/2/')) {
+    if (ruta.vista === 'tema2') {
       mundo.desmontar();
-      pintarTemaDos(ctx, hash);
-      pintarRailTemaDos(ctx.rail, hash);
-      ctx.tituloMovil.textContent = 'Tema 2 · Matemática financiera';
+      // Dentro de la misma lección, cambiar de parte solo desplaza: no se pierde lo que llevas hecho.
+      if (!desplazarTemaDos(ctx, ruta)) pintarTemaDos(ctx, ruta);
+      pintarRailTemaDos(ctx.rail, ruta);
       document.title = 'Matemática financiera · Tema 2';
-      if (hash === '#tema/2') window.scrollTo(0, 0);
+      if (ruta.scrollArriba) window.scrollTo(0, 0);
       activarAparicion();
       return;
     }
@@ -95,7 +96,9 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
 
   conectarFichas(ctx, estado, practica);
   // La insignia de pendientes del índice sigue a la práctica.
-  practica.escuchar(() => pintarRail(ctx.rail, estado, seccionActual, practica));
+  practica.escuchar(() => {
+    if (vistaTemaUno) pintarRail(ctx.rail, estado, seccionActual, practica);
+  });
   const flotante = document.querySelector<HTMLElement>('#ib');
   conectarMenuMovil(flotante ? [elemento('#mb'), flotante] : [elemento('#mb')], ctx.rail);
   addEventListener('hashchange', pintar);

@@ -12,7 +12,7 @@ beforeAll(() => {
   window.scrollTo = () => {};
   localStorage.clear();
   document.body.innerHTML = `<nav class="rail" id="rail"></nav><main><div class="topbar"><button id="mb">Índice</button><span id="mt"></span></div><div class="page" id="page"></div></main>`;
-  location.hash = '';
+  location.hash = '#inicio';
   iniciarApp(tema01);
 });
 
