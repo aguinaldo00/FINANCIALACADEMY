@@ -1,7 +1,11 @@
 import type { Tema } from '../content/schema.ts';
+import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../content/academia.ts';
 import { TEMAS, type TemaCatalogo } from '../content/temas/index.ts';
 import { validarTema } from '../content/validate.ts';
-import { almacenNavegador } from '../persistence/storage.ts';
+import { almacenNavegador, escribirJson, leerJson } from '../persistence/storage.ts';
+import { type Miga, pintarMigas, pintarRailAcademia } from '../ui/components/barraAcademia.ts';
+import { pintarAcademia, type UltimoSitio } from '../ui/views/academiaView.ts';
+import { pintarAsignatura } from '../ui/views/asignaturaView.ts';
 import { pintarRail } from '../ui/components/rail.ts';
 import { activarAparicion, conectarFichas, conectarMenuMovil } from '../ui/interactions.ts';
 import type { ContextoVista } from '../ui/views/context.ts';
@@ -13,11 +17,14 @@ import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
-import { desplazarTemaDos, detenerTemaDos, pintarIndiceTemas, pintarTemaDos, pintarRailTemaDos, pintarRailTemas } from '../ui/views/topicsView.ts';
+import { desplazarTemaDos, detenerTemaDos, pintarTemaDos, pintarRailTemaDos } from '../ui/views/topicsView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
-import { resolverRuta } from './router.ts';
+import { hrefAcademia, hrefAsignatura, hrefInicio, hrefTema2, resolverRuta } from './router.ts';
 import { EstadoPractica } from './practiceStore.ts';
 import { EstadoEstudio } from './store.ts';
+
+/** Último sitio visitado de cada asignatura (comodidad local: "Continuar donde lo dejaste"). */
+export const CLAVE_ULTIMO = 'financial-academy:ultimo';
 
 function elemento(selector: string): HTMLElement {
   const el = document.querySelector<HTMLElement>(selector);
@@ -25,7 +32,7 @@ function elemento(selector: string): HTMLElement {
   return el;
 }
 
-export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS): void {
+export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMAS): void {
   if (import.meta.env.DEV) {
     const errores = validarTema(tema);
     if (errores.length) console.error('Contenido del tema con errores:', errores);
@@ -37,6 +44,25 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
   const practica = new EstadoPractica(tema, almacen);
   const mundo = new ControladorMundo(estado, almacen, practica);
 
+  const migas = document.querySelector<HTMLElement>('#migas');
+  const gf = buscarAsignatura(ID_GESTION_FINANCIERA)!;
+  const ultimos = (): Record<string, UltimoSitio> => {
+    const v = leerJson(almacen, CLAVE_ULTIMO);
+    return v && typeof v === 'object' ? (v as Record<string, UltimoSitio>) : {};
+  };
+  /** Cierra lo que haya dejado montado la vista anterior (animaciones del selector). */
+  let detenerVista: (() => void) | null = null;
+  /** Migas de la asignatura y del tema (el texto de la página actual lo pone cada vista en #mt). */
+  const migasTema = (numero: number, href: string): Miga[] => [
+    { texto: 'Academia', href: hrefAcademia() },
+    { texto: gf.nombre, href: hrefAsignatura(gf.id) },
+    { texto: `Tema ${numero}`, href },
+  ];
+  const recordar = () => {
+    const titulo = ctx.tituloMovil.textContent?.trim();
+    if (titulo) escribirJson(almacen, CLAVE_ULTIMO, { ...ultimos(), [gf.id]: { href: location.hash || hrefInicio(), titulo } });
+  };
+
   let seccionActual: string | null = null;
   /** Si la vista actual es del tema 1 (el índice lateral es el suyo). */
   let vistaTemaUno = true;
@@ -44,16 +70,32 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
   function pintar(): void {
     document.body.classList.remove('menu');
     const ruta = resolverRuta(location.hash, tema);
+    detenerVista?.();
+    detenerVista = null;
+    // Índice bajo demanda fuera del estudio (selector y asignatura); fijo al estudiar.
+    document.body.classList.toggle('rail-bajo-demanda', ruta.vista === 'academia' || ruta.vista === 'asignatura');
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();
     if (ruta.vista !== 'tema2') detenerTemaDos();
-    vistaTemaUno = ruta.vista !== 'temas' && ruta.vista !== 'tema2';
-    if (ruta.vista === 'temas') {
+    vistaTemaUno = ruta.vista !== 'academia' && ruta.vista !== 'asignatura' && ruta.vista !== 'tema2';
+    if (ruta.vista === 'academia') {
       mundo.desmontar();
-      pintarIndiceTemas(ctx, catalogo);
-      pintarRailTemas(ctx.rail, catalogo);
-      document.title = 'Gestión financiera · Temas';
+      detenerVista = pintarAcademia(ctx, ultimos());
+      pintarRailAcademia(ctx.rail);
+      pintarMigas(migas, []);
+      document.title = 'Financial Academy';
+      window.scrollTo(0, 0);
+      activarAparicion();
+      return;
+    }
+    if (ruta.vista === 'asignatura') {
+      mundo.desmontar();
+      const asignatura = buscarAsignatura(ruta.asignaturaId)!;
+      pintarAsignatura(ctx, asignatura, estado, practica, ultimos()[asignatura.id]);
+      pintarRailAcademia(ctx.rail, asignatura);
+      pintarMigas(migas, [{ texto: 'Academia', href: hrefAcademia() }]);
+      document.title = `${asignatura.nombre} · Financial Academy`;
       window.scrollTo(0, 0);
       activarAparicion();
       return;
@@ -63,6 +105,8 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
       // Dentro de la misma lección, cambiar de parte solo desplaza: no se pierde lo que llevas hecho.
       if (!desplazarTemaDos(ctx, ruta)) pintarTemaDos(ctx, ruta);
       pintarRailTemaDos(ctx.rail, ruta);
+      pintarMigas(migas, migasTema(2, hrefTema2()).slice(0, ruta.leccion ? 3 : 2));
+      recordar();
       document.title = 'Matemática financiera · Tema 2';
       if (ruta.scrollArriba) window.scrollTo(0, 0);
       activarAparicion();
@@ -90,6 +134,8 @@ export function iniciarApp(tema: Tema, catalogo: readonly TemaCatalogo[] = TEMAS
       if (raizMundo) mundo.montar(raizMundo);
     }
     pintarRail(ctx.rail, estado, seccionActual, practica);
+    pintarMigas(migas, migasTema(tema.meta.numero, hrefInicio()).slice(0, ruta.vista === 'inicio' ? 2 : 3));
+    recordar();
     if (ruta.scrollArriba) window.scrollTo(0, 0);
     activarAparicion();
   }

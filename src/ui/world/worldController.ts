@@ -3,6 +3,7 @@ import type { EstadoPractica } from '../../app/practiceStore.ts';
 import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
 import { type Ambiente, siguienteAmbiente } from '../../world/ambiente.ts';
 import { MARCA } from '../components/brandTitle.ts';
+import { colorBloque } from '../blockColors.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
@@ -568,7 +569,7 @@ export class ControladorMundo {
         { passive: false },
       );
       vista.addEventListener('pointerup', (e) => {
-        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.ver-intro, .mundo-acciones')) {
+        if (this.enPortada && inicio && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) <= 6 && !(e.target as Element).closest('.ver-intro, .mundo-acciones, .portada-zonas')) {
           // Clic en el mapa de la portada: pantalla completa y exploración.
           void this.entrarPantallaCompleta();
         }
@@ -775,8 +776,26 @@ export class ControladorMundo {
       }
     }
     this.el('[data-atlas]').innerHTML = atlasHtml(vistaAtlas(this.modelo, this.foco), historia);
+    this.pintarZonasPortada();
     this.pintarEtiquetas();
     this.pintarFicha();
+  }
+
+  /**
+   * "Zonas de la ciudad" en la portada: los barrios, que son los grupos del tema en DATA (no zonas
+   * inventadas), con su color, sus apartados y su peso. Pulsar uno lleva la cámara a ese barrio.
+   */
+  private pintarZonasPortada(): void {
+    const nav = this.raiz?.querySelector<HTMLElement>('[data-portada-zonas]');
+    if (!nav) return;
+    const filas = this.modelo.barrios
+      .map((b) => {
+        const [numero, ...resto] = b.titulo.split(' · ');
+        const n = b.seccionIds.length;
+        return `<li><button type="button" data-foco="${codificarFoco({ nivel: 'barrio', grupoId: b.grupoId })}" style="--c:${colorBloque(b.indice)}"><span class="pz-num">${numero}</span><span class="pz-txt"><b>${resto.join(' · ') || b.titulo}</b><small>${n} ${n === 1 ? 'apartado' : 'apartados'} · ${b.pesoExamen} % del examen</small></span></button></li>`;
+      })
+      .join('');
+    nav.innerHTML = `<p class="pz-cab">Zonas de la ciudad</p><ol>${filas}</ol>`;
   }
 
   /** Etiquetas flotantes del nivel actual (ver `etiquetasDelNivel`). */

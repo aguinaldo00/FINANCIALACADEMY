@@ -1,15 +1,15 @@
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
-import { hrefExamen, hrefInicio, hrefProgreso, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro, hrefVisual } from '../../app/router.ts';
+import { hrefExamen, hrefInicio, hrefTemas, hrefProgreso, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro, hrefVisual } from '../../app/router.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { MARCA } from './brandTitle.ts';
 import { anilloDominio } from './ring.ts';
 import { iconoUi } from '../../icons/ui.ts';
 
-/** Enlace al índice de temas, igual en el menú de todos los temas. */
+/** Enlace a la asignatura (todos sus temas y su temario), igual en el menú de todos los temas. */
 export const enlaceTodosLosTemas = (): string =>
-  `<a class="sl tema-cambio" href="#temas"><div class="top"><span class="id" aria-hidden="true">←</span><span>Todos los temas</span></div></a>`;
+  `<a class="sl tema-cambio" href="${hrefTemas()}"><div class="top"><span class="id" aria-hidden="true">←</span><span>Gestión Financiera · todos los temas</span></div></a>`;
 
 /** Índice lateral: dominio global, una barra de dominio por sección y, al final, el grupo Examen. */
 export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActual: string | null, practica?: EstadoPractica): void {

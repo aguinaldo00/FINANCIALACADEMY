@@ -19,6 +19,7 @@ import {
   PlaneGeometry,
   SphereGeometry,
 } from 'three';
+import { colorBloque } from '../../ui/blockColors.ts';
 import { colorDominio } from '../../ui/format.ts';
 import { AVENIDA, CALLE, type ModeloCiudad, tramosEntreCruces, type ZonaVisual } from '../../world/cityModel.ts';
 import { centroRect, encoger, longitudSegmento, pseudoAleatorio, type Rect, type Segmento } from '../../world/geometry.ts';
@@ -118,9 +119,36 @@ export function construirCapaEstatica(m: ModeloCiudad): Group {
   }
 
   for (const z of m.zonas) capa.add(z.composicion === 'urbana' ? construirManzanaUrbana(z, m) : construirManzana(z, m));
+  capa.add(construirLimitesBarrios(m));
   capa.add(construirAparcados(m));
   capa.add(construirArbolado(m), construirFarolas(m));
   return capa;
+}
+
+/**
+ * Límite de cada barrio: una banda luminosa del color de su grupo alrededor de su parcela, sobre la
+ * calzada. Los barrios son los grupos de DATA (no se inventan zonas): así se distinguen los grandes
+ * bloques del tema de un vistazo, con el mismo color que el índice, el temario y el gráfico.
+ */
+function construirLimitesBarrios(m: ModeloCiudad): Group {
+  const grupo = new Group();
+  grupo.name = 'limites-barrios';
+  const ANCHO = 0.42;
+  const MARGEN = 0.55;
+  const alto = NIVEL.acera + 0.04;
+  for (const b of m.barrios) {
+    const r = { x: b.parcela.x - MARGEN, z: b.parcela.z - MARGEN, ancho: b.parcela.ancho + MARGEN * 2, fondo: b.parcela.fondo + MARGEN * 2 };
+    const piezas = [
+      new BoxGeometry(r.ancho + ANCHO, alto, ANCHO).translate(r.x + r.ancho / 2, alto / 2, r.z),
+      new BoxGeometry(r.ancho + ANCHO, alto, ANCHO).translate(r.x + r.ancho / 2, alto / 2, r.z + r.fondo),
+      new BoxGeometry(ANCHO, alto, r.fondo).translate(r.x, alto / 2, r.z + r.fondo / 2),
+      new BoxGeometry(ANCHO, alto, r.fondo).translate(r.x + r.ancho, alto / 2, r.z + r.fondo / 2),
+    ];
+    const malla = new Mesh(unir(piezas)!, emisivo(colorBloque(b.indice)));
+    malla.name = `limite-barrio-${b.grupoId}`;
+    grupo.add(malla);
+  }
+  return grupo;
 }
 
 function construirManzana(z: ZonaVisual, m: ModeloCiudad): Group {

@@ -651,6 +651,66 @@ Sustituye a las 4 columnas, que dejaban un hueco porque el apartado 3 tiene 8 su
   - que cada subpunto queda dentro de su apartado;
   - que hay 12 porciones y 12 filas, y una sola recomendación.
 
+## Academia: asignaturas, temas y experiencias (10/10)
+
+Financial Academy reúne las asignaturas del ciclo. La ciudad 3D **no** es el sistema visual común:
+es la experiencia del Tema 1 de Gestión Financiera. Cada tema declara la suya.
+
+**Capas** (de fuera hacia dentro, cada una independiente de la siguiente):
+
+1. **Selector global de asignaturas** (`content/academia.ts`, `ui/views/academiaView.ts`, ruta
+   `#academia`, que también es la entrada sin hash).
+   - `ASIGNATURAS` define 6 asignaturas, cada una con identidad (nombre, icono propio en medallón y
+     color) y temas.
+   - La disponibilidad **se deriva** de que tenga temas, no se declara. Hoy solo Gestión
+     Financiera tiene temas; las demás aparecen como "Todavía sin contenido".
+   - **Colores:** paleta categórica validada sobre fondo oscuro con la skill *dataviz*. Pasa cada
+     par de mundos vecinos, en el arco de escritorio y en la rejilla de 3×2 de móvil. El color
+     nunca va solo: siempre acompaña al nombre y al icono.
+2. **Navegación y temario de cada asignatura** (`ui/views/asignaturaView.ts`, `#a/<id>`; `#temas`
+   lleva a Gestión Financiera).
+   - Los temas aparecen como puertas, cada uno con su experiencia.
+   - Debajo, los botones de estudio y examen del Tema 1 de siempre.
+   - El temario jerárquico (`ui/components/temario.ts`) se genera a partir de los datos de cada
+     tema: Tema 1 con sus grupos, secciones y conceptos; Tema 2 con su lección y sus partes. Tiene
+     buscador por número o nombre y lleva a cualquier apartado sin pasar por el 3D.
+3. **Experiencias por tema.** `TemaCatalogo.experiencia` vale `'ciudad-3d'` o `'leccion'`.
+   - Cada tema conserva su vista y sus rutas: `#inicio` y `#s/…` para la ciudad del Tema 1;
+     `#tema/2/…` para la lección del Tema 2.
+   - No hay un renderer común impuesto.
+4. **Infraestructura compartida:**
+   - barra de orientación con migas "Academia › Gestión Financiera › Tema N"
+     (`ui/components/barraAcademia.ts`);
+   - router, almacén, iconos (`icons/ui.ts`) y estilos base.
+5. **Contenido y progreso independientes de la vista.** `EstadoEstudio`, `EstadoPractica` y sus
+   claves no cambian. El temario y la ciudad leen los mismos ids y el mismo dominio.
+   `financial-academy:ultimo` solo recuerda el último sitio de cada asignatura, para "Continuar
+   donde lo dejaste".
+
+**Índice lateral:** bajo demanda (botón "Temario") en el selector, en la asignatura y en la
+portada de la ciudad; fijo al estudiar un apartado o la lección.
+
+**Ciudad del Tema 1:**
+- los barrios, que son los grupos de DATA, tienen un límite luminoso de su color;
+- un panel "Zonas de la ciudad" con esos mismos grupos lleva la cámara a cada uno;
+- los botones del mapa se agrupan abajo a la derecha;
+- **no se han inventado zonas.** Si la segmentación cambia, las zonas se regeneran a partir de los
+  grupos.
+
+**Cómo añadir:**
+- **Una asignatura:** una entrada en `ASIGNATURAS`.
+- **Un tema:**
+  - su entrada en el catálogo de temas, con su `experiencia`;
+  - su árbol en `ARBOLES` (`temario.ts`);
+  - sus rutas y su vista.
+
+**Pendiente de decisión:**
+- **Segmentación definitiva** en unidades y temas. Hoy es "Tema N" y, dentro del Tema 1, los
+  grupos de DATA.
+- **Contenido de las otras 5 asignaturas.**
+- **Rediseño de la vista de zona** (nivel 2): los rótulos de un barrio grande, como el 3, siguen
+  siendo muchos.
+
 ## Pendiente (siguientes pasos)
 
 1. Reproducir las historias en 3D: entidades como piezas sobre la maqueta, flujos animados y

@@ -68,6 +68,18 @@ export const ICONOS_UI = {
   ampliar: '<path d="M8 22V8h14M42 8h14v14M56 42v14H42M22 56H8V42"/>',
   cerrar: '<path d="M14 14 L50 50M50 14 L14 50"/>',
   parar: '<rect x="16" y="16" width="32" height="32" rx="4"/>',
+  /** Asignaturas (selector de mundos). Contabilidad: libro con una cuenta en T (Debe | Haber). */
+  contabilidad: '<rect x="6" y="6" width="52" height="52" rx="5"/><path d="M14 18h36M32 18v32"/><path d="M16 28h10M16 36h10M38 28h10M38 36h7"/>',
+  /** Gestión Logística: caja con su ruta de reparto. */
+  logistica: '<path d="M6 24 L24 15 L42 24 L24 33Z"/><path d="M6 24v18l18 9 18-9V24"/><path d="M24 33v18"/><path d="M48 52 Q60 44 52 34 Q46 26 54 18"/><circle cx="54" cy="12" r="4"/>',
+  /** Gestión Financiera: pila de monedas y una línea que crece. */
+  financiera: '<ellipse cx="22" cy="50" rx="15" ry="5"/><path d="M7 50v-7M37 50v-7"/><ellipse cx="22" cy="43" rx="15" ry="5"/><path d="M7 43v-7M37 43v-7"/><ellipse cx="22" cy="36" rx="15" ry="5"/><path d="M40 30 L48 20 L53 25 L60 12"/><path d="M52 12h8v8"/>',
+  /** Recursos Humanos: dos personas unidas. */
+  rrhh: '<circle cx="19" cy="17" r="8"/><circle cx="45" cy="17" r="8"/><path d="M5 54 Q5 31 19 31 Q27 31 32 39 Q37 31 45 31 Q59 31 59 54"/><path d="M26 46h12"/>',
+  /** IPE: casco de seguridad con la cruz de la prevención. */
+  ipe: '<path d="M10 42 Q10 14 32 14 Q54 14 54 42Z"/><path d="M4 42h56"/><path d="M26 28h12M32 22v12"/><path d="M14 50h36"/>',
+  /** Simulación Empresarial: engranaje que mueve una gráfica. */
+  simulacion: '<circle cx="22" cy="42" r="9"/><path d="M22 27v5M22 52v5M7 42h5M32 42h5M11 31l4 4M29 49l4 4M33 31l-4 4M15 49l-4 4"/><path d="M36 26 L44 16 L50 21 L58 8"/><path d="M50 8h8v8"/>',
   /** Modos de "otra forma": analogía cotidiana (porción), para un niño (globo), gemelo confuso. */
   analogia: '<path d="M8 12 Q32 2 56 12 L32 60Z"/><path d="M12 20 Q32 12 52 20"/><circle cx="29" cy="28" r="3"/><circle cx="37" cy="39" r="3"/>',
   nino: '<ellipse cx="32" cy="22" rx="15" ry="18"/><path d="M29 40h6l-3 4Z"/><path d="M32 44 Q25 51 32 55 Q39 59 32 63"/>',

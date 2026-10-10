@@ -67,3 +67,16 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Animación continua:** las palomas y las nubes hacen que la escena se redibuje (a unos 30 fps)
   mientras el mapa está a la vista. Con movimiento reducido no se anima nada.
 
+
+## Academia y navegación (10/10)
+
+- **Segmentación en unidades:** el selector y el temario usan lo que hay ("Tema 1", "Tema 2" y,
+  dentro del Tema 1, sus 4 grupos de DATA).
+  - **¿Unidades por encima de los temas?** Decidirlo. La arquitectura lo admite: un nivel más en
+    el árbol del temario.
+- **Asignaturas sin contenido:** Contabilidad, Gestión Logística, Recursos Humanos, IPE y
+  Simulación Empresarial aparecen como "Todavía sin contenido". No tienen temas, estado ni
+  progreso inventados.
+- **Zonas de la ciudad:** el boceto mostraba 6 zonas (Política monetaria, Mercados
+  internacionales…) que no existen en DATA. Se usan los 4 grupos reales; cambiarlo requiere
+  decidir antes la estructura académica.

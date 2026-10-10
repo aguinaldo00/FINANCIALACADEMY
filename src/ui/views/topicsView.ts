@@ -1,6 +1,5 @@
 import type { Ruta } from '../../app/router.ts';
 import { hrefTema2 } from '../../app/router.ts';
-import { TEMAS, type TemaCatalogo } from '../../content/temas/index.ts';
 import {
   FORMULA_CAPITAL_FINAL,
   FORMULA_INTERESES_TOTALES,
@@ -25,21 +24,6 @@ export function detenerTemaDos(): void {
   detenerExperiencia = null;
 }
 
-export function pintarIndiceTemas(ctx: ContextoVista, catalogo: readonly TemaCatalogo[] = TEMAS): void {
-  ctx.pagina.innerHTML = `<div class="tema-indice">
-    <header class="sh"><div class="kick"><span class="pill k">Gestión financiera</span></div>
-      <h1>Elige un tema</h1><p>Cada tema tiene su propio contenido y su propia forma de estudiarlo.</p>
-    </header>
-    <nav class="tema-opciones" aria-label="Temas disponibles">${catalogo.map((tema) => `
-      <a class="tile tema-opcion" href="${tema.href}">
-        <span class="i">Tema ${tema.numero}</span><span class="n">${tema.titulo}</span>
-        <span class="w">${tema.descripcion}</span><span class="tema-ir">Abrir tema →</span>
-      </a>`).join('')}
-    </nav>
-  </div>`;
-  ctx.tituloMovil.textContent = 'Todos los temas';
-}
-
 const PARTE = Object.fromEntries(PARTES_LECCION.map((p) => [p.id, p])) as Record<(typeof PARTES_LECCION)[number]['id'], (typeof PARTES_LECCION)[number]>;
 
 function cabeceraParte(id: keyof typeof PARTE, numero: number, intro: string): string {
@@ -52,7 +36,6 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2): void {
   detenerTemaDos();
   const leccion = LECCIONES_TEMA2[0];
   ctx.pagina.innerHTML = `<div class="tema-matematica">
-    <p class="tema-migas"><a href="#temas">Todos los temas</a><span aria-hidden="true">/</span><span>Tema ${tema02.numero} · ${tema02.titulo}</span></p>
     <header class="sh">
       <div class="kick"><span class="pill k">Tema ${tema02.numero}</span><span class="pill">${tema02.fuente}</span></div>
       <h1>${leccion.titulo}</h1>
@@ -111,11 +94,6 @@ export function desplazarTemaDos(ctx: ContextoVista, ruta: RutaTema2): boolean {
   if (ruta.parte) ctx.pagina.querySelector(`#mat-${ruta.parte}`)?.scrollIntoView({ block: 'start' });
   else window.scrollTo(0, 0);
   return true;
-}
-
-export function pintarRailTemas(rail: HTMLElement, catalogo: readonly TemaCatalogo[] = TEMAS): void {
-  rail.innerHTML = `<a class="brand" href="#temas"><span class="ring tema-anillo" aria-hidden="true">GF</span><span><small class="brand-ante">Gestión financiera</small><b>Todos los temas</b><small>${catalogo.length} disponibles</small></span></a>
-    <div class="grp">Temas</div>${catalogo.map((tema) => `<a class="sl" href="${tema.href}"><div class="top"><span class="id">${tema.numero}</span><span>${tema.titulo}</span></div></a>`).join('')}`;
 }
 
 export function pintarRailTemaDos(rail: HTMLElement, ruta: RutaTema2): void {

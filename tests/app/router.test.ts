@@ -3,9 +3,13 @@ import { hrefTema2, resolverRuta } from '../../src/app/router.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 
 describe('rutas hash', () => {
-  it('sin hash se entra por el índice de temas; #inicio es la portada del tema 1', () => {
-    expect(resolverRuta('', tema01)).toEqual({ vista: 'temas', scrollArriba: true });
-    expect(resolverRuta('#temas', tema01)).toEqual({ vista: 'temas', scrollArriba: true });
+  it('sin hash se entra por el selector de asignaturas; #temas es Gestión Financiera; #inicio, la portada del tema 1', () => {
+    expect(resolverRuta('', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
+    expect(resolverRuta('#academia', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
+    expect(resolverRuta('#temas', tema01)).toEqual({ vista: 'asignatura', asignaturaId: 'gestion-financiera', scrollArriba: true });
+    expect(resolverRuta('#a/gestion-financiera', tema01)).toEqual({ vista: 'asignatura', asignaturaId: 'gestion-financiera', scrollArriba: true });
+    // Una asignatura desconocida vuelve al selector.
+    expect(resolverRuta('#a/astrologia', tema01)).toEqual({ vista: 'academia', scrollArriba: true });
     expect(resolverRuta('#inicio', tema01)).toEqual({ vista: 'inicio', scrollArriba: true });
   });
 

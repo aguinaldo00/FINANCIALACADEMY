@@ -206,12 +206,13 @@ describe('app en el navegador', () => {
     expect($('.sl.on').getAttribute('href')).toBe('#visual');
   });
 
-  it('el selector separa el Tema 2 de la ciudad del Tema 1', () => {
+  it('la asignatura separa el Tema 2 de la ciudad del Tema 1', () => {
     navegar('#temas');
-    expect($('#mt').textContent).toBe('Todos los temas');
-    expect($$('.tema-opcion')).toHaveLength(2);
-    expect($$('.tema-opcion')[1]!.textContent).toContain('Matemática financiera');
-    expect($$('.tema-opcion')[1]!.getAttribute('href')).toBe('#tema/2');
+    expect($('#mt').textContent).toBe('Gestión Financiera');
+    expect($$('.as-puerta')).toHaveLength(2);
+    expect($$('.as-puerta')[0]!.getAttribute('href')).toBe('#inicio');
+    expect($$('.as-puerta')[1]!.textContent).toContain('Matemática financiera');
+    expect($$('.as-puerta')[1]!.getAttribute('href')).toBe('#tema/2');
   });
 
   it('el Tema 2 abre su propia experiencia y mantiene una ruta separada', () => {
@@ -221,7 +222,7 @@ describe('app en el navegador', () => {
     expect($('.vis')).toBeNull();
     expect($('.mat-parametros').textContent).toContain('1.000,00');
     expect($('.mat-notacion-lista').textContent).toContain('Intereses totales');
-    expect($('.rail').textContent).toContain('Todos los temas');
+    expect($('.rail').textContent).toContain('Gestión Financiera · todos los temas');
   });
 
   it('el Tema 2 enseña primero los símbolos y después el ejemplo, los errores y la práctica', () => {
@@ -242,11 +243,11 @@ describe('app en el navegador', () => {
     expect($('.mat-papel-solucion').hidden).toBe(false);
   });
 
-  it('el menú vuelve al de cada tema y "Todos los temas" está siempre arriba', () => {
+  it('el menú vuelve al de cada tema y el enlace a la asignatura está siempre arriba', () => {
     navegar('#tema/2');
-    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#temas');
+    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#a/gestion-financiera');
     navegar('#inicio');
-    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#temas');
+    expect($('.rail').firstElementChild!.getAttribute('href')).toBe('#a/gestion-financiera');
     expect($('.rail').textContent).toContain('dominio global');
   });
 
