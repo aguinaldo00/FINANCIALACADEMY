@@ -25,6 +25,8 @@ import { EstadoEstudio } from './store.ts';
 
 /** Último sitio visitado de cada asignatura (comodidad local: "Continuar donde lo dejaste"). */
 export const CLAVE_ULTIMO = 'financial-academy:ultimo';
+/** El usuario ha ocultado el índice lateral en escritorio (se abre como capa con "Temario"). */
+export const CLAVE_INDICE_PLEGADO = 'financial-academy:indice-plegado';
 
 function elemento(selector: string): HTMLElement {
   const el = document.querySelector<HTMLElement>(selector);
@@ -63,6 +65,27 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     if (titulo) escribirJson(almacen, CLAVE_ULTIMO, { ...ultimos(), [gf.id]: { href: location.hash || hrefInicio(), titulo } });
   };
 
+  let indicePlegado = leerJson(almacen, CLAVE_INDICE_PLEGADO) === true;
+  const botonPlegar = document.querySelector<HTMLButtonElement>('#rp');
+  let vistaAcademia = false;
+  const aplicarIndice = () => {
+    // Plegado = el mismo modo "bajo demanda" del selector: el índice se abre como capa con "Temario".
+    document.body.classList.toggle('rail-bajo-demanda', indicePlegado || vistaAcademia);
+    document.body.classList.toggle('indice-plegado', indicePlegado && !vistaAcademia);
+    if (!botonPlegar) return;
+    const fijar = indicePlegado;
+    botonPlegar.setAttribute('aria-label', fijar ? 'Fijar el índice' : 'Ocultar el índice');
+    botonPlegar.title = fijar ? 'Fijar el índice' : 'Ocultar el índice';
+    botonPlegar.classList.toggle('fijar', fijar);
+  };
+  botonPlegar?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    indicePlegado = !indicePlegado;
+    escribirJson(almacen, CLAVE_INDICE_PLEGADO, indicePlegado);
+    document.body.classList.remove('menu');
+    aplicarIndice();
+  });
+
   let seccionActual: string | null = null;
   /** Si la vista actual es del tema 1 (el índice lateral es el suyo). */
   let vistaTemaUno = true;
@@ -72,8 +95,10 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     const ruta = resolverRuta(location.hash, tema);
     detenerVista?.();
     detenerVista = null;
-    // Índice bajo demanda fuera del estudio (selector y asignatura); fijo al estudiar.
-    document.body.classList.toggle('rail-bajo-demanda', ruta.vista === 'academia' || ruta.vista === 'asignatura');
+    // Índice bajo demanda fuera del estudio (selector y asignatura) o si el usuario lo ha ocultado.
+    vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura';
+    aplicarIndice();
+    document.body.dataset.vista = ruta.vista;
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();
@@ -149,4 +174,5 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
   conectarMenuMovil(flotante ? [elemento('#mb'), flotante] : [elemento('#mb')], ctx.rail);
   addEventListener('hashchange', pintar);
   pintar();
+  document.documentElement.classList.remove('arrancando');
 }

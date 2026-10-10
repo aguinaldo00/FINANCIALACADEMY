@@ -42,8 +42,8 @@
    peso en el examen, relleno = tu dominio) y su leyenda con todos los valores en texto. */
 .tl{margin:34px 0 10px}
 .tl-encabezado p{color:var(--mut);margin:4px 0 18px;max-width:64ch;font-size:1rem}
-.tl-cuerpo{display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:20px 32px;align-items:start}
-.tl-figura{position:sticky;top:16px}
+.tl-cuerpo{display:grid;grid-template-columns:minmax(240px,360px) minmax(0,1fr);gap:20px 40px;align-items:start}
+.tl-figura{position:sticky;top:calc(var(--alto-topbar,53px) + 16px)}
 .tl-grafico{display:block;width:100%;height:auto;max-width:340px;margin:0 auto;overflow:visible}
 /* Anillo interior: apartados. */
 .tl-grupo path{fill:var(--c);transition:opacity .2s}
@@ -65,8 +65,8 @@
 
 /* Leyenda: 2 columnas equilibradas. Un apartado largo puede seguir en la otra columna, pero su
    cabecera nunca se queda sola y ningún subpunto se parte. */
-.tl-leyenda{list-style:none;margin:0;padding:0;columns:2;column-gap:22px}
-.tl-apartado{margin:0 0 16px;min-width:0}
+.tl-leyenda{list-style:none;margin:0;padding:0;columns:3 230px;column-gap:26px}
+.tl-apartado{margin:0 0 16px;min-width:0;break-inside:avoid}
 .tl-apartado li{break-inside:avoid}
 .tl-cab{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;align-items:center;padding:0 0 6px;border-bottom:3px solid var(--c);margin-bottom:6px;break-inside:avoid;break-after:avoid}
 .tl-num{grid-row:span 2;display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--c);color:var(--bg);font:600 1.05rem/1 var(--f-texto)}

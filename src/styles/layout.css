@@ -22,3 +22,23 @@ main{margin-left:300px;min-height:100vh}
 
 /* Corrección: nada provoca desplazamiento horizontal de la página (gráficos con desborde visible). */
 body{overflow-x:clip}
+
+/* Ocultar / fijar el índice (escritorio): una pestaña en el borde del índice. */
+.rail-plegar{display:none}
+@media (min-width:1001px){
+  .rail-plegar{display:grid;place-items:center;position:fixed;z-index:41;left:300px;top:calc(var(--alto-topbar,53px) + 14px);width:26px;height:44px;padding:0;
+    border:1px solid var(--line2);border-left:0;border-radius:0 8px 8px 0;background:var(--bg2);color:var(--mut);cursor:pointer;transition:color var(--anim),background var(--anim),left .45s cubic-bezier(.2,.8,.2,1)}
+  .rail-plegar svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .rail-plegar:hover,.rail-plegar:focus-visible{color:var(--ink);background:var(--bg3)}
+  /* Plegado: la pestaña solo se ve con el índice abierto como capa, para fijarlo de nuevo. */
+  .rail-plegar.fijar svg{transform:scaleX(-1)}
+  body.indice-plegado:not(.menu) .rail-plegar,
+  body.rail-bajo-demanda:not(.indice-plegado) .rail-plegar,
+  body.portada-inmersiva:not(.menu) .rail-plegar{display:none}
+}
+
+/* Portada del tema (mapa, gráfico del tema, Estudia ya…): aprovecha el ancho; las vistas de
+   lectura mantienen su columna. */
+@media (min-width:1001px){
+  body[data-vista="inicio"] .page{max-width:1240px}
+}
