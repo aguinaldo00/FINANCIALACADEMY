@@ -102,82 +102,176 @@
   .ac-mundos{transform:none}
 }
 
-/* ── Selector en 3D: islas flotantes (si hay WebGL). Tratamiento cinematográfico, mismos tipos. ── */
+/* ── Selector en 3D: "capítulos de un documental" ──
+   Cuatro reglas hacen la identidad (ver docs/fase-2-arquitectura.md):
+   1. Números: el capítulo es enorme y fino (fondo); los índices, pequeños y tabulares.
+   2. Líneas: filetes de 1 px que unen (capítulo, guías de rótulo, separadores), nunca cajas.
+   3. Rótulos: antetítulo en versalitas, titular condensado, texto de lectura.
+   4. Texto sobre imagen: sin paneles; velos locales y anclas en las esquinas, la isla al centro.
+   El acento (--acento) lo pone la asignatura elegida. */
+.academia{
+  --acento:var(--oro);
+  --ac-blanco:#f4efe6;--ac-blanco2:rgba(244,239,230,.72);--ac-blanco3:rgba(244,239,230,.5);
+  --ac-filete:rgba(244,239,230,.22);
+  /* Tipos del selector: titulares en Barlow Condensed, números de capítulo en Fraunces cursiva fina,
+     rótulos en Barlow Condensed espaciada. La cabecera usa Big Shoulders (marca) y Plex Mono (accesos). */
+  --ac-tit:"Barlow Condensed",var(--f-texto);--ac-tit-peso:600;--ac-tit-ancho:100%;--ac-tit-esp:.01em;
+  --ac-num:"Fraunces",Georgia,serif;--ac-num-peso:300;--ac-num-ancho:100%;--ac-num-estilo:italic;
+  --ac-rot:"Barlow Condensed",var(--f-texto);--ac-rot-peso:500;--ac-rot-ancho:100%;--ac-rot-esp:.22em;
+  --ac-marca:"Big Shoulders Display",var(--f-texto);
+}
 .ac-escena{display:none}
-.academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:520px;padding:0;gap:0;justify-content:flex-start;
+.academia.ac-3d{height:calc(100svh - var(--alto-topbar));min-height:560px;padding:0;gap:0;justify-content:flex-start;color:var(--ac-blanco);
   background:radial-gradient(ellipse 60% 45% at 50% 42%,#173a52 0%,#0b1e30 45%,#060d18 75%,#03060c 100%)}
+/* La cabecera del selector sustituye a la barra común (solo aquí). */
+body.ac-cabecera-escena .topbar{display:none}
+body.ac-cabecera-escena .page{padding:0}
+body.ac-cabecera-escena .academia.ac-3d{height:100svh;margin-top:0;margin-bottom:0}
 .academia.ac-3d .ac-fondo{display:none}
 .academia.ac-3d .ac-escena{display:block;position:absolute;inset:0}
-/* Velo inferior y superior: el texto se lee sobre la ilustración sin sombras en cada letra. */
+/* Velos locales: arriba para la cabecera, abajo para el capítulo. La isla queda limpia. */
 .academia.ac-3d .ac-escena::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(5,9,18,.55) 0%,rgba(5,9,18,0) 22%,rgba(5,9,18,0) 52%,rgba(5,9,18,.72) 82%,rgba(5,9,18,.88) 100%)}
+  background:linear-gradient(180deg,rgba(4,7,14,.62) 0%,rgba(4,7,14,0) 18%,rgba(4,7,14,0) 58%,rgba(4,7,14,.55) 76%,rgba(4,7,14,.9) 100%)}
 .ac-lienzo{display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab}
-.academia.ac-3d .ac-cab{position:absolute;top:clamp(16px,3.4vh,32px);left:0;right:0;margin:0 auto;z-index:2;pointer-events:none;display:grid;justify-items:center;gap:6px}
-.academia.ac-3d .ac-ante{margin:0;font-size:var(--t-mini);letter-spacing:.24em;color:var(--oro)}
-.academia.ac-3d .ac-cab h1{font-family:var(--f-titulo);font-weight:400;font-size:clamp(1.7rem,2.8vw,2.4rem);line-height:1.05;letter-spacing:-.01em}
-.ac-lema{display:grid;gap:2px}
-.ac-lema span{display:block}
-.academia.ac-3d .ac-lema{margin:2px 0 0;font-size:var(--t-pie);color:var(--mut)}
-.ac-cifras{font-family:var(--f-cifra);font-size:.78rem;color:var(--tenue);letter-spacing:.02em}
-.academia.ac-3d .ac-ver-intro{pointer-events:auto;margin-top:6px;font-size:var(--t-pie)}
-@media (min-width:701px){
-  .academia.ac-3d .ac-cab{left:clamp(24px,3.4vw,48px);right:auto;justify-items:start;text-align:left;max-width:32ch}
-}
-/* Al entrar, la cámara vuela a la isla y el texto se retira. */
-.academia.ac-3d.saliendo :is(.ac-foco,.ac-nav,.ac-mundos){opacity:0;transition:opacity .3s}
-/* La isla ya es la identidad: el panel no repite el sello. */
+
+/* Rótulo (antetítulo) común: versalitas espaciadas. */
+.ac-rotulo{margin:0;font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-weight:var(--ac-rot-peso);font-size:.72rem;letter-spacing:var(--ac-rot-esp);text-transform:uppercase;color:var(--ac-blanco2)}
+
+/* Cabecera de la escena. */
+.ac-top{position:absolute;z-index:4;left:0;right:0;top:0;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  height:76px;padding:calc(env(safe-area-inset-top,0px)) clamp(18px,3.2vw,48px) 0}
+.ac-top[hidden]{display:none}
+.ac-top::after{content:"";position:absolute;left:clamp(18px,3.2vw,48px);right:clamp(18px,3.2vw,48px);bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--ac-filete) 12%,var(--ac-filete) 88%,transparent)}
+.ac-logo{display:flex;align-items:center;gap:16px;color:var(--ac-blanco);text-decoration:none}
+.ac-logo-txt{display:grid;padding-left:11px;border-left:2px solid var(--acento);transition:border-color .5s}
+.ac-logo-txt b{font-family:var(--ac-marca);font-weight:750;font-size:1.08rem;line-height:.92;letter-spacing:.06em;text-transform:uppercase;color:var(--ac-blanco)}
+.ac-logo-sub{padding-left:16px;border-left:1px solid var(--ac-filete);font-size:.78rem;line-height:1.3;color:var(--ac-blanco3);max-width:24ch}
+.ac-accesos{display:flex;align-items:center;gap:clamp(6px,1.4vw,18px)}
+.ac-acceso{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 10px;border:0;border-radius:6px;background:none;color:var(--ac-blanco2);cursor:pointer;text-decoration:none;
+  font-family:var(--f-cifra);font-weight:500;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;transition:color var(--anim),background var(--anim)}
+.ac-acceso svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ac-acceso:hover,.ac-acceso[aria-expanded="true"]{color:var(--ac-blanco);background:rgba(244,239,230,.07)}
+.ac-acceso:focus-visible{outline:1px solid var(--acento);outline-offset:2px}
+.ac-ajustes-caja{position:relative}
+.ac-ajustes{position:absolute;right:0;top:calc(100% + 12px);z-index:6;display:grid;gap:2px;width:280px;padding:14px 8px 10px;border-top:2px solid var(--acento);border-radius:0 0 8px 8px;background:rgba(5,8,16,.94);box-shadow:0 18px 40px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.ac-ajustes[hidden]{display:none}
+.ac-ajustes .ac-rotulo{padding:0 10px 8px;color:var(--acento)}
+.ac-ajuste{display:grid;gap:2px;width:100%;padding:9px 10px;border:0;border-radius:6px;background:none;color:var(--ac-blanco);text-align:left;cursor:pointer;font:500 .92rem/1.25 var(--f-texto)}
+.ac-ajuste small,.ac-ajuste-info small{font-weight:400;font-size:.76rem;color:var(--ac-blanco3)}
+.ac-ajuste:hover,.ac-ajuste:focus-visible{background:rgba(244,239,230,.07);outline:none}
+.ac-ajuste-info{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin-top:6px;padding:10px 10px 4px;border-top:1px solid var(--ac-filete);font-size:.92rem}
+.ac-ajuste-info b{font-family:var(--f-cifra);font-weight:500;font-size:.8rem;color:var(--acento)}
+.ac-ajuste-info small{grid-column:1/-1}
+
+/* "Elige un mundo" con su cuenta: dato en pantalla (número grande, palabra pequeña). */
+.academia.ac-3d .ac-cab{position:absolute;z-index:2;top:98px;left:clamp(18px,3.2vw,48px);right:auto;margin:0;display:grid;gap:10px;justify-items:start;text-align:left;pointer-events:none}
+.academia.ac-3d .ac-ante,.academia.ac-3d .ac-lema{display:none}
+.academia.ac-3d .ac-cab h1{margin:0;font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-weight:var(--ac-rot-peso);font-size:.78rem;line-height:1;letter-spacing:var(--ac-rot-esp);text-transform:uppercase;color:var(--ac-blanco2)}
+.ac-cuenta{display:none}
+.academia.ac-3d .ac-cuenta{display:flex;gap:22px;margin:0}
+.ac-cuenta span{display:flex;align-items:baseline;gap:8px;font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ac-blanco3)}
+.ac-cuenta b{font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:var(--ac-num-peso);font-size:2.6rem;line-height:.8;letter-spacing:-.02em;color:var(--ac-blanco);font-variant-numeric:tabular-nums}
+.academia.ac-3d.saliendo :is(.ac-foco,.ac-nav,.ac-mundos,.ac-cab,.ac-top){opacity:0;transition:opacity .3s}
 .academia.ac-3d .ac-foco-sello{display:none}
 
-/* Rótulos de los mundos: icono de línea en su color, nombre y estado; sin discos ni sombras. */
+/* Rótulos laterales: índice → nombre → estado, colgados de una guía vertical. */
 .academia.ac-3d .ac-mundos{position:absolute;inset:0;display:block;width:auto;transform:none;pointer-events:none;z-index:2}
-.academia.ac-3d .ac-mundo{position:absolute;left:0;top:0;width:180px;margin:0;opacity:1;animation:none;pointer-events:auto;transition:opacity .35s;will-change:transform}
-.academia.ac-3d .ac-mundo.elegida{opacity:0;pointer-events:none}
-.academia.ac-3d .ac-puerta{padding:8px 6px;gap:3px;border-radius:8px;cursor:pointer}
-.academia.ac-3d .ac-puerta:hover{background:rgba(5,9,18,.35)}
-.academia.ac-3d .ac-sello{width:30px;animation:none;filter:none;margin-bottom:2px}
-.academia.ac-3d .ac-halo,.academia.ac-3d .ac-detalle{display:none}
-.academia.ac-3d .ac-nombre{font-family:var(--f-titulo);font-weight:500;font-size:1.12rem;line-height:1.15;color:var(--ink);text-shadow:0 1px 12px rgba(0,0,0,.75)}
-.academia.ac-3d .ac-estado{font-size:var(--t-mini);font-weight:500;letter-spacing:.06em;text-transform:none;font-style:normal;color:#c3c9d4;text-shadow:0 1px 8px rgba(0,0,0,.8)}
-.academia.ac-3d .ac-mundo.abierta .ac-estado{color:var(--oro2);font-family:var(--f-cifra);letter-spacing:.04em}
-.academia.ac-3d .ac-mundo.pendiente .ac-sello{filter:saturate(.5) brightness(.95)}
-.academia.ac-3d .ac-mundo.pendiente .ac-nombre{color:#d6d9e0}
+.academia.ac-3d .ac-mundo{position:absolute;left:0;top:0;width:190px;margin:0;opacity:1;animation:none;pointer-events:auto;transition:opacity .35s;will-change:transform}
+.academia.ac-3d .ac-mundo.elegida,.academia.ac-3d .ac-mundo.fuera{opacity:0;pointer-events:none}
+.academia.ac-3d .ac-puerta{position:relative;padding:34px 8px 8px;gap:2px;border-radius:0;cursor:pointer}
+.academia.ac-3d .ac-sello,.academia.ac-3d .ac-halo,.academia.ac-3d .ac-detalle{display:none}
+.ac-guia,.ac-num{display:none}
+.academia.ac-3d .ac-guia{display:block;position:absolute;left:50%;top:0;width:1px;height:28px;background:linear-gradient(0deg,var(--c),transparent);opacity:.75}
+.academia.ac-3d .ac-guia::after{content:"";position:absolute;left:-2px;bottom:-2px;width:5px;height:5px;border-radius:50%;background:var(--c)}
+.academia.ac-3d .ac-num{display:block;font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:var(--ac-num-peso);font-size:1.5rem;line-height:1;color:color-mix(in srgb,var(--c) 55%,#fff);font-variant-numeric:tabular-nums}
+.academia.ac-3d .ac-nombre{font-family:var(--ac-tit);font-stretch:var(--ac-tit-ancho);font-weight:var(--ac-tit-peso);font-size:1.32rem;line-height:1.02;letter-spacing:var(--ac-tit-esp);color:var(--ac-blanco);text-shadow:0 1px 14px rgba(0,0,0,.6)}
+.academia.ac-3d .ac-estado{margin-top:3px;font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-weight:var(--ac-rot-peso);font-size:.62rem;letter-spacing:var(--ac-rot-esp);text-transform:uppercase;font-style:normal;color:var(--ac-blanco3)}
+.academia.ac-3d .ac-puerta:hover .ac-nombre{text-decoration:underline;text-decoration-color:var(--c);text-decoration-thickness:1px;text-underline-offset:5px}
+.academia.ac-3d .ac-puerta:focus-visible{outline:1px solid var(--c);outline-offset:2px}
+.academia.ac-3d .ac-mundo.lejana .ac-puerta{padding-top:6px}
+.academia.ac-3d .ac-mundo.lejana :is(.ac-guia,.ac-estado){display:none}
+.academia.ac-3d .ac-mundo.lejana .ac-nombre{font-size:1.1rem;color:var(--ac-blanco2)}
 
-/* Panel de la isla elegida: título editorial, temas en líneas cortas y una sola acción principal. */
-.ac-foco{position:absolute;left:50%;bottom:clamp(74px,10.5vh,100px);translate:-50% 0;z-index:3;display:grid;justify-items:center;gap:12px;width:min(620px,calc(100% - 32px));text-align:center;animation:ac-foco-llega .45s ease both}
-@keyframes ac-foco-llega{from{opacity:0;translate:-50% 12px}to{opacity:1;translate:-50% 0}}
-.ac-foco-sello{width:60px;height:auto}
-.ac-foco h2{margin:0;font-family:var(--f-titulo);font-weight:400;font-size:clamp(2.1rem,4.2vw,3.3rem);line-height:1;letter-spacing:-.015em;color:var(--ink);text-shadow:0 2px 24px rgba(0,0,0,.55)}
-.ac-foco-temas{list-style:none;margin:0;padding:0;display:grid;gap:4px;justify-items:center}
-.ac-foco-temas li{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;column-gap:10px;font-size:var(--t-base);line-height:1.4;color:#dfe3ea}
-.ac-foco-n{font-family:var(--f-cifra);font-size:.76rem;letter-spacing:.06em;color:var(--oro2);text-transform:uppercase}
-.ac-foco-x{font-size:var(--t-pie);color:var(--mut)}
-.ac-foco-x::before{content:"— ";color:var(--tenue)}
-.ac-foco-vacio{margin:0;max-width:40ch;color:#d3d8e1;font-size:var(--t-base);line-height:1.45}
-.ac-foco-acciones{display:grid;justify-items:center;gap:10px;margin-top:4px}
-.ac-entrar{min-width:180px;padding:12px 30px;font-size:1.02rem}
-.ac-cerrada{display:inline-block;padding:6px 0;font-size:var(--t-pie);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
-.academia.ac-3d .ac-continuar{font-size:var(--t-pie)}
+/* Capítulo elegido: número de fondo, rótulo, filete y titular (ancla abajo a la izquierda);
+   temas y acción (ancla abajo a la derecha). */
+.ac-foco{position:absolute;z-index:3;left:clamp(18px,3.2vw,48px);right:clamp(18px,3.2vw,48px);bottom:clamp(84px,11vh,112px);
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px 48px;flex-wrap:wrap;pointer-events:none}
+.ac-foco>*{pointer-events:auto}
+/* Número a la izquierda, del alto del bloque; a su derecha rótulo, filete y titular en dos líneas. */
+.ac-cap{position:relative;display:grid;grid-template-columns:auto minmax(0,auto);grid-template-rows:auto auto 1fr;column-gap:clamp(14px,1.6vw,24px);row-gap:10px;align-items:end;max-width:min(720px,62vw)}
+.ac-cap>.ac-rotulo,.ac-cap>.ac-filete,.ac-cap>h2{grid-column:2}
+.ac-cap-num{grid-column:1;grid-row:1/-1;align-self:end;margin-bottom:-.06em;font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:var(--ac-num-peso);
+  font-size:clamp(6.5rem,11.5vw,11rem);line-height:.78;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--acento) 85%,transparent);font-variant-numeric:tabular-nums;pointer-events:none}
+.ac-cap .ac-rotulo{color:color-mix(in srgb,var(--acento) 75%,#fff);text-shadow:0 1px 10px rgba(0,0,0,.65)}
+.ac-filete{display:block;width:clamp(80px,12vw,160px);height:1px;background:var(--acento);transform-origin:left;animation:ac-filete .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ac-filete{from{transform:scaleX(0)}}
+.ac-foco h2{margin:0;font-family:var(--ac-tit);font-stretch:var(--ac-tit-ancho);font-weight:var(--ac-tit-peso);font-size:clamp(2.6rem,5vw,4.6rem);line-height:.86;letter-spacing:var(--ac-tit-esp);text-transform:uppercase;color:var(--ac-blanco);max-width:9.5ch;text-wrap:balance;text-shadow:0 2px 30px rgba(0,0,0,.45);animation:ac-titular .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ac-titular{from{opacity:0;transform:translateY(10px)}}
+.ac-cap-cuerpo{display:grid;gap:18px;justify-items:start;width:min(420px,100%);animation:ac-titular .5s .08s cubic-bezier(.2,.8,.2,1) both}
+.ac-foco-temas{list-style:none;margin:0;padding:0;display:grid;width:100%}
+.ac-foco-temas li{display:grid;grid-template-columns:2.4em minmax(0,1fr);column-gap:12px;row-gap:1px;padding:10px 0;border-top:1px solid var(--ac-filete)}
+.ac-foco-temas li:last-child{border-bottom:1px solid var(--ac-filete)}
+.ac-foco-n{grid-row:span 2;font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:var(--ac-num-peso);font-size:1.6rem;line-height:1;color:var(--acento);font-variant-numeric:tabular-nums}
+.ac-foco-t{font-size:1rem;line-height:1.3;color:var(--ac-blanco)}
+.ac-foco-x{font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-weight:var(--ac-rot-peso);font-size:.64rem;letter-spacing:var(--ac-rot-esp);text-transform:uppercase;color:var(--ac-blanco3)}
+.ac-foco-vacio{margin:0;max-width:34ch;padding:10px 0;border-top:1px solid var(--ac-filete);border-bottom:1px solid var(--ac-filete);color:var(--ac-blanco2);font-size:.95rem;line-height:1.45}
+.ac-foco-acciones{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+/* Acción principal: el rectángulo de siempre, con voz de titular y su número de capítulo. */
+.ac-entrar{position:relative;overflow:hidden;justify-content:space-between;gap:18px;min-width:200px;padding:13px 16px 13px 20px;border-radius:6px;
+  font-family:var(--ac-tit);font-stretch:var(--ac-tit-ancho);font-weight:var(--ac-tit-peso);font-size:1.05rem;letter-spacing:.12em;text-transform:uppercase}
+.ac-entrar-num{padding-left:14px;border-left:1px solid rgba(10,16,32,.25);font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:400;letter-spacing:0}
+.ac-entrar::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--acento) 45%,transparent) 50%,transparent 70%);transform:translateX(-100%);transition:transform .6s ease}
+.ac-entrar:hover::before{transform:translateX(100%)}
+.ac-entrar>span{position:relative}
+.ac-cerrada{display:inline-flex;align-items:center;gap:10px;font-family:var(--ac-rot);font-stretch:var(--ac-rot-ancho);font-weight:var(--ac-rot-peso);font-size:.72rem;letter-spacing:var(--ac-rot-esp);text-transform:uppercase;color:var(--ac-blanco2)}
+.ac-cerrada::before{content:"";width:28px;height:1px;background:var(--ac-blanco3)}
+.academia.ac-3d .ac-continuar{font-size:.86rem;color:var(--ac-blanco2);text-decoration-color:var(--acento)}
+.academia.ac-3d .ac-continuar:hover{color:var(--ac-blanco)}
 
-/* Navegación: chevrones finos y una línea de posición; sin círculos. */
-.ac-nav{position:absolute;left:50%;bottom:clamp(18px,3.6vh,32px);translate:-50% 0;z-index:3;display:flex;align-items:center;gap:clamp(16px,4vw,40px)}
-.ac-flecha{display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:8px;background:none;color:var(--ink);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--anim),color var(--anim)}
-.ac-flecha svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.ac-flecha:hover:not(:disabled){background:rgba(255,255,255,.08)}
-.ac-flecha:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
+/* Navegación: chevrones, capítulo actual / total y la línea de posición en el acento. */
+.ac-nav{position:absolute;left:50%;bottom:clamp(22px,3.4vh,34px);translate:-50% 0;z-index:3;display:flex;align-items:center;gap:14px}
+.ac-flecha{display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:6px;background:none;color:var(--ac-blanco);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:background var(--anim)}
+.ac-flecha svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ac-flecha:hover:not(:disabled){background:rgba(244,239,230,.08)}
+.ac-flecha:focus-visible{outline:1px solid var(--acento);outline-offset:2px}
 .ac-flecha:disabled{opacity:.25;cursor:default}
-.ac-puntos{display:flex;align-items:center;gap:8px}
-.ac-punto{width:6px;height:6px;padding:0;border-radius:3px;border:0;background:rgba(255,255,255,.35);cursor:pointer;transition:width var(--anim),background var(--anim)}
-.ac-punto:hover{background:rgba(255,255,255,.7)}
-.ac-punto[aria-current="true"]{width:22px;background:var(--ink)}
-@media (max-width:700px){
-  .academia.ac-3d .ac-lema,.academia.ac-3d .ac-ante{display:none}
-  .academia.ac-3d .ac-mundo{width:130px}
-  .academia.ac-3d .ac-sello{width:24px}
-  .academia.ac-3d .ac-nombre{font-size:.95rem}
-  .academia.ac-3d .ac-estado{font-size:.68rem}
-  .ac-foco{bottom:76px;gap:10px}
-  .ac-foco-temas li{font-size:var(--t-pie)}
+.ac-contador{font-family:var(--ac-num);font-stretch:var(--ac-num-ancho);font-style:var(--ac-num-estilo);font-weight:var(--ac-num-peso);font-size:1.15rem;line-height:1;color:var(--ac-blanco3);font-variant-numeric:tabular-nums;min-width:1.4em;text-align:center}
+.ac-contador b{font-weight:inherit;color:var(--ac-blanco)}
+.ac-puntos{display:flex;align-items:center;gap:6px}
+.ac-punto{width:14px;height:1px;padding:6px 0;border:0;background:none;cursor:pointer;position:relative}
+.ac-punto::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(244,239,230,.4);transition:background var(--anim),height var(--anim)}
+.ac-punto:hover::before{background:var(--ac-blanco)}
+.ac-punto[aria-current="true"]{width:40px}
+.ac-punto[aria-current="true"]::before{height:2px;margin-top:-.5px;background:var(--acento);box-shadow:none}
+
+@media (max-width:820px){
+  .ac-logo-sub,.academia.ac-3d .ac-cab{display:none}
+  .ac-acceso span{display:none}
+  .ac-acceso{padding:0 8px}
+  /* En vertical no hay cielo libre a los lados: se navega con flechas y contador. */
+  .academia.ac-3d .ac-mundos{display:none}
+  .ac-cap .ac-rotulo{letter-spacing:.12em;white-space:nowrap}
+  .ac-cap .ac-rotulo{color:var(--ac-blanco)}
+  /* En vertical el bloque del capítulo cae sobre el sol: el velo empieza antes. */
+  .academia.ac-3d .ac-escena::after{background:linear-gradient(180deg,rgba(4,7,14,.6) 0%,rgba(4,7,14,0) 14%,rgba(4,7,14,0) 46%,rgba(4,7,14,.62) 60%,rgba(4,7,14,.92) 100%)}
+  .academia.ac-3d .ac-nombre{font-size:1.02rem}
+  .academia.ac-3d .ac-num{font-size:1.15rem}
+  .ac-foco{bottom:76px;flex-direction:column;align-items:center;gap:16px;text-align:center}
+  .ac-cap{grid-template-columns:auto auto;justify-content:center;justify-items:start;text-align:left;max-width:100%}
+  .ac-cap-num{font-size:6.2rem}
+  .ac-foco h2{max-width:none}
+  .ac-filete{width:64px}
+  .ac-foco h2{font-size:clamp(2.2rem,11vw,3.2rem)}
+  .ac-cap-cuerpo{justify-items:center;width:100%;max-width:420px}
+  .ac-foco-temas li{text-align:left;padding:8px 0}
   .ac-foco-x{display:none}
+  .ac-foco-temas li .ac-foco-n{grid-row:auto;font-size:1.25rem}
+  .ac-foco-acciones{justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  .ac-filete,.ac-foco h2,.ac-cap-cuerpo{animation:none}
+  .ac-entrar::before{display:none}
 }
 
 /* ── Página de asignatura ── */

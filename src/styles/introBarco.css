@@ -42,8 +42,8 @@ body.intro-barco-activa{overflow:hidden}
 }
 
 /* El selector, mientras la intro lo tapa y cuando se revela. */
-.academia.ac-llegada :is(.ac-cab,.ac-foco,.ac-nav,.ac-mundos){opacity:0}
-.academia.ac-revelando .ac-cab{transition:opacity .9s ease .7s}
+.academia.ac-llegada :is(.ac-top,.ac-cab,.ac-foco,.ac-nav,.ac-mundos){opacity:0}
+.academia.ac-revelando :is(.ac-top,.ac-cab){transition:opacity .9s ease .7s}
 .academia.ac-revelando .ac-mundos{transition:opacity .9s ease .9s}
 .academia.ac-revelando .ac-foco{transition:opacity .9s ease 1.05s}
 .academia.ac-revelando .ac-nav{transition:opacity .9s ease 1.25s}
