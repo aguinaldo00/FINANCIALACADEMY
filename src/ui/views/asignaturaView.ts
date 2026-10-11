@@ -15,7 +15,6 @@ import { porcentaje } from '../format.ts';
 import type { UltimoSitio } from './academiaView.ts';
 import type { ContextoVista } from './context.ts';
 import cielo from '../../assets/mundos/cielo.webp';
-import isla from '../../assets/mundos/isla-gestion-financiera.webp';
 import niebla from '../../assets/mundos/niebla.webp';
 import videoSistemaFinancieroMp4 from '../../../video/sistema-financiero.mp4';
 import videoSistemaFinancieroWebm from '../../../video/sistema-financiero.webm';
@@ -213,11 +212,9 @@ export function pintarAsignatura(ctx: ContextoVista, a: Asignatura, estado: Esta
         <div class="ed-cta">${cta}</div>
       </div>
       <div class="ed-collage" aria-hidden="true">
-        <img class="ed-isla" src="${isla}" alt="">
         <img class="ed-niebla n1" src="${niebla}" alt="">
         <img class="ed-niebla n2" src="${niebla}" alt="">
         <figure class="ed-recorte ed-recorte-papel">${formulaAnotada()}<figcaption>II · El cálculo financiero</figcaption></figure>
-        <p class="ed-pie-collage"><span>I</span> La Ciudad del Dinero</p>
       </div>
     </section>
 

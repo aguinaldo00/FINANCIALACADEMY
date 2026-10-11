@@ -91,7 +91,6 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-boton-papel:hover{background:rgba(241,235,223,.1)}
 .ed-enlace{color:var(--mut)!important;font-size:.98rem;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(242,212,143,.4)}
 .ed-collage{position:relative;height:clamp(420px,52vw,660px);align-self:stretch}
-.ed-isla{position:absolute;right:-6%;top:-8%;width:min(108%,720px);filter:drop-shadow(0 40px 60px rgba(0,0,0,.55))}
 .ed-niebla{position:absolute;width:70%;opacity:.55;mix-blend-mode:screen;pointer-events:none}
 .ed-niebla.n1{right:-12%;bottom:24%}
 .ed-niebla.n2{left:-10%;bottom:8%;transform:scaleX(-1);opacity:.4}
@@ -100,8 +99,6 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-recorte-papel::after{content:"";position:absolute;left:38%;top:-10px;width:90px;height:26px;background:rgba(242,212,143,.55);transform:rotate(4deg)}
 .ed-recorte-papel>*{position:relative;z-index:1}
 .ed-recorte figcaption{margin-top:14px;padding-top:10px;border-top:1px solid var(--ed-regla);font:600 .76rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase}
-.ed-pie-collage{position:absolute;right:4%;top:6%;margin:0;display:flex;align-items:center;gap:10px;font:600 .78rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase;color:var(--ink)}
-.ed-pie-collage span{font:italic 300 1.6rem/1 var(--f-titulo);color:var(--oro2);letter-spacing:0}
 
 /* La fórmula anotada (misma gramática que las animaciones: tinta y rotulador) */
 .ed-anotada-fx{margin:0;font-size:clamp(2.2rem,3.6vw,3rem)}
