@@ -361,7 +361,8 @@ Se corrigen, no se rehacen (auditoría §3.0–3.1):
 - **Capítulos que acaban a medias** (se ven así con movimiento reducido).
   - La prueba `tests/ui/escenasQuietas.dom.test.ts` (incremento 2a) compara lo que se lee en `fin − 0,5` y en `fin`, sin contar el ambiente vivo.
   - Midió 53 capítulos de las 19 escenas que aún se mueven al final: cámara, rotuladores, flechas y etiquetas que llegan tarde.
-  - Están en la lista `PENDIENTES_2B`, que solo puede encoger. El 2b la deja vacía.
+  - Resuelto en el 2b de forma general: cada capítulo tiene un instante de lectura (`lectura`) y el reproductor se detiene ahí 0,6 s. Las fórmulas que llegaban tarde terminan durante una retención (`retener` en `tiempo.ts`). La prueba ya no tiene excepciones.
+  - **Reorientación del usuario (12/10):** la quietud total no es prioridad. Primero van los índices Simple/Compuesta y el laboratorio de la ficha.
 - **Solapes:** compuesta-capital-inicial, compuesta-intereses, descuento-compuesto-comercial y simple-tiempo.
 - **Móvil:** tamaño mínimo de rótulo.
 - **compuesta-tiempo:** el logaritmo en 8 pasos con la `pizarra` (auditoría §3.3).

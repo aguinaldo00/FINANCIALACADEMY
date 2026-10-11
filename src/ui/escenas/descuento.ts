@@ -88,7 +88,7 @@ export const escenaDescuentoRacional: Escena = {
   capitulos: [
     { t: 0, texto: 'Descuento racional: es la capitalización simple al revés. Primero se busca $C_0 = \\frac{C_n}{1 + n · i}$.' },
     { t: 3.4, texto: 'El descuento es lo que separa los dos: $D_r = C_n - C_0 = C_0 · n · i$. Se calcula sobre el efectivo.' },
-    { t: 7.0, texto: 'Sustituyendo $C_0$: $D_r = \\frac{C_n · n · i}{1 + n · i}$.' },
+    { t: 7, lectura: 9.8, texto: 'Sustituyendo $C_0$: $D_r = \\frac{C_n · n · i}{1 + n · i}$.' },
     { t: 10.2, texto: 'Mismo pagaré (6.000 €, 45 días, 5 %): racional 37,27 €, comercial 37,50 €. El comercial es mayor: su base, $N$, es mayor que $C_0$.' },
   ],
   montar(l) {
@@ -146,10 +146,10 @@ export const escenaRemesa: Escena = {
   duracion: 14.5,
   descripcion: 'Ejercicio propuesto: pagaré de 6.000 € a 45 días al 5 %, comisión del 1 % con mínimo de 10 € y 3 € de correo. Cascada: 6.000 − 37,50 − 60 − 3 = 5.899,50 €.',
   capitulos: [
-    { t: 0, texto: 'Liquidar un descuento: del nominal se restan el descuento, las comisiones y los gastos. (Ejercicio propuesto, no es del libro).' },
-    { t: 2.8, texto: 'Pagaré de 6.000 € a 45 días al 5 %: el descuento comercial es 37,50 €.' },
-    { t: 5.4, texto: 'Comisión del 1 % con un mínimo de 10 €: el 1 % de 6.000 son 60 €, más que el mínimo, así que se cobran 60 €.' },
-    { t: 8.4, texto: 'Gastos de correo: 3 €.' },
+    { t: 0, lectura: 2.7, texto: 'Liquidar un descuento: del nominal se restan el descuento, las comisiones y los gastos. (Ejercicio propuesto, no es del libro).' },
+    { t: 2.8, lectura: 5.3, texto: 'Pagaré de 6.000 € a 45 días al 5 %: el descuento comercial es 37,50 €.' },
+    { t: 5.4, lectura: 7.95, texto: 'Comisión del 1 % con un mínimo de 10 €: el 1 % de 6.000 son 60 €, más que el mínimo, así que se cobran 60 €.' },
+    { t: 8.4, lectura: 10.25, texto: 'Gastos de correo: 3 €.' },
     { t: 10.4, texto: 'Valor líquido = 6.000 − 37,50 − 60 − 3 = 5.899,50 €.' },
   ],
   montar(l) {
@@ -213,7 +213,7 @@ export const escenaDescuentoCompuestoRacional: Escena = {
   capitulos: [
     { t: 0, texto: 'Caso práctico 28: 12.500 € que vencen dentro de 565 días, con descuento compuesto racional al 4 %.' },
     { t: 2.8, texto: 'En compuesta el tiempo va en años: $n$ = 565 / 365 = 1,548 años (año civil, como en el caso).' },
-    { t: 5.6, texto: 'Actualizar es dividir entre (1 + $i$) por cada año, también por la fracción: $C_0 = C_n · (1 + i)^{-n}$ = 11.763,68 €.' },
+    { t: 5.6, lectura: 9.05, texto: 'Actualizar es dividir entre (1 + $i$) por cada año, también por la fracción: $C_0 = C_n · (1 + i)^{-n}$ = 11.763,68 €.' },
     { t: 9.4, texto: 'El descuento es la diferencia: $D_r = C_n · [1 - (1 + i)^{-n}]$ = 736,32 €.' },
   ],
   montar(l) {
@@ -266,8 +266,8 @@ export const escenaDescuentoCompuestoComercial: Escena = {
   duracion: 14,
   descripcion: 'Caso práctico 29: efecto de 2.000 € a 6 años al 5 %. Cada año hacia atrás se multiplica por 0,95: E = 2.000 · 0,95⁶ = 1.470,18 € y Dc = 529,82 €. Con descuento simple serían 1.400 €.',
   capitulos: [
-    { t: 0, texto: 'Caso práctico 29: efecto de 2.000 € a 6 años, con descuento compuesto comercial al 5 %.' },
-    { t: 2.6, texto: 'Cada año hacia atrás se quita el 5 % de lo que queda: se multiplica por $(1 - d)$ = 0,95.' },
+    { t: 0, lectura: 2.5, texto: 'Caso práctico 29: efecto de 2.000 € a 6 años, con descuento compuesto comercial al 5 %.' },
+    { t: 2.6, lectura: 6.5, texto: 'Cada año hacia atrás se quita el 5 % de lo que queda: se multiplica por $(1 - d)$ = 0,95.' },
     { t: 6.6, texto: 'Seis años: $E = N · (1 - d)^n$ = 2.000 · 0,95⁶ = 1.470,18 €.' },
     { t: 9.8, texto: 'El descuento total: $D_c = N · [1 - (1 - d)^n]$ = 529,82 €. (Con descuento simple serían 600 €: contornos).' },
   ],

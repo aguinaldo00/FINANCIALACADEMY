@@ -26,8 +26,8 @@ export const escenaTipoSimple: Escena = {
   capitulos: [
     { t: 0, texto: 'Conoces la semilla y el montante: $C_0$ = 10.000 € hoy y $C_n$ = 12.100 € a los 3 años. Falta el tipo.' },
     { t: 2.8, texto: 'Lo que ha crecido es la diferencia: $C_n - C_0$ = 2.100 €. Son los intereses $I$.' },
-    { t: 6.2, texto: 'Repartido entre los $n$ = 3 años, cada año ha dado 2.100 / 3 = 700 €.' },
-    { t: 9.4, texto: 'Una cosecha comparada con la semilla: 700 / 10.000 = 0,07. Esa proporción es el tipo.' },
+    { t: 6.2, lectura: 9.05, texto: 'Repartido entre los $n$ = 3 años, cada año ha dado 2.100 / 3 = 700 €.' },
+    { t: 9.4, lectura: 12.65, texto: 'Una cosecha comparada con la semilla: 700 / 10.000 = 0,07. Esa proporción es el tipo.' },
     { t: 13.0, texto: 'Tipo de interés: $i = \\frac{C_n - C_0}{n · C_0}$. Sale en tanto por uno y en la unidad de $n$: 0,07 anual = 7 %.' },
   ],
   montar(l) {

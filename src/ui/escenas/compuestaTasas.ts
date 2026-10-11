@@ -1,7 +1,7 @@
 import type { Escena } from '../motion/reproductor.ts';
 import { Capsula, Etiqueta, Grafico, Rotulo, Salto } from '../motion/motivos.ts';
 import { fijar } from '../motion/lienzo.ts';
-import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
+import { claves, curvas, mezclar, retener, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Tantos equivalentes en compuesta · 1 + i = (1 + iₘ)ᵐ   (caso práctico 19: 10 % anual)
@@ -11,14 +11,14 @@ import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
 export const escenaEquivalentes: Escena = {
   id: 'compuesta-equivalentes',
   titulo: 'Tantos equivalentes en capitalización compuesta',
-  duracion: 17,
+  duracion: 17.6,
   descripcion: 'Caso práctico 19: un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^(1/m) − 1.',
   capitulos: [
     { t: 0, texto: 'Caso práctico 19: tipo anual del 10 %. ¿Qué tipo mensual es equivalente en compuesta?' },
     { t: 2.8, texto: 'Un salto anual: cada euro se convierte en 1,10 €.' },
     { t: 5.2, texto: 'Doce saltos mensuales tienen que llegar al mismo sitio: $1 + i = (1 + i_m)^{12}$.' },
-    { t: 9.0, texto: 'Por eso $i_m = (1 + i)^{1/m} - 1$: $i_{12}$ = 1,10^(1/12) − 1 = 0,7974 % al mes.' },
-    { t: 12.4, texto: 'Dividir 10 % / 12 = 0,8333 % se pasa: llega a 1,1047. En compuesta el tipo no se divide.' },
+    { t: 9.6, texto: 'Por eso $i_m = (1 + i)^{1/m} - 1$: $i_{12}$ = 1,10^(1/12) − 1 = 0,7974 % al mes.' },
+    { t: 13, texto: 'Dividir 10 % / 12 = 0,8333 % se pasa: llega a 1,1047. En compuesta el tipo no se divide.' },
   ],
   montar(l) {
     const g = new Grafico(l, { x0: 100, y0: 470, x1: 620, y1: 170, xmin: 0, xmax: 12, ymin: 1, ymax: 1.115 });
@@ -36,7 +36,9 @@ export const escenaEquivalentes: Escena = {
     const etFin = new Rotulo(l, '1,10', 'mo-cifra s-cn', 'start');
     const formula = l.formula('1 + i = (1 + i_m)^m', { x: 360, y: 90, tam: 42 });
     const despeje = l.formula('i_m = (1 + i)^{1/m} - 1', { x: 360, y: 548, tam: 28 });
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t = retener(tReal, 9, 0.6);
       l.camara(360, claves(t, [[0, 310], [12, 310], [13, 320]]), claves(t, [[0, 1], [12, 1], [13, 0.96]]));
       l.foco(360, 330, 340);
       g.pintar(tramo(t, 0, 0.8));
@@ -62,7 +64,7 @@ export const escenaEquivalentes: Escena = {
       fijar(pMalo, { cx: g.px(12), cy: g.py(malo ** 12), opacity: tramo(t, 13.9, 14.2) });
       etMalo.pintar(g.px(12) - 12, g.py(malo ** 12) - 18, tramo(t, 14.0, 14.5));
       formula.opacidad(tramo(t, 7.4, 7.5));
-      formula.construir(t, 7.5, { origenes: { i: [l.aPantalla({ x: g.px(6), y: g.py(1.1) - 150 })], i_m: l.aPantalla({ x: g.px(6), y: g.py(im ** 6) + 60 }), m: l.aPantalla({ x: g.px(11), y: g.py(im ** 11) }) } });
+      formula.construir(tReal, 7.5, { origenes: { i: [l.aPantalla({ x: g.px(6), y: g.py(1.1) - 150 })], i_m: l.aPantalla({ x: g.px(6), y: g.py(im ** 6) + 60 }), m: l.aPantalla({ x: g.px(11), y: g.py(im ** 11) }) } });
       despeje.opacidad(tramo(t, 9.2, 9.3));
       despeje.construir(t, 9.3, { escalon: 0.05 });
     };
@@ -83,7 +85,7 @@ export const escenaComparacion: Escena = {
   capitulos: [
     { t: 0, texto: 'Mismo capital y mismo tipo: ¿qué da más, simple o compuesta? Depende del plazo.' },
     { t: 2.8, texto: 'Simple crece en línea recta, $C_0 · (1 + n · i)$; compuesta, en curva, $C_0 · (1 + i)^n$.' },
-    { t: 6.4, texto: 'Antes del año la recta va por encima: con menos de un año, simple da más.' },
+    { t: 6.4, lectura: 9.2, texto: 'Antes del año la recta va por encima: con menos de un año, simple da más.' },
     { t: 9.4, texto: 'En $n$ = 1 dan lo mismo. Después gana la compuesta, y la diferencia crece cada año.' },
     { t: 12.4, texto: 'Caso práctico 20: 5.000 € al 3 % durante 195 días. Simple: 5.080,14 €. Compuesta: 5.079,59 €.' },
   ],
@@ -139,7 +141,7 @@ export const escenaTae: Escena = {
   descripcion: 'Caso práctico 24: TIN del 12 % con capitalización mensual: 1 % al mes durante 12 meses lleva 10.000 € a 11.268,25 € (TAE 12,68 %). Con una comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.',
   capitulos: [
     { t: 0, texto: 'El TIN ($J_m$) es un tipo nominal anual: se reparte entre las $m$ capitalizaciones del año.' },
-    { t: 3.0, texto: 'TIN del 12 % con capitalización mensual: $i_m = \\frac{J_m}{m}$ = 12 % / 12 = 1 % al mes.' },
+    { t: 3, lectura: 5.6, texto: 'TIN del 12 % con capitalización mensual: $i_m = \\frac{J_m}{m}$ = 12 % / 12 = 1 % al mes.' },
     { t: 5.8, texto: 'Doce capitalizaciones del 1 %: 10.000 € se convierten en 11.268,25 €.' },
     { t: 9.4, texto: 'Lo que rinde de verdad en un año es la TAE: $TAE = (1 + \\frac{J_m}{m})^m - 1$ = 12,68 %.' },
     { t: 12.6, texto: 'Caso práctico 24: con una comisión de reembolso del 1,5 % recibes 11.099,23 €. TAE real: 10,99 %.' },
@@ -178,11 +180,11 @@ export const escenaTae: Escena = {
       etIm.pintar(530, 230, tramo(t, 4.0, 4.6) * fuera);
       // Doce capitalizaciones: cada mes, ×1,01 sobre lo que hay.
       columnas.forEach((c, k) => {
-        const t0 = k === 0 ? 5.8 : 6.0 + k * 0.24;
+        const t0 = k === 0 ? 5.8 : 6.0 + k * 0.22;
         c.pintar(X0 + k * PASO, BASE, cap(k) * ESC * tramo(t, t0, t0 + 0.4, curvas.salida), tramo(t, t0, t0 + 0.1) * (k > 0 && k < 12 ? mezclar(1, 0.55, tramo(t, 9.4, 9.8)) : 1));
       });
       etInicio.pintar(X0 - 10, BASE + 30, tramo(t, 6.0, 6.4));
-      etFinal.pintar(X0 + 12 * PASO + 20, BASE - cap(12) * ESC - 16, tramo(t, 9.0, 9.4) * (1 - tramo(t, 12.8, 13.2)));
+      etFinal.pintar(X0 + 12 * PASO + 20, BASE - cap(12) * ESC - 16, tramo(t, 8.8, 9.2) * (1 - tramo(t, 12.8, 13.2)));
       const pc = tramo(t, 13.0, 13.8);
       comision.pintar(X0 + 12 * PASO, BASE - cap(12) * ESC * (1 - 0.015 * pc), cap(12) * ESC * 0.015 * pc, pc);
       etComision.pintar(X0 + 12 * PASO + 20, BASE - cap(12) * ESC - 16, tramo(t, 13.4, 13.9));

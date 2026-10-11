@@ -14,6 +14,13 @@ export interface Capitulo {
   t: number;
   /** Subtítulo: una frase; las fórmulas van entre $…$. */
   texto: string;
+  /**
+   * Instante de lectura: el fotograma en que el capítulo está completo y quieto. Por defecto, justo
+   * antes del capítulo siguiente; se adelanta cuando al final ya empieza a moverse lo del siguiente
+   * (la cámara que se va, una flecha que nace). Es lo que se ve con movimiento reducido y al saltar
+   * de capítulo, y donde el reproductor se detiene a leer.
+   */
+  lectura?: number;
 }
 
 export interface Escena {
@@ -48,8 +55,27 @@ export function capituloEn(escena: Escena, t: number): number {
 
 /** Final de un capítulo: el instante en que su composición está completa. */
 export function finCapitulo(escena: Escena, k: number): number {
+  const capitulo = escena.capitulos[k]!;
+  if (capitulo.lectura !== undefined) return capitulo.lectura;
   const siguiente = escena.capitulos[k + 1];
-  return siguiente ? Math.max(escena.capitulos[k]!.t, siguiente.t - 0.05) : escena.duracion;
+  return siguiente ? Math.max(capitulo.t, siguiente.t - 0.05) : escena.duracion;
+}
+
+/** Segundos que el reproductor se queda quieto en el instante de lectura de cada capítulo. */
+export const PAUSA_LECTURA = 0.6;
+
+/**
+ * Avance del reproductor: corre `dt` segundos, pero al llegar al instante de lectura de un capítulo
+ * (menos el último, que ya se queda quieto al acabar) se detiene `PAUSA_LECTURA` antes de seguir.
+ */
+export function avanzar(escena: Escena, t: number, espera: number, dt: number): { t: number; espera: number } {
+  if (espera > 1e-6) return { t, espera: Math.max(0, espera - dt) };
+  const destino = Math.min(escena.duracion, t + dt);
+  for (let k = 0; k < escena.capitulos.length - 1; k++) {
+    const lectura = finCapitulo(escena, k);
+    if (t < lectura && destino >= lectura) return { t: lectura, espera: PAUSA_LECTURA };
+  }
+  return { t: destino, espera: 0 };
 }
 
 /** Dibuja la escena congelada en un instante (miniaturas del índice). */
@@ -114,6 +140,7 @@ export function montarReproductor(contenedor: HTMLElement, escena: Escena, opcio
   let t = 0;
   let reproduciendo = false;
   let ultimo = 0;
+  let espera = 0;
   let marcoRaf = 0;
   let capituloMostrado = -1;
   let vivo = true;
@@ -146,7 +173,7 @@ export function montarReproductor(contenedor: HTMLElement, escena: Escena, opcio
     if (!vivo || !reproduciendo) return;
     const dt = Math.min(0.1, (ahora - ultimo) / 1000);
     ultimo = ahora;
-    t = Math.min(total, t + dt);
+    ({ t, espera } = avanzar(escena, t, espera, dt));
     dibujar();
     if (t >= total) {
       reproduciendo = false;
@@ -159,6 +186,7 @@ export function montarReproductor(contenedor: HTMLElement, escena: Escena, opcio
   function reproducir(): void {
     if (reducido) return;
     if (t >= total - 0.01) t = 0;
+    espera = 0;
     reproduciendo = true;
     yaArranco = true;
     ultimo = performance.now();

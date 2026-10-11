@@ -1,6 +1,6 @@
 import type { Escena } from '../motion/reproductor.ts';
 import { Capsula, Eje, Etiqueta, Guia, Hueco, Llave, Rotulo, suelo } from '../motion/motivos.ts';
-import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
+import { claves, curvas, mezclar, retener, tramo, ventana } from '../motion/tiempo.ts';
 import { fijar } from '../motion/lienzo.ts';
 
 /*
@@ -23,20 +23,20 @@ const ANCHO = 66;
 export const escenaCapitalInicialSimple: Escena = {
   id: 'simple-capital-inicial',
   titulo: 'Capital inicial en capitalización simple',
-  duracion: 17.5,
+  duracion: 18.1,
   descripcion: 'Se conoce el montante de 12.100 € a 3 años al 7 %. La columna mide 1,21 veces la semilla; al dividir entre 1 + n · i se recupera la semilla de 10.000 € en el año 0.',
   capitulos: [
     { t: 0, texto: 'Ahora conoces el final: $C_n$ = 12.100 € dentro de $n$ = 3 años, al $i$ = 7 % anual.' },
-    { t: 2.8, texto: '¿Qué semilla hizo falta? Hay que volver al año 0, donde está la incógnita, $C_0$.' },
+    { t: 2.8, lectura: 4.9, texto: '¿Qué semilla hizo falta? Hay que volver al año 0, donde está la incógnita, $C_0$.' },
     { t: 5.6, texto: 'Por cada euro de semilla, al final hay 1 + $n · i$ = 1 + 3 · 0,07 = 1,21 euros.' },
-    { t: 9.0, texto: 'Dividir deshace multiplicar: el factor $(1 + n · i)$ pasa al otro lado dividiendo.' },
-    { t: 12.6, texto: '$C_0$ = 12.100 / 1,21 = 10.000 €: la parte de la semilla vuelve al origen.' },
+    { t: 9, texto: 'Dividir deshace multiplicar: el factor $(1 + n · i)$ pasa al otro lado dividiendo.' },
+    { t: 13.2, texto: '$C_0$ = 12.100 / 1,21 = 10.000 €: la parte de la semilla vuelve al origen.' },
   ],
   montar(l) {
     suelo(l, SUELO);
     const eje = new Eje(l, { x0: X0, paso: PASO, y: SUELO, periodos: N, unidad: 'años' });
     const hueco = new Hueco(l, 's-c0');
-    const flechas = l.grupo({ class: 'mo-flechas s-n' });
+    const flechas = l.grupo({ class: 'mo-flechas s-n', 'data-vivo': '' }); // bucle: los chevrones recorren el camino sin parar
     const chevrones = Array.from({ length: 5 }, () => l.el('path', { d: 'M8 -9 L0 0 L8 9', class: 'mo-flecha' }, flechas));
     const columna = new Capsula(l, { clase: 's-cn', ancho: ANCHO + 10, relleno: 0.4 });
     const parteC0 = new Capsula(l, { clase: 's-c0', ancho: ANCHO, relleno: 0.22 });
@@ -55,7 +55,9 @@ export const escenaCapitalInicialSimple: Escena = {
     const l2 = l.formula('C_0 = \\frac{C_n}{1 + n · i}', { x: 360, y: 158, tam: 42 });
     const sust = l.formula('C_0 = \\frac{12.100}{1 + 3 · 0,07} = "10.000 €"', { x: 360, y: 548, tam: 26 });
 
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t = retener(tReal, 12.6, 0.6);
       const cx = claves(t, [[0, XF - 40], [2.8, XF - 40], [4.8, 320], [5.6, 470], [9.0, 470], [10.0, 380]]);
       const cy = claves(t, [[0, 300], [2.8, 300], [4.8, 330], [5.6, 300], [9.0, 300], [10.0, 190]]);
       const z = claves(t, [[0, 1.25], [2.8, 1.25], [4.8, 1.0], [5.6, 1.15], [9.0, 1.15], [10.0, 0.8]]);
@@ -108,7 +110,7 @@ export const escenaCapitalInicialSimple: Escena = {
         },
       });
       l2.opacidad(tramo(t, 10.5, 10.6));
-      l2.construir(t, 10.6, { origenes: { C_0: centro(l1, 'C_0'), C_n: centro(l1, 'C_n'), n: centro(l1, 'n'), i: centro(l1, 'i') }, duracion: 1.3 });
+      l2.construir(tReal, 10.6, { origenes: { C_0: centro(l1, 'C_0'), C_n: centro(l1, 'C_n'), n: centro(l1, 'n'), i: centro(l1, 'i') }, duracion: 1.3 });
 
       etC0.pintar(X0, SUELO - ALTO_C0 - 28, tramo(t, 14.2, 14.8));
       sust.opacidad(tramo(t, 14.3, 14.4));
