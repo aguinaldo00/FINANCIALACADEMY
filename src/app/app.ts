@@ -105,6 +105,10 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     // Identidad editorial (página a todo el ancho con su propia navegación): hoy, la portada de la
     // asignatura y todo el Tema 2. El resto de pantallas usa el esqueleto común.
     document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || indiceTemaDos);
+    // Fichas de fórmula y fases B–D del Tema 2: escritorio oscuro y cálido; la ficha, a todo el ancho (laboratorio).
+    const pantallaT2 = ruta.vista === 'tema2' ? ruta.pantalla.tipo : null;
+    document.body.classList.toggle('t2-escritorio', pantallaT2 === 'formula' || pantallaT2 === 'fase');
+    document.body.classList.toggle('t2-laboratorio', pantallaT2 === 'formula');
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();

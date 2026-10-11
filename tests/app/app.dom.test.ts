@@ -277,6 +277,47 @@ describe('app en el navegador', () => {
     expect($('.rail .sl.on').getAttribute('href')).toBe('#tema/2/simple/datos');
   });
 
+  it('la ficha de una fórmula es un laboratorio: cuaderno, animación y calculadora que comparten el ejercicio', () => {
+    localStorage.clear();
+    navegar('#tema/2/f/simple-capital-inicial');
+    expect(document.body.classList.contains('t2-escritorio')).toBe(true);
+    const lab = $('[data-laboratorio="simple-capital-inicial"]');
+    expect(lab.dataset.modo).toBe('digital');
+    const escribir = (sel: string, valor: string) => {
+      const c = $<HTMLInputElement>(`.lab-cuaderno ${sel}`);
+      c.value = valor;
+      c.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    escribir('[data-campo="dato:C_n"]', '3.000 €');
+    escribir('[data-campo="dato:n"]', '3');
+    escribir('[data-campo="dato:i"]', '7');
+    // Un tipo sin % no se corrige en silencio: se avisa.
+    expect($('.lab-cuaderno [data-salida="dato:i"]').textContent).toContain('%');
+    escribir('[data-campo="dato:i"]', '7 %');
+    // El papel (modo analógico) tiene lo mismo: un solo estado para los dos modos.
+    expect($<HTMLInputElement>('.lab-papel [data-campo="dato:C_n"]').value).toBe('3.000 €');
+    // La calculadora calcula de verdad y envía al cuaderno.
+    const entrada = $<HTMLInputElement>('[data-cal-entrada]');
+    entrada.value = '3000 ÷ (1 + 3 × 0,07)';
+    entrada.dispatchEvent(new Event('input', { bubbles: true }));
+    $<HTMLButtonElement>('[data-cal-accion="igual"]').click();
+    expect($('[data-cal-resultado]').textContent).toBe('2.479,338843');
+    $<HTMLButtonElement>('[data-cal-explicar]').click();
+    expect($('[data-cal-explicacion]').textContent).toContain('3000 es Cₙ.');
+    $<HTMLButtonElement>('[data-cal-enviar]').click();
+    expect($<HTMLTextAreaElement>('.lab-cuaderno [data-campo="operaciones"]').value).toBe('3000 ÷ (1 + 3 × 0,07) = 2.479,34');
+    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
+    expect($('.lab-cuaderno [data-salida="resultado"]').textContent).toBe('Correcto: 2.479,34 €.');
+    // Analógico: el papel sube desde detrás de la animación y la calculadora cambia de forma.
+    $<HTMLButtonElement>('[data-lab-modo="analogico"]').click();
+    expect(lab.dataset.modo).toBe('analogico');
+    expect(lab.classList.contains('lab-papel-abierto')).toBe(true);
+    expect($('[data-lab-papel]').getAttribute('aria-hidden')).toBe('false');
+    // La teoría sigue debajo, completa.
+    expect($('.t2-teoria .t2-simbolos')).not.toBeNull();
+    expect($$('.t2-teoria [data-t2-error]').length).toBeGreaterThan(0);
+  });
+
   it('ir a un ejercicio dentro de la misma pantalla del Tema 2 no reinicia lo ya hecho', () => {
     navegar('#tema/2/compuesta/practica');
     $<HTMLButtonElement>('[data-mat-revelar-error]').click();
