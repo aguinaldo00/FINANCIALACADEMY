@@ -392,9 +392,10 @@ El laboratorio de las 18 fórmulas restantes se extiende de una en una después 
 - TAE → TIN: está en el temario (Actividades 37 y 38). El cambio de frecuencia de un nominal se hace como cadena.
 - «OMEC»: descartado. La necesidad real es que todas las siglas se entiendan (glosario).
 
-**Abiertas**
-1. Redondeo de los tipos intermedios (iₘ con 4 o 6 decimales) cuando el enunciado no lo dice. Propuesta: guardarlos sin redondear y mostrar 4 decimales en %.
-2. Libro sin convenio indicado: ¿360 o 365? Solo afecta a los casos del libro, no a los generados.
+- Redondeo de iₘ: se guarda sin redondear y se muestra con 4 decimales en % (aceptado el 11/10).
+- Caso del libro sin convenio indicado: se calcula con los dos (360 y 365), se aceptan las dos respuestas y se explica la diferencia (11/10).
+
+**Abiertas:** ninguna por ahora.
 
 ## 15. Herramientas
 
