@@ -270,8 +270,8 @@ const progreso = () => {
   await p.waitForSelector('a.ac-entrar', { timeout: 30000 }).catch(() => {});
   await p.locator('a.ac-entrar').click();
   await p.locator('.as-puerta[href="#tema/2"]').click();
-  await p.waitForSelector('.tema-matematica', { timeout: 10000 }).catch(() => {});
-  ok('academia: el Tema 2 (lección) se abre desde la asignatura', (await p.locator('.mat-parte').count()) === 5);
+  await p.waitForSelector('.tema-matematica .t2-bloque', { timeout: 10000 }).catch(() => {});
+  ok('academia: el Tema 2 (índice de fórmulas) se abre desde la asignatura', (await p.locator('.t2-bloque').count()) === 3 && (await p.locator('a.t2-carta').count()) === 19);
   await p.screenshot({ path: `${SP}/ver-academia-tema2.png` }).catch(() => {});
   await p.close();
 }
