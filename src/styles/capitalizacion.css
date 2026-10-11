@@ -83,7 +83,7 @@
 
 /* Un color fijo por variable (Okabe-Ito, apta para daltonismo). El símbolo sigue escrito: el color es una ayuda, no la única pista. */
 .s{font-weight:600}
-.tema-matematica .s-c0{color:#56b4e9}.tema-matematica .s-cn{color:#e69f00}.tema-matematica .s-i{color:#2fc196}.tema-matematica .s-n{color:#d98cbc}.tema-matematica .s-I{color:#ef7a35}
+/* Los colores de los símbolos están en tema2.css (un color por papel en todo el tema). */
 /* Lo oculto (modo cuaderno, soluciones) se oculta aunque el bloque tenga su propio display. */
 .tema-matematica [hidden]{display:none!important}
 

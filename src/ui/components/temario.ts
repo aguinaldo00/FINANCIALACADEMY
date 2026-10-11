@@ -1,7 +1,9 @@
-import { hrefConcepto, hrefSeccion, hrefTema2 } from '../../app/router.ts';
+import { hrefBloqueTema2, hrefConcepto, hrefFase, hrefFormula, hrefSeccion } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { TemaCatalogo } from '../../content/temas/index.ts';
-import { LECCIONES_TEMA2, PARTES_LECCION } from '../../content/temas/tema-02/index.ts';
+import { FASES_TEMA2 } from '../../content/temas/tema-02/index.ts';
+import { BLOQUES, formulasDe } from '../../content/temas/tema-02/formulas.ts';
+import { formulaTexto } from '../matematica/formula.ts';
 import { dominioConcepto, dominioSeccion } from '../../domain/mastery.ts';
 import { colorBloque } from '../blockColors.ts';
 import { colorDominio, porcentaje } from '../format.ts';
@@ -54,13 +56,17 @@ const ARBOLES: Readonly<Record<number, ArbolTema>> = {
         })),
       };
     }),
+  // Tema 2: cada bloque del temario con sus fórmulas (fase A) y sus fases de práctica (B, C y D).
   2: () =>
-    LECCIONES_TEMA2.map((l) => ({
+    BLOQUES.map((b) => ({
       id: '',
-      titulo: l.titulo,
-      href: hrefTema2(l.id),
-      detalle: l.subtitulo,
-      hijos: PARTES_LECCION.map((p, i) => ({ id: String(i + 1).padStart(2, '0'), titulo: p.titulo, href: hrefTema2(l.id, p.id), detalle: p.subtitulo })),
+      titulo: b.titulo,
+      href: hrefBloqueTema2(b.id),
+      detalle: b.apartado,
+      hijos: [
+        ...formulasDe(b.id).map((f) => ({ id: String(f.numero), titulo: f.nombre, href: hrefFormula(f.id), detalle: formulaTexto(f.expresion) })),
+        ...FASES_TEMA2.filter((f) => f.id !== 'formulas').map((f) => ({ id: f.letra, titulo: f.titulo, href: hrefFase(b.id, f.id), detalle: f.subtitulo })),
+      ],
     })),
 };
 
