@@ -134,3 +134,15 @@ Detalle en `docs/infografias-tema1.md` y `docs/auditoria-tema2.md`.
 
 ## Plan maestro (11/10)
 Las dudas de conversión de periodos y tipos están en `docs/plan-completo.md`, §14. El 11/10 se resolvieron el bimestre y la quincena, el 360/365, TAE → TIN y OMEC; quedan el redondeo de iₘ y los casos del libro sin convenio.
+
+## Narración de las animaciones (pedida el 11/10, sin empezar)
+Narración provisional con la voz del dispositivo, usando la Web Speech API (`speechSynthesis`): gratis y sin dependencias.
+- **Qué se lee:** el subtítulo de cada capítulo pasado a voz, con las fórmulas leídas como en clase («ce ene igual a ce cero por, uno más i, todo elevado a ene»).
+- **Locución propia:** un campo opcional `locucion` en `Capitulo` para cuando el subtítulo no suene bien leído.
+- **Botón:** «Narración» en los mandos del reproductor, apagado por defecto y recordado. No aparece si el navegador no tiene voz.
+- **Sincronía:** el reproductor espera en el instante de lectura de cada capítulo hasta que la voz acaba, con un tope por si nunca avisa del final.
+- **Pausa y cambio de capítulo:** al pausar o salir de pantalla, la voz calla; al saltar de capítulo, empieza la del nuevo.
+- **Voces según el dispositivo:**
+  - Windows: Helena, Laura o Pablo; en Edge, las voces «Natural» online, que suenan mejor.
+  - Android y Samsung: el motor de voz del teléfono.
+  - Apple: las voces en español del sistema (Mónica, Jorge…). Las voces de Siri no suelen estar disponibles para páginas web.
