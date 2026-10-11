@@ -283,56 +283,104 @@ describe('app en el navegador', () => {
     expect(document.body.classList.contains('t2-escritorio')).toBe(true);
     const lab = $('[data-laboratorio="simple-capital-inicial"]');
     expect(lab.dataset.modo).toBe('digital');
+    // Por defecto, el caso de la animación como enunciado.
+    expect(lab.dataset.ejercicio).toBe('animacion');
+    expect($('[data-lab-caso-texto]').textContent).toContain('12.100 €');
+    // Ningún campo enseña los números del caso como ejemplo.
+    for (const c of $$('.lab-cuaderno [placeholder]')) expect(c.getAttribute('placeholder')).not.toMatch(/\d/);
     const escribir = (sel: string, valor: string) => {
       const c = $<HTMLInputElement>(`.lab-cuaderno ${sel}`);
       c.value = valor;
       c.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    escribir('[data-campo="dato:C_n"]', '3.000 €');
+    escribir('[data-campo="dato:C_n"]', '12.100 €');
     escribir('[data-campo="dato:n"]', '3');
     escribir('[data-campo="dato:i"]', '7');
-    // Un tipo sin % no se corrige en silencio: se avisa.
-    expect($('.lab-cuaderno [data-salida="dato:i"]').textContent).toContain('%');
-    escribir('[data-campo="dato:i"]', '7 %');
+    escribir('[data-campo="incognita"]', 'C_0');
+    escribir('[data-campo="formula"]', 'simple-capital-inicial');
+    escribir('[data-campo="resultado"]', '10.000');
+    // Mientras se escribe no se corrige nada.
+    expect($('.lab-cuaderno [data-nota="datos"]').textContent).toBe('');
     // El papel (modo analógico) tiene lo mismo: un solo estado para los dos modos.
-    expect($<HTMLInputElement>('.lab-papel [data-campo="dato:C_n"]').value).toBe('3.000 €');
+    expect($<HTMLInputElement>('.lab-papel [data-campo="dato:C_n"]').value).toBe('12.100 €');
+    // Comprobar revisa paso a paso: el tipo sin % se marca, sin dar el valor.
+    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
+    expect($('.lab-cuaderno [data-paso="datos"]').dataset.revision).toBe('mal');
+    expect($('.lab-cuaderno [data-nota="datos"]').textContent).toContain('%');
+    escribir('[data-campo="dato:i"]', '7 %');
+    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
+    for (const paso of ['datos', 'incognita', 'formula', 'resultado']) expect($(`.lab-cuaderno [data-paso="${paso}"]`).dataset.revision, paso).toBe('bien');
+    expect($('.lab-cuaderno [data-nota="resultado"]').textContent).toBe('Correcto: 10.000,00 €.');
+    expect($('.lab-cuaderno [data-lab-revision]').textContent).toBe('Todo el cuaderno está bien.');
+    // La fórmula se elige en un desplegable; la del montante también vale (sale despejando).
+    escribir('[data-campo="formula"]', 'simple-montante');
+    expect($('.lab-cuaderno [data-lab-formula-elegida]').textContent).toContain('=');
+    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
+    expect($('.lab-cuaderno [data-nota="formula"]').textContent).toContain('También vale');
     // La calculadora calcula de verdad y envía al cuaderno.
     const entrada = $<HTMLInputElement>('[data-cal-entrada]');
-    entrada.value = '3000 ÷ (1 + 3 × 0,07)';
+    entrada.value = '12100 ÷ (1 + 3 × 0,07)';
     entrada.dispatchEvent(new Event('input', { bubbles: true }));
     $<HTMLButtonElement>('[data-cal-accion="igual"]').click();
-    expect($('[data-cal-resultado]').textContent).toBe('2.479,338843');
+    expect($('[data-cal-resultado]').textContent).toBe('10.000');
     $<HTMLButtonElement>('[data-cal-explicar]').click();
-    expect($('[data-cal-explicacion]').textContent).toContain('3000 es Cₙ.');
+    expect($('[data-cal-explicacion]').textContent).toContain('12100 es Cₙ.');
     $<HTMLButtonElement>('[data-cal-enviar]').click();
-    expect($<HTMLTextAreaElement>('.lab-cuaderno [data-campo="operaciones"]').value).toBe('3000 ÷ (1 + 3 × 0,07) = 2.479,34');
-    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
-    expect($('.lab-cuaderno [data-salida="resultado"]').textContent).toBe('Correcto: 2.479,34 €.');
-    // Analógico: el papel sube desde detrás de la animación y la calculadora cambia de forma.
+    expect($<HTMLTextAreaElement>('.lab-cuaderno [data-campo="operaciones"]').value).toBe('12100 ÷ (1 + 3 × 0,07) = 10.000,00');
+    // Ejercicio de práctica: generado, con su número; cambiar de ejercicio empieza un cuaderno nuevo.
+    $<HTMLButtonElement>('[data-lab-ejercicio="practica"]').click();
+    expect(lab.dataset.ejercicio).toBe('practica');
+    expect($('[data-lab-caso-origen]').textContent).toContain('Ejercicio de práctica nº');
+    expect($<HTMLInputElement>('.lab-cuaderno [data-campo="dato:C_n"]').value).toBe('');
+    const primero = $('[data-lab-caso-texto]').textContent;
+    $<HTMLButtonElement>('[data-lab-otro]').click();
+    expect($('[data-lab-caso-texto]').textContent).not.toBe(primero);
+    $<HTMLButtonElement>('[data-lab-ejercicio="propio"]').click();
+    expect($('[data-lab-escena-nota]').textContent).toContain('no tus datos');
+    // Analógico: el papel sube desde detrás de la animación.
     $<HTMLButtonElement>('[data-lab-modo="analogico"]').click();
     expect(lab.dataset.modo).toBe('analogico');
-    expect(lab.classList.contains('lab-papel-abierto')).toBe(true);
     expect($('[data-lab-papel]').getAttribute('aria-hidden')).toBe('false');
-    // La teoría sigue debajo, completa.
+    // La pizarra con las fórmulas del bloque, y la teoría completa debajo.
+    expect($$('.pizarra-formulas li').length).toBe(6);
+    expect($('.pizarra-actual a').getAttribute('href')).toBe('#tema/2/f/simple-capital-inicial');
     expect($('.t2-teoria .t2-simbolos')).not.toBeNull();
     expect($$('.t2-teoria [data-t2-error]').length).toBeGreaterThan(0);
   });
 
-  it('las fichas con cambios de unidad llevan el calendario de equivalencias: cualquier unidad a cualquier otra', () => {
+  it('las fichas con cambios de unidad llevan el calendario de equivalencias: duraciones y tipos, cualquier unidad a cualquier otra', () => {
     navegar('#tema/2/f/compuesta-equivalentes');
     const conv = $('[data-conversor]');
-    // Por defecto, la pregunta que no encaja: 1 semestre, ¿cuántos cuatrimestres?
-    expect($('[data-conv-resultado]', conv).textContent).toBe('1 semestre = 1,5 cuatrimestres');
+    const resultado = () => $('[data-conv-resultado]', conv).textContent ?? '';
+    const atajo = (k: number) => $<HTMLButtonElement>(`[data-conv-atajo="${k}"]`, conv).click();
+    // En tantos equivalentes empieza por los tipos en compuesta: el caso práctico 19.
+    expect(conv.dataset.modo).toBe('tipo');
+    expect(resultado()).toContain('10 % anual = 0,7974 % mensual');
     expect($('[data-conv-reproductor] .mo-svg', conv)).not.toBeNull();
-    // Con días aparece el convenio y la escena se rehace para la nueva pareja.
-    $<HTMLButtonElement>('[data-conv-atajo="8"]', conv).click();
-    expect($('[data-conv-resultado]', conv).textContent).toBe('195 días = 0,5342 años');
+    // Entre dos fracciones del año: distinto en compuesta y en simple.
+    atajo(13);
+    expect(resultado()).toContain('2 % trimestral = 2,6755 % cuatrimestral');
+    atajo(14);
+    expect(resultado()).toContain('2 % trimestral = 2,6667 % cuatrimestral');
+    // Duraciones: la pregunta que no encaja y los días con su convenio.
+    $<HTMLButtonElement>('[data-conv-modo="duracion"]', conv).click();
+    expect(conv.dataset.modo).toBe('duracion');
+    expect(resultado()).toBe('1 semestre = 1,5 cuatrimestres');
+    atajo(8);
+    expect(resultado()).toBe('195 días = 0,5342 años');
     expect($('[data-conv-convenio]', conv).hidden).toBe(false);
     expect($('[data-conv-reproductor]', conv).dataset.escena).toBe('conversion-dia-año-195-365');
-    const cantidad = $<HTMLInputElement>('[data-conv-cantidad]', conv);
-    cantidad.value = '1.5';
-    cantidad.dispatchEvent(new Event('input', { bubbles: true }));
-    expect($('[data-conv-resultado]', conv).textContent).toContain('coma');
+    const valor = $<HTMLInputElement>('[data-conv-valor]', conv);
+    valor.value = '1.5';
+    valor.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(resultado()).toContain('coma');
+    // Calculadora analógica al lado, que lleva su resultado al conversor.
+    expect($('.conv-calculadora .cal-analogica', conv)).not.toBeNull();
+    const entrada = $<HTMLInputElement>('#conv-cal-entrada', conv);
+    entrada.value = '6 ÷ 4';
+    entrada.dispatchEvent(new Event('input', { bubbles: true }));
+    $<HTMLButtonElement>('.conv-calculadora [data-cal-enviar]', conv).click();
+    expect(valor.value).toBe('1,50');
     // No todas las fichas lo llevan.
     navegar('#tema/2/f/simple-intereses');
     expect(document.querySelector('[data-conversor]')).toBeNull();

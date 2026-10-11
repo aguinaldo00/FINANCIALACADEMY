@@ -110,6 +110,7 @@
 .mo-gigante{font-size:46px}
 .mo-grafico-eje{stroke:var(--tinta);stroke-width:2;vector-effect:non-scaling-stroke}
 .mo-curva{stroke:currentColor;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mo-curva-error{stroke:var(--r);stroke-width:2.6;stroke-dasharray:7 7}
 .mo-curva-fina{stroke:var(--tinta);stroke-opacity:.7;stroke-width:1.6;stroke-dasharray:5 6;vector-effect:non-scaling-stroke}
 .mo-punto{fill:currentColor;stroke:var(--tinta);stroke-width:2}
 .mo-salto{color:var(--tinta)}

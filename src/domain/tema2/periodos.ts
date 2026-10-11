@@ -19,17 +19,19 @@ export interface DatosUnidad {
   id: Unidad;
   singular: string;
   plural: string;
+  /** Adjetivo del tipo referido a esta unidad: anual, semestral… */
+  adjetivo: string;
   /** Cuántas caben en un año (m); el día depende del convenio. */
   porAño: (convenio: Convenio) => number;
 }
 
 export const UNIDADES: readonly DatosUnidad[] = [
-  { id: 'año', singular: 'año', plural: 'años', porAño: () => 1 },
-  { id: 'semestre', singular: 'semestre', plural: 'semestres', porAño: () => 2 },
-  { id: 'cuatrimestre', singular: 'cuatrimestre', plural: 'cuatrimestres', porAño: () => 3 },
-  { id: 'trimestre', singular: 'trimestre', plural: 'trimestres', porAño: () => 4 },
-  { id: 'mes', singular: 'mes', plural: 'meses', porAño: () => 12 },
-  { id: 'dia', singular: 'día', plural: 'días', porAño: (c) => c },
+  { id: 'año', singular: 'año', plural: 'años', adjetivo: 'anual', porAño: () => 1 },
+  { id: 'semestre', singular: 'semestre', plural: 'semestres', adjetivo: 'semestral', porAño: () => 2 },
+  { id: 'cuatrimestre', singular: 'cuatrimestre', plural: 'cuatrimestres', adjetivo: 'cuatrimestral', porAño: () => 3 },
+  { id: 'trimestre', singular: 'trimestre', plural: 'trimestres', adjetivo: 'trimestral', porAño: () => 4 },
+  { id: 'mes', singular: 'mes', plural: 'meses', adjetivo: 'mensual', porAño: () => 12 },
+  { id: 'dia', singular: 'día', plural: 'días', adjetivo: 'diario', porAño: (c) => c },
 ];
 
 export const unidad = (id: Unidad): DatosUnidad => UNIDADES.find((u) => u.id === id)!;
@@ -74,4 +76,38 @@ export function convertirDuracion(cantidad: number, de: Unidad, a: Unidad, conve
 /** Duración total en años de una cantidad en años, meses y días (los días según el convenio). */
 export function añosDeDuracionMixta(años: number, meses: number, dias: number, convenio: Convenio): number {
   return años + meses / 12 + dias / convenio;
+}
+
+export type Regimen = 'simple' | 'compuesta';
+
+export interface ConversionTipo {
+  tipo: number;
+  de: Unidad;
+  a: Unidad;
+  regimen: Regimen;
+  convenio: Convenio;
+  resultado: number;
+  /** Cuántos periodos de cada unidad caben en un año (m). */
+  mDe: number;
+  mA: number;
+  /** Lo que crece 1 € en un año con el tipo de partida (el punto al que las dos tienen que llegar). */
+  factorAño: number;
+  /** Lo que daría repartir en proporción (lo correcto en simple; en compuesta, el error típico). */
+  proporcional: number;
+}
+
+/**
+ * Pasa un tipo de interés de una unidad de tiempo a otra. Dos tipos son equivalentes si llevan el
+ * mismo capital al mismo sitio en el mismo tiempo (un año):
+ *  - en simple, la cosecha de cada periodo es proporcional a lo que dura: iₐ · mₐ = i · m;
+ *  - en compuesta, cada periodo crece sobre el anterior: (1 + iₐ)^mₐ = (1 + i)^m.
+ * Entre dos fracciones del año (trimestral → cuatrimestral) es la misma igualdad pasando por el año.
+ */
+export function convertirTipo(tipo: number, de: Unidad, a: Unidad, regimen: Regimen, convenio: Convenio = 360): ConversionTipo {
+  const mDe = unidad(de).porAño(convenio);
+  const mA = unidad(a).porAño(convenio);
+  const proporcional = (tipo * mDe) / mA;
+  const factorAño = regimen === 'simple' ? 1 + tipo * mDe : (1 + tipo) ** mDe;
+  const resultado = regimen === 'simple' ? proporcional : (1 + tipo) ** (mDe / mA) - 1;
+  return { tipo, de, a, regimen, convenio, resultado, mDe, mA, factorAño, proporcional };
 }
