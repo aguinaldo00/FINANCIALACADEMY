@@ -247,6 +247,13 @@ describe('app en el navegador', () => {
     expect(document.body.classList.contains('rail-bajo-demanda')).toBe(true);
     expect($$('.ed-barra-partes a').map((a) => a.getAttribute('href'))).toEqual(['#tema/2/simple', '#tema/2/compuesta', '#tema/2/descuento']);
     expect($('[data-reproductor="simple-intereses"] .mo-svg')).not.toBeNull();
+    // Simple y Compuesta comparten composición: la madre grande y una columna de ramas, cada fórmula
+    // con su animación ampliable desde el índice (sin salir de él).
+    for (const [parte, madre, ramas] of [['simple', 'simple-intereses', 5], ['compuesta', 'compuesta-montante', 7]] as const) {
+      expect($(`#t2-${parte} .ed-estrella-centro [data-expandir="${madre}"]`)).not.toBeNull();
+      expect($(`#t2-${parte} .ed-estrella-centro .ed-margen`)).not.toBeNull();
+      expect($$(`#t2-${parte} .ed-estrella-ramas li`).filter((li) => li.querySelector('[data-expandir] .mo-svg')).length).toBe(ramas);
+    }
   });
 
   it('el Tema 2 va en orden: fórmulas (A), datos (B), elegir (C) y practicar (D)', () => {

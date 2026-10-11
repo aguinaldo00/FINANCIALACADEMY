@@ -1,7 +1,7 @@
 /*
  * Fase A · Índice de fórmulas del Tema 2, con la identidad editorial: apertura con la ruta A → D y la
- * animación de la fórmula 1, una barra del capítulo que se queda arriba al bajar y las tres partes,
- * cada una con la composición que refleja su lógica (genealogía, estrella y matriz). Cada parte
+ * animación de la fórmula 1, una barra del capítulo que se queda arriba al bajar y las tres partes:
+ * Simple y Compuesta como estrella (la madre y sus ramas) y Descuento como matriz. Cada parte
  * termina con su práctica (B, C y D). El temario completo está en el Sumario.
  */
 import { hrefAcademia, hrefAsignatura, hrefFase } from '../../../app/router.ts';
@@ -44,23 +44,46 @@ export const DERIVACIONES: Record<BloqueId, { desde: string; hacia: string; como
 const como = (bloque: BloqueId, id: string) => DERIVACIONES[bloque].find((d) => d.hacia === id)?.como ?? '';
 const duracion = (id: string) => duracionLegible(ESCENAS[id]?.duracion ?? 0);
 
-/** Animaciones que se abren con la expansión cinematográfica desde el índice. */
-const MEDIOS: Readonly<Record<string, FuenteExpandible>> = {
-  'compuesta-montante': { tipo: 'escena', escena: ESCENAS['compuesta-montante']!, volanta: 'Parte II · Fórmula 7' },
-};
+/** Animaciones que se amplían desde el índice (expansión cinematográfica): las de Simple y Compuesta. */
+const MEDIOS: Readonly<Record<string, FuenteExpandible>> = Object.fromEntries(
+  BLOQUES.slice(0, 2).flatMap((b, k) => formulasDe(b.id).map((f) => [f.id, { tipo: 'escena', escena: ESCENAS[f.id]!, volanta: `Parte ${ROMANOS[k]} · Fórmula ${f.numero}` } as FuenteExpandible])),
+);
 
-/** Un nodo de fórmula: número, nombre, fórmula y duración de su animación. Sin caja. */
+/**
+ * Un nodo de fórmula: número, nombre y fórmula, que llevan a su ficha. Sin caja. Si su animación se
+ * amplía desde el índice (la miniatura va al lado), el pie invita a abrir la ficha; si no, anuncia
+ * la animación que hay dentro.
+ */
 function nodo(id: string, clase = ''): string {
   const f = formulaPorId(id)!;
+  const pie = MEDIOS[id] ? 'Abrir la ficha <span aria-hidden="true">→</span>' : `<i aria-hidden="true"></i>Animación · ${duracion(id)}`;
   return `<a class="ed-f ${clase}" href="${hrefFormula(id)}" data-formula="${id}">
     <span class="ed-f-num">${f.numero}</span>
     <span class="ed-f-nombre">${escaparHtml(f.nombre)}</span>
     <span class="ed-f-fx">${formulaHtml(f.expresion)}</span>
-    <span class="ed-f-ver"><i aria-hidden="true"></i>Animación · ${duracion(id)}</span>
+    <span class="ed-f-ver">${pie}</span>
   </a>`;
 }
 
-const rama = (bloque: BloqueId, id: string) => `<li><span class="ed-rama">${escaparHtml(como(bloque, id))}</span>${nodo(id)}</li>`;
+/** Una rama: cómo sale de la madre, la fórmula y, si la tiene, la miniatura que amplía su animación. */
+const rama = (bloque: BloqueId, id: string) =>
+  `<li><span class="ed-rama">${escaparHtml(como(bloque, id))}</span>${nodo(id)}${MEDIOS[id] ? miniaturaHtml(id, MEDIOS[id], 'vx-papel ed-mini') : ''}</li>`;
+
+/**
+ * Simple y Compuesta comparten composición: a la izquierda, la madre con su animación grande (se
+ * amplía) y lo mínimo que hay que memorizar; a la derecha, una sola columna con las fórmulas que
+ * salen de ella, cada una con cómo sale y su animación en miniatura.
+ */
+function estrella(bloque: BloqueId, madre: string, ramas: string[]): string {
+  return `<div class="ed-estrella">
+        <div class="ed-estrella-centro">
+          ${miniaturaHtml(madre, MEDIOS[madre]!, 'vx-papel')}
+          ${nodo(madre, 'ed-f-madre ed-f-centro')}
+          ${memoriza(bloque)}
+        </div>
+        <ul class="ed-estrella-ramas">${ramas.map((id) => rama(bloque, id)).join('')}</ul>
+      </div>`;
+}
 
 function cabParte(k: number, b: (typeof BLOQUES)[number], cita: string): string {
   return `<header class="ed-parte-cab">
@@ -133,32 +156,11 @@ export function htmlIndice(estado: EstadoEstudio): string {
     </nav>
 
     ${parte(simple, `${cabParte(0, simple, '«Los intereses de cada periodo se calculan siempre sobre el capital inicial.»')}
-      <div class="ed-parte-cuerpo">
-        <div class="ed-genealogia">
-          <div class="ed-madres">
-            ${nodo('simple-intereses', 'ed-f-madre')}
-            <span class="ed-union"><span>${escaparHtml(como('simple', 'simple-montante'))}</span></span>
-            ${nodo('simple-montante', 'ed-f-madre')}
-          </div>
-          <div class="ed-hijas">
-            <ul class="ed-hijas-col">${rama('simple', 'simple-tipo')}${rama('simple', 'simple-tiempo')}${rama('simple', 'simple-fraccionado')}</ul>
-            <ul class="ed-hijas-col">${rama('simple', 'simple-capital-inicial')}</ul>
-          </div>
-        </div>
-        ${memoriza('simple')}
-      </div>
+      ${estrella('simple', 'simple-intereses', ['simple-montante', 'simple-capital-inicial', 'simple-tipo', 'simple-tiempo', 'simple-fraccionado'])}
       ${practicaParte('simple')}`)}
 
     ${parte(compuesta, `${cabParte(1, compuesta, '«Los intereses se suman al capital y producen nuevos intereses.»')}
-      <div class="ed-estrella">
-        <div class="ed-estrella-centro">
-          ${miniaturaHtml('compuesta-montante', MEDIOS['compuesta-montante']!, 'vx-papel')}
-          ${nodo('compuesta-montante', 'ed-f-madre ed-f-centro')}
-        </div>
-        <ul class="ed-estrella-ramas">
-          ${['compuesta-intereses', 'compuesta-capital-inicial', 'compuesta-tiempo', 'compuesta-tipo', 'compuesta-equivalentes', 'compuesta-tae', 'compuesta-comparacion'].map((id) => rama('compuesta', id)).join('')}
-        </ul>
-      </div>
+      ${estrella('compuesta', 'compuesta-montante', ['compuesta-intereses', 'compuesta-capital-inicial', 'compuesta-tiempo', 'compuesta-tipo', 'compuesta-equivalentes', 'compuesta-tae', 'compuesta-comparacion'])}
       ${practicaParte('compuesta')}`)}
 
     ${parte(descuento, `${cabParte(2, descuento, '«Cobrar hoy lo que vence mañana tiene un precio: el descuento.»')}
