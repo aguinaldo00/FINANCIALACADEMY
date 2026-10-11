@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { formulaTexto, simbolosDe } from '../../src/ui/matematica/formula.ts';
 import { UNIDADES } from '../../src/domain/tema2/periodos.ts';
 import { escenaConversion } from '../../src/ui/escenas/conversionPeriodos.ts';
+import { escenaConversionTipo } from '../../src/ui/escenas/conversionTipos.ts';
 import { LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
 import { Lienzo } from '../../src/ui/motion/lienzo.ts';
 import { avanzar, type Escena, finCapitulo, PAUSA_LECTURA, textoConFormulas } from '../../src/ui/motion/reproductor.ts';
@@ -135,6 +136,27 @@ describe('el calendario de equivalencias: cualquier unidad a cualquier otra, con
   for (const p of parejas) {
     it(`${p.cantidad} ${p.de} → ${p.a} (${p.convenio})`, () => {
       const escena = escenaConversion(p);
+      const fotoEn = camaraDe(escena);
+      const malos = escena.capitulos.flatMap((_, k) => {
+        const problemas = problemasDeLectura(escena, fotoEn, k);
+        return problemas.length ? [`cap. ${k + 1}: ${problemas.slice(0, 2).join(' · ')}`] : [];
+      });
+      expect(malos).toEqual([]);
+    });
+  }
+});
+
+describe('tipos de interés de cualquier unidad a cualquier otra, en simple y en compuesta: capítulos completos y quietos', () => {
+  const casos = (['simple', 'compuesta'] as const).flatMap((regimen) => UNIDADES.flatMap((de) => UNIDADES.filter((a) => a.id !== de.id).flatMap((a) => {
+    const conDias = de.id === 'dia' || a.id === 'dia';
+    // Un tipo razonable para cada unidad (un 5 % diario compuesto no se puede dibujar ni existe en el tema).
+    const tipo = de.id === 'dia' ? 0.0001 : de.id === 'mes' ? 0.01 : 0.04;
+    return (conDias ? [360, 365] as const : [360] as const).map((convenio) => ({ tipo, de: de.id, a: a.id, regimen, convenio }));
+  })));
+  it(`son ${casos.length} casos`, () => expect(casos.length).toBe(80));
+  for (const p of casos) {
+    it(`${p.regimen}: ${p.de} → ${p.a} (${p.convenio})`, () => {
+      const escena = escenaConversionTipo(p);
       const fotoEn = camaraDe(escena);
       const malos = escena.capitulos.flatMap((_, k) => {
         const problemas = problemasDeLectura(escena, fotoEn, k);

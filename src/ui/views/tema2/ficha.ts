@@ -4,9 +4,9 @@
  * plegado para cuando haga falta.
  */
 import { hrefFase } from '../../../app/router.ts';
-import { FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/tema-02/formulas.ts';
+import { FORMULAS_TEMA2, formulaPorId, formulasDe } from '../../../content/temas/tema-02/formulas.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
-import { htmlConversor, montarConversor } from '../../components/conversorPeriodos.ts';
+import { htmlConversor, montarConversor, preguntaInicial } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
@@ -17,6 +17,23 @@ function lista(items: string[]): string {
 
 /** Fichas en las que pasar de una unidad de tiempo a otra es parte del cálculo: llevan el conversor. */
 const CON_CONVERSOR = new Set(['simple-tiempo', 'simple-fraccionado', 'compuesta-tiempo', 'compuesta-equivalentes', 'compuesta-tae', 'descuento-comercial', 'descuento-racional', 'descuento-compuesto-racional']);
+
+/**
+ * Pizarra: las fórmulas del bloque escritas a tiza, con la de esta ficha rodeada. Es decoración con
+ * función: cada fórmula lleva a su ficha, y sirve de chuleta para el paso «Fórmula» del cuaderno.
+ */
+function pizarraHtml(idActual: string): string {
+  const f = formulaPorId(idActual)!;
+  const b = bloque(f.bloque);
+  const giro = (k: number) => (((k * 37) % 7) - 3) * 0.35;
+  return `<aside class="pizarra" aria-labelledby="pizarra-tit">
+    <div class="pizarra-tablero">
+      <h2 class="pizarra-tit" id="pizarra-tit">${escaparHtml(b.titulo)}</h2>
+      <ul class="pizarra-formulas">${formulasDe(f.bloque).map((o, k) => `<li style="--giro:${giro(k)}deg"${o.id === idActual ? ' class="pizarra-actual" aria-current="page"' : ''}><a href="${hrefFormula(o.id)}"><span class="pizarra-num">${o.numero}</span><span class="pizarra-fx">${formulaHtml(o.expresion)}</span><span class="sr">${escaparHtml(o.nombre)}</span></a></li>`).join('')}</ul>
+    </div>
+    <div class="pizarra-repisa" aria-hidden="true"><span class="pizarra-tiza"></span><span class="pizarra-borrador"></span></div>
+  </aside>`;
+}
 
 export function htmlFicha(id: string): string {
   const f = formulaPorId(id)!;
@@ -37,7 +54,8 @@ export function htmlFicha(id: string): string {
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}
-    ${CON_CONVERSOR.has(f.id) ? htmlConversor() : ''}
+    ${pizarraHtml(f.id)}
+    ${CON_CONVERSOR.has(f.id) ? htmlConversor(preguntaInicial(f.id)) : ''}
     <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
       <h2 class="t2-teoria-tit" id="t2-teoria-tit">Para entenderla</h2>
       ${f.variantes?.length ? `<ul class="t2-variantes">${f.variantes.map((v) => `<li>${formulaHtml(v.expresion)}<span>${escaparHtml(v.nota)}</span></li>`).join('')}</ul>` : ''}

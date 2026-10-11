@@ -19,11 +19,21 @@ const TECLAS: Tecla[] = [
   { t: '=', accion: 'igual', clase: 'cal-igual', etiqueta: 'Calcular' },
 ];
 
-export function htmlCalculadora(): string {
-  return `<div class="cal" data-calculadora>
+export interface HtmlCalculadora {
+  /** Para que dos calculadoras en la misma página no repitan id. */
+  id?: string;
+  /** Texto del botón de enviar (por defecto, «Enviar al cuaderno»). */
+  enviar?: string;
+  /** Aspecto analógico: pantalla de cristal líquido y teclas de mesa. */
+  analogica?: boolean;
+}
+
+export function htmlCalculadora(o: HtmlCalculadora = {}): string {
+  const id = o.id ?? 'cal-entrada';
+  return `<div class="cal${o.analogica ? ' cal-analogica' : ''}" data-calculadora>
     <div class="cal-pantalla">
-      <label class="sr" for="cal-entrada">Operación</label>
-      <input id="cal-entrada" class="cal-entrada" data-cal-entrada type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="3000 ÷ (1 + 3 × 0,07)">
+      <label class="sr" for="${id}">Operación</label>
+      <input id="${id}" class="cal-entrada" data-cal-entrada type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Escribe una operación">
       <output class="cal-resultado" data-cal-resultado aria-live="polite">0</output>
       <div class="cal-estado">
         <span class="cal-ans" data-cal-ans>Ans = 0</span>
@@ -34,7 +44,7 @@ export function htmlCalculadora(): string {
     <div class="cal-teclas">${TECLAS.map((k) => `<button type="button" class="cal-tecla ${k.clase ?? ''}" data-cal-tecla="${escaparHtml(k.inserta ?? k.t)}"${k.accion ? ` data-cal-accion="${k.accion}"` : ''}${k.etiqueta ? ` aria-label="${escaparHtml(k.etiqueta)}"` : ''}>${escaparHtml(k.t)}</button>`).join('')}</div>
     <div class="cal-acciones">
       <button type="button" class="cal-accion cal-accion-explicar" data-cal-explicar aria-expanded="false"><svg class="cal-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Explícame este cálculo paso a paso</button>
-      <button type="button" class="cal-accion cal-accion-enviar" data-cal-enviar>Enviar al cuaderno <span aria-hidden="true">→</span></button>
+      <button type="button" class="cal-accion cal-accion-enviar" data-cal-enviar>${escaparHtml(o.enviar ?? 'Enviar al cuaderno')} <span aria-hidden="true">→</span></button>
     </div>
     <ol class="cal-explicacion" data-cal-explicacion hidden></ol>
   </div>`;
