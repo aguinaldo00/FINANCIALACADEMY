@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { iniciarApp } from '../../src/app/app.ts';
 import { ASIGNATURAS, disponible, ID_GESTION_FINANCIERA } from '../../src/content/academia.ts';
 import { TEMAS } from '../../src/content/temas/index.ts';
-import { PARTES_LECCION } from '../../src/content/temas/tema-02/index.ts';
+import { BLOQUES, FORMULAS_TEMA2 } from '../../src/content/temas/tema-02/formulas.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 
 const $ = <T extends Element = HTMLElement>(s: string, raiz: ParentNode = document) => raiz.querySelector<T>(s)!;
@@ -56,7 +56,7 @@ describe('academia en el navegador', () => {
     navegar('#s/3.2B');
     expect($$('#migas a').map((a) => a.getAttribute('href'))).toEqual(['#academia', '#a/gestion-financiera', '#inicio']);
     expect(document.body.classList.contains('rail-bajo-demanda')).toBe(false);
-    navegar('#tema/2/capitalizacion-compuesta/papel');
+    navegar('#tema/2/compuesta/practica');
     expect($$('#migas a').map((a) => a.textContent)).toEqual(['Academia', 'Gestión Financiera', 'Tema 2']);
   });
 
@@ -66,7 +66,9 @@ describe('academia en el navegador', () => {
     const enlaces = new Set($$('.as-temario a').map((a) => a.getAttribute('href')));
     for (const s of tema01.secciones) expect(enlaces.has(`#s/${s.id}`)).toBe(true);
     for (const c of tema01.conceptos) expect(enlaces.has(`#c/${c.id}`)).toBe(true);
-    for (const p of PARTES_LECCION) expect(enlaces.has(`#tema/2/capitalizacion-compuesta/${p.id}`)).toBe(true);
+    // Tema 2: cada fórmula del índice y cada fase (B, C, D) de cada bloque.
+    for (const f of FORMULAS_TEMA2) expect(enlaces.has(`#tema/2/f/${f.id}`)).toBe(true);
+    for (const b of BLOQUES) for (const fase of ['datos', 'elegir', 'practica']) expect(enlaces.has(`#tema/2/${b.id}/${fase}`)).toBe(true);
     // Los botones de estudio y examen de siempre siguen ahí.
     expect($$('.as-herramientas a.ab').map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#visual', '#simulacro', '#repaso', '#progreso']);
   });
@@ -78,9 +80,9 @@ describe('academia en el navegador', () => {
     campo.dispatchEvent(new Event('input'));
     const visibles = $$('.as-temario .tm-n1').filter((a) => !a.closest('li')!.hidden);
     expect(visibles.map((a) => a.querySelector('.tm-id')!.textContent)).toEqual(['3.2B']);
-    campo.value = 'simbolos';
+    campo.value = 'tantos equivalentes';
     campo.dispatchEvent(new Event('input'));
-    expect($$('.as-temario a').filter((a) => !a.closest('li')?.hidden && a.textContent!.includes('Los símbolos'))).toHaveLength(1);
+    expect($$('.as-temario a').filter((a) => !a.closest('li')?.hidden && a.textContent!.includes('Tantos equivalentes'))).toHaveLength(1);
     campo.value = 'zzzz';
     campo.dispatchEvent(new Event('input'));
     expect($('[data-tm-vacio]').hidden).toBe(false);

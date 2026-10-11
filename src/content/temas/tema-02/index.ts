@@ -9,12 +9,29 @@ export interface TemaMatematica {
 
 export const tema02: TemaMatematica = {
   numero: 2,
-  titulo: 'Matemática financiera',
+  titulo: 'Introducción al cálculo financiero',
   fuente: 'Unidad 2 · Gestión financiera',
-  primeraLeccion: 'Capitalización compuesta',
+  primeraLeccion: 'Capitalización simple',
 };
 
-/** Lecciones del tema 2 (por ahora una). El id es el segmento de la ruta `#tema/2/<id>`. */
+/**
+ * Cómo se estudia el tema: A, el índice de fórmulas (comprenderlas); B, identificar los datos del
+ * enunciado; C, elegir la fórmula; D, resolver en papel con ayudas que se retiran.
+ * El id es el segmento de la ruta `#tema/2/<bloque>/<fase>` (la fase A es el índice).
+ */
+export const FASES_TEMA2 = [
+  { id: 'formulas', letra: 'A', titulo: 'Las fórmulas', subtitulo: 'Qué es cada símbolo y por qué funciona' },
+  { id: 'datos', letra: 'B', titulo: 'Identificar los datos', subtitulo: 'Del enunciado al símbolo' },
+  { id: 'elegir', letra: 'C', titulo: 'Elegir la fórmula', subtitulo: 'Qué te dan y qué te piden' },
+  { id: 'practica', letra: 'D', titulo: 'Practicar en papel', subtitulo: 'Cada vez con menos ayuda' },
+] as const;
+
+export type FaseTema2 = (typeof FASES_TEMA2)[number]['id'];
+
+/**
+ * Lección anterior (solo compuesta). Sus rutas `#tema/2/capitalizacion-compuesta/<parte>` siguen
+ * funcionando: el router las lleva a la parte equivalente del tema rehecho.
+ */
 export const LECCIONES_TEMA2 = [
   { id: 'capitalizacion-compuesta', titulo: 'Capitalización compuesta', subtitulo: 'Notación, cálculo y práctica' },
 ] as const;

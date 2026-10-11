@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hrefTema2, resolverRuta } from '../../src/app/router.ts';
+import { hrefFase, hrefFormula, hrefTema2, resolverRuta } from '../../src/app/router.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 
 describe('rutas hash', () => {
@@ -13,16 +13,28 @@ describe('rutas hash', () => {
     expect(resolverRuta('#inicio', tema01)).toEqual({ vista: 'inicio', scrollArriba: true });
   });
 
-  it('#tema/2 con lección y parte; lo desconocido cae en la portada del tema 2', () => {
-    expect(resolverRuta('#tema/2', tema01)).toEqual({ vista: 'tema2', leccion: null, parte: null, scrollArriba: true });
-    expect(resolverRuta('#tema/2/capitalizacion-compuesta', tema01))
-      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: null, scrollArriba: true });
-    expect(resolverRuta('#tema/2/capitalizacion-compuesta/papel', tema01))
-      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: 'papel', scrollArriba: false });
-    expect(resolverRuta('#tema/2/capitalizacion-compuesta/nada', tema01))
-      .toEqual({ vista: 'tema2', leccion: 'capitalizacion-compuesta', parte: null, scrollArriba: true });
-    expect(resolverRuta('#tema/2/otra', tema01)).toEqual({ vista: 'tema2', leccion: null, parte: null, scrollArriba: true });
-    expect(hrefTema2('capitalizacion-compuesta', 'errores')).toBe('#tema/2/capitalizacion-compuesta/errores');
+  it('#tema/2: índice, bloque, ficha de fórmula y fases; lo desconocido cae en el índice', () => {
+    const t2 = (pantalla: unknown, scrollArriba = true) => ({ vista: 'tema2', pantalla, scrollArriba });
+    expect(resolverRuta('#tema/2', tema01)).toEqual(t2({ tipo: 'indice', bloque: null }));
+    expect(resolverRuta('#tema/2/simple', tema01)).toEqual(t2({ tipo: 'indice', bloque: 'simple' }, false));
+    expect(resolverRuta('#tema/2/simple/formulas', tema01)).toEqual(t2({ tipo: 'indice', bloque: 'simple' }, false));
+    expect(resolverRuta('#tema/2/f/simple-intereses', tema01)).toEqual(t2({ tipo: 'formula', id: 'simple-intereses' }));
+    expect(resolverRuta('#tema/2/f/no-existe', tema01)).toEqual(t2({ tipo: 'indice', bloque: null }));
+    expect(resolverRuta('#tema/2/descuento/datos', tema01)).toEqual(t2({ tipo: 'fase', bloque: 'descuento', fase: 'datos' }));
+    expect(resolverRuta('#tema/2/simple/elegir#t2-ej-s-juana', tema01)).toEqual(t2({ tipo: 'fase', bloque: 'simple', fase: 'elegir' }, false));
+    expect(resolverRuta('#tema/2/otra', tema01)).toEqual(t2({ tipo: 'indice', bloque: null }));
+    expect(hrefTema2()).toBe('#tema/2');
+    expect(hrefFormula('compuesta-tae')).toBe('#tema/2/f/compuesta-tae');
+    expect(hrefFase('compuesta', 'practica')).toBe('#tema/2/compuesta/practica');
+    expect(hrefFase('compuesta', 'formulas')).toBe('#tema/2/compuesta');
+  });
+
+  it('los enlaces de la lección anterior de compuesta llevan a su sitio en el tema rehecho', () => {
+    const t2 = (pantalla: unknown, scrollArriba: boolean) => ({ vista: 'tema2', pantalla, scrollArriba });
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta', tema01)).toEqual(t2({ tipo: 'indice', bloque: 'compuesta' }, false));
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta/simbolos', tema01)).toEqual(t2({ tipo: 'indice', bloque: 'compuesta' }, false));
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta/papel', tema01)).toEqual(t2({ tipo: 'fase', bloque: 'compuesta', fase: 'practica' }, true));
+    expect(resolverRuta('#tema/2/capitalizacion-compuesta/reconocer', tema01)).toEqual(t2({ tipo: 'fase', bloque: 'compuesta', fase: 'elegir' }, true));
   });
 
   it('#s/<id> abre la sección', () => {

@@ -1,107 +1,141 @@
-import type { Ruta } from '../../app/router.ts';
-import { hrefTema2 } from '../../app/router.ts';
-import {
-  FORMULA_CAPITAL_FINAL,
-  FORMULA_INTERESES_TOTALES,
-  FORMULA_INTERESES_TOTALES_FACTOR,
-  LECCIONES_TEMA2,
-  NOTACION_CAPITALIZACION_COMPUESTA,
-  PARTES_LECCION,
-  tema02,
-} from '../../content/temas/tema-02/index.ts';
+import type { PantallaTema2, Ruta } from '../../app/router.ts';
+import { hrefBloqueTema2, hrefFase, hrefFormula, hrefTema2 } from '../../app/router.ts';
+import { BLOQUES, formulaPorId, formulasDe, type BloqueId } from '../../content/temas/tema-02/formulas.ts';
+import { FASES_TEMA2, tema02 } from '../../content/temas/tema-02/index.ts';
 import { montarCapitalizacionCompuesta } from '../components/capitalizacionCompuesta.ts';
-import { montarPracticaCompuesta, seccionErrores, seccionPapel, seccionReconocer } from '../components/practicaCompuesta.ts';
+import { montarPracticaCompuesta, seccionErrores, seccionReconocer } from '../components/practicaCompuesta.ts';
 import { enlaceTodosLosTemas } from '../components/rail.ts';
-import { colorearSimbolos } from '../components/simbolos.ts';
+import { escaparHtml } from '../components/simbolos.ts';
+import { bloque as datosBloque, pestanasBloque, recorridoFases } from './tema2/comun.ts';
+import { htmlElegir, htmlIdentificar, htmlPractica, montarFase } from './tema2/fases.ts';
+import { htmlFicha, montarFicha } from './tema2/ficha.ts';
+import { htmlIndice, montarMiniaturas } from './tema2/indice.ts';
 import type { ContextoVista } from './context.ts';
+
+/*
+ * Tema 2 · Introducción al cálculo financiero. Cuatro fases sobre tres bloques del temario:
+ *  A · índice de fórmulas (y la ficha animada de cada una),
+ *  B · identificar los datos, C · elegir la fórmula, D · practicar en papel.
+ */
 
 type RutaTema2 = Extract<Ruta, { vista: 'tema2' }>;
 
 let detenerExperiencia: (() => void) | null = null;
+let pantallaMontada = '';
 
 export function detenerTemaDos(): void {
   detenerExperiencia?.();
   detenerExperiencia = null;
+  pantallaMontada = '';
 }
 
-const PARTE = Object.fromEntries(PARTES_LECCION.map((p) => [p.id, p])) as Record<(typeof PARTES_LECCION)[number]['id'], (typeof PARTES_LECCION)[number]>;
+const clavePantalla = (p: PantallaTema2) => (p.tipo === 'formula' ? `f:${p.id}` : p.tipo === 'fase' ? `${p.bloque}:${p.fase}` : 'indice');
 
-function cabeceraParte(id: keyof typeof PARTE, numero: number, intro: string): string {
-  const p = PARTE[id];
-  return `<header class="mat-parte-cabecera"><p class="mat-ceja">${String(numero).padStart(2, '0')} · ${p.subtitulo.toUpperCase()}</p>
-    <h2 id="mat-${id}-titulo">${p.titulo}</h2><p>${intro}</p></header>`;
+const INTRO_FASE = {
+  datos: 'Antes de calcular, cada dato del enunciado tiene que tener su símbolo. Aquí no se calcula nada.',
+  elegir: 'En el examen nadie te dice qué fórmula toca. Con los datos identificados, elige y comprueba por qué.',
+  practica: 'Ahora sí: en papel, con calculadora y con cada vez menos ayuda.',
+} as const;
+
+function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): string {
+  const b = datosBloque(bloque);
+  const f = FASES_TEMA2.find((x) => x.id === fase)!;
+  const extraAntes = bloque === 'compuesta' && fase === 'practica'
+    ? `<section class="t2-extra" aria-labelledby="t2-ejemplo-titulo">
+        <h2 id="t2-ejemplo-titulo">Antes de empezar: un ejemplo resuelto, año a año</h2>
+        <p>Con el modo cuaderno, cada cálculo se oculta hasta que lo hayas hecho tú.</p>
+        <div data-capitalizacion-compuesta></div>
+      </section>
+      <section class="t2-extra" aria-labelledby="t2-errores-titulo">
+        <h2 id="t2-errores-titulo">Errores típicos en compuesta</h2>
+        <p>Antes de pulsar, piensa qué está mal.</p>
+        ${seccionErrores()}
+      </section>`
+    : '';
+  const extraDespues = bloque === 'compuesta' && fase === 'elegir'
+    ? `<section class="t2-extra" aria-labelledby="t2-mezcla-titulo">
+        <h2 id="t2-mezcla-titulo">Repaso mezclado: simple y compuesta</h2>
+        <p>Tipos de ejercicio intercalados, como en el examen.</p>
+        ${seccionReconocer()}
+      </section>`
+    : '';
+  const siguiente = FASES_TEMA2[FASES_TEMA2.findIndex((x) => x.id === fase) + 1];
+  const bloqueSiguiente = BLOQUES[BLOQUES.findIndex((x) => x.id === bloque) + 1];
+  const continuar = siguiente
+    ? `<a class="btn-principal" href="${hrefFase(bloque, siguiente.id)}">${siguiente.letra} · ${siguiente.titulo}</a>`
+    : bloqueSiguiente
+      ? `<a class="btn-principal" href="${hrefBloqueTema2(bloqueSiguiente.id)}">Siguiente bloque: ${escaparHtml(bloqueSiguiente.titulo)}</a>`
+      : `<a class="btn-principal" href="${hrefTema2()}">Volver al índice de fórmulas</a>`;
+  return `<div class="tema-matematica t2 t2-fase-pagina">
+    <header class="t2-cabecera t2-cabecera-fase">
+      <p class="t2-ceja">${escaparHtml(b.apartado)} · ${escaparHtml(b.titulo)}</p>
+      <h1><span class="t2-letra">${f.letra}</span>${escaparHtml(f.titulo)}</h1>
+      <p class="t2-entradilla">${INTRO_FASE[fase]}</p>
+      ${recorridoFases(bloque, fase)}
+      ${pestanasBloque(bloque, fase)}
+    </header>
+    ${extraAntes}
+    ${fase === 'datos' ? htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque)}
+    ${extraDespues}
+    <nav class="t2-continuar">${continuar}</nav>
+  </div>`;
+}
+
+function tituloPantalla(p: PantallaTema2): string {
+  if (p.tipo === 'formula') return formulaPorId(p.id)!.nombre;
+  if (p.tipo === 'fase') return FASES_TEMA2.find((f) => f.id === p.fase)!.titulo;
+  return p.bloque ? datosBloque(p.bloque).titulo : 'Índice de fórmulas';
 }
 
 export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2): void {
   detenerTemaDos();
-  const leccion = LECCIONES_TEMA2[0];
-  ctx.pagina.innerHTML = `<div class="tema-matematica">
-    <header class="sh">
-      <div class="kick"><span class="pill k">Tema ${tema02.numero}</span><span class="pill">${tema02.fuente}</span></div>
-      <h1>${leccion.titulo}</h1>
-      <p>Un capital actual se convierte en uno futuro, y cada periodo el interés se suma al capital y genera más interés. Esta lección va en cinco partes; ten a mano <b>papel y calculadora</b>: en cada paso, intenta escribirlo tú antes de verlo.</p>
-      <ol class="mat-indice" aria-label="Partes de la lección">${PARTES_LECCION.map((p, i) => `<li><a href="${hrefTema2(leccion.id, p.id)}"><span>${String(i + 1).padStart(2, '0')}</span>${p.titulo}</a></li>`).join('')}</ol>
-    </header>
-
-    <section class="mat-parte mat-notacion" id="mat-simbolos" aria-labelledby="mat-simbolos-titulo">
-      ${cabeceraParte('simbolos', 1, 'Antes de ver el cálculo, apréndete qué es cada letra. Cada símbolo tiene siempre el mismo color en toda la lección.')}
-      <dl class="mat-notacion-lista">${NOTACION_CAPITALIZACION_COMPUESTA.map((dato) =>
-        `<div><dt>${colorearSimbolos(dato.simbolo)}</dt><dd>${dato.significado}</dd></div>`,
-      ).join('')}</dl>
-      <div class="mat-formulas" aria-label="Fórmulas de capitalización compuesta">
-        <p><span>Capital final</span><strong>${colorearSimbolos(FORMULA_CAPITAL_FINAL)}</strong></p>
-        <p><span>Intereses totales</span><strong>${colorearSimbolos(FORMULA_INTERESES_TOTALES)}</strong></p>
-        <p><span>Intereses totales · con el factor</span><strong>${colorearSimbolos(FORMULA_INTERESES_TOTALES_FACTOR)}</strong></p>
-      </div>
-      <p class="mat-aviso">El tipo <span class="s s-i">i</span> se usa en tanto por uno (5 % = 0,05) y en la misma unidad de tiempo que <span class="s s-n">n</span>.</p>
-    </section>
-
-    <section class="mat-parte mat-leccion" id="mat-leccion" aria-labelledby="mat-leccion-titulo">
-      ${cabeceraParte('leccion', 2, 'Un ejemplo resuelto, año a año. Con el modo cuaderno, cada cálculo se oculta hasta que lo hayas hecho tú en papel.')}
-      <div data-capitalizacion-compuesta></div>
-    </section>
-
-    <section class="mat-parte" id="mat-errores" aria-labelledby="mat-errores-titulo">
-      ${cabeceraParte('errores', 3, 'Lo que más se falla en estos ejercicios. Antes de pulsar, piensa qué está mal.')}
-      ${seccionErrores()}
-    </section>
-
-    <section class="mat-parte" id="mat-papel" aria-labelledby="mat-papel-titulo">
-      ${cabeceraParte('papel', 4, 'Casos resueltos del libro. El primero te da casi todo; el último, nada. Resuélvelos en el cuaderno y solo después mira la solución.')}
-      ${seccionPapel()}
-    </section>
-
-    <section class="mat-parte" id="mat-reconocer" aria-labelledby="mat-reconocer-titulo">
-      ${cabeceraParte('reconocer', 5, 'En el examen nadie te dice qué tipo de ejercicio es. Aquí no se calcula nada: solo entrenas a elegir la fórmula, con tipos mezclados.')}
-      ${seccionReconocer()}
-    </section>
-  </div>`;
-  ctx.tituloMovil.textContent = `Tema ${tema02.numero} · ${leccion.titulo}`;
-
-  const contenedor = ctx.pagina.querySelector<HTMLElement>('[data-capitalizacion-compuesta]');
-  const detenerLeccion = contenedor ? montarCapitalizacionCompuesta(contenedor) : () => {};
-  const detenerPractica = montarPracticaCompuesta(ctx.pagina);
-  detenerExperiencia = () => {
-    detenerLeccion();
-    detenerPractica();
-  };
-  if (ruta.parte) ctx.pagina.querySelector(`#mat-${ruta.parte}`)?.scrollIntoView({ block: 'start' });
+  const p = ruta.pantalla;
+  ctx.pagina.innerHTML = p.tipo === 'formula' ? htmlFicha(p.id) : p.tipo === 'fase' ? htmlFase(p.bloque, p.fase) : htmlIndice();
+  ctx.tituloMovil.textContent = `Tema ${tema02.numero} · ${tituloPantalla(p)}`;
+  const paradas: (() => void)[] = [];
+  if (p.tipo === 'formula') paradas.push(montarFicha(ctx.pagina));
+  else if (p.tipo === 'fase') {
+    paradas.push(montarFase(ctx.pagina, p.bloque, p.fase));
+    const ejemplo = ctx.pagina.querySelector<HTMLElement>('[data-capitalizacion-compuesta]');
+    if (ejemplo) paradas.push(montarCapitalizacionCompuesta(ejemplo));
+    if (ctx.pagina.querySelector('[data-mat-error], [data-mat-pregunta]')) paradas.push(montarPracticaCompuesta(ctx.pagina));
+  } else {
+    paradas.push(montarMiniaturas(ctx.pagina));
+  }
+  detenerExperiencia = () => paradas.forEach((parar) => parar());
+  pantallaMontada = clavePantalla(p);
+  desplazar(ctx, p);
 }
 
-/** Si la lección ya está montada, solo se desplaza a la parte pedida. Devuelve si lo ha hecho. */
+function desplazar(ctx: ContextoVista, p: PantallaTema2): void {
+  const ancla = location.hash.includes('#t2-') ? location.hash.slice(location.hash.lastIndexOf('#')) : '';
+  if (p.tipo === 'indice' && p.bloque) ctx.pagina.querySelector(`#t2-${p.bloque}`)?.scrollIntoView({ block: 'start' });
+  else if (ancla) ctx.pagina.querySelector(ancla)?.scrollIntoView({ block: 'start' });
+}
+
+/** Si la pantalla pedida ya está montada, solo se desplaza (no se pierde lo hecho). Devuelve si lo ha hecho. */
 export function desplazarTemaDos(ctx: ContextoVista, ruta: RutaTema2): boolean {
-  if (!detenerExperiencia || !ctx.pagina.querySelector('.tema-matematica')) return false;
-  if (ruta.parte) ctx.pagina.querySelector(`#mat-${ruta.parte}`)?.scrollIntoView({ block: 'start' });
-  else window.scrollTo(0, 0);
+  if (!detenerExperiencia || !ctx.pagina.querySelector('.t2') || pantallaMontada !== clavePantalla(ruta.pantalla)) return false;
+  if (ruta.scrollArriba) window.scrollTo(0, 0);
+  desplazar(ctx, ruta.pantalla);
   return true;
 }
 
 export function pintarRailTemaDos(rail: HTMLElement, ruta: RutaTema2): void {
-  const leccion = LECCIONES_TEMA2[0];
-  const partes = PARTES_LECCION.map((p, i) => {
-    const activa = ruta.parte === p.id;
-    return `<a class="sl${activa ? ' on' : ''}" href="${hrefTema2(leccion.id, p.id)}"${activa ? ' aria-current="location"' : ''}><div class="top"><span class="id">${String(i + 1).padStart(2, '0')}</span><span>${p.titulo}</span></div><small class="sl-sub">${p.subtitulo}</small></a>`;
+  const p = ruta.pantalla;
+  const bloqueActual = p.tipo === 'formula' ? formulaPorId(p.id)!.bloque : p.bloque;
+  const grupos = BLOQUES.map((b) => {
+    const abierto = b.id === bloqueActual;
+    const formulas = formulasDe(b.id).map((f) => {
+      const on = p.tipo === 'formula' && p.id === f.id;
+      return `<a class="sl t2-sl${on ? ' on' : ''}" href="${hrefFormula(f.id)}"${on ? ' aria-current="location"' : ''}><div class="top"><span class="id">${f.numero}</span><span>${escaparHtml(f.nombre)}</span></div></a>`;
+    }).join('');
+    const fases = FASES_TEMA2.filter((f) => f.id !== 'formulas').map((f) => {
+      const on = p.tipo === 'fase' && p.bloque === b.id && p.fase === f.id;
+      return `<a class="sl${on ? ' on' : ''}" href="${hrefFase(b.id, f.id)}"${on ? ' aria-current="location"' : ''}><div class="top"><span class="id">${f.letra}</span><span>${f.titulo}</span></div><small class="sl-sub">${f.subtitulo}</small></a>`;
+    }).join('');
+    return `<details class="t2-rail-bloque"${abierto || !bloqueActual ? ' open' : ''}><summary class="grp"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></summary>${formulas}${fases}</details>`;
   }).join('');
-  rail.innerHTML = `${enlaceTodosLosTemas()}<a class="brand" href="${hrefTema2()}"><span class="ring tema-anillo" aria-hidden="true">${tema02.numero}</span><span><small class="brand-ante">Gestión financiera</small><b>${tema02.titulo}</b><small>Tema ${tema02.numero}</small></span></a>
-    <div class="grp">${leccion.titulo}</div>${partes}`;
+  rail.innerHTML = `${enlaceTodosLosTemas()}<a class="brand" href="${hrefTema2()}"><span class="ring tema-anillo" aria-hidden="true">${tema02.numero}</span><span><small class="brand-ante">Gestión financiera</small><b>${tema02.titulo}</b><small>Tema ${tema02.numero} · índice de fórmulas</small></span></a>
+    ${grupos}`;
 }

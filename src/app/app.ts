@@ -130,9 +130,9 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
       // Dentro de la misma lección, cambiar de parte solo desplaza: no se pierde lo que llevas hecho.
       if (!desplazarTemaDos(ctx, ruta)) pintarTemaDos(ctx, ruta);
       pintarRailTemaDos(ctx.rail, ruta);
-      pintarMigas(migas, migasTema(2, hrefTema2()).slice(0, ruta.leccion ? 3 : 2));
+      pintarMigas(migas, migasTema(2, hrefTema2()).slice(0, ruta.pantalla.tipo === 'indice' && !ruta.pantalla.bloque ? 2 : 3));
       recordar();
-      document.title = 'Matemática financiera · Tema 2';
+      document.title = 'Introducción al cálculo financiero · Tema 2';
       if (ruta.scrollArriba) window.scrollTo(0, 0);
       activarAparicion();
       return;
