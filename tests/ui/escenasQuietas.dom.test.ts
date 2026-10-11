@@ -1,6 +1,8 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
 import { formulaTexto, simbolosDe } from '../../src/ui/matematica/formula.ts';
+import { UNIDADES } from '../../src/domain/tema2/periodos.ts';
+import { escenaConversion } from '../../src/ui/escenas/conversionPeriodos.ts';
 import { LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
 import { Lienzo } from '../../src/ui/motion/lienzo.ts';
 import { avanzar, type Escena, finCapitulo, PAUSA_LECTURA, textoConFormulas } from '../../src/ui/motion/reproductor.ts';
@@ -116,6 +118,27 @@ describe('cada capítulo tiene un instante de lectura completo y quieto', () => 
       const malos = escena.capitulos.flatMap((c, k) => {
         const p = problemasDeLectura(escena, fotoEn, k);
         return p.length ? [`cap. ${k + 1} (${c.t} s, lectura ${finCapitulo(escena, k)} s): ${p.slice(0, 2).join(' · ')}`] : [];
+      });
+      expect(malos).toEqual([]);
+    });
+  }
+});
+
+describe('el calendario de equivalencias: cualquier unidad a cualquier otra, con capítulos completos y quietos', () => {
+  // Todas las parejas de unidades (con días, los dos convenios) y cantidades enteras y con decimales.
+  const parejas = UNIDADES.flatMap((de) => UNIDADES.filter((a) => a.id !== de.id).flatMap((a) => {
+    const conDias = de.id === 'dia' || a.id === 'dia';
+    const cantidad = de.id === 'dia' ? 195 : de.id === 'mes' ? 9 : de.id === 'año' ? 2.5 : 1;
+    return (conDias ? [360, 365] as const : [360] as const).map((convenio) => ({ cantidad, de: de.id, a: a.id, convenio }));
+  }));
+  it(`son ${parejas.length} parejas`, () => expect(parejas.length).toBe(40));
+  for (const p of parejas) {
+    it(`${p.cantidad} ${p.de} → ${p.a} (${p.convenio})`, () => {
+      const escena = escenaConversion(p);
+      const fotoEn = camaraDe(escena);
+      const malos = escena.capitulos.flatMap((_, k) => {
+        const problemas = problemasDeLectura(escena, fotoEn, k);
+        return problemas.length ? [`cap. ${k + 1}: ${problemas.slice(0, 2).join(' · ')}`] : [];
       });
       expect(malos).toEqual([]);
     });

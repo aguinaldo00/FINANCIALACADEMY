@@ -232,6 +232,42 @@ select.lab-campo{font-family:var(--f-texto);cursor:pointer}
 /* Analógico: la pantalla pasa a cristal líquido verdoso, como la calculadora de mesa */
 .lab[data-modo="analogico"] .cal-pantalla{background:linear-gradient(180deg,#c9d3bd,#b9c4ad)}
 
+/* ── Calendario de equivalencias (conversor de unidades de tiempo) ── */
+.conv{margin-top:56px;padding-top:28px;border-top:1px solid var(--line2)}
+.conv-cab{max-width:760px;margin-bottom:22px}
+.conv-volanta{margin:0 0 6px;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.24em;text-transform:uppercase;color:var(--oro)}
+.conv-cab h2{margin:0;font-size:var(--t-h2)}
+.conv-entrada{margin:10px 0 0;color:var(--mut)}
+.conv-cuerpo{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.6fr);gap:22px;align-items:start}
+.conv-mandos{position:relative;padding:22px;border-radius:4px;color:var(--lab-tinta);isolation:isolate;
+  background:linear-gradient(var(--lab-cuadro) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,var(--lab-cuadro) 1px,transparent 1px) 0 0/22px 22px,var(--lab-papel);
+  box-shadow:0 2px 0 rgba(0,0,0,.25),0 30px 40px -28px rgba(0,0,0,.9)}
+.conv-mandos::before{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:multiply;opacity:.12}
+.conv-pregunta{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1fr) minmax(0,1fr);gap:12px}
+.conv-campo{display:grid;gap:4px}
+.conv-campo span,.conv-convenio legend,.conv-atajos-tit{font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--lab-tinta-suave)}
+.conv-campo input,.conv-campo select{width:100%;box-sizing:border-box;padding:6px 4px;border:0;border-bottom:1.5px solid rgba(42,33,24,.38);background:rgba(255,255,255,.3);color:var(--lab-tinta);font:500 1.05rem/1.3 var(--f-cifra)}
+.conv-campo select{font-family:var(--f-texto);cursor:pointer}
+.conv-campo input:focus,.conv-campo select:focus{outline:none;border-bottom-color:#b0701f;background:rgba(232,192,98,.18)}
+.conv-convenio{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:6px 18px;margin:4px 0 0;padding:0;border:0}
+.conv-convenio legend{width:100%;margin-bottom:4px}
+.conv-convenio label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.conv-resultado{margin:18px 0 0;padding:12px 0;border-top:2px solid var(--lab-tinta);border-bottom:1px dashed rgba(42,33,24,.3);font:400 1.35rem/1.35 var(--f-titulo)}
+.conv-resultado,.conv-resultado b{color:var(--lab-tinta)}
+.conv-resultado b{font-weight:600}
+.conv-resultado small{display:block;margin-top:6px;font:400 .85rem/1.35 var(--f-texto);color:var(--lab-tinta-suave)}
+.conv-resultado.conv-aviso{color:var(--lab-mal);font-size:1rem;font-family:var(--f-texto)}
+.conv-atajos-tit{margin:18px 0 8px}
+.conv-atajos{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.conv-atajos button{padding:6px 10px;border:1px solid rgba(42,33,24,.3);border-radius:999px;background:rgba(255,255,255,.35);color:var(--lab-tinta);cursor:pointer;font:500 .85rem/1.2 var(--f-texto)}
+.conv-atajos button:hover{border-color:#a24f1c;color:#a24f1c}
+.conv-atajos button:focus-visible{outline:2px solid #b0701f;outline-offset:2px}
+.conv-escena{position:relative;margin:0;padding:12px 12px 14px;border-radius:6px;isolation:isolate;background:linear-gradient(180deg,var(--lab-carbon2),var(--lab-carbon));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 34px 50px -30px rgba(0,0,0,.95)}
+.conv-escena::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:soft-light;opacity:.7}
+.conv-escena-medio{display:block;border-radius:3px;overflow:hidden}
+.conv-escena.vx-en-viaje{visibility:hidden}
+.conv-escena figcaption{display:flex;justify-content:flex-end;margin-top:12px}
+
 /* ── Teoría, debajo del laboratorio ── */
 .t2-teoria{margin-top:56px;padding-top:28px;border-top:1px solid var(--line2)}
 .t2-teoria-tit{margin:0 0 18px;font-size:var(--t-h2)}
@@ -244,6 +280,7 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .lab[data-modo="analogico"]{grid-template-areas:"barra barra" "centro centro" "calc calc"}
   .lab[data-modo="analogico"] .lab-calculadora{max-width:460px;justify-self:center;width:100%}
   .lab-centro,.lab-calculadora{position:relative;top:auto}
+  .conv-cuerpo{grid-template-columns:minmax(0,1fr)}
 }
 /* Móvil: enunciado, animación, cuaderno y calculadora, en ese orden */
 @media (max-width:760px){
@@ -263,6 +300,9 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .lab-papel .lab-paso-cuerpo{grid-template-columns:minmax(0,1fr)}
   .lab-papel .lab-paso-cuerpo>:not(.lab-paso-tit){grid-column:1}
   .cal-tecla{min-height:52px}
+  .conv-pregunta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .conv-pregunta .conv-campo:first-child{grid-column:1 / -1}
+  .conv-mandos{padding:18px 14px}
 }
 @media (prefers-reduced-motion:reduce){
   .lab-papel-marco,.lab-papel{transition:none}

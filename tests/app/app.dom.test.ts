@@ -318,6 +318,26 @@ describe('app en el navegador', () => {
     expect($$('.t2-teoria [data-t2-error]').length).toBeGreaterThan(0);
   });
 
+  it('las fichas con cambios de unidad llevan el calendario de equivalencias: cualquier unidad a cualquier otra', () => {
+    navegar('#tema/2/f/compuesta-equivalentes');
+    const conv = $('[data-conversor]');
+    // Por defecto, la pregunta que no encaja: 1 semestre, ¿cuántos cuatrimestres?
+    expect($('[data-conv-resultado]', conv).textContent).toBe('1 semestre = 1,5 cuatrimestres');
+    expect($('[data-conv-reproductor] .mo-svg', conv)).not.toBeNull();
+    // Con días aparece el convenio y la escena se rehace para la nueva pareja.
+    $<HTMLButtonElement>('[data-conv-atajo="8"]', conv).click();
+    expect($('[data-conv-resultado]', conv).textContent).toBe('195 días = 0,5342 años');
+    expect($('[data-conv-convenio]', conv).hidden).toBe(false);
+    expect($('[data-conv-reproductor]', conv).dataset.escena).toBe('conversion-dia-año-195-365');
+    const cantidad = $<HTMLInputElement>('[data-conv-cantidad]', conv);
+    cantidad.value = '1.5';
+    cantidad.dispatchEvent(new Event('input', { bubbles: true }));
+    expect($('[data-conv-resultado]', conv).textContent).toContain('coma');
+    // No todas las fichas lo llevan.
+    navegar('#tema/2/f/simple-intereses');
+    expect(document.querySelector('[data-conversor]')).toBeNull();
+  });
+
   it('ir a un ejercicio dentro de la misma pantalla del Tema 2 no reinicia lo ya hecho', () => {
     navegar('#tema/2/compuesta/practica');
     $<HTMLButtonElement>('[data-mat-revelar-error]').click();

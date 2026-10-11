@@ -6,6 +6,7 @@
 import { hrefFase } from '../../../app/router.ts';
 import { FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/tema-02/formulas.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
+import { htmlConversor, montarConversor } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
@@ -13,6 +14,9 @@ import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio
 function lista(items: string[]): string {
   return `<ul>${items.map((x) => `<li>${textoT2(x)}</li>`).join('')}</ul>`;
 }
+
+/** Fichas en las que pasar de una unidad de tiempo a otra es parte del cálculo: llevan el conversor. */
+const CON_CONVERSOR = new Set(['simple-tiempo', 'simple-fraccionado', 'compuesta-tiempo', 'compuesta-equivalentes', 'compuesta-tae', 'descuento-comercial', 'descuento-racional', 'descuento-compuesto-racional']);
 
 export function htmlFicha(id: string): string {
   const f = formulaPorId(id)!;
@@ -33,6 +37,7 @@ export function htmlFicha(id: string): string {
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}
+    ${CON_CONVERSOR.has(f.id) ? htmlConversor() : ''}
     <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
       <h2 class="t2-teoria-tit" id="t2-teoria-tit">Para entenderla</h2>
       ${f.variantes?.length ? `<ul class="t2-variantes">${f.variantes.map((v) => `<li>${formulaHtml(v.expresion)}<span>${escaparHtml(v.nota)}</span></li>`).join('')}</ul>` : ''}
@@ -83,7 +88,9 @@ export function htmlFicha(id: string): string {
 }
 
 export function montarFicha(raiz: HTMLElement): () => void {
-  const parar = montarLaboratorio(raiz);
+  const pararLaboratorio = montarLaboratorio(raiz);
+  const pararConversor = montarConversor(raiz);
+  const parar = () => { pararLaboratorio(); pararConversor(); };
   const alPulsar = (e: Event) => {
     const boton = (e.target as Element | null)?.closest<HTMLButtonElement>('[data-t2-ver-error]');
     if (!boton) return;
