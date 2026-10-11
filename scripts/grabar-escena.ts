@@ -6,13 +6,24 @@
 import '../src/styles/fuentes.css';
 import '../src/styles/base.css';
 import '../src/styles/tema2.css';
+import '../src/styles/escenasTema1.css';
 import '../src/styles/editorial.css';
-import { ESCENAS } from '../src/ui/escenas/index.ts';
+import { ESCENAS as ESCENAS_TEMA2 } from '../src/ui/escenas/index.ts';
+import { ESCENAS_TEMA1 } from '../src/ui/escenas/tema1/index.ts';
+
+const ESCENAS = { ...ESCENAS_TEMA2, ...ESCENAS_TEMA1 };
 import { Lienzo } from '../src/ui/motion/lienzo.ts';
 import { capituloEn, textoConFormulas } from '../src/ui/motion/reproductor.ts';
 
 const escena = ESCENAS[new URLSearchParams(location.search).get('escena') ?? ''] ?? ESCENAS['simple-intereses']!;
-const lienzo = new Lienzo(escena.titulo);
+const lienzo = new Lienzo(escena.titulo, escena.ambiente);
+if (escena.ambiente === 'noche') {
+  // Capítulo I: marco nocturno y subtítulo en marfil sobre tinta.
+  document.querySelector('#lienzo')!.classList.add('mo-noche');
+  const s = document.querySelector<HTMLElement>('#sub')!;
+  s.classList.remove('ed-sobre-papel');
+  Object.assign(s.style, { background: '#0d1321', color: '#f1ebdf', borderTopColor: 'rgba(241,235,223,.12)' });
+}
 document.querySelector('#lienzo')!.append(lienzo.svg);
 const pintar = escena.montar(lienzo);
 const sub = document.querySelector<HTMLElement>('#sub')!;

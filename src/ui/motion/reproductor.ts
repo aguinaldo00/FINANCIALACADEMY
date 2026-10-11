@@ -7,7 +7,7 @@
 import { formulaHtml } from '../matematica/formula.ts';
 import { escaparHtml } from '../components/simbolos.ts';
 import { alCambiarMovimiento, movimientoReducido } from '../motion.ts';
-import { Lienzo } from './lienzo.ts';
+import { type Ambiente, Lienzo } from './lienzo.ts';
 
 export interface Capitulo {
   /** Segundo en que empieza. */
@@ -23,6 +23,8 @@ export interface Escena {
   capitulos: readonly Capitulo[];
   /** Qué queda en pantalla al final (para lectores de pantalla). */
   descripcion: string;
+  /** Papel (Tema 2, por defecto) o noche (Tema 1). */
+  ambiente?: Ambiente;
   /** Construye el dibujo y devuelve la función que lo pinta en el segundo t. */
   montar(lienzo: Lienzo): (t: number) => void;
 }
@@ -52,7 +54,8 @@ export function finCapitulo(escena: Escena, k: number): number {
 
 /** Dibuja la escena congelada en un instante (miniaturas del índice). */
 export function pintarFotograma(contenedor: HTMLElement, escena: Escena, t = escena.duracion): () => void {
-  const lienzo = new Lienzo(`${escena.titulo}. ${escena.descripcion}`);
+  const lienzo = new Lienzo(`${escena.titulo}. ${escena.descripcion}`, escena.ambiente);
+  contenedor.classList.toggle('mo-noche', escena.ambiente === 'noche');
   contenedor.replaceChildren(lienzo.svg);
   const pintarEscena = escena.montar(lienzo);
   const pintar = (instante: number) => {
@@ -80,12 +83,12 @@ export interface OpcionesReproductor {
 
 /** Monta el reproductor dentro de `contenedor`. Devuelve la función que lo desmonta. */
 export function montarReproductor(contenedor: HTMLElement, escena: Escena, opciones: OpcionesReproductor = {}): () => void {
-  const lienzo = new Lienzo(`${escena.titulo}. ${escena.descripcion}`);
+  const lienzo = new Lienzo(`${escena.titulo}. ${escena.descripcion}`, escena.ambiente);
   const total = escena.duracion;
   contenedor.classList.add('mo');
   contenedor.dataset.escena = escena.id;
   contenedor.innerHTML = `
-    <div class="mo-marco" data-mo-marco></div>
+    <div class="mo-marco${escena.ambiente === 'noche' ? ' mo-noche' : ''}" data-mo-marco></div>
     <p class="mo-sub" aria-live="polite" data-mo-sub></p>
     <div class="mo-mandos">
       <button type="button" class="mo-play" data-mo-play aria-label="Reproducir">${ICONO_PLAY}</button>

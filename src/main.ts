@@ -12,6 +12,7 @@ import './styles/practice.css';
 import './styles/infographic.css';
 import './styles/capitalizacion.css';
 import './styles/tema2.css';
+import './styles/escenasTema1.css';
 import './styles/decor.css';
 import './styles/iconos.css';
 import './styles/intro.css';

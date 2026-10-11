@@ -4,7 +4,7 @@
  * para que cada símbolo pueda viajar desde el elemento de la escena que representa.
  */
 import { analizarFormula, claseSimbolo, type Nodo } from '../matematica/formula.ts';
-import { asegurarGrano, nuevaSemilla, rectanguloRecortado, trazoRotulador } from './papel.ts';
+import { asegurarGrano, nuevaSemilla, rectanguloRecortado, ruido, trazoRotulador } from './papel.ts';
 import { arco, curvas, limitar, mezclar, tramo } from './tiempo.ts';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -44,6 +44,8 @@ export function situar(el: Element, x: number, y: number, escala = 1, opacidad =
   });
 }
 
+export type Ambiente = 'papel' | 'noche';
+
 export class Lienzo {
   readonly svg: SVGSVGElement;
   readonly defs: SVGDefsElement;
@@ -58,10 +60,14 @@ export class Lienzo {
   /** Segundo que se está pintando (lo fija el reproductor; lo usa el temblor de los recortes). */
   instante = 0;
 
-  constructor(titulo: string) {
+  /**
+   * @param ambiente «papel» (Tema 2: papel cuadriculado con tinta) o «noche» (Tema 1: azul tinta con
+   *   luz cálida, sin cuadrícula; el polvo del fondo da la profundidad).
+   */
+  constructor(titulo: string, readonly ambiente: Ambiente = 'papel') {
     this.prefijo = `mo${++Lienzo.contador}`;
     this.svg = document.createElementNS(SVG_NS, 'svg');
-    fijar(this.svg, { viewBox: `0 0 ${ANCHO} ${ALTO}`, class: 'mo-svg', role: 'img', 'aria-label': titulo, preserveAspectRatio: 'xMidYMid meet' });
+    fijar(this.svg, { viewBox: `0 0 ${ANCHO} ${ALTO}`, class: ambiente === 'noche' ? 'mo-svg mo-svg-noche' : 'mo-svg', role: 'img', 'aria-label': titulo, preserveAspectRatio: 'xMidYMid meet' });
     this.defs = this.el('defs', {}, this.svg);
     const p = this.prefijo;
     asegurarGrano();
@@ -74,6 +80,15 @@ export class Lienzo {
     this.luz = this.el('circle', { r: 260, cx: ANCHO / 2, cy: ALTO / 2, fill: `url(#${p}-luz)` }, this.svg);
     this.mundo = this.el('g', { class: 'mo-mundo' }, this.svg);
     this.frente = this.el('g', { class: 'mo-frente' }, this.svg);
+    if (ambiente === 'noche') {
+      // Polvo en suspensión, a distintas distancias: con la cámara se mueve menos que el mundo.
+      for (let k = 0; k < 90; k++) {
+        const x = ANCHO / 2 + ruido(311, k) * (ANCHO / 2 + 600);
+        const y = ALTO / 2 + ruido(733, k) * (ALTO / 2 + 400);
+        this.el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (0.6 + Math.abs(ruido(97, k)) * 1.4).toFixed(2), class: 'mo-polvo', 'fill-opacity': (0.12 + Math.abs(ruido(53, k)) * 0.35).toFixed(2) }, this.fondo);
+      }
+      return;
+    }
     // Papel cuadriculado (el de hacer los ejercicios), con paralaje para dar profundidad.
     for (let y = -480; y <= ALTO + 480; y += 32) this.el('line', { x1: -900, x2: ANCHO + 900, y1: y, y2: y, class: y % 160 === 0 ? 'mo-renglon fuerte' : 'mo-renglon' }, this.fondo);
     for (let x = -896; x <= ANCHO + 896; x += 32) this.el('line', { x1: x, x2: x, y1: -480, y2: ALTO + 480, class: x % 160 === 0 ? 'mo-renglon fuerte' : 'mo-renglon' }, this.fondo);
