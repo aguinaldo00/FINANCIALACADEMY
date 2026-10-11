@@ -363,6 +363,18 @@ Se corrigen, no se rehacen (auditoría §3.0–3.1):
   - Midió 53 capítulos de las 19 escenas que aún se mueven al final: cámara, rotuladores, flechas y etiquetas que llegan tarde.
   - Resuelto en el 2b de forma general: cada capítulo tiene un instante de lectura (`lectura`) y el reproductor se detiene ahí 0,6 s. Las fórmulas que llegaban tarde terminan durante una retención (`retener` en `tiempo.ts`). La prueba ya no tiene excepciones.
   - **Reorientación del usuario (12/10):** la quietud total no es prioridad. Primero van los índices Simple/Compuesta y el laboratorio de la ficha.
+
+### 10.1 Reorientación (12/10): índices y laboratorio
+- **Índices Simple y Compuesta (hecho):**
+  - misma composición: la madre con su animación grande y «Para no memorizarlo todo» a la izquierda, y una columna numerada de ramas a la derecha;
+  - cada rama lleva su miniatura, que amplía la animación sin salir del índice (`reproductorExpandido`);
+  - en móvil, la relación y la miniatura van arriba y la fórmula debajo, a todo el ancho.
+- **Laboratorio en la página de cada fórmula** (siguiente):
+  - cuaderno a la izquierda, animación grande (ampliable) en el centro y calculadora a la derecha;
+  - selector DIGITAL/ANALÓGICO en la propia página. En DIGITAL, campos por paso (datos con Cₙ, C₀… y una celda para escribir lo que sea; incógnita, fórmula, despeje, sustitución, operaciones). En ANALÓGICO, el papel pautado, que sube desde detrás de la animación;
+  - los dos modos comparten el motor de cálculo y el estado del ejercicio. El modo individual es el predeterminado; VERSUS queda como opción futura;
+  - generador de ejercicios y progreso, debajo o en «Practicar».
+- **Fondo oscuro de escritorio** (como la imagen de referencia del usuario) en las fases B, C y D con sus paneles y en todas las páginas de fórmula. Los índices siguen claros.
 - **Solapes:** compuesta-capital-inicial, compuesta-intereses, descuento-compuesto-comercial y simple-tiempo.
 - **Móvil:** tamaño mínimo de rótulo.
 - **compuesta-tiempo:** el logaritmo en 8 pasos con la `pizarra` (auditoría §3.3).
