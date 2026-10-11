@@ -18,7 +18,7 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 - **Claude fusiona sus PR** cuando pasan las comprobaciones (autorizado por el usuario el 11/10; el repositorio es público).
 - Tras fusionar: esperar 2–3 minutos y recargar con Ctrl + F5.
 - Previsualización: cada incremento con código se enseña en una URL de GitHub Pages que no pise producción
-  (plan en `docs/plan-completo.md`, §10). Si no se puede de forma segura, se explica el bloqueo antes de tocar permisos.
+  (plan en `docs/plan-completo.md`, §12). Si no se puede de forma segura, se explica el bloqueo antes de tocar permisos.
 
 ## Normas del usuario
 - No cambiar los datos ni la lógica académica (`src/content/`), no inventar contenido y no quitar funciones.
