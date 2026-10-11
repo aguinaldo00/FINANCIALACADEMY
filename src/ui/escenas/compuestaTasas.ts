@@ -13,6 +13,7 @@ export const escenaEquivalentes: Escena = {
   titulo: 'Tantos equivalentes en capitalización compuesta',
   duracion: 17.6,
   descripcion: 'Caso práctico 19: un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^(1/m) − 1.',
+  caso: { i: '10 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'Caso práctico 19: tipo anual del 10 %. ¿Qué tipo mensual es equivalente en compuesta?' },
     { t: 2.8, texto: 'Un salto anual: cada euro se convierte en 1,10 €.' },
@@ -139,6 +140,7 @@ export const escenaTae: Escena = {
   titulo: 'TIN y TAE',
   duracion: 17,
   descripcion: 'Caso práctico 24: TIN del 12 % con capitalización mensual: 1 % al mes durante 12 meses lleva 10.000 € a 11.268,25 € (TAE 12,68 %). Con una comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.',
+  caso: { J_m: '12 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'El TIN ($J_m$) es un tipo nominal anual: se reparte entre las $m$ capitalizaciones del año.' },
     { t: 3, lectura: 5.6, texto: 'TIN del 12 % con capitalización mensual: $i_m = \\frac{J_m}{m}$ = 12 % / 12 = 1 % al mes.' },

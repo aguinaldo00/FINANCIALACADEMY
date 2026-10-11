@@ -32,6 +32,12 @@ export interface Escena {
   descripcion: string;
   /** Papel (Tema 2, por defecto) o noche (Tema 1). */
   ambiente?: Ambiente;
+  /**
+   * El caso que enseña la animación, con los datos escritos como los escribiría el alumno (símbolo →
+   * texto: «12.100 €», «7 %», «45/360»). El laboratorio lo propone como enunciado y comprueba que el
+   * cuaderno resuelve el mismo ejercicio; una prueba verifica que su resultado es el que pinta la escena.
+   */
+  caso?: Readonly<Record<string, string>>;
   /** Construye el dibujo y devuelve la función que lo pinta en el segundo t. */
   montar(lienzo: Lienzo): (t: number) => void;
 }

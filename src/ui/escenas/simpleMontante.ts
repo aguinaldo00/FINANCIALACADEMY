@@ -24,6 +24,7 @@ export const escenaMontanteSimple: Escena = {
   titulo: 'Capital final o montante en capitalización simple',
   duracion: 19.5,
   descripcion: 'La semilla de 10.000 € y las tres cosechas de 700 € forman una columna de 12.100 €: Cₙ = C₀ + I = C₀ · (1 + n · i).',
+  caso: { C_0: '10.000 €', n: '3', i: '7 %' },
   capitulos: [
     { t: 0, texto: 'El montante $C_n$ es todo lo que hay al final: la semilla $C_0$ más las cosechas, $I$.' },
     { t: 2.6, texto: 'La semilla sale de la tierra y las cosechas se apilan encima: $C_n = C_0 + I$ = 12.100 €.' },

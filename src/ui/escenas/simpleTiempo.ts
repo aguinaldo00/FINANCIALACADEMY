@@ -27,6 +27,7 @@ export const escenaTiempoSimple: Escena = {
   titulo: 'Tiempo en capitalización simple',
   duracion: 21.5,
   descripcion: 'Caso práctico 13: 6.000 € al 3 % para llegar a 6.500 €. Hay que reunir 500 € con cosechas de 180 €: caben 2,78. Ampliando, 0,78 años son 9,36 meses y 0,36 meses son 10,8 días: 2 años, 9 meses y 11 días.',
+  caso: { C_0: '6.000 €', C_n: '6.500 €', i: '3 %' },
   capitulos: [
     { t: 0, texto: 'Caso práctico 13: semilla $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: $C_n$ = 6.500 €. ¿Cuánto tiempo?' },
     { t: 2.8, texto: 'Hay que reunir $C_n - C_0$ = 500 € de intereses.' },

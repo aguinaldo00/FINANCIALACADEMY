@@ -1,18 +1,22 @@
 /*
- * Ficha de una fórmula: la animación manda; al lado, lo imprescindible a la vista (qué calcula,
- * cada símbolo y cómo reconocerla) y el resto plegado para cuando haga falta.
+ * Ficha de una fórmula: arriba, el laboratorio (cuaderno, animación ampliable y calculadora, en modo
+ * digital o analógico); debajo, la teoría: qué calcula, cada símbolo, cómo reconocerla y el resto
+ * plegado para cuando haga falta.
  */
 import { hrefFase } from '../../../app/router.ts';
 import { FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/tema-02/formulas.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
-import { ESCENAS } from '../../escenas/index.ts';
+import { htmlConversor, montarConversor } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
-import { montarReproductor } from '../../motion/reproductor.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
+import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
 
 function lista(items: string[]): string {
   return `<ul>${items.map((x) => `<li>${textoT2(x)}</li>`).join('')}</ul>`;
 }
+
+/** Fichas en las que pasar de una unidad de tiempo a otra es parte del cálculo: llevan el conversor. */
+const CON_CONVERSOR = new Set(['simple-tiempo', 'simple-fraccionado', 'compuesta-tiempo', 'compuesta-equivalentes', 'compuesta-tae', 'descuento-comercial', 'descuento-racional', 'descuento-compuesto-racional']);
 
 export function htmlFicha(id: string): string {
   const f = formulaPorId(id)!;
@@ -25,13 +29,18 @@ export function htmlFicha(id: string): string {
   return `<div class="tema-matematica t2 t2-ficha" data-formula="${f.id}">
     <nav class="t2-volver"><a href="${hrefBloqueTema2(f.bloque)}">← ${escaparHtml(b.titulo)} · índice de fórmulas</a></nav>
     <header class="t2-ficha-cabecera">
-      <p class="t2-ceja">Fórmula ${f.numero} · ${escaparHtml(b.titulo)}</p>
-      <h1>${escaparHtml(f.nombre)}</h1>
-      <p class="t2-ficha-fx">${formulaHtml(f.expresion)}</p>
-      ${f.variantes?.length ? `<ul class="t2-variantes">${f.variantes.map((v) => `<li>${formulaHtml(v.expresion)}<span>${escaparHtml(v.nota)}</span></li>`).join('')}</ul>` : ''}
+      <div class="t2-ficha-titulo">
+        <p class="t2-ceja">Tema 2 · Fórmula ${f.numero} · ${escaparHtml(b.titulo)}</p>
+        <h1>${escaparHtml(f.nombre)}</h1>
+      </div>
+      ${cartulinaHtml(f.expresion, 97 + f.numero * 31)}
+      <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
-    <div class="t2-ficha-cuerpo">
-      <figure class="t2-escena" data-escena-ficha="${f.id}"></figure>
+    ${htmlLaboratorio(f.id)}
+    ${CON_CONVERSOR.has(f.id) ? htmlConversor() : ''}
+    <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
+      <h2 class="t2-teoria-tit" id="t2-teoria-tit">Para entenderla</h2>
+      ${f.variantes?.length ? `<ul class="t2-variantes">${f.variantes.map((v) => `<li>${formulaHtml(v.expresion)}<span>${escaparHtml(v.nota)}</span></li>`).join('')}</ul>` : ''}
       <div class="t2-ficha-info">
         <p class="t2-calcula">${calcula ? `<span>Calcula</span>${formulaHtml(f.calcula!)}<b>${escaparHtml(calcula.nombre)}</b>` : f.id === 'descuento-remesa' ? '<span>Calcula</span><b>El valor líquido de la remesa</b>' : '<span>Compara</span><b>Simple y compuesta según el plazo</b>'}</p>
         <section class="t2-seccion">
@@ -69,7 +78,7 @@ export function htmlFicha(id: string): string {
           <p>${textoT2(f.ejemplo.texto)}</p>
         </section>
       </div>
-    </div>
+    </section>
     <nav class="t2-ficha-nav" aria-label="Otras fórmulas">
       ${anterior ? `<a class="t2-ficha-ant" href="${hrefFormula(anterior.id)}"><small>Fórmula ${anterior.numero}</small>${escaparHtml(anterior.nombre)}</a>` : '<span></span>'}
       <a class="btn-principal" href="${hrefFase(f.bloque, 'datos')}">Practicar: identificar los datos</a>
@@ -79,9 +88,9 @@ export function htmlFicha(id: string): string {
 }
 
 export function montarFicha(raiz: HTMLElement): () => void {
-  const figura = raiz.querySelector<HTMLElement>('[data-escena-ficha]');
-  const escena = figura ? ESCENAS[figura.dataset.escenaFicha ?? ''] : undefined;
-  const parar = figura && escena ? montarReproductor(figura, escena) : () => {};
+  const pararLaboratorio = montarLaboratorio(raiz);
+  const pararConversor = montarConversor(raiz);
+  const parar = () => { pararLaboratorio(); pararConversor(); };
   const alPulsar = (e: Event) => {
     const boton = (e.target as Element | null)?.closest<HTMLButtonElement>('[data-t2-ver-error]');
     if (!boton) return;

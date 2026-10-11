@@ -16,6 +16,7 @@ export const escenaDescuentoComercial: Escena = {
   titulo: 'Descuento comercial simple',
   duracion: 15,
   descripcion: 'Pagaré de 6.000 € a 45 días al 5 %: el descuento comercial se calcula sobre el nominal, Dc = N · n · d = 37,50 €, y se reciben E = N · (1 − n · d) = 5.962,50 €.',
+  caso: { N: '6.000 €', n: '45/360', d: '5 %' },
   capitulos: [
     { t: 0, texto: 'Tienes un pagaré de $N$ = 6.000 € que vence dentro de 45 días. Lo quieres cobrar hoy.' },
     { t: 3.0, texto: 'El banco te lo adelanta, pero se queda un descuento calculado sobre el nominal: $D_c = N · n · d$.' },
@@ -85,6 +86,7 @@ export const escenaDescuentoRacional: Escena = {
   titulo: 'Descuento racional simple',
   duracion: 15,
   descripcion: 'El descuento racional es la capitalización simple al revés: C₀ = Cₙ / (1 + n · i) y Dr = Cₙ − C₀ = Cₙ · n · i / (1 + n · i). Con el pagaré de 6.000 € a 45 días al 5 %, Dr = 37,27 €, menor que el comercial (37,50 €) porque su base es C₀.',
+  caso: { C_n: '6.000 €', n: '45/360', i: '5 %' },
   capitulos: [
     { t: 0, texto: 'Descuento racional: es la capitalización simple al revés. Primero se busca $C_0 = \\frac{C_n}{1 + n · i}$.' },
     { t: 3.4, texto: 'El descuento es lo que separa los dos: $D_r = C_n - C_0 = C_0 · n · i$. Se calcula sobre el efectivo.' },
@@ -210,6 +212,7 @@ export const escenaDescuentoCompuestoRacional: Escena = {
   titulo: 'Descuento compuesto racional',
   duracion: 14,
   descripcion: 'Caso práctico 28: 12.500 € que vencen en 565 días al 4 %. n = 565 / 365 = 1,548 años; C₀ = 12.500 · 1,04^(−565/365) = 11.763,68 €; Dr = 736,32 €.',
+  caso: { C_n: '12.500 €', n: '565/365', i: '4 %' },
   capitulos: [
     { t: 0, texto: 'Caso práctico 28: 12.500 € que vencen dentro de 565 días, con descuento compuesto racional al 4 %.' },
     { t: 2.8, texto: 'En compuesta el tiempo va en años: $n$ = 565 / 365 = 1,548 años (año civil, como en el caso).' },
@@ -265,6 +268,7 @@ export const escenaDescuentoCompuestoComercial: Escena = {
   titulo: 'Descuento compuesto comercial',
   duracion: 14,
   descripcion: 'Caso práctico 29: efecto de 2.000 € a 6 años al 5 %. Cada año hacia atrás se multiplica por 0,95: E = 2.000 · 0,95⁶ = 1.470,18 € y Dc = 529,82 €. Con descuento simple serían 1.400 €.',
+  caso: { N: '2.000 €', n: '6', d: '5 %' },
   capitulos: [
     { t: 0, lectura: 2.5, texto: 'Caso práctico 29: efecto de 2.000 € a 6 años, con descuento compuesto comercial al 5 %.' },
     { t: 2.6, lectura: 6.5, texto: 'Cada año hacia atrás se quita el 5 % de lo que queda: se multiplica por $(1 - d)$ = 0,95.' },

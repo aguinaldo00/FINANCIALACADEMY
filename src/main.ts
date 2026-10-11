@@ -14,6 +14,7 @@ import './styles/calcografia.css';
 import './styles/glosario.css';
 import './styles/capitalizacion.css';
 import './styles/tema2.css';
+import './styles/laboratorio.css';
 import './styles/escenasTema1.css';
 import './styles/decor.css';
 import './styles/iconos.css';

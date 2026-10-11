@@ -25,6 +25,7 @@ export const escenaMontanteCompuesta: Escena = {
   titulo: 'Capital final en capitalización compuesta',
   duracion: 19.2,
   descripcion: 'Con 10.000 € al 7 % compuesto, cada año se multiplica el capital por 1,07: 10.700, 11.449 y 12.250,43 €. Tres multiplicaciones: Cₙ = C₀ · (1 + i)ⁿ. En simple serían 12.100 €.',
+  caso: { C_0: '10.000 €', i: '7 %', n: '3' },
   capitulos: [
     { t: 0, texto: 'En compuesta, cada cosecha se vuelve a sembrar: el capital de cada año es la semilla del siguiente.' },
     { t: 2.6, lectura: 5.2, texto: 'Año 1: $C_1 = C_0 · (1 + i)$ = 10.000 · 1,07 = 10.700 €.' },

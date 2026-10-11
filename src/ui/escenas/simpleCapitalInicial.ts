@@ -25,6 +25,7 @@ export const escenaCapitalInicialSimple: Escena = {
   titulo: 'Capital inicial en capitalización simple',
   duracion: 18.1,
   descripcion: 'Se conoce el montante de 12.100 € a 3 años al 7 %. La columna mide 1,21 veces la semilla; al dividir entre 1 + n · i se recupera la semilla de 10.000 € en el año 0.',
+  caso: { C_n: '12.100 €', n: '3', i: '7 %' },
   capitulos: [
     { t: 0, texto: 'Ahora conoces el final: $C_n$ = 12.100 € dentro de $n$ = 3 años, al $i$ = 7 % anual.' },
     { t: 2.8, lectura: 4.9, texto: '¿Qué semilla hizo falta? Hay que volver al año 0, donde está la incógnita, $C_0$.' },
