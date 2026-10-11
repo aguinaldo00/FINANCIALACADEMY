@@ -6,7 +6,7 @@
 import { hrefFase } from '../../../app/router.ts';
 import { FORMULAS_TEMA2, formulaPorId, formulasDe } from '../../../content/temas/tema-02/formulas.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
-import { htmlConversor, montarConversor, preguntaInicial } from '../../components/conversorPeriodos.ts';
+import { htmlConversor, montarConversor, preguntaInicial, regimenDeFicha } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
@@ -55,7 +55,7 @@ export function htmlFicha(id: string): string {
     </header>
     ${htmlLaboratorio(f.id)}
     ${pizarraHtml(f.id)}
-    ${CON_CONVERSOR.has(f.id) ? htmlConversor(preguntaInicial(f.id)) : ''}
+    ${CON_CONVERSOR.has(f.id) ? htmlConversor(preguntaInicial(f.id), regimenDeFicha(f.id)) : ''}
     <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
       <h2 class="t2-teoria-tit" id="t2-teoria-tit">Para entenderla</h2>
       ${f.variantes?.length ? `<ul class="t2-variantes">${f.variantes.map((v) => `<li>${formulaHtml(v.expresion)}<span>${escaparHtml(v.nota)}</span></li>`).join('')}</ul>` : ''}

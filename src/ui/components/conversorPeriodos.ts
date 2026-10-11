@@ -63,13 +63,28 @@ export function preguntaInicial(idFormula: string): number {
   return 0;
 }
 
-export function htmlConversor(k = 0): string {
+/** Régimen de la ficha: en las de compuesta el tipo se convierte en compuesta, y en las de simple, en simple. */
+export function regimenDeFicha(idFormula: string): Regimen | null {
+  if (idFormula.startsWith('compuesta-') || idFormula.startsWith('descuento-compuesto-')) return 'compuesta';
+  if (idFormula.startsWith('simple-') || idFormula.startsWith('descuento-')) return 'simple';
+  return null;
+}
+
+const ENTRADA: Record<Regimen | 'ambos', string> = {
+  ambos: 'Cualquier unidad del tema a cualquier otra: años, semestres, cuatrimestres, trimestres, meses y días (año comercial o civil). Una <b>duración</b> solo cambia cómo se mide el tiempo; un <b>tipo de interés</b> cambia cuánto rinde cada periodo, y ahí importa si es simple o compuesta.',
+  simple: 'Una <b>duración</b> solo cambia cómo se mide el tiempo: 1 semestre son 1,5 cuatrimestres. Un <b>tipo de interés</b>, en simple, se reparte en proporción, porque cada periodo cosecha sobre el mismo capital: iₐ · mₐ = i · m.',
+  compuesta: 'Una <b>duración</b> se pasa igual que en simple: el tiempo es el mismo (1 semestre son 1,5 cuatrimestres). Un <b>tipo de interés</b>, en compuesta, <b>no se reparte</b>: cada periodo crece sobre lo acumulado, así que se busca el tipo que llega al mismo sitio en el mismo tiempo: (1 + iₐ)<sup>mₐ</sup> = (1 + i)<sup>m</sup>.',
+};
+
+export function htmlConversor(k = 0, regimenFicha: Regimen | null = null): string {
   const q = ATAJOS[k] ?? ATAJOS[0]!;
-  return `<section class="conv" data-conversor data-modo="${q.modo}" aria-labelledby="conv-tit">
+  // En una ficha de un régimen, las preguntas de tipos son solo de ese régimen (la otra se puede comparar con el botón).
+  const ofrecida = (a: Pregunta) => !regimenFicha || !a.regimen || a.regimen === regimenFicha;
+  return `<section class="conv" data-conversor data-modo="${q.modo}"${regimenFicha ? ` data-conv-ficha="${regimenFicha}"` : ''} aria-labelledby="conv-tit">
     <header class="conv-cab">
-      <p class="conv-volanta">Calendario de equivalencias</p>
+      <p class="conv-volanta">Calendario de equivalencias${regimenFicha ? ` · ${regimenFicha}` : ''}</p>
       <h2 id="conv-tit">Pasar de una unidad de tiempo a otra</h2>
-      <p class="conv-entrada">Cualquier unidad del tema a cualquier otra: años, semestres, cuatrimestres, trimestres, meses y días (año comercial o civil). Una <b>duración</b> solo cambia cómo se mide el tiempo; un <b>tipo de interés</b> cambia cuánto rinde cada periodo, y ahí importa si es simple o compuesta.</p>
+      <p class="conv-entrada">${ENTRADA[regimenFicha ?? 'ambos']}</p>
     </header>
     <div class="conv-cuerpo">
       <div class="conv-mandos">
@@ -92,7 +107,7 @@ export function htmlConversor(k = 0): string {
         </div>
         <p class="conv-resultado" data-conv-resultado aria-live="polite"></p>
         <p class="conv-atajos-tit">Preguntas típicas</p>
-        <ul class="conv-atajos">${ATAJOS.map((a, i) => `<li data-conv-atajo-modo="${a.modo}"${a.modo === q.modo ? '' : ' hidden'}><button type="button" data-conv-atajo="${i}">${escaparHtml(textoAtajo(a))}</button></li>`).join('')}</ul>
+        <ul class="conv-atajos">${ATAJOS.map((a, i) => (ofrecida(a) ? `<li data-conv-atajo-modo="${a.modo}"${a.modo === q.modo ? '' : ' hidden'}><button type="button" data-conv-atajo="${i}">${escaparHtml(textoAtajo(a))}</button></li>` : '')).join('')}</ul>
       </div>
       <figure class="conv-escena" data-conv-figura>
         <div class="conv-escena-medio" data-vx-medio><div data-conv-reproductor></div></div>
@@ -118,6 +133,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
   const resultado = conv.querySelector<HTMLElement>('[data-conv-resultado]')!;
   const figura = conv.querySelector<HTMLElement>('[data-conv-figura]')!;
   const contenedor = conv.querySelector<HTMLElement>('[data-conv-reproductor]')!;
+  const regimenFicha = (conv.dataset.convFicha ?? null) as Regimen | null;
   let pararReproductor: () => void = () => {};
   let escenaActual: Escena | null = null;
   let ultimaClave = '';
@@ -197,7 +213,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
   const alPulsar = (e: Event) => {
     const b = (e.target as Element).closest<HTMLButtonElement>('button');
     if (!b || b.closest('[data-calculadora]')) return;
-    if (b.dataset.convModo) aplicarAtajo(ATAJOS.findIndex((q) => q.modo === b.dataset.convModo));
+    if (b.dataset.convModo) aplicarAtajo(ATAJOS.findIndex((q) => q.modo === b.dataset.convModo && (!regimenFicha || !q.regimen || q.regimen === regimenFicha)));
     else if (b.dataset.convAtajo !== undefined) aplicarAtajo(Number(b.dataset.convAtajo));
     else if (b.hasAttribute('data-conv-ampliar') && escenaActual) expandir(figura, { tipo: 'escena', escena: escenaActual, volanta: 'Calendario de equivalencias' });
   };

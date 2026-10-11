@@ -357,10 +357,19 @@ describe('app en el navegador', () => {
     expect(conv.dataset.modo).toBe('tipo');
     expect(resultado()).toContain('10 % anual = 0,7974 % mensual');
     expect($('[data-conv-reproductor] .mo-svg', conv)).not.toBeNull();
-    // Entre dos fracciones del año: distinto en compuesta y en simple.
+    // Es una ficha de compuesta: las preguntas de tipos son de compuesta, no el reparto de simple.
+    expect(conv.dataset.convFicha).toBe('compuesta');
+    expect($('.conv-volanta', conv).textContent).toContain('compuesta');
+    expect($('.conv-entrada', conv).textContent).toContain('no se reparte');
+    const preguntasTipo = $$('[data-conv-atajo-modo="tipo"] button', conv).map((b) => b.textContent ?? '');
+    expect(preguntasTipo.length).toBeGreaterThan(0);
+    expect(preguntasTipo.every((t) => t.includes('compuesta'))).toBe(true);
+    // Entre dos fracciones del año: distinto en compuesta y en simple (simple, solo para comparar).
     atajo(13);
     expect(resultado()).toContain('2 % trimestral = 2,6755 % cuatrimestral');
-    atajo(14);
+    const simple = $<HTMLInputElement>('[data-conv-regimen] input[value="simple"]', conv);
+    simple.checked = true;
+    simple.dispatchEvent(new Event('change', { bubbles: true }));
     expect(resultado()).toContain('2 % trimestral = 2,6667 % cuatrimestral');
     // Duraciones: la pregunta que no encaja y los días con su convenio.
     $<HTMLButtonElement>('[data-conv-modo="duracion"]', conv).click();
@@ -381,6 +390,12 @@ describe('app en el navegador', () => {
     entrada.dispatchEvent(new Event('input', { bubbles: true }));
     $<HTMLButtonElement>('.conv-calculadora [data-cal-enviar]', conv).click();
     expect(valor.value).toBe('1,50');
+    // En una ficha de simple, «Tipo de interés» pregunta en simple: se reparte en proporción.
+    navegar('#tema/2/f/simple-tiempo');
+    const convSimple = $('[data-conversor]');
+    expect(convSimple.dataset.modo).toBe('duracion');
+    $<HTMLButtonElement>('[data-conv-modo="tipo"]', convSimple).click();
+    expect($('[data-conv-resultado]', convSimple).textContent).toContain('10 % anual = 0,8333 % mensual');
     // No todas las fichas lo llevan.
     navegar('#tema/2/f/simple-intereses');
     expect(document.querySelector('[data-conversor]')).toBeNull();
