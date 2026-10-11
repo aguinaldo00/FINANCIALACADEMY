@@ -45,7 +45,9 @@ export const escenaMontanteCompuesta: Escena = {
     const etiquetas = Array.from({ length: N + 1 }, (_, k) => new Etiqueta(l, k === 0 ? 'C_0' : `C_${k}`, 24));
     const valores = Array.from({ length: N + 1 }, (_, k) => new Rotulo(l, k === 0 ? '10.000 €' : `${fmt(capital(k))} €`, `mo-cifra mo-cifra-peq ${k === 0 ? 's-c0' : 's-cn'}`));
     const intereses = Array.from({ length: N }, (_, k) => new Rotulo(l, `+${fmt(capital(k) * TIPO)}`, 'mo-cifra mo-cifra-peq s-I', 'start'));
-    const etSimple = new Rotulo(l, 'simple: 12.100 €', 'mo-rotulo', 'end');
+    // A la derecha de la última columna (ya libre): no tapa la cifra del año 2.
+    const etSimple = new Rotulo(l, 'simple: 12.100 €', 'mo-rotulo', 'start');
+    const etDiferencia = new Rotulo(l, `+${fmt(capital(N) - C0 * (1 + N * TIPO))} € más`, 'mo-cifra mo-cifra-peq s-I', 'start');
 
     const cadena = l.formula('C_3 = C_0 · (1 + i) · (1 + i) · (1 + i)', { x: 360, y: 84, tam: 30 });
     const formula = l.formula('C_n = C_0 · (1 + i)^n', { x: 360, y: 150, tam: 50 });
@@ -88,7 +90,8 @@ export const escenaMontanteCompuesta: Escena = {
       // Contornos de simple para comparar.
       const ps = tramo(t, 14.8, 15.6);
       simples.forEach((s, k) => s.pintar(eje.x(k), SUELO, (C0 + C0 * TIPO * k) * ESC, k === 0 ? 0 : ps));
-      etSimple.pintar(eje.x(N) - ANCHO / 2 - 12, SUELO - (C0 * (1 + N * TIPO)) * ESC + 6, tramo(t, 15.4, 16.0));
+      etSimple.pintar(eje.x(N) + ANCHO / 2 + 14, SUELO - (C0 * (1 + N * TIPO)) * ESC + 22, tramo(t, 15.4, 16.0));
+      etDiferencia.pintar(eje.x(N) + ANCHO / 2 + 14, SUELO - (C0 * (1 + N * TIPO)) * ESC + 48, tramo(t, 15.8, 16.4));
 
       const origen = (k: number) => l.aPantalla({ x: (eje.x(k) + eje.x(k + 1)) / 2, y: SUELO - capital(k) * ESC - 56 });
       cadena.opacidad(tramo(t, 11.0, 11.1) * mezclar(1, 0.45, tramo(t, 12.8, 13.4)));

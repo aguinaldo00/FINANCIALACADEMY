@@ -1,5 +1,7 @@
 import type { PantallaTema2, Ruta } from '../../app/router.ts';
-import { hrefBloqueTema2, hrefFase, hrefFormula, hrefTema2 } from '../../app/router.ts';
+import { hrefAcademia, hrefAsignatura, hrefBloqueTema2, hrefFase, hrefFormula, hrefTema2 } from '../../app/router.ts';
+import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../../content/academia.ts';
+import { montarEditorial, navegacionEditorial, sumarioEditorial } from '../components/editorial.ts';
 import { BLOQUES, formulaPorId, formulasDe, type BloqueId } from '../../content/temas/tema-02/formulas.ts';
 import { FASES_TEMA2, tema02 } from '../../content/temas/tema-02/index.ts';
 import { montarCapitalizacionCompuesta } from '../components/capitalizacionCompuesta.ts';
@@ -91,9 +93,16 @@ function tituloPantalla(p: PantallaTema2): string {
 export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: EstadoEstudio): void {
   detenerTemaDos();
   const p = ruta.pantalla;
-  ctx.pagina.innerHTML = p.tipo === 'formula' ? htmlFicha(p.id) : p.tipo === 'fase' ? htmlFase(p.bloque, p.fase) : htmlIndice(estado);
+  if (p.tipo === 'indice') ctx.pagina.innerHTML = htmlIndice(estado);
+  else {
+    // Fichas y fases: la misma navegación editorial y el mismo Sumario que el índice (sin el índice lateral oscuro).
+    const gf = buscarAsignatura(ID_GESTION_FINANCIERA)!;
+    const migas = [{ texto: 'Academia', href: hrefAcademia() }, { texto: gf.nombre, href: hrefAsignatura(gf.id) }, { texto: `Tema ${tema02.numero}`, href: hrefTema2() }, { texto: tituloPantalla(p) }];
+    ctx.pagina.innerHTML = `${navegacionEditorial('noche', migas)}<div class="t2-estudio">${p.tipo === 'formula' ? htmlFicha(p.id) : htmlFase(p.bloque, p.fase)}</div>${sumarioEditorial(gf, estado)}`;
+  }
   ctx.tituloMovil.textContent = `Tema ${tema02.numero} · ${tituloPantalla(p)}`;
   const paradas: (() => void)[] = [];
+  if (p.tipo !== 'indice') paradas.push(montarEditorial(ctx.pagina));
   if (p.tipo === 'formula') paradas.push(montarFicha(ctx.pagina));
   else if (p.tipo === 'fase') {
     paradas.push(montarFase(ctx.pagina, p.bloque, p.fase));

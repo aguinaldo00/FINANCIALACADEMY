@@ -97,12 +97,13 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     detenerVista?.();
     detenerVista = null;
     // Índice bajo demanda fuera del estudio (selector y asignatura) o si el usuario lo ha ocultado.
-    const indiceTemaDos = ruta.vista === 'tema2' && ruta.pantalla.tipo === 'indice';
+    // Todo el Tema 2 (índice, fichas y fases) usa la navegación editorial y el Sumario de papel.
+    const indiceTemaDos = ruta.vista === 'tema2';
     vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura' || indiceTemaDos;
     aplicarIndice();
     document.body.dataset.vista = ruta.vista;
     // Identidad editorial (página a todo el ancho con su propia navegación): hoy, la portada de la
-    // asignatura y el índice del Tema 2. El resto de pantallas usa el esqueleto común.
+    // asignatura y todo el Tema 2. El resto de pantallas usa el esqueleto común.
     document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || indiceTemaDos);
     seccionActual = null;
     detenerSimulacro();

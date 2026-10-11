@@ -86,6 +86,9 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-boton{display:grid;gap:4px;padding:16px 26px 16px 22px;background:var(--ink);color:var(--oro-tinta)!important;text-decoration:none;font:600 1.05rem/1.2 var(--f-texto);border-left:4px solid var(--oro);transition:background var(--anim)}
 .ed-boton small{font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--oro3)}
 .ed-boton:hover{background:#fff8ea}
+.ed-boton-papel{background:transparent;color:var(--ink)!important;border:1.5px solid var(--ink);border-left:4px solid var(--oro)}
+.ed-boton-papel small{color:var(--oro)}
+.ed-boton-papel:hover{background:rgba(241,235,223,.1)}
 .ed-enlace{color:var(--mut)!important;font-size:.98rem;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(242,212,143,.4)}
 .ed-collage{position:relative;height:clamp(420px,52vw,660px);align-self:stretch}
 .ed-isla{position:absolute;right:-6%;top:-8%;width:min(108%,720px);filter:drop-shadow(0 40px 60px rgba(0,0,0,.55))}
@@ -419,3 +422,7 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 @media (prefers-reduced-motion:reduce){
   .ed-enlace-fuerte span,.ed-nav{transition:none}
 }
+
+/* Fichas y fases del Tema 2 dentro del marco editorial: columna de lectura con su margen. */
+body.editorial .t2-estudio{max-width:900px;margin:0 auto;padding:104px 30px 90px}
+@media (max-width:600px){body.editorial .t2-estudio{padding:86px 16px 80px}}

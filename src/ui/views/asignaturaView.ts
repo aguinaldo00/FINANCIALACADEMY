@@ -195,9 +195,12 @@ function titular(nombre: string): string {
 export function pintarAsignatura(ctx: ContextoVista, a: Asignatura, estado: EstadoEstudio, practica?: EstadoPractica, ultimo?: UltimoSitio): () => void {
   const numero = ASIGNATURAS.indexOf(a) + 1;
   const ciudad = a.temas.find((t) => t.experiencia === 'ciudad-3d');
+  const leccion = a.temas.find((t) => t.experiencia !== 'ciudad-3d');
+  // El índice de fórmulas del capítulo II siempre está a la vista, junto al botón principal.
+  const indiceFormulas = leccion ? `<a class="ed-boton ed-boton-papel" href="${leccion.href}"><small>Capítulo II · ${FORMULAS_TEMA2.length} fórmulas</small>Abrir el índice de fórmulas</a>` : '';
   const cta = ultimo
-    ? `<a class="ed-boton" href="${ultimo.href}"><small>Continuar donde lo dejaste</small>${escaparHtml(ultimo.titulo)}</a>${ciudad ? `<a class="ed-enlace" href="${ciudad.href}">o vuelve al capítulo I →</a>` : ''}`
-    : `<a class="ed-boton" href="${a.temas[0]?.href ?? hrefInicio()}"><small>Empezar</small>Capítulo I · ${escaparHtml(a.temas[0]?.titulo ?? '')}</a>${a.temas[1] ? `<a class="ed-enlace" href="${a.temas[1].href}">o ve al capítulo II →</a>` : ''}`;
+    ? `<a class="ed-boton" href="${ultimo.href}"><small>Continuar donde lo dejaste</small>${escaparHtml(ultimo.titulo)}</a>${indiceFormulas}${ciudad ? `<a class="ed-enlace" href="${ciudad.href}">o vuelve al capítulo I →</a>` : ''}`
+    : `<a class="ed-boton" href="${a.temas[0]?.href ?? hrefInicio()}"><small>Empezar</small>Capítulo I · ${escaparHtml(a.temas[0]?.titulo ?? '')}</a>${indiceFormulas}`;
   ctx.pagina.innerHTML = `<div class="ed-pagina ed-pagina-noche ed-portada" style="--c:${a.color}">
   ${navegacionEditorial('noche', [{ texto: 'Academia', href: hrefAcademia() }, { texto: a.nombre }])}
   <div class="ed">
