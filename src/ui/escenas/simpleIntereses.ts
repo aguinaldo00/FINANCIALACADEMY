@@ -35,6 +35,7 @@ export const escenaInteresesSimple: Escena = {
   titulo: 'Intereses totales en capitalización simple',
   duracion: 27,
   descripcion: 'Un capital de 10.000 € al 7 % anual da cada año una cosecha de 700 €, siempre calculada sobre el mismo capital. En 3 años, 2.100 € de intereses: I = C₀ · n · i.',
+  caso: { C_0: '10.000 €', n: '3', i: '7 %' },
   capitulos: [
     { t: 0, texto: 'Esto es el capital inicial, $C_0$: 10.000 € que se invierten hoy.' },
     { t: 3.2, lectura: 5.95, texto: 'El tipo, $i$ = 7 % anual, dice qué parte del capital se cosecha cada año: 0,07 de $C_0$.' },

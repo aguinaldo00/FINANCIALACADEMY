@@ -15,6 +15,7 @@ export const escenaInteresesCompuesta: Escena = {
   titulo: 'Intereses totales en capitalización compuesta',
   duracion: 16.8,
   descripcion: 'Caso práctico 15: 4.500 € al 3 % durante 7 años llegan a 5.534,43 €. Los intereses son 1.034,43 €: I = Cₙ − C₀ = C₀ · [(1 + i)ⁿ − 1].',
+  caso: { C_0: '4.500 €', i: '3 %', n: '7' },
   capitulos: [
     { t: 0, texto: 'Caso práctico 15: 4.500 € al 3 % de interés compuesto durante 7 años.' },
     { t: 3.0, texto: 'Siete multiplicaciones por 1,03: $C_n$ = 4.500 · 1,03⁷ = 5.534,43 €.' },
@@ -99,6 +100,7 @@ export const escenaCapitalInicialCompuesta: Escena = {
   titulo: 'Capital inicial en capitalización compuesta',
   duracion: 17.7,
   descripcion: '9.000 € a 8 años al 7 % compuesto: cada año hacia atrás se divide entre 1,07. Tras ocho divisiones queda C₀ = 9.000 · 1,07⁻⁸ = 5.238,08 €.',
+  caso: { C_n: '9.000 €', i: '7 %', n: '8' },
   capitulos: [
     { t: 0, texto: 'Conoces el final: $C_n$ = 9.000 € a 8 años, al 7 % compuesto. ¿Cuánto se invirtió?' },
     { t: 2.8, lectura: 5.45, texto: 'Un año hacia atrás es dividir entre $(1 + i)$: 9.000 / 1,07 = 8.411,21 €.' },
@@ -172,6 +174,7 @@ export const escenaTiempoCompuesta: Escena = {
   titulo: 'Tiempo en capitalización compuesta',
   duracion: 18.7,
   descripcion: 'Caso práctico 17: 30.000 € al 10 % hasta 35.000 €. En escala logarítmica cada año sube log 1,1; la meta está a log 1,1667: n = 1,62 años = 1 año, 7 meses y 13 días.',
+  caso: { C_0: '30.000 €', C_n: '35.000 €', i: '10 %' },
   capitulos: [
     { t: 0, texto: 'Caso práctico 17: 30.000 € al 10 % compuesto hasta 35.000 €. Hay que crecer 35.000 / 30.000 = 1,1667 veces.' },
     { t: 3, texto: 'Cada año multiplica por 1,1: tras un año, ×1,1; tras dos, ×1,21. La meta queda entre los dos.' },
@@ -253,6 +256,7 @@ export const escenaTipoCompuesta: Escena = {
   titulo: 'Tipo de interés en capitalización compuesta',
   duracion: 15,
   descripcion: '50.000 € se convierten en 52.000 € en 6 años: el factor total 1,04 se reparte en 6 factores iguales de 1,006558. i = (Cₙ / C₀)^(1/n) − 1 = 0,006558.',
+  caso: { C_0: '50.000 €', C_n: '52.000 €', n: '6' },
   capitulos: [
     { t: 0, texto: '50.000 € se convierten en 52.000 € en 6 años, en compuesta. Han crecido 52.000 / 50.000 = 1,04 veces.' },
     { t: 3.2, texto: 'Ese 1,04 es el producto de 6 factores iguales: $(1 + i)^6$ = 1,04.' },

@@ -375,6 +375,17 @@ Se corrigen, no se rehacen (auditoría §3.0–3.1):
   - los dos modos comparten el motor de cálculo y el estado del ejercicio. El modo individual es el predeterminado; VERSUS queda como opción futura;
   - generador de ejercicios y progreso, debajo o en «Practicar».
 - **Fondo oscuro de escritorio** (como la imagen de referencia del usuario) en las fases B, C y D con sus paneles y en todas las páginas de fórmula. Los índices siguen claros.
+- **Segunda pasada visual (12/10), ya como sistema común para las 19 fórmulas:**
+  - fondo espresso con el grano de la portada (`--mo-grano`, fijo y a dos escalas);
+  - fórmula en cartulina: fibras, borde rasgado determinista (`bordeRasgado`), cinta y sombra;
+  - cuaderno digital en papel de trabajo cuadriculado (los campos son líneas de escritura, lo calculado va en tinta azul y las unidades a la vista); el analógico, en papel pautado;
+  - calculadora como instrumento: pantalla de cristal con operación, resultado, Ans y decimales FIX 2/4/6, y teclas con relieve.
+- **Coherencia de datos:** cada escena declara su `caso` una vez. El laboratorio lo propone como enunciado, el cuaderno se compara con él y, si el alumno usa sus propios datos, se avisa de que la animación sigue con su ejemplo. Una prueba comprueba los 17 casos.
+- **Pendiente del sistema:**
+  - llevar el mismo lenguaje a las fases B, C y D (enunciado, cuaderno, calculadora y corrección del mismo ejercicio);
+  - generador de ejercicios con la hoja que sube desde detrás de la animación;
+  - progreso por familia;
+  - escenas parametrizadas con los datos del alumno (hoy cada escena tiene su caso fijo).
 - **Solapes:** compuesta-capital-inicial, compuesta-intereses, descuento-compuesto-comercial y simple-tiempo.
 - **Móvil:** tamaño mínimo de rótulo.
 - **compuesta-tiempo:** el logaritmo en 8 pasos con la `pizarra` (auditoría §3.3).
@@ -433,6 +444,7 @@ GitHub Pages solo publica un sitio por repositorio. Así se evita pisar producci
 | 6b | Piezas `calendario`, `lupa` y `pizarra` + actos I–III | 6a | No | Capítulos quietos y cifras cotejadas |
 | 6c | Actos IV–VII + enlaces desde las fichas 6, 12 y 14 | 6b | Solo los valores sin fuente | Escena completa con movimiento reducido |
 | 6d | Logaritmo en 8 pasos (compuesta-tiempo) | 6b (`pizarra`) | No | Auditoría §3.3 |
+| 6e | **Conversor interactivo** en el laboratorio de las fórmulas 6, 12 y 14: el alumno elige la unidad (semestre, cuatrimestre, trimestre, mes, día 360/365) y ve partirse el calendario, crecer simple frente a compuesta, el tipo proporcional frente al equivalente y el nominal frente al efectivo, todo con `periodos.ts` | 3a, 6b | No | Mover un control cambia las cifras y el dibujo, y cuadran con el dominio |
 | 7 | Matriz de textos de las 19 fórmulas y después los cambios | 4 | **Sí** | El usuario aprueba la matriz |
 | 8 | Tema 1: ICO pulido → 11 infografías; glosario; preguntas generadas | — | **Sí** en partes | Una pieza por incremento |
 | 9 | Atlas, transición «planta» y portada | 2 | No (Tema 2) | Con alternativa estática y sin destellos |

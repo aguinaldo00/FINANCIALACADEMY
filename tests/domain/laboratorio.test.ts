@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { FORMULAS_TEMA2 } from '../../src/content/temas/tema-02/formulas.ts';
 import { comprobar, esperado, LABORATORIOS, leerDato, mostrar } from '../../src/domain/tema2/laboratorio.ts';
+import { formatear } from '../../src/domain/tema2/expresion.ts';
+import { LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
 import { simbolosDe } from '../../src/ui/matematica/formula.ts';
 
 const lab = (id: string) => LABORATORIOS[id]!;
@@ -49,5 +51,27 @@ describe('laboratorio de cada fórmula', () => {
     const c0 = lab('simple-capital-inicial');
     expect(comprobar('2.479,34', c0, 3000 / 1.21).bien).toBe(true);
     expect(comprobar('2479,3', c0, 3000 / 1.21).bien).toBe(false);
+  });
+
+  it('el caso de cada animación es el mismo ejercicio que resuelve su laboratorio y da lo que pinta la escena', () => {
+    const conCaso = LISTA_ESCENAS.filter((e) => e.caso);
+    expect(conCaso.length).toBe(Object.keys(LABORATORIOS).length);
+    for (const e of conCaso) {
+      const l = LABORATORIOS[e.id]!;
+      expect(Object.keys(e.caso!).sort(), e.id).toEqual(l.datos.map((d) => d.simbolo).sort());
+      const valores: Record<string, number> = {};
+      for (const d of l.datos) {
+        const lectura = leerDato(e.caso![d.simbolo]!, d.magnitud);
+        expect(lectura.ok, `${e.id}: ${d.simbolo}`).toBe(true);
+        if (lectura.ok === true) { expect(lectura.aviso, `${e.id}: ${d.simbolo}`).toBeUndefined(); valores[d.simbolo] = lectura.valor; }
+      }
+      const x = esperado(l, valores)!;
+      // El resultado aparece en lo que cuenta la escena, con la precisión que ella usa.
+      const candidatos = l.incognita.magnitud === 'tipo'
+        ? [formatear(x * 100, 4), formatear(x * 100, 2), formatear(x * 100, 0), formatear(x, 6)]
+        : [formatear(x, 2), formatear(x, 0)];
+      const texto = [e.descripcion, ...e.capitulos.map((c) => c.texto)].join(' ');
+      expect(candidatos.some((c) => texto.includes(c)), `${e.id}: ${candidatos.join(' / ')}`).toBe(true);
+    }
   });
 });

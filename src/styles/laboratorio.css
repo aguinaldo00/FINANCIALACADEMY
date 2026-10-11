@@ -1,98 +1,159 @@
 /*
- * Fichas de fórmula y fases B–D del Tema 2: «escritorio» oscuro y cálido (la referencia del usuario),
- * con papel y cartón encima. Los tokens de base.css se redefinen solo dentro de estas pantallas, así
- * que todo lo que ya existía (tarjetas, botones, nav) se adapta solo. Lo propio del laboratorio usa
- * variables --lab-*.
+ * Laboratorio de Matemática Financiera: fichas de fórmula y fases B–D del Tema 2.
+ * Un mismo sistema para las 19 fórmulas, con materiales distintos a propósito:
+ *  - el fondo es una superficie oscura (espresso) con el grano de la portada (--mo-grano, papel.ts);
+ *  - la fórmula es una pieza física: cartulina con fibras, borde rasgado, cinta y sombra;
+ *  - el cuaderno digital es papel de trabajo cuadriculado; el analógico, papel pautado con espiral;
+ *  - la calculadora es un instrumento: carcasa de carbón, pantalla de cristal y teclas con relieve.
+ * Los tokens de base.css se redefinen solo dentro de estas pantallas; lo propio usa --lab-*.
  */
 body.t2-escritorio{
-  --bg:#110d09;--bg2:#19140e;--bg3:#221b14;--bg4:#2c241b;
+  --bg:#130f0b;--bg2:#1a1510;--bg3:#231c15;--bg4:#2d241b;
   --line:rgba(224,178,94,.14);--line2:rgba(224,178,94,.28);
-  --lab-panel:#1d1711;--lab-panel2:#251e16;--lab-borde:rgba(224,178,94,.18);
-  --lab-papel:#f2e9d6;--lab-papel-linea:rgba(64,98,150,.2);--lab-papel-margen:rgba(196,74,64,.45);--lab-tinta:#2a2118;--lab-tinta-suave:rgba(42,33,24,.6);
-  --lab-lcd:#c8d2bd;--lab-lcd-tinta:#1f2a1c;
-  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(224,178,94,.07),transparent 70%),var(--bg)
+  --lab-carbon:#1d1813;--lab-carbon2:#27201a;
+  --lab-papel:#efe6d1;--lab-papel2:#e6dcc4;--lab-cuadro:rgba(58,88,128,.11);
+  --lab-papel-linea:rgba(64,98,150,.2);--lab-papel-margen:rgba(196,74,64,.45);
+  --lab-tinta:#2a2118;--lab-tinta-suave:rgba(42,33,24,.62);--lab-tinta-azul:#2c5a88;
+  --lab-bien:#2f7a3e;--lab-mal:#a8322a;--lab-aviso:#8a5a12;
+  background:var(--bg)
 }
+/* Grano de la portada sobre toda la pantalla, fijo (no se ve como una imagen dentro de una caja).
+   Dos escalas del mismo grano, en proporción no entera, para que no se note la repetición. */
+body.t2-escritorio::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--mo-grano,none),var(--mo-grano,none),radial-gradient(ellipse 80% 60% at 50% 18%,rgba(224,178,94,.06),transparent 70%),radial-gradient(ellipse 120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.35));
+  background-size:180px,523px,auto,auto;mix-blend-mode:soft-light;opacity:.9}
 
 /* La ficha usa todo el ancho: el laboratorio necesita sus tres columnas */
-body.editorial.t2-laboratorio .t2-estudio{max-width:1520px;padding-left:clamp(16px,3vw,48px);padding-right:clamp(16px,3vw,48px)}
+body.editorial.t2-laboratorio .t2-estudio{max-width:1560px;padding-left:clamp(16px,3vw,48px);padding-right:clamp(16px,3vw,48px)}
 body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 
-/* Cabecera: título, la fórmula como recorte de papel y «Practicar» */
-.t2-ficha .t2-ficha-cabecera{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:end;gap:18px 34px;margin-bottom:26px}
-.t2-ficha .t2-ficha-cabecera h1{font-size:clamp(2.2rem,4.2vw,3.4rem)}
-.t2-ficha .t2-ficha-fx{margin:0;padding:12px 22px 10px;background:var(--lab-papel);color:var(--lab-tinta);border-radius:3px;transform:rotate(-1.2deg);
-  box-shadow:0 14px 30px -14px rgba(0,0,0,.8);font-size:clamp(1.5rem,2.6vw,2.2rem);max-width:min(560px,100%)}
-.t2-ficha .t2-ficha-fx .fx-op,.t2-ficha .t2-ficha-fx .fx-num{color:var(--lab-tinta)}
-.t2-practicar{align-self:center;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:1px solid var(--line2);border-radius:999px;color:var(--ink);text-decoration:none;
+/* ── Cabecera: título, la fórmula en cartulina y «Practicar» ── */
+.t2-ficha .t2-ficha-cabecera{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:18px clamp(24px,4vw,64px);margin:6px 0 30px}
+.t2-ficha .t2-ficha-cabecera h1{font-size:clamp(2.3rem,4.4vw,3.6rem);letter-spacing:-.02em}
+.t2-practicar{align-self:start;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:1px solid var(--line2);border-radius:999px;color:var(--ink);text-decoration:none;
   font:600 .8rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}
 .t2-practicar:hover{border-color:var(--oro);color:var(--oro2)}
 
-/* ── Laboratorio ── */
-.lab{display:grid;grid-template-columns:minmax(290px,1fr) minmax(0,1.6fr) minmax(270px,.9fr);grid-template-areas:"modo modo modo" "cuaderno centro calc";gap:18px;align-items:start}
-.lab[data-modo="analogico"]{grid-template-areas:"modo modo modo" "centro centro calc"}
+/* Cartulina: la pieza física de la fórmula. La sombra va en el contenedor (drop-shadow sigue el
+   borde rasgado del recorte); el papel lleva fibras, grano y una variación de tono. */
+.lab-cartulina{position:relative;justify-self:center;transform:rotate(-1.6deg);filter:drop-shadow(0 26px 22px rgba(0,0,0,.5)) drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.lab-cartulina-papel{position:relative;padding:26px 40px 30px;color:var(--lab-tinta);isolation:isolate;
+  background:
+    repeating-linear-gradient(97deg,rgba(120,88,48,.05) 0 1px,transparent 1px 6px),
+    repeating-linear-gradient(11deg,rgba(255,255,255,.08) 0 1px,transparent 1px 9px),
+    radial-gradient(ellipse 70% 90% at 12% 20%,rgba(255,255,255,.35),transparent 60%),
+    radial-gradient(ellipse 60% 80% at 92% 90%,rgba(150,108,52,.16),transparent 65%),
+    var(--lab-papel)}
+.lab-cartulina-papel::before{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:multiply;opacity:.16}
+.lab-cartulina .t2-ficha-fx{margin:0;font-size:clamp(1.9rem,3.2vw,2.9rem);overflow:visible;padding:0}
+.lab-cartulina .fx .fx-num,.lab-cartulina .fx .fx-op{color:var(--lab-tinta)}
+/* Cinta adhesiva: la misma del recorte de la portada */
+.lab-cinta{position:absolute;z-index:2;left:18%;top:-12px;width:96px;height:26px;background:rgba(242,212,143,.62);transform:rotate(-5deg);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+
+/* ── Laboratorio: tres zonas ── */
+.lab{display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,1.75fr) minmax(290px,.95fr);grid-template-areas:"barra barra barra" "cuaderno centro calc";gap:22px;align-items:start}
+.lab[data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
 .lab[data-modo="analogico"] .lab-cuaderno{display:none}
 .lab-cuaderno{grid-area:cuaderno}
-.lab-centro{grid-area:centro;display:grid;min-width:0}
+.lab-centro{grid-area:centro;display:grid;min-width:0;position:sticky;top:20px}
 .lab-calculadora{grid-area:calc}
 
-/* Selector DIGITAL / ANALÓGICO */
-.lab-modo{grid-area:modo;justify-self:end;display:inline-flex;padding:4px;border:1px solid var(--line2);border-radius:999px;background:var(--lab-panel)}
-.lab-modo button{padding:8px 20px;border:0;border-radius:999px;background:none;color:var(--mut);cursor:pointer;font:600 .8rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase}
+/* Enunciado del ejercicio y selector DIGITAL / ANALÓGICO */
+.lab-barra{grid-area:barra;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:16px 30px;padding-bottom:18px;border-bottom:1px solid var(--line2)}
+.lab-caso{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 24px;align-items:baseline;max-width:980px}
+.lab-caso-volanta{grid-column:1 / -1;margin:0;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.24em;text-transform:uppercase;color:var(--oro)}
+.lab-caso-volanta::before{content:"";display:inline-block;width:8px;height:8px;margin-right:10px;background:var(--r);vertical-align:1px}
+.lab-caso-texto{margin:0;font:400 clamp(1.1rem,1.6vw,1.35rem)/1.4 var(--f-titulo);color:var(--ink)}
+.lab-caso-texto .fx{font-size:1.05em}
+.lab-caso-estado{grid-column:1;margin:2px 0 0;font-size:.9rem;color:var(--mut)}
+.lab-caso-estado:empty{display:none}
+.lab-caso-estado.lab-bien{color:var(--g)}.lab-caso-estado.lab-aviso{color:var(--oro2)}
+.lab-caso .lab-mini{grid-column:2;grid-row:2}
+.lab-modo{display:inline-flex;padding:4px;border:1px solid var(--line2);border-radius:999px;background:var(--lab-carbon)}
+.lab-modo button{padding:9px 22px;border:0;border-radius:999px;background:none;color:var(--mut);cursor:pointer;font:600 .8rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase}
 .lab-modo button[aria-pressed="true"]{background:var(--oro);color:var(--oro-tinta)}
 .lab-modo button:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
+.lab-mini{border:0;background:none;padding:0;color:var(--mut);cursor:pointer;font-size:.85rem;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.lab-mini:hover{color:var(--oro2)}
 
-/* Paneles */
-.lab-panel{background:var(--lab-panel);border:1px solid var(--lab-borde);border-radius:14px;padding:18px 18px 20px;box-shadow:0 24px 40px -30px rgba(0,0,0,.9)}
-.lab-panel-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.lab-panel-cab h2{display:flex;align-items:center;gap:10px;margin:0;font:600 .86rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase;color:var(--ink)}
-.lab-panel-cab h2 span:first-child{color:var(--oro)}
-.lab-mini{border:0;background:none;color:var(--mut);cursor:pointer;font-size:.82rem;text-decoration:underline;text-underline-offset:3px}
-.lab-mini:hover{color:var(--ink)}
+/* Cabecera común de los paneles */
+.lab-panel-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.lab-panel-cab h2{display:flex;align-items:baseline;gap:10px;margin:0;font:600 .86rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase}
+.lab-panel-cab h2 span:first-child{font:700 1.05rem/1 "Big Shoulders Display",var(--f-texto);letter-spacing:.04em;color:var(--oro)}
 
-/* Cuaderno: pasos numerados */
-.lab-pasos{margin:0;padding:0;list-style:none;display:grid;gap:12px}
-.lab-paso{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
-.lab-paso-n{display:grid;place-items:center;width:26px;height:26px;border:1.5px solid var(--line2);border-radius:50%;font:700 .85rem/1 "Big Shoulders Display",var(--f-texto);color:var(--oro)}
-.lab-paso-tit{margin:2px 0 6px;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
-.lab-campo{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--ink);font:500 .98rem/1.35 var(--f-cifra)}
-textarea.lab-campo{resize:vertical;min-height:2.6em}
-.lab-campo:focus{outline:2px solid var(--oro);outline-offset:1px;border-color:transparent}
-.lab-campo::placeholder{color:var(--tenue);font-family:var(--f-texto)}
-.lab-datos{display:grid;gap:8px}
-.lab-dato{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:4px 10px}
+/* ── Cuaderno digital: papel de trabajo cuadriculado ── */
+.lab-cuaderno{position:relative;padding:22px 22px 26px;border-radius:4px;color:var(--lab-tinta);isolation:isolate;
+  background:
+    linear-gradient(var(--lab-cuadro) 1px,transparent 1px) 0 0/22px 22px,
+    linear-gradient(90deg,var(--lab-cuadro) 1px,transparent 1px) 0 0/22px 22px,
+    var(--lab-papel);
+  box-shadow:0 2px 0 rgba(0,0,0,.25),0 30px 40px -28px rgba(0,0,0,.9)}
+.lab-cuaderno::before{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:multiply;opacity:.12;border-radius:inherit}
+.lab-cuaderno .lab-panel-cab h2{color:var(--lab-tinta)}
+.lab-cuaderno .lab-panel-cab h2 span:first-child{color:#a24f1c}
+.lab-cuaderno .lab-mini{color:var(--lab-tinta-suave)}
+.lab-cuaderno .lab-mini:hover{color:#a24f1c}
+.lab-pasos{margin:0;padding:0;list-style:none}
+.lab-paso{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start;padding:14px 0;border-top:1px dashed rgba(42,33,24,.22)}
+.lab-paso:first-child{border-top:2px solid var(--lab-tinta);padding-top:16px}
+.lab-paso-n{display:grid;place-items:center;width:28px;height:28px;border:1.5px solid currentColor;border-radius:50%;font:700 .95rem/1 "Big Shoulders Display",var(--f-texto)}
+.lab-paso-tit{margin:4px 0 8px;font:600 .76rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--lab-tinta-suave)}
+/* Campos editables: líneas de escritura, no cajas. El foco las marca en ocre. */
+.lab-campo{width:100%;box-sizing:border-box;padding:6px 4px 5px;border:0;border-bottom:1.5px solid rgba(42,33,24,.38);border-radius:0;background:rgba(255,255,255,.28);color:var(--lab-tinta);font:500 1.02rem/1.35 var(--f-cifra)}
+textarea.lab-campo{resize:vertical;min-height:2.8em;line-height:1.6}
+select.lab-campo{font-family:var(--f-texto);cursor:pointer}
+.lab-campo:hover{background:rgba(255,255,255,.45)}
+.lab-campo:focus{outline:none;border-bottom-color:#b0701f;background:rgba(232,192,98,.18)}
+.lab-campo::placeholder{color:rgba(42,33,24,.4);font-family:var(--f-texto);font-size:.92rem}
+/* Datos: el símbolo con su color, la celda y la unidad, de un vistazo */
+.lab-datos{display:grid;gap:10px}
+.lab-dato{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:2px 10px}
 .lab-dato .lab-salida{grid-column:2}
-.lab-sim{font-size:1.25rem}
-.lab-salida{display:block;margin-top:4px;font:400 .82rem/1.35 var(--f-cifra);color:var(--mut)}
+.lab-sim{font-size:1.3rem;line-height:1}
+.lab-cuaderno .lab-sim .fx var.s{color:var(--lab-tinta);background:linear-gradient(transparent 12%,color-mix(in srgb,var(--m) 60%,transparent) 12%,color-mix(in srgb,var(--m) 60%,transparent) 92%,transparent 92%);padding:0 .12em;border-radius:2px}
+.lab-dato-celda{position:relative;display:block}
+.lab-dato-celda .lab-campo{padding-right:74px}
+.lab-unidad{position:absolute;right:4px;bottom:7px;font:600 .7rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.14em;text-transform:uppercase;color:var(--lab-tinta-suave);text-decoration:none;cursor:help}
+/* Lo que calcula la aplicación (derivado) va en tinta azul, como una anotación; las ayudas, en cursiva */
+.lab-salida{display:block;margin-top:5px;font:500 .84rem/1.35 var(--f-cifra);color:var(--lab-tinta-azul)}
 .lab-salida:empty{display:none}
+.lab-derivado::before{content:"calc. ";font:600 .68rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.14em;text-transform:uppercase;opacity:.7}
 .lab-salida-lineas{display:grid;gap:2px}
-.lab-bien{color:var(--g)}
-.lab-mal{color:var(--r)}
-.lab-aviso{color:var(--oro2)}
-.lab-pista{margin-top:6px;border:0;background:none;color:var(--oro);cursor:pointer;font-size:.82rem;text-decoration:underline;text-underline-offset:3px}
-.lab-pista-fx{margin:6px 0 0;font-size:1.3rem}
-.lab-resultado{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
-.lab-comprobar{padding:8px 14px;border:0;border-radius:8px;background:var(--oro);color:var(--oro-tinta);cursor:pointer;font-weight:600}
-.lab-comprobar:hover{background:var(--oro2)}
-.lab-veredicto{margin:6px 0 0;font-size:.92rem}
+.lab-cuaderno .lab-bien,.lab-papel .lab-bien{color:var(--lab-bien)}
+.lab-cuaderno .lab-mal,.lab-papel .lab-mal{color:var(--lab-mal)}
+.lab-cuaderno .lab-aviso,.lab-papel .lab-aviso{color:var(--lab-aviso);font-family:var(--f-texto)}
+.lab-pista{margin-top:6px;border:0;background:none;padding:0;color:#a24f1c;cursor:pointer;font:italic 400 .95rem/1.2 var(--f-titulo);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.lab-pista-fx{margin:8px 0 0;font-size:1.35rem}
+.lab-pista-fx .fx .fx-num,.lab-pista-fx .fx .fx-op{color:var(--lab-tinta)}
+.lab-resultado{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+.lab-paso-resultado .lab-campo{font-size:1.2rem;font-weight:600}
+.lab-comprobar{padding:9px 16px;border:0;border-radius:6px;background:var(--lab-tinta);color:var(--lab-papel);cursor:pointer;font:600 .8rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase}
+.lab-comprobar:hover{background:#a24f1c}
+.lab-comprobar:focus-visible,.lab-pista:focus-visible,.lab-cuaderno .lab-mini:focus-visible{outline:2px solid #b0701f;outline-offset:2px}
+.lab-veredicto{margin:8px 0 0;font-size:.95rem;font-weight:500}
 .lab-veredicto:empty{display:none}
 
-/* Centro: la animación y el papel que sube desde detrás */
-.lab-escena{position:relative;z-index:1;margin:0;padding:12px;background:var(--lab-panel);border:1px solid var(--lab-borde);border-radius:16px;box-shadow:0 30px 50px -30px rgba(0,0,0,.95)}
-.lab-escena-medio{display:block;border-radius:10px;overflow:hidden}
+/* ── Centro: la animación, como una lámina montada, y el papel que sube desde detrás ── */
+.lab-escena{position:relative;z-index:1;margin:0;padding:12px 12px 14px;border-radius:6px;isolation:isolate;
+  background:linear-gradient(180deg,var(--lab-carbon2),var(--lab-carbon));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 34px 50px -30px rgba(0,0,0,.95)}
+.lab-escena::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:soft-light;opacity:.7}
+.lab-escena-medio{display:block;border-radius:3px;overflow:hidden}
 .lab-escena.vx-en-viaje{visibility:hidden}
-.lab-escena-pie{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px}
-.lab-boton{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line2);border-radius:10px;background:var(--lab-panel2);color:var(--ink);cursor:pointer;
+.lab-escena-pie{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.lab-escena-nota{font:italic 400 .95rem/1.3 var(--f-titulo);color:var(--oro2)}
+.lab-escena-botones{display:flex;flex-wrap:wrap;gap:10px;margin-left:auto}
+.lab-boton{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line2);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;
   font:600 .78rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}
 .lab-boton svg{width:16px;height:16px}
 .lab-boton:hover{border-color:var(--oro);color:var(--oro2)}
 .lab-boton:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
 .lab[data-modo="digital"] .lab-boton-papel{display:none}
 
-.lab-papel-marco{display:grid;grid-template-rows:0fr;overflow:hidden;transition:grid-template-rows .55s cubic-bezier(.2,.8,.2,1)}
-.lab-papel-abierto .lab-papel-marco{grid-template-rows:1fr;margin-bottom:-14px}
+.lab-papel-marco{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.2,.8,.2,1)}
+.lab-papel-abierto .lab-papel-marco{grid-template-rows:1fr;margin-bottom:-12px}
 .lab-papel-pliegue{min-height:0;overflow:hidden}
 .lab-papel{box-sizing:border-box;transform:translateY(60%);opacity:0;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .3s;
-  margin:0 14px;padding:18px 20px 30px 58px;border-radius:6px 6px 0 0;color:var(--lab-tinta);
+  margin:0 14px;padding:18px 20px 30px 58px;border-radius:4px 4px 0 0;color:var(--lab-tinta);
   background:
     radial-gradient(circle at 22px 22px,var(--bg) 6px,transparent 7px) 0 0/44px 38px repeat-y,
     linear-gradient(90deg,transparent 44px,var(--lab-papel-margen) 44px 45.5px,transparent 45.5px),
@@ -103,81 +164,105 @@ textarea.lab-campo{resize:vertical;min-height:2.6em}
 .lab-papel .lab-panel-cab h2{color:var(--lab-tinta)}
 .lab-papel .lab-panel-cab h2 span:first-child{color:#a24f1c}
 .lab-papel .lab-mini{color:var(--lab-tinta-suave)}
-.lab-papel .lab-paso-n{border-color:var(--lab-tinta-suave);color:var(--lab-tinta)}
-.lab-papel .lab-paso-tit{font:italic 500 1.05rem/1.2 var(--f-titulo);letter-spacing:0;text-transform:none;color:var(--lab-tinta);text-decoration:underline;text-underline-offset:4px}
-.lab-papel .lab-paso{grid-template-columns:26px minmax(0,1fr)}
+.lab-papel .lab-paso{grid-template-columns:28px minmax(0,1fr);padding:4px 0;border:0}
+.lab-papel .lab-paso:first-child{border:0}
+.lab-papel .lab-paso-n{width:24px;height:24px;font-size:.85rem}
+.lab-papel .lab-paso-tit{margin:0;font:italic 500 1.05rem/1.2 var(--f-titulo);letter-spacing:0;text-transform:none;color:var(--lab-tinta);text-decoration:underline;text-underline-offset:4px}
 .lab-papel .lab-paso-cuerpo{display:grid;grid-template-columns:minmax(110px,auto) minmax(0,1fr);gap:6px 14px;align-items:baseline}
-.lab-papel .lab-paso-tit{margin:0}
 .lab-papel .lab-paso-cuerpo>:not(.lab-paso-tit){grid-column:2}
-.lab-papel .lab-campo{padding:4px 2px;border:0;border-bottom:1px dashed var(--lab-tinta-suave);border-radius:0;background:transparent;color:var(--lab-tinta);font:italic 400 1.15rem/1.3 var(--f-titulo)}
-.lab-papel .lab-campo::placeholder{color:var(--lab-tinta-suave);font-family:var(--f-titulo)}
-.lab-papel .lab-campo:focus{outline:none;border-bottom:1.5px solid #a24f1c}
-.lab-papel .lab-datos{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px 18px}
+.lab-papel .lab-campo{padding:4px 2px;border-bottom:1px dashed var(--lab-tinta-suave);background:transparent;font:italic 400 1.15rem/1.3 var(--f-titulo)}
+.lab-papel .lab-campo::placeholder{font-family:var(--f-titulo)}
+.lab-papel .lab-campo:focus{background:transparent;border-bottom:1.5px solid #a24f1c}
+.lab-papel .lab-datos{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 18px}
 .lab-papel .lab-dato{grid-template-columns:auto minmax(0,1fr)}
-.lab-papel .lab-salida,.lab-papel .lab-veredicto{color:var(--lab-tinta-suave)}
-.lab-papel .lab-bien{color:#2f7a3e}
-.lab-papel .lab-mal{color:#a8322a}
-.lab-papel .lab-aviso{color:#8a5a12}
-.lab-papel .lab-pista{color:#a24f1c}
-.lab-papel .lab-comprobar{background:transparent;border:1.5px solid #a8322a;color:#a8322a;font:italic 500 1rem/1 var(--f-titulo)}
-.lab-papel select.lab-campo option{color:#000}
+.lab-papel .lab-dato-celda .lab-campo{padding-right:2px}
+.lab-papel .lab-unidad{display:none}
+.lab-papel .lab-derivado::before{content:""}
+.lab-papel .lab-comprobar{background:transparent;border:1.5px solid var(--lab-mal);color:var(--lab-mal);font:italic 500 1rem/1 var(--f-titulo);letter-spacing:0;text-transform:none}
+.lab-papel select.lab-campo option,.lab-cuaderno select.lab-campo option{color:#000}
 
-/* Calculadora */
-.cal-pantalla{position:relative;padding:12px 14px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line2)}
-.cal-entrada{width:100%;box-sizing:border-box;border:0;background:transparent;color:var(--mut);font:500 1.05rem/1.4 var(--f-cifra);outline:none}
-.cal-entrada::placeholder{color:var(--tenue)}
-.cal-resultado{display:block;text-align:right;font:600 clamp(1.4rem,2.2vw,1.9rem)/1.25 var(--f-cifra);color:var(--ink);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-.cal-error{margin:6px 0 0;font-size:.82rem;color:var(--r)}
-.cal-teclas{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:14px}
-.cal-tecla{min-height:46px;border:1px solid var(--line2);border-radius:10px;background:var(--lab-panel2);color:var(--ink);cursor:pointer;font:500 1.12rem/1 var(--f-cifra);transition:transform .08s,background .15s}
-.cal-tecla:hover{background:var(--bg4)}
-.cal-tecla:active{transform:translateY(1px)}
+/* ── Calculadora: un instrumento ── */
+.lab-calculadora{padding:18px 16px 18px;border-radius:20px;isolation:isolate;position:sticky;top:20px;
+  background:linear-gradient(170deg,#2c241c 0%,#1f1914 55%,#1a1511 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.4),0 2px 0 #0c0907,0 34px 46px -28px rgba(0,0,0,.95)}
+.lab-calculadora::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:soft-light;opacity:.8}
+.lab-calculadora .lab-panel-cab{margin-bottom:12px;padding:0 4px}
+.lab-calculadora .lab-panel-cab h2{color:var(--ink)}
+/* Pantalla: cristal cálido hundido en la carcasa; operación arriba, resultado grande, estado abajo */
+.cal-pantalla{position:relative;padding:12px 14px 9px;border-radius:10px;background:linear-gradient(180deg,#d9d2bc,#cfc7ae);
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.4),inset 0 -1px 0 rgba(255,255,255,.35),0 1px 0 rgba(255,255,255,.06)}
+.cal-entrada{width:100%;box-sizing:border-box;border:0;padding:0;background:transparent;color:rgba(31,26,20,.72);font:500 1rem/1.4 var(--f-cifra);outline:none}
+.cal-entrada::placeholder{color:rgba(31,26,20,.38)}
+.cal-entrada:focus-visible{box-shadow:0 2px 0 rgba(31,26,20,.4)}
+.cal-resultado{display:block;margin-top:2px;text-align:right;font:600 clamp(1.6rem,2.3vw,2.15rem)/1.15 var(--f-cifra);letter-spacing:-.01em;color:#1a1611;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.cal-estado{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid rgba(31,26,20,.18);font:600 .68rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.14em;text-transform:uppercase;color:rgba(31,26,20,.6)}
+.cal-ans{font-family:var(--f-cifra);letter-spacing:0;text-transform:none;font-size:.74rem}
+.cal-fix{display:inline-flex;align-items:center;gap:2px}
+.cal-fix button{min-width:22px;padding:3px 4px;border:0;border-radius:3px;background:none;color:inherit;cursor:pointer;font:inherit}
+.cal-fix button[aria-pressed="true"]{background:#1f1a14;color:#d9d2bc}
+.cal-fix span{margin-left:4px}
+.cal-error{margin:6px 0 0;font-size:.82rem;color:#8e2a20}
+/* Teclado: funciones pequeñas arriba, números en crema, operaciones en ocre, borrar en bermellón, = en azul */
+.cal-teclas{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px 8px;margin-top:16px}
+.cal-tecla{position:relative;min-height:48px;border:0;border-radius:9px;cursor:pointer;color:#efe6d1;font:600 1.15rem/1 var(--f-texto);
+  background:linear-gradient(180deg,#3a3129,#2b241d);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 3px 0 #0e0b08,0 5px 8px -3px rgba(0,0,0,.7);
+  transition:transform .07s,box-shadow .07s,filter .15s}
+.cal-tecla:hover{filter:brightness(1.12)}
+.cal-tecla:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 #0e0b08}
 .cal-tecla:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
-.cal-op{background:rgba(224,178,94,.16);color:var(--oro2)}
-.cal-borrar{background:rgba(233,114,95,.18);color:var(--r)}
-.cal-igual{grid-column:1 / -1;background:var(--b);color:#0b1420;border-color:transparent;font-weight:700}
-.cal-igual:hover{background:#8bbcf0}
-.cal-acciones{display:grid;gap:8px;margin-top:14px}
-.cal-enlace{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:0;color:var(--ink);cursor:pointer;text-align:left;font-size:.92rem}
-.cal-enlace:hover{color:var(--oro2)}
-.cal-icono{width:20px;height:20px;color:var(--oro)}
-.cal-explicacion{margin:12px 0 0;padding:12px 14px 12px 32px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:.9rem;line-height:1.45;display:grid;gap:4px}
-/* Analógico: la calculadora de mesa, con pantalla de cristal líquido y teclas con relieve */
-.lab[data-modo="analogico"] .cal-pantalla{background:var(--lab-lcd);border:0;box-shadow:inset 0 3px 8px rgba(0,0,0,.35)}
-.lab[data-modo="analogico"] .cal-entrada{color:rgba(31,42,28,.75)}
-.lab[data-modo="analogico"] .cal-entrada::placeholder{color:rgba(31,42,28,.45)}
-.lab[data-modo="analogico"] .cal-resultado{color:var(--lab-lcd-tinta)}
-.lab[data-modo="analogico"] .cal-tecla{border:0;background:linear-gradient(180deg,#3a3128,#2a231c);box-shadow:0 3px 0 #120e0a,0 6px 10px -4px rgba(0,0,0,.7);font-family:var(--f-texto);font-weight:600}
-.lab[data-modo="analogico"] .cal-tecla:active{transform:translateY(2px);box-shadow:0 1px 0 #120e0a}
-.lab[data-modo="analogico"] .cal-op{background:linear-gradient(180deg,#c99a4b,#a87b32);color:#1d1405}
-.lab[data-modo="analogico"] .cal-borrar{background:linear-gradient(180deg,#d4684f,#a8432f);color:#fff3ec}
-.lab[data-modo="analogico"] .cal-igual{background:linear-gradient(180deg,#5d8fcf,#3b6aa8);color:#fff}
+.cal-teclas .cal-tecla:nth-child(-n+5){min-height:36px;font:600 .95rem/1 var(--f-cifra);color:#cfc6b0;background:linear-gradient(180deg,#2d2620,#211b16)}
+.cal-num{color:#211a13;background:linear-gradient(180deg,#f0e8d4,#d9cfb6);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 3px 0 #8c7f63,0 5px 8px -3px rgba(0,0,0,.6)}
+.cal-num:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 0 #8c7f63}
+.cal-op{color:#1d1405;background:linear-gradient(180deg,#e2b465,#bf8b38);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #6e4d1b,0 5px 8px -3px rgba(0,0,0,.6);font-size:1.3rem}
+.cal-op:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 #6e4d1b}
+.cal-borrar{color:#fff4ee;background:linear-gradient(180deg,#d4684f,#a8432f);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 3px 0 #5e2216,0 5px 8px -3px rgba(0,0,0,.6)}
+.cal-igual{grid-column:1 / -1;min-height:50px;color:#fff;background:linear-gradient(180deg,#5f90cf,#3c6aa6);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 3px 0 #1f3b62,0 6px 10px -3px rgba(0,0,0,.6);font-size:1.4rem}
+.cal-igual:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 #1f3b62}
+/* Acciones: dos botones de verdad, no texto suelto */
+.cal-acciones{display:grid;gap:10px;margin-top:18px}
+.cal-accion{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 .82rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.16em;text-transform:uppercase;text-align:center}
+.cal-accion-explicar{border:1.5px solid rgba(232,192,98,.6);background:rgba(232,192,98,.08);color:var(--oro2)}
+.cal-accion-explicar:hover,.cal-accion-explicar[aria-expanded="true"]{background:rgba(232,192,98,.18);border-color:var(--oro)}
+.cal-accion-enviar{border:0;background:var(--lab-papel);color:var(--lab-tinta)}
+.cal-accion-enviar:hover{background:#fff6e2}
+.cal-accion:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
+.cal-icono{width:20px;height:20px}
+/* La explicación sale en una tira de papel, como un tique */
+.cal-explicacion{margin:12px 0 0;padding:12px 14px 14px 34px;border-radius:3px;background:var(--lab-papel);color:var(--lab-tinta);font-size:.9rem;line-height:1.45;display:grid;gap:4px;box-shadow:0 10px 20px -12px rgba(0,0,0,.8)}
+/* Analógico: la pantalla pasa a cristal líquido verdoso, como la calculadora de mesa */
+.lab[data-modo="analogico"] .cal-pantalla{background:linear-gradient(180deg,#c9d3bd,#b9c4ad)}
 
 /* ── Teoría, debajo del laboratorio ── */
-.t2-teoria{margin-top:48px;padding-top:26px;border-top:1px solid var(--line2)}
+.t2-teoria{margin-top:56px;padding-top:28px;border-top:1px solid var(--line2)}
 .t2-teoria-tit{margin:0 0 18px;font-size:var(--t-h2)}
 body.t2-laboratorio .t2-ficha .t2-ficha-info{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start;margin-top:18px}
 body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;margin-right:auto}
 
-/* Pantallas medianas: la animación arriba, cuaderno y calculadora debajo */
+/* Pantallas medianas: la animación arriba, a todo el ancho; cuaderno y calculadora debajo */
 @media (max-width:1180px){
-  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"modo modo" "centro centro" "cuaderno calc"}
-  .lab[data-modo="analogico"]{grid-template-areas:"modo modo" "centro centro" "calc calc"}
+  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"barra barra" "centro centro" "cuaderno calc"}
+  .lab[data-modo="analogico"]{grid-template-areas:"barra barra" "centro centro" "calc calc"}
   .lab[data-modo="analogico"] .lab-calculadora{max-width:460px;justify-self:center;width:100%}
+  .lab-centro,.lab-calculadora{position:relative;top:auto}
 }
-/* Móvil: una columna */
+/* Móvil: enunciado, animación, cuaderno y calculadora, en ese orden */
 @media (max-width:760px){
-  .t2-ficha .t2-ficha-cabecera{grid-template-columns:minmax(0,1fr)}
-  .t2-ficha .t2-ficha-fx{justify-self:start}
+  .t2-ficha .t2-ficha-cabecera{grid-template-columns:minmax(0,1fr);gap:22px}
+  .lab-cartulina{justify-self:start;max-width:100%}
+  .lab-cartulina-papel{padding:20px 22px 24px}
   .t2-practicar{justify-self:start}
-  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1fr);grid-template-areas:"modo" "centro" "cuaderno" "calc"}
-  .lab[data-modo="analogico"]{grid-template-areas:"modo" "centro" "calc"}
-  .lab-modo{justify-self:stretch}
+  .lab-barra{grid-template-columns:minmax(0,1fr)}
+  .lab-caso{grid-template-columns:minmax(0,1fr)}
+  .lab-caso .lab-mini{grid-column:1;grid-row:auto;justify-self:start}
+  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1fr);grid-template-areas:"barra" "centro" "cuaderno" "calc"}
+  .lab[data-modo="analogico"]{grid-template-areas:"barra" "centro" "calc"}
+  .lab-modo{justify-self:stretch;display:flex}
   .lab-modo button{flex:1}
+  .lab-cuaderno{padding:18px 14px 22px}
   .lab-papel{margin:0 4px;padding:16px 12px 26px 44px;background-size:34px 38px,auto,auto,auto}
   .lab-papel .lab-paso-cuerpo{grid-template-columns:minmax(0,1fr)}
   .lab-papel .lab-paso-cuerpo>:not(.lab-paso-tit){grid-column:1}
-  .cal-tecla{min-height:50px}
+  .cal-tecla{min-height:52px}
 }
 @media (prefers-reduced-motion:reduce){
   .lab-papel-marco,.lab-papel{transition:none}

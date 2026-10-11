@@ -13,9 +13,9 @@ type Tecla = { t: string; inserta?: string; accion?: 'borrar' | 'atras' | 'igual
 const TECLAS: Tecla[] = [
   { t: '(' }, { t: ')' }, { t: '√', inserta: '√(', etiqueta: 'Raíz cuadrada' }, { t: 'log', inserta: 'log(', etiqueta: 'Logaritmo decimal' }, { t: 'ln', inserta: 'ln(', etiqueta: 'Logaritmo neperiano' },
   { t: 'C', accion: 'borrar', clase: 'cal-borrar', etiqueta: 'Borrar todo' }, { t: '⌫', accion: 'atras', etiqueta: 'Borrar el último signo' }, { t: 'xʸ', inserta: '^', etiqueta: 'Potencia' }, { t: '%' }, { t: '÷', clase: 'cal-op', etiqueta: 'Dividir' },
-  { t: '7' }, { t: '8' }, { t: '9' }, { t: 'Ans', etiqueta: 'Resultado anterior' }, { t: '×', clase: 'cal-op', etiqueta: 'Multiplicar' },
-  { t: '4' }, { t: '5' }, { t: '6' }, { t: ',', etiqueta: 'Coma decimal' }, { t: '−', clase: 'cal-op', etiqueta: 'Restar' },
-  { t: '1' }, { t: '2' }, { t: '3' }, { t: '0' }, { t: '+', clase: 'cal-op', etiqueta: 'Sumar' },
+  { t: '7', clase: 'cal-num' }, { t: '8', clase: 'cal-num' }, { t: '9', clase: 'cal-num' }, { t: 'Ans', etiqueta: 'Resultado anterior' }, { t: '×', clase: 'cal-op', etiqueta: 'Multiplicar' },
+  { t: '4', clase: 'cal-num' }, { t: '5', clase: 'cal-num' }, { t: '6', clase: 'cal-num' }, { t: ',', clase: 'cal-num', etiqueta: 'Coma decimal' }, { t: '−', clase: 'cal-op', etiqueta: 'Restar' },
+  { t: '1', clase: 'cal-num' }, { t: '2', clase: 'cal-num' }, { t: '3', clase: 'cal-num' }, { t: '0', clase: 'cal-num' }, { t: '+', clase: 'cal-op', etiqueta: 'Sumar' },
   { t: '=', accion: 'igual', clase: 'cal-igual', etiqueta: 'Calcular' },
 ];
 
@@ -25,12 +25,16 @@ export function htmlCalculadora(): string {
       <label class="sr" for="cal-entrada">Operación</label>
       <input id="cal-entrada" class="cal-entrada" data-cal-entrada type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="3000 ÷ (1 + 3 × 0,07)">
       <output class="cal-resultado" data-cal-resultado aria-live="polite">0</output>
+      <div class="cal-estado">
+        <span class="cal-ans" data-cal-ans>Ans = 0</span>
+        <span class="cal-fix" role="group" aria-label="Decimales que se muestran">${[2, 4, 6].map((d) => `<button type="button" data-cal-fix="${d}" aria-pressed="${d === 6}">${d}</button>`).join('')}<span aria-hidden="true">dec.</span></span>
+      </div>
       <p class="cal-error" data-cal-error hidden></p>
     </div>
     <div class="cal-teclas">${TECLAS.map((k) => `<button type="button" class="cal-tecla ${k.clase ?? ''}" data-cal-tecla="${escaparHtml(k.inserta ?? k.t)}"${k.accion ? ` data-cal-accion="${k.accion}"` : ''}${k.etiqueta ? ` aria-label="${escaparHtml(k.etiqueta)}"` : ''}>${escaparHtml(k.t)}</button>`).join('')}</div>
     <div class="cal-acciones">
-      <button type="button" class="cal-enlace" data-cal-explicar aria-expanded="false"><svg class="cal-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Explícame este cálculo paso a paso</button>
-      <button type="button" class="cal-enlace" data-cal-enviar>Enviar al cuaderno <span aria-hidden="true">→</span></button>
+      <button type="button" class="cal-accion cal-accion-explicar" data-cal-explicar aria-expanded="false"><svg class="cal-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Explícame este cálculo paso a paso</button>
+      <button type="button" class="cal-accion cal-accion-enviar" data-cal-enviar>Enviar al cuaderno <span aria-hidden="true">→</span></button>
     </div>
     <ol class="cal-explicacion" data-cal-explicacion hidden></ol>
   </div>`;
@@ -51,13 +55,17 @@ export function montarCalculadora(raiz: HTMLElement, opciones: OpcionesCalculado
   const error = cal.querySelector<HTMLElement>('[data-cal-error]')!;
   const explicacion = cal.querySelector<HTMLOListElement>('[data-cal-explicacion]')!;
   const botonExplicar = cal.querySelector<HTMLButtonElement>('[data-cal-explicar]')!;
+  const ansEl = cal.querySelector<HTMLElement>('[data-cal-ans]')!;
   let ans = 0;
+  /** Decimales que se ven (FIX, como en la calculadora de examen); el valor interno es completo. */
+  let fix = 6;
+  const ver = (v: number) => (fix === 6 ? formatearExacto(v) : formatear(v, fix));
 
   /** Vista previa mientras se escribe; los errores solo se enseñan al pulsar =. */
   const previa = () => {
     error.hidden = true;
     const r = calcular(entrada.value, ans);
-    if (r.ok) resultado.textContent = formatearExacto(r.valor);
+    if (r.ok) resultado.textContent = ver(r.valor);
     if (!botonExplicar.getAttribute('aria-expanded')?.includes('true')) return;
     explicar_();
   };
@@ -71,7 +79,8 @@ export function montarCalculadora(raiz: HTMLElement, opciones: OpcionesCalculado
       return;
     }
     ans = r.valor;
-    resultado.textContent = formatearExacto(r.valor);
+    resultado.textContent = ver(r.valor);
+    ansEl.textContent = `Ans = ${formatearExacto(ans)}`;
     error.hidden = true;
   };
   const insertar = (texto: string) => {
@@ -102,6 +111,12 @@ export function montarCalculadora(raiz: HTMLElement, opciones: OpcionesCalculado
         previa();
       } else if (accion === 'igual') igual();
       else insertar(t.dataset.calTecla);
+      return;
+    }
+    if (t.dataset.calFix) {
+      fix = Number(t.dataset.calFix);
+      cal.querySelectorAll<HTMLButtonElement>('[data-cal-fix]').forEach((b) => b.setAttribute('aria-pressed', String(b === t)));
+      previa();
       return;
     }
     if (t.hasAttribute('data-cal-explicar')) {

@@ -15,7 +15,7 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
   Desde ella se abre la PR hacia `main`; si la PR anterior ya está fusionada, se reinicia la rama desde `main` y se abre otra.
 - Trabajo automático: al terminar un cambio y pasar las comprobaciones, Claude hace commit, push y
   abre o actualiza la PR sin esperar permiso. Si algo es ambiguo, decide lo más razonable y lo explica al final.
-- **Claude fusiona sus PR** cuando pasan las comprobaciones (autorizado por el usuario el 11/10; el repositorio es público).
+- **Claude no fusiona ninguna PR sin autorización expresa del usuario** (decisión del 12/10, sustituye a la del 11/10). Abre o actualiza la PR y avisa.
 - Tras fusionar: esperar 2–3 minutos y recargar con Ctrl + F5.
 - Previsualización: cada incremento con código se enseña en una URL de GitHub Pages que no pise producción
   (plan en `docs/plan-completo.md`, §12). Si no se puede de forma segura, se explica el bloqueo antes de tocar permisos.
@@ -41,6 +41,10 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 - `src/styles/`: `base.css` es el sistema visual (colores, tipos, botones); las demás hojas solo colocan.
 - Identidad editorial (portada de la asignatura e índice del Tema 2): `src/ui/components/editorial.ts` y `src/styles/editorial.css`;
   el reproductor con expansión de las miniaturas de vídeo es `src/ui/components/reproductorExpandido.ts`. Estado en `docs/identidad-editorial.md`.
+- Laboratorio de las fórmulas del Tema 2 (un solo sistema para las 19): vista `src/ui/views/tema2/laboratorio.ts`,
+  calculadora `src/ui/components/calculadora.ts`, motor `src/domain/tema2/` (expresiones y laboratorios) y estilos
+  `src/styles/laboratorio.css` (escritorio oscuro con grano, cartulina, cuaderno y calculadora). El caso de cada animación
+  se declara una vez en su escena (`caso`) y una prueba comprueba que coincide con lo que pinta.
 - Infografías del Tema 1 en dirección «Calcografía» (de momento solo el ICO): `src/ui/infografias/` y `src/styles/calcografia.css`;
   análisis y decisión en `docs/infografias-tema1.md`.
 - `src/assets/fuentes/`: fuentes propias (Fraunces, IBM Plex, Barlow Condensed, Big Shoulders); no usar Google Fonts.

@@ -23,6 +23,7 @@ export const escenaTipoSimple: Escena = {
   titulo: 'Tipo de interés en capitalización simple',
   duracion: 19,
   descripcion: 'Con C₀ = 10.000 € y Cₙ = 12.100 € en 3 años, lo crecido (2.100 €) se reparte en 3 cosechas de 700 €; cada una es 0,07 de la semilla: i = (Cₙ − C₀) / (n · C₀) = 7 %.',
+  caso: { C_0: '10.000 €', C_n: '12.100 €', n: '3' },
   capitulos: [
     { t: 0, texto: 'Conoces la semilla y el montante: $C_0$ = 10.000 € hoy y $C_n$ = 12.100 € a los 3 años. Falta el tipo.' },
     { t: 2.8, texto: 'Lo que ha crecido es la diferencia: $C_n - C_0$ = 2.100 €. Son los intereses $I$.' },

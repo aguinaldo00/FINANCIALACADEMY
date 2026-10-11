@@ -8,7 +8,7 @@ import { FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/tema-02/for
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
-import { htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
+import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
 
 function lista(items: string[]): string {
   return `<ul>${items.map((x) => `<li>${textoT2(x)}</li>`).join('')}</ul>`;
@@ -29,7 +29,7 @@ export function htmlFicha(id: string): string {
         <p class="t2-ceja">Tema 2 · Fórmula ${f.numero} · ${escaparHtml(b.titulo)}</p>
         <h1>${escaparHtml(f.nombre)}</h1>
       </div>
-      <p class="t2-ficha-fx">${formulaHtml(f.expresion)}</p>
+      ${cartulinaHtml(f.expresion, 97 + f.numero * 31)}
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}

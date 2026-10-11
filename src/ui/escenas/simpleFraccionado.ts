@@ -25,6 +25,7 @@ export const escenaFraccionadoSimple: Escena = {
   titulo: 'Fraccionamiento del año en capitalización simple',
   duracion: 21,
   descripcion: 'Una cosecha anual de 700 € (10.000 € al 7 %) se reparte en m partes iguales y el tipo también: iₘ = i / m. En 3 años hay 36 meses; las 36 cosechas de 58,33 € suman 2.100 €, como con años: I = C₀ · iₘ · n · m.',
+  caso: { i: '7 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'Con $C_0$ = 10.000 € al $i$ = 7 % anual, la cosecha de un año es $C_0 · i$ = 700 €.' },
     { t: 2.8, texto: 'Si el año se divide en $m$ partes, la cosecha se reparte a partes iguales: $m$ = 2, 4, 12.' },
