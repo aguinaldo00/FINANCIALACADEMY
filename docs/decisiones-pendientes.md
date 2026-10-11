@@ -133,4 +133,4 @@ Detalle en `docs/infografias-tema1.md` y `docs/auditoria-tema2.md`.
 - **Errores del Tema 2:** caso 28 (exponente −565/365) y la frase del descuento compuesto en `formulas.ts:56`.
 
 ## Plan maestro (11/10)
-Las dudas de conversión de periodos y tipos (bimestre y quincena, diario 360/365 en compuesta, TAE → TIN, redondeo de iₘ, convenio por defecto) y «OMEC» están en `docs/plan-completo.md`, §14.
+Las dudas de conversión de periodos y tipos están en `docs/plan-completo.md`, §14. El 11/10 se resolvieron el bimestre y la quincena, el 360/365, TAE → TIN y OMEC; quedan el redondeo de iₘ y los casos del libro sin convenio.

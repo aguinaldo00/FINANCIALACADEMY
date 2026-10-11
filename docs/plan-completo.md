@@ -80,16 +80,21 @@ Es la misma en todas partes: escena, fichas, ejercicios, diagnóstico y calculad
 | día, año comercial | 360 | temario |
 | día, año civil | 365 | temario |
 
-Bimestre, quincena y otras unidades no constan en el temario: quedan fuera hasta que el usuario las confirme (§14).
+Bimestre (m = 6) y quincena (m = 24) solo se **mencionan** en el calendario de la escena, sin explicarlos ni generar ejercicios con ellos (decisión del usuario, 11/10).
 
 **Funciones, cada una con nombre propio** (nunca una regla única de «dividir entre 12»):
 - `convertirDuracion(valor, de, a, convenio)`: solo cambia la duración. Ejemplos: 195 días → 195/365 años; 2,78 años → 2 años, 9 meses y 11 días, con el convenio del material (n con 2 decimales, mes de 30 días; CP13).
 - `tipoProporcional(i, m)`: solo en simple, iₘ = i/m (fórmula 6, CP14).
 - `tipoEquivalente(i, de, a)`: solo en compuesta, en los dos sentidos. iₘ = (1+i)^{1/m} − 1 e i = (1+iₘ)^m − 1 (fórmula 12, CP19).
 - `nominalAEfectivo(Jₘ, m)`: iₘ = Jₘ/m (el TIN se divide porque está definido así) y TAE = (1 + Jₘ/m)^m − 1 (fórmula 14, CP24).
+- `efectivoANominal(TAE, m)`: la inversa, Jₘ = m · ((1 + TAE)^{1/m} − 1) (Actividades 37 y 38: «la TAE a partir del TIN y viceversa»).
+- Nominal de una frecuencia a otra: no es una fórmula nueva, sino la cadena de las dos anteriores (Jₘ → TAE → Jₖ). Se enseña como combinación.
 - `homogeneizar(dato tipo, dato tiempo, régimen)`: decide si hay que convertir el tiempo, convertir el tipo o dejarlo igual, y devuelve el porqué.
+- `diasEntre(fecha1, fecha2)`: días reales entre fechas, para vencimientos y descuentos.
+- `llevarAFecha(capital, desde, hasta, ley)`: lleva un capital a otra fecha con la ley del enunciado. Sirve para comparar o sustituir capitales que vencen en días distintos (equivalencia financiera y sustitución de capitales, CP3).
+- El convenio 360/365 sale siempre del enunciado («año comercial» o «año civil»), también para el equivalente diario en compuesta.
 
-El paso TAE → TIN (la inversa) y el paso entre nominales de distinta frecuencia necesitan confirmación (§14).
+Fórmulas como el vencimiento común o el vencimiento medio no constan en `docs/fuentes`: solo entran si aparecen en los apuntes.
 
 ## 4. Analizador de expresiones (`expresion.ts`)
 
@@ -181,6 +186,14 @@ Si dos errores dan la misma cifra, el generador cambia de semilla.
 - Los casos del libro se quedan como anclas fijas.
 - Lo generado lleva la marca «Ejercicio de práctica».
 - Verificación en tres capas (auditoría §4.4).
+- **Cobertura total** (objetivo del usuario: todos los ejercicios que se puedan preguntar del temario, en todas sus variantes). Las familias salen del producto:
+  - fórmula × incógnita (cada despeje);
+  - unidad del tipo × unidad del tiempo (año, semestre, cuatrimestre, trimestre, mes, día);
+  - convenio 360/365;
+  - régimen;
+  - fechas (capitales que vencen en días distintos, días al vencimiento);
+  - combinaciones (TIN → TAE → TIN de otra frecuencia, TAE real con comisiones, remesas).
+- Una prueba recorre ese producto y falla si queda alguna combinación válida sin familia.
 
 **EXAMEN**
 - Botón visible en cada bloque.
@@ -262,6 +275,8 @@ Todo es SVG con los tokens de `base.css`.
 
 **I. «El año se puede cortar»** (duración)
 - Imagen: la franja de un año se estira y se parte en 2, 3, 4, 12 y 360/365 trozos, y la cámara entra hasta los días.
+- El bimestre y la quincena aparecen un instante, solo como mención.
+- Unidades juntas: una deuda vence el 15 de marzo y otra el 30 de junio. Se cuentan los días entre fechas y se pasan a años con el convenio del enunciado.
 - Pregunta: ¿cuántos años son 195 días? Respuesta: 195/365 con año civil y 195/360 con comercial.
 - Vuelta: 2,78 años = 2 años, 9 meses y 11 días (CP13). Solo cambia cómo se mide el tiempo; el dinero no se mueve.
 
@@ -284,6 +299,8 @@ Todo es SVG con los tokens de `base.css`.
 - Aquí dividir sí es correcto, porque así está definido: iₘ = Jₘ/m.
 - CP24: TIN 12 % mensual → iₘ = 1 % → TAE = 1,01¹² − 1 = 12,68 %.
 - Contraste explícito con el acto IV: lo que se divide es un nominal, nunca un efectivo.
+- Vuelta atrás (Actividades 37 y 38): de la TAE al TIN, con Jₘ = m · ((1 + TAE)^{1/m} − 1).
+- Cambio de frecuencia de un nominal: pasando por la TAE.
 
 **VI. ¿Qué régimen da más?**
 - CP20: 5.000 € al 3 % durante 195 días. Simple: 5.080,14 €. Compuesta: 5.079,59 €.
@@ -320,7 +337,7 @@ Se corrigen, no se rehacen (auditoría §3.0–3.1):
 - **Preguntas generadas:** plantillas sobre los 45 conceptos y las 12 secciones, con distractores validados (sin repetir la respuesta y sin falsos correctos). Dan prioridad a los conceptos fallados.
 - **Calcografía:** pulir primero el ICO, para que cada actor se reconozca por su tipo visual, y después las otras 11 de una en una.
 - **Glosario:** llevarlo a las fichas de los edificios de la ciudad, a las escenas y al Tema 2.
-- **OMEC:** pendiente de que el usuario lo aclare.
+- **Siglas comprensibles:** toda sigla que aparezca en la aplicación tiene que poder entenderse (botón del glosario). «OMEC» queda descartado: era un ejemplo de esta necesidad.
 
 **Tema 2 y global**
 - Sumario con la página actual marcada.
@@ -369,12 +386,15 @@ El laboratorio de las 18 fórmulas restantes se extiende de una en una después 
 
 ## 14. Decisiones pendientes (no se deciden sin el usuario)
 
-1. ¿Entran el bimestre, la quincena u otras unidades? Hoy no constan.
-2. Equivalente diario en compuesta: ¿m = 360 o 365? Afecta a los valores de la Act. 20.
-3. ¿Se enseña TAE → TIN y la conversión entre nominales de distinta frecuencia? La auditoría lo marca como hueco que necesita permiso.
-4. Redondeo de los tipos intermedios (iₘ con 4 o 6 decimales) cuando el enunciado no lo dice.
-5. Cuando el enunciado no indica el convenio, ¿360 o 365 por defecto?
-6. Significado de «OMEC».
+**Resueltas el 11/10**
+- Bimestre y quincena: solo se mencionan.
+- 360/365: lo decide el enunciado (civil o comercial), también para el diario en compuesta. El generador siempre lo indica.
+- TAE → TIN: está en el temario (Actividades 37 y 38). El cambio de frecuencia de un nominal se hace como cadena.
+- «OMEC»: descartado. La necesidad real es que todas las siglas se entiendan (glosario).
+
+**Abiertas**
+1. Redondeo de los tipos intermedios (iₘ con 4 o 6 decimales) cuando el enunciado no lo dice. Propuesta: guardarlos sin redondear y mostrar 4 decimales en %.
+2. Libro sin convenio indicado: ¿360 o 365? Solo afecta a los casos del libro, no a los generados.
 
 ## 15. Herramientas
 
