@@ -1,11 +1,11 @@
 /*
- * Piezas de la animación de referencia (dirección editorial aprobada): papel recortado con sombra,
- * etiquetas que «caen» sobre el papel, notas escritas a mano y una planta como metáfora del capital.
- * Se apoyan en el motor real (src/ui/motion) y solo viven en la propuesta hasta que se apruebe.
+ * Piezas de papel recortado de la identidad editorial: bloques con volumen y sombra, etiquetas que
+ * «caen» sobre el papel, notas escritas a mano, flechas discontinuas y una planta como metáfora del
+ * capital. Las usa la animación de la fórmula 1 (escenas/simpleIntereses.ts).
  */
-import { fijar, type Lienzo, situar, SVG_NS } from '../../../src/ui/motion/lienzo.ts';
-import { nuevaSemilla, rectanguloRecortado, temblor } from '../../../src/ui/motion/papel.ts';
-import { curvas, limitar, mezclar, tramo } from '../../../src/ui/motion/tiempo.ts';
+import { fijar, type Lienzo, situar, SVG_NS } from './lienzo.ts';
+import { nuevaSemilla, rectanguloRecortado, temblor } from './papel.ts';
+import { curvas, limitar, mezclar, tramo } from './tiempo.ts';
 
 /** Caída de una pieza de papel: llega grande e inclinada, se pasa un poco y se asienta. */
 export function caida(p: number, giroFinal = 0): { escala: number; giro: number; sombra: number; opacidad: number } {

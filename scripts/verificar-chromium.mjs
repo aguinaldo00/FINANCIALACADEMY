@@ -258,10 +258,11 @@ const progreso = () => {
   await p.locator('[data-ac-ir="2"]').click();
   await p.screenshot({ path: `${SP}/ver-academia-islas.png` }).catch(() => {});
   await p.locator('a.ac-entrar').click();
-  await p.waitForSelector('.asignatura', { timeout: 10000 }).catch(() => {});
-  ok('academia: entrar en Gestión Financiera muestra sus 2 temas y el temario', (await p.locator('.as-puerta').count()) === 2 && (await p.locator('.as-temario a.tm-fila[href^="#s/"]').count()) >= 12 && (await p.locator('.as-temario a.tm-n1[href^="#s/"]').count()) === 12);
-  ok('academia: los botones de estudio y examen siguen ahí', (await p.locator('.as-herramientas a.ab').count()) === 6);
-  await p.locator('.as-temario a[href="#s/3.2B"]').first().click();
+  await p.waitForSelector('.ed-portada', { timeout: 10000 }).catch(() => {});
+  ok('academia: entrar en Gestión Financiera muestra sus 2 capítulos y el temario (en el Sumario)', (await p.locator('.ed-cap').count()) === 2 && (await p.locator('.ed-sumario a.tm-fila[href^="#s/"]').count()) >= 12 && (await p.locator('.ed-sumario a.tm-n1[href^="#s/"]').count()) === 12);
+  ok('academia: las herramientas de estudio y examen siguen ahí (Cuaderno de estudio)', (await p.locator('.ed-cuaderno a').count()) === 6);
+  await p.locator('.ed-acciones [data-sumario]').click();
+  await p.locator('.ed-sumario a[href="#s/3.2B"]').first().click();
   await p.waitForSelector('.cc', { timeout: 10000 }).catch(() => {});
   ok('academia: el temario abre un apartado sin pasar por la ciudad', (await p.evaluate(() => location.hash)) === '#s/3.2B' && (await p.locator('.mundo-lienzo').count()) === 0);
   await p.locator('#migas a[href="#academia"]').click();
@@ -269,9 +270,9 @@ const progreso = () => {
   ok('academia: las migas vuelven al selector y recuerdan por dónde ibas', (await p.locator('.ac-continuar').first().getAttribute('href').catch(() => null)) === '#s/3.2B');
   await p.waitForSelector('a.ac-entrar', { timeout: 30000 }).catch(() => {});
   await p.locator('a.ac-entrar').click();
-  await p.locator('.as-puerta[href="#tema/2"]').click();
-  await p.waitForSelector('.tema-matematica .t2-bloque', { timeout: 10000 }).catch(() => {});
-  ok('academia: el Tema 2 (índice de fórmulas) se abre desde la asignatura', (await p.locator('.t2-bloque').count()) === 3 && (await p.locator('a.t2-carta').count()) === 19);
+  await p.locator('.ed-cap-2 a.ed-enlace-fuerte[href="#tema/2"]').click();
+  await p.waitForSelector('.ed-indice-t2 .ed-parte', { timeout: 10000 }).catch(() => {});
+  ok('academia: el Tema 2 (índice de fórmulas) se abre desde la asignatura', (await p.locator('.ed-indice-t2 .ed-parte').count()) === 3 && new Set(await p.locator('a.ed-f').evaluateAll((as) => as.map((a) => a.dataset.formula))).size === 19);
   await p.screenshot({ path: `${SP}/ver-academia-tema2.png` }).catch(() => {});
   await p.close();
 }
@@ -529,6 +530,74 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await pulsar(p, '.atlas-item[data-foco="zona:4.2A"]');
   ok('sin WebGL: el Atlas navega', (await p.locator('.atlas-item').count()) === 8);
   await p.close();
+}
+
+// 0b. Identidad editorial (portada de la asignatura e índice del Tema 2) y reproductor con
+// expansión cinematográfica: el vídeo real se abre desde su miniatura, se reproduce, se pausa y vuelve.
+{
+  const p = await pagina({ viewport: { width: 1400, height: 900 } }, progreso);
+  await p.goto('http://localhost:4173/#a/gestion-financiera');
+  await p.waitForSelector('.ed-portada', { timeout: 30000 });
+  ok('editorial: la portada de la asignatura tiene su propia navegación (sin la barra común)', (await p.evaluate(() => document.body.classList.contains('editorial'))) && !(await p.locator('.topbar').isVisible()) && (await p.locator('.ed-nav').isVisible()));
+  const abre = p.locator('.ed-acciones [data-sumario]');
+  await abre.click();
+  ok('editorial: el Sumario se abre con el foco en su buscador', (await p.locator('[data-capa-sumario]').isVisible()) && (await p.evaluate(() => document.activeElement?.matches('[data-tm-buscar]'))));
+  await p.keyboard.type('TAE');
+  const filas = await p.locator('.ed-sumario .tm-fila:visible').allTextContents();
+  ok('editorial: el buscador del Sumario filtra', filas.length > 0 && filas.length < 20 && filas.some((t) => t.includes('TAE')), `${filas.length} filas`);
+  await p.keyboard.press('Escape');
+  ok('editorial: Escape cierra el Sumario y devuelve el foco', (await p.locator('[data-capa-sumario]').isHidden()) && (await p.evaluate(() => document.activeElement?.matches('.ed-acciones [data-sumario]'))));
+  const mini = p.locator('[data-expandir="sistema-financiero"]');
+  await mini.scrollIntoViewIfNeeded();
+  await p.waitForTimeout(1000);
+  await mini.focus();
+  await p.keyboard.press('Enter');
+  await p.waitForSelector('.vx-capa .vx-marco video', { timeout: 5000 }).catch(() => {});
+  ok('vídeo: la miniatura se expande en un diálogo modal con el mismo <video>', (await p.locator('.vx-capa[role="dialog"][aria-modal="true"]').count()) === 1 && (await mini.locator('video').count()) === 0);
+  await p.waitForTimeout(1800);
+  const t1 = await p.evaluate(() => document.querySelector('.vx-marco video').currentTime);
+  await p.waitForTimeout(900);
+  const t2 = await p.evaluate(() => document.querySelector('.vx-marco video').currentTime);
+  ok('vídeo: se reproduce al terminar la expansión', t2 > t1, `${t1.toFixed(2)} → ${t2.toFixed(2)} s`);
+  await p.keyboard.press('Space');
+  await p.waitForTimeout(200);
+  ok('vídeo: Espacio lo pausa', await p.evaluate(() => document.querySelector('.vx-marco video').paused));
+  await p.screenshot({ path: `${SP}/ver-video-expandido.png` }).catch(() => {});
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(900);
+  ok('vídeo: Escape lo devuelve a la miniatura y el foco vuelve a ella', (await p.locator('.vx-capa').count()) === 0 && (await mini.locator('video').count()) === 1 && (await p.evaluate(() => document.activeElement?.dataset.expandir === 'sistema-financiero')));
+  await p.goto('http://localhost:4173/#tema/2');
+  await p.waitForSelector('.ed-indice-t2', { timeout: 10000 }).catch(() => {});
+  await p.waitForTimeout(800);
+  ok('editorial: el índice del Tema 2 tiene la barra del capítulo y la animación de la fórmula 1', (await p.locator('.ed-barra-cap').isVisible()) && (await p.locator('.ed-t2-pantalla .mo-svg').count()) === 1);
+  await p.locator('[data-expandir="compuesta-montante"]').click();
+  await p.waitForTimeout(1500);
+  ok('animación: la miniatura de la fórmula 7 se expande con su reproductor y arranca', (await p.locator('.vx-capa .mo.mo-reproduciendo').count()) === 1);
+  await p.locator('.vx-cerrar').click();
+  await p.waitForTimeout(900);
+  ok('animación: Cerrar la devuelve a su miniatura', (await p.locator('.vx-capa').count()) === 0);
+  await p.close();
+
+  const r = await pagina({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' }, progreso);
+  await r.goto('http://localhost:4173/#a/gestion-financiera');
+  await r.waitForSelector('.ed-portada', { timeout: 30000 });
+  await r.locator('[data-expandir="sistema-financiero"]').scrollIntoViewIfNeeded();
+  await r.locator('[data-expandir="sistema-financiero"]').click();
+  const animadas = await r.evaluate(() => document.getAnimations().map((a) => a.effect.target.className));
+  await r.waitForTimeout(1200);
+  ok('vídeo con movimiento reducido: solo un fundido (sin desplazamiento ni 3D) y no arranca solo', animadas.every((c) => String(c).startsWith('vx-capa')) && (await r.evaluate(() => document.querySelector('.vx-marco video').paused)), animadas.join(','));
+  await r.close();
+
+  const m = await pagina({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, progreso);
+  for (const ruta of ['#a/gestion-financiera', '#tema/2']) {
+    await m.goto(`http://localhost:4173/${ruta}`);
+    await m.waitForSelector('.ed-pagina', { timeout: 30000 });
+    await m.waitForTimeout(600);
+    ok(`editorial (móvil): ${ruta} sin desbordamiento horizontal`, (await m.evaluate(() => document.documentElement.scrollWidth)) <= 390);
+  }
+  await m.locator('[data-ed-menu]').tap();
+  ok('editorial (móvil): el menú abre los accesos', await m.locator('#ed-menu').isVisible());
+  await m.close();
 }
 
 ok('sin errores de consola ni de página', errores.length === 0, errores.slice(0, 3).join(' / '));

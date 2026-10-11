@@ -1,0 +1,77 @@
+/*
+ * Reproductor con expansión cinematográfica (src/ui/components/reproductorExpandido.ts): la
+ * miniatura de vídeo, la capa que atenúa la página y el reproductor grande con sus controles.
+ * Tokens de base.css; tipografía de la identidad editorial.
+ */
+
+/* ── Miniatura: un botón con el propio vídeo (o la animación) detenido en un fotograma ── */
+.vx-miniatura{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:0;border-radius:12px;overflow:hidden;isolation:isolate;
+  background:#05080f;color:var(--ink);cursor:pointer;font:inherit;text-align:left;box-shadow:0 30px 60px -28px rgba(0,0,0,.75)}
+.vx-medio{position:absolute;inset:0;display:block}
+.vx-medio video{display:block;width:100%;height:100%;object-fit:cover}
+.vx-medio.mo-marco{aspect-ratio:auto;border:0;border-radius:0;box-shadow:none}
+.vx-miniatura::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(7,11,20,0) 52%,rgba(7,11,20,.62))}
+.vx-play{position:absolute;z-index:2;left:18px;bottom:18px;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;
+  background:var(--ink);color:var(--bg2);box-shadow:0 10px 24px rgba(0,0,0,.4);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.vx-play svg{width:24px;height:24px;margin-left:3px;fill:currentColor}
+.vx-rotulo{position:absolute;z-index:2;left:92px;bottom:37px;display:flex;align-items:baseline;gap:12px;font:600 .78rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
+.vx-rotulo span+span{font:500 .8rem/1 var(--f-cifra);letter-spacing:0;color:var(--oro2)}
+.vx-miniatura:hover .vx-play,.vx-miniatura:focus-visible .vx-play{transform:scale(1.08)}
+.vx-miniatura:focus-visible{outline:2px solid var(--oro);outline-offset:4px}
+/* Mientras el reproductor está abierto, la miniatura «ha viajado» hasta él. */
+.vx-miniatura.vx-en-viaje{visibility:hidden}
+/* Sobre papel: la animación con su papel y una sombra de tinta. */
+.vx-papel{aspect-ratio:6/5;border-radius:16px;background:var(--ink);box-shadow:0 34px 60px -22px rgba(13,19,33,.5),0 2px 0 rgba(13,19,33,.08)}
+.vx-papel::after{background:linear-gradient(0deg,rgba(241,235,223,0) 70%,rgba(13,19,33,.22))}
+/* En las animaciones el pie suele tener contenido (totales, sustituciones): el botón va arriba. */
+.vx-papel .vx-play{top:16px;bottom:auto}
+.vx-papel .vx-rotulo{display:none}
+
+/* ── La capa: el resto de la interfaz se atenúa y el reproductor queda en el centro ── */
+.vx-capa{position:fixed;inset:0;z-index:70;display:grid;place-items:center;overscroll-behavior:contain;
+  padding:max(16px,env(safe-area-inset-top,0px)) clamp(16px,3vw,48px) max(16px,env(safe-area-inset-bottom,0px))}
+.vx-fondo{position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 50% 45%,rgba(13,19,33,.88),rgba(4,6,12,.97));-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.vx-escenario{position:relative;display:grid;gap:16px;width:min(1180px,100%);max-height:100%}
+.vx-cab{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:6px 24px;width:var(--vx-ancho);margin:0 auto}
+.vx-volanta{margin:0;font:600 .76rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.24em;text-transform:uppercase;color:var(--oro2)}
+.vx-cab h2{grid-column:1;margin:0;font:300 clamp(1.4rem,2.8vw,2.4rem)/1.05 var(--f-titulo);letter-spacing:-.01em;color:var(--ink)}
+.vx-cerrar{grid-column:2;grid-row:1/3;align-self:center;min-height:44px;padding:0 18px;border:1px solid rgba(241,235,223,.45);background:none;color:var(--ink);cursor:pointer;
+  font:600 .8rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;transition:background var(--anim),color var(--anim)}
+.vx-cerrar:hover,.vx-cerrar:focus-visible{background:var(--ink);color:var(--bg2)}
+.vx-cerrar:focus-visible{outline:2px solid var(--oro);outline-offset:3px}
+.vx-cuerpo{display:grid;gap:14px}
+
+/* Vídeo: el marco conserva el formato del archivo; los controles van debajo, no encima. */
+.vx-capa-video{--vx-ancho:min(100%,calc((100svh - 240px) * 16 / 9))}
+.vx-marco{position:relative;width:var(--vx-ancho);aspect-ratio:16/9;margin:0 auto;background:#05080f;border-radius:10px;clip-path:inset(0 round 10px);will-change:transform}
+.vx-marco video{display:block;width:100%;height:100%;object-fit:contain;cursor:pointer}
+.vx-mandos{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;width:var(--vx-ancho);margin:0 auto}
+.vx-boton{flex:none;display:grid;place-items:center;width:52px;height:52px;padding:0;border:0;border-radius:50%;background:var(--ink);color:var(--bg2);cursor:pointer}
+.vx-boton svg{width:22px;height:22px;fill:currentColor}
+.vx-boton:focus-visible,.vx-barra:focus-visible{outline:2px solid var(--oro);outline-offset:3px}
+.vx-barra{--p:0%;flex:1;min-width:120px;height:32px;margin:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.vx-barra::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--oro) var(--p),rgba(241,235,223,.24) var(--p))}
+.vx-barra::-webkit-slider-thumb{width:16px;height:16px;margin-top:-6px;border:0;border-radius:50%;background:var(--ink);-webkit-appearance:none;appearance:none}
+.vx-barra::-moz-range-track{height:4px;border-radius:2px;background:rgba(241,235,223,.24)}
+.vx-barra::-moz-range-progress{height:4px;border-radius:2px;background:var(--oro)}
+.vx-barra::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:var(--ink)}
+.vx-tiempo{flex:none;font:500 .85rem/1 var(--f-cifra);font-variant-numeric:tabular-nums;color:var(--mut)}
+.vx-nota{flex-basis:100%;margin:0;font-size:.82rem;color:var(--tenue)}
+
+/* Animación del motor: su propio reproductor (subtítulos y capítulos) en el centro. */
+.vx-capa-escena{--vx-ancho:min(100%,calc((100svh - 310px) * 1.2),860px)}
+.vx-capa-escena .mo{width:var(--vx-ancho);margin:0 auto}
+.vx-capa-escena .mo-marco{will-change:transform}
+.vx-capa-escena .mo-sub{color:var(--ink);font-family:var(--f-titulo)}
+
+@media (max-width:700px){
+  .vx-play{left:12px;bottom:12px;width:48px;height:48px}
+  .vx-rotulo{left:72px;bottom:28px}
+  .vx-cab h2{font-size:1.3rem}
+  .vx-cerrar{padding:0 12px}
+  .vx-capa-video{--vx-ancho:100%}
+  .vx-capa-escena{--vx-ancho:min(100%,calc((100svh - 290px) * 1.2))}
+}
+@media (prefers-reduced-motion:reduce){
+  .vx-play,.vx-cerrar{transition:none}
+}

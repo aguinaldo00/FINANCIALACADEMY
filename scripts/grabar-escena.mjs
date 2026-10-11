@@ -1,15 +1,15 @@
 // Graba una escena en MP4 (H.264) fotograma a fotograma y saca una hoja de fotogramas.
-// Uso: npm run dev  y luego  node propuesta/editorial/grabar.mjs <salida.mp4> [escena] [fps]
+// Uso: npm run dev  y luego  node scripts/grabar-escena.mjs <salida.mp4> [escena] [fps]
 import { createRequire } from 'node:module';
 import { execSync, spawn } from 'node:child_process';
 const raiz = execSync('npm root -g').toString().trim();
 const { chromium } = createRequire(raiz + '/')(raiz + '/playwright');
-const [salida = 'referencia.mp4', escena = 'referencia-simple', fps = '30'] = process.argv.slice(2);
+const [salida = 'escena.mp4', escena = 'simple-intereses', fps = '30'] = process.argv.slice(2);
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 720, height: 696 }, deviceScaleFactor: 2 });
 const errores = [];
 p.on('pageerror', (e) => errores.push(e.message));
-await p.goto(`http://127.0.0.1:5173/propuesta/editorial/grabar.html?escena=${escena}`);
+await p.goto(`http://127.0.0.1:5173/scripts/grabar-escena.html?escena=${escena}`);
 await p.waitForSelector('[data-listo]');
 await p.waitForTimeout(800);
 const dur = await p.evaluate(() => window.__duracion);

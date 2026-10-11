@@ -1,35 +1,32 @@
 /*
- * PROPUESTA · dirección editorial (Cinematic Editorial / Interactive Documentary / Knowledge Atlas).
- * Solo para la maqueta aislada. Usa los tokens y fuentes de base.css; no redefine la paleta.
+ * Identidad editorial (Cinematic Editorial / Interactive Documentary / Knowledge Atlas).
+ * Hoy se aplica a dos pantallas: la portada de la asignatura (#a/…) con su Sumario y el índice del
+ * Tema 2 (#tema/2). Usa los tokens y fuentes de base.css; no redefine la paleta.
  *  - Noche (--bg) para las aperturas cinematográficas y el Atlas.
  *  - Papel (--ink) para el capítulo II y la lectura: tinta azul noche (--bg2) y rotulador de color.
  *  - Titulares en Fraunces (romana + cursiva), volantas en Barlow Condensed, texto en IBM Plex.
  */
 :root{--ed-margen:clamp(20px,6vw,96px);--ed-tinta:var(--bg2);--ed-tinta-suave:rgba(13,19,33,.72);--ed-regla:rgba(13,19,33,.18)}
-body{margin:0}
+
+/* El esqueleto común (barra superior, índice lateral fijo y columna de 900 px) no se aplica a estas
+   pantallas: la página ocupa todo el ancho y trae su propia navegación. El índice lateral sigue
+   montado y se abre como capa. */
+body.editorial .topbar,body.editorial .rail-plegar{display:none}
+body.editorial main{margin-left:0}
+body.editorial .page{max-width:none;margin:0;padding:0}
+.ed-sin-scroll{overflow:hidden}
 .ed-pagina{position:relative;min-height:100vh;overflow-x:clip}
 .ed-pagina-noche{background:var(--bg);color:var(--ink)}
 .ed-pagina-papel{background:var(--ink);color:var(--ed-tinta)}
 /* Textura de papel solo donde hay composición (aperturas, recortes, el pliego del capítulo II);
    las zonas de lectura (partes, sumario, guion) van limpias. */
-.ed-cap-2::before,.ed-recorte-papel::before,.ed-t2-apertura::before,.ed-revision-cab::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:multiply;opacity:.28;z-index:0}
+.ed-cap-2::before,.ed-recorte-papel::before,.ed-t2-apertura::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:var(--mo-grano,none);background-size:180px;mix-blend-mode:multiply;opacity:.28;z-index:0}
 .ed-pagina-papel>*{position:relative;z-index:1}
 .ed em{font-style:italic}
 .ed-pagina-papel b,.ed-pagina-papel strong,.ed-cap-2 b,.ed-sumario b,.ed-marca b{color:inherit}
 .ed-migas a{color:inherit}
 .ed a{color:inherit}
 
-/* Barra de la maqueta (no es parte del diseño) */
-.ed-barra-propuesta{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.82);color:#fff;font:500 .78rem/1.3 var(--f-texto);box-shadow:0 10px 30px rgba(0,0,0,.4);backdrop-filter:blur(6px)}
-.ed-barra-propuesta b{color:var(--oro2);letter-spacing:.08em;text-transform:uppercase;font-size:.7rem}
-.ed-barra-propuesta span{opacity:.7}
-.ed-barra-propuesta a{color:#fff;text-decoration:none;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.2)}
-.ed-barra-propuesta a[aria-current]{background:#fff;color:#000}
-.ed-barra-propuesta a.ed-barra-comparar{border-style:dashed;color:var(--oro2)}
-.limpio .ed-barra-propuesta{display:none}
-.ed-saltar{position:absolute;left:12px;top:-60px;z-index:60;padding:10px 16px;background:var(--oro);color:var(--oro-tinta);font:600 .9rem var(--f-texto);text-decoration:none}
-.ed-saltar:focus{top:12px}
-.ed-sin-scroll{overflow:hidden}
 
 /* Volantas y titulares */
 .ed-volanta{margin:0 0 18px;display:flex;align-items:center;gap:12px;font:600 .8rem/1.3 "Barlow Condensed",var(--f-texto);letter-spacing:.26em;text-transform:uppercase;color:var(--oro2)}
@@ -122,11 +119,9 @@ body{margin:0}
 .ed-seccion-cab em,.ed-cuaderno h2 em,.ed-atlas h2 em{color:var(--oro2);font-weight:300}
 .ed-cap{position:relative;display:grid;align-items:center;gap:clamp(28px,5vw,80px)}
 .ed-cap-1{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);margin-top:70px}
-.ed-cap-visual{position:relative;aspect-ratio:16/10;background-size:cover;background-position:center 60%;overflow:hidden}
-.ed-cap-1 .ed-cap-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,11,20,0) 40%,rgba(7,11,20,.55))}
-.ed-cap-visual>img:first-child{position:absolute;left:50%;top:50%;width:62%;transform:translate(-50%,-46%);filter:drop-shadow(0 30px 40px rgba(0,0,0,.5))}
+.ed-cap-visual{position:relative;margin:0}
+.ed-cap-video .vx-miniatura{aspect-ratio:16/10}
 /* Plano detalle: la ciudad de cerca (en la apertura se ve entera) */
-.ed-cap-1 .ed-cap-visual>img:first-child{width:135%;left:46%;top:60%;transform:translate(-50%,-30%)}
 .ed-niebla.n3{left:-5%;bottom:-6%;width:110%;opacity:.6;z-index:1}
 .ed-cap-texto{position:relative}
 .ed-cap-num{display:block;margin:0 0 14px -.04em;font:italic 300 clamp(6rem,10vw,9rem)/.78 var(--f-titulo);color:transparent;-webkit-text-stroke:1.2px var(--oro2);letter-spacing:-.04em}
@@ -150,10 +145,9 @@ body{margin:0}
 .ed-cap-2 .ed-datos{border-top-color:var(--ed-regla)}
 .ed-cap-2 .ed-datos div{border-right-color:var(--ed-regla)}
 .ed-cap-2 .ed-datos dt{color:var(--ed-tinta-suave)}
-.ed-cap-visual-papel{aspect-ratio:auto;overflow:visible}
-.ed-fotograma{aspect-ratio:6/5;box-shadow:0 34px 60px -20px rgba(13,19,33,.45),0 2px 0 rgba(13,19,33,.08)}
-.ed-cap-visual-papel .ed-fotograma{transform:rotate(1.4deg)}
 .ed-leyenda-foto{margin:18px 0 0;font:italic 300 .98rem/1.4 var(--f-titulo);color:var(--ed-tinta-suave)}
+.ed-cap-1 .ed-leyenda-foto{color:var(--mut)}
+.ed-insignia{display:inline-grid;place-items:center;min-width:1.5em;height:1.5em;margin-left:8px;padding:0 .35em;border-radius:999px;background:var(--oro);color:var(--oro-tinta);font:600 .74rem/1 var(--f-cifra);vertical-align:2px}
 
 /* Cuaderno de estudio: una acción destacada y el resto como lista tipográfica */
 .ed-cuaderno{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:30px clamp(30px,6vw,96px);padding:120px var(--ed-margen)}
@@ -189,7 +183,7 @@ body{margin:0}
 .ed-volver{flex-basis:100%;text-align:center;font:400 .85rem var(--f-texto);color:var(--tenue)!important}
 
 /* Sumario: el temario real (temario.ts) en una capa de papel, con su buscador y tu dominio */
-.ed-sumario{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:rgba(7,11,20,.62);backdrop-filter:blur(4px)}
+.ed-sumario{position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end;background:rgba(7,11,20,.62);backdrop-filter:blur(4px)}
 .ed-sumario[hidden]{display:none}
 .ed-sumario-hoja{position:relative;width:min(1080px,100%);height:100%;overflow:auto;overscroll-behavior:contain;padding:40px clamp(20px,4vw,56px) 90px;background:var(--ink);color:var(--ed-tinta);box-shadow:-30px 0 60px rgba(0,0,0,.4)}
 .ed-sumario header{display:grid;grid-template-columns:1fr auto;align-items:end;gap:14px 24px;padding-bottom:20px;border-bottom:2px solid var(--ed-tinta)}
@@ -320,8 +314,7 @@ body{margin:0}
 
 /* Parte II · estrella: la madre en el centro y sus siete ramas */
 .ed-estrella{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(30px,5vw,80px);align-items:start}
-.ed-estrella-centro{position:sticky;top:90px;display:grid;gap:22px}
-.ed-estrella-centro .ed-fotograma{transform:rotate(-1.2deg)}
+.ed-estrella-centro{position:sticky;top:calc(var(--ed-nav-alto,62px) + 64px);display:grid;gap:22px}
 .ed-estrella-ramas{margin:0;padding:0;list-style:none;counter-reset:rama}
 .ed-estrella-ramas li{display:grid;grid-template-columns:minmax(120px,.42fr) minmax(0,1fr);gap:20px;align-items:start;padding:20px 0;border-top:1px solid var(--ed-regla)}
 .ed-estrella-ramas li:first-child{border-top:3px solid var(--ed-tinta)}
@@ -366,22 +359,6 @@ body{margin:0}
 .ed-barra-partes a[aria-current]{border-bottom-color:var(--oro)}
 .ed-parte{scroll-margin-top:120px}
 
-/* Revisión de la animación de referencia */
-.ed-revision-cab{position:relative;isolation:isolate;padding:60px var(--ed-margen) 30px;background:var(--ink)}
-.ed-revision-cab .ed-entradilla{max-width:62ch}
-.ed-revision-reproductor{max-width:980px;margin:10px auto 0;padding:0 var(--ed-margen)}
-.ed-revision-reproductor .mo-marco{box-shadow:0 40px 70px -24px rgba(13,19,33,.5)}
-.ed-guion{padding:90px var(--ed-margen) 40px}
-.ed-guion h2,.ed-antes h2{margin:0 0 30px;font:400 clamp(2rem,4vw,3rem)/1 var(--f-titulo);letter-spacing:-.02em}
-.ed-guion ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 28px;margin:0;padding:0;list-style:none}
-.ed-guion li{display:grid;align-content:start;gap:8px;padding-top:14px;border-top:2px solid var(--ed-tinta)}
-.ed-guion-foto{aspect-ratio:6/5;box-shadow:0 18px 30px -16px rgba(13,19,33,.4)}
-.ed-guion-t{margin:6px 0 0;font:600 .74rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--ed-tinta-suave)}
-.ed-guion li p{margin:0}
-.ed-guion li p:last-child{font:400 1.05rem/1.45 var(--f-titulo)}
-.ed-antes{padding:60px var(--ed-margen) 130px;border-top:1px solid var(--ed-regla)}
-.ed-antes>p{max-width:62ch;margin:0 0 26px;color:var(--ed-tinta-suave)}
-.ed-antes-vista{max-width:620px}
 
 .ed-pagina-papel .ed-volver{text-align:left;color:var(--ed-tinta-suave)!important}
 
@@ -395,7 +372,6 @@ body{margin:0}
   .ed-contenido{grid-template-columns:minmax(0,1fr)}
   .ed-contenido>a{margin-right:0;border-right:0;border-bottom:1px solid var(--ed-regla);padding-right:0}
   .ed-barra-cap-tit{display:none}
-  .ed-guion ol{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:760px){
   .ed-nav{grid-template-columns:auto 1fr auto;gap:12px;padding-top:16px;padding-bottom:16px}
@@ -403,7 +379,6 @@ body{margin:0}
   .ed-acciones{justify-content:flex-end;gap:16px}
   .ed-acciones .ed-accion:not([data-sumario]){display:none}
   .ed-menu-boton{display:inline-flex}
-  .ed-barra-propuesta>span{display:none}
   .ed-barra-cap{overflow-x:auto;scrollbar-width:none;gap:0 14px;padding:0 8px}
   .ed-barra-cap::-webkit-scrollbar{display:none}
   .ed-barra-cap a{padding:11px 8px}
@@ -416,8 +391,6 @@ body{margin:0}
   .ed-sumario .tm-plegable>summary{flex-wrap:wrap}
   .ed-sumario .tm-plegable>summary .tm-fila{flex-basis:100%}
   .ed-sumario .tm-mas{margin:0 0 8px 2.8em}
-  .ed-guion ol{grid-template-columns:minmax(0,1fr)}
-  .ed-revision-reproductor{padding:0 8px}
   .ed-f-fx{font-size:1.45rem}
   .ed-f-madre .ed-f-fx{font-size:1.7rem}
   .ed-liquidacion .ed-f-fx{font-size:1.1rem}

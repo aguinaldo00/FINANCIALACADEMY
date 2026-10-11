@@ -60,17 +60,17 @@ describe('academia en el navegador', () => {
     expect($$('#migas a').map((a) => a.textContent)).toEqual(['Academia', 'Gestión Financiera', 'Tema 2']);
   });
 
-  it('el temario llega a cualquier apartado del Tema 1 y a cualquier parte del Tema 2 sin pasar por el 3D', () => {
+  it('el temario (en el Sumario) llega a cualquier apartado del Tema 1 y a cualquier parte del Tema 2 sin pasar por el 3D', () => {
     navegar('#a/gestion-financiera');
     expect($('[data-mundo]', document)).toBeNull();
-    const enlaces = new Set($$('.as-temario a').map((a) => a.getAttribute('href')));
+    const enlaces = new Set($$('.ed-sumario a').map((a) => a.getAttribute('href')));
     for (const s of tema01.secciones) expect(enlaces.has(`#s/${s.id}`)).toBe(true);
     for (const c of tema01.conceptos) expect(enlaces.has(`#c/${c.id}`)).toBe(true);
     // Tema 2: cada fórmula del índice y cada fase (B, C, D) de cada bloque.
     for (const f of FORMULAS_TEMA2) expect(enlaces.has(`#tema/2/f/${f.id}`)).toBe(true);
     for (const b of BLOQUES) for (const fase of ['datos', 'elegir', 'practica']) expect(enlaces.has(`#tema/2/${b.id}/${fase}`)).toBe(true);
-    // Los botones de estudio y examen de siempre siguen ahí.
-    expect($$('.as-herramientas a.ab').map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#visual', '#simulacro', '#repaso', '#progreso']);
+    // Las herramientas de estudio y examen de siempre siguen ahí (en el Cuaderno de estudio).
+    expect($$('.ed-cuaderno a').map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#simulacro', '#repaso', '#visual', '#progreso']);
   });
 
   it('el buscador del temario filtra por número o por nombre', () => {
@@ -78,11 +78,11 @@ describe('academia en el navegador', () => {
     const campo = $<HTMLInputElement>('[data-tm-buscar]');
     campo.value = '3.2b';
     campo.dispatchEvent(new Event('input'));
-    const visibles = $$('.as-temario .tm-n1').filter((a) => !a.closest('li')!.hidden);
+    const visibles = $$('.ed-sumario .tm-n1').filter((a) => !a.closest('li')!.hidden);
     expect(visibles.map((a) => a.querySelector('.tm-id')!.textContent)).toEqual(['3.2B']);
     campo.value = 'tantos equivalentes';
     campo.dispatchEvent(new Event('input'));
-    expect($$('.as-temario a').filter((a) => !a.closest('li')?.hidden && a.textContent!.includes('Tantos equivalentes'))).toHaveLength(1);
+    expect($$('.ed-sumario a').filter((a) => !a.closest('li')?.hidden && a.textContent!.includes('Tantos equivalentes'))).toHaveLength(1);
     campo.value = 'zzzz';
     campo.dispatchEvent(new Event('input'));
     expect($('[data-tm-vacio]').hidden).toBe(false);
@@ -92,5 +92,38 @@ describe('academia en el navegador', () => {
     navegar('#s/4.1');
     navegar('#academia');
     expect($('.ac-continuar').getAttribute('href')).toBe('#s/4.1');
+  });
+
+  it('la portada de la asignatura tiene la identidad editorial: una acción principal, capítulos y Sumario', () => {
+    navegar('#s/4.1');
+    navegar('#a/gestion-financiera');
+    expect(document.body.classList.contains('editorial')).toBe(true);
+    // La acción principal es «Continuar donde lo dejaste», con el mismo dato que el selector.
+    expect($('.ed-boton').getAttribute('href')).toBe('#s/4.1');
+    expect($('.ed-boton').textContent).toContain('Continuar donde lo dejaste');
+    expect($$('.ed-cap .ed-enlace-fuerte').map((a) => a.getAttribute('href'))).toEqual(['#inicio', '#tema/2']);
+    // El Tema 1 tiene su vídeo y el Tema 2 su animación, como miniaturas que se expanden.
+    expect($$('[data-expandir]').map((b) => b.dataset.expandir)).toEqual(['sistema-financiero', 'simple-intereses']);
+    expect($('[data-expandir="sistema-financiero"] video')).not.toBeNull();
+    // Fuera de estas pantallas vuelve el esqueleto común.
+    navegar('#s/4.1');
+    expect(document.body.classList.contains('editorial')).toBe(false);
+    expect($('.ed-sumario')).toBeNull();
+  });
+
+  it('el Sumario se abre como diálogo, recibe el foco, se cierra con Escape y devuelve el foco', () => {
+    navegar('#a/gestion-financiera');
+    const capa = $('[data-capa-sumario]');
+    expect(capa.hidden).toBe(true);
+    const boton = $<HTMLButtonElement>('.ed-acciones [data-sumario]');
+    boton.focus();
+    boton.click();
+    expect(capa.hidden).toBe(false);
+    expect(document.activeElement).toBe($('[data-capa-sumario] [data-tm-buscar]'));
+    expect($('#page').closest('main')!.inert).toBe(true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(capa.hidden).toBe(true);
+    expect($('#page').closest('main')!.inert).toBe(false);
+    expect(document.activeElement).toBe(boton);
   });
 });

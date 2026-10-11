@@ -1,4 +1,5 @@
-// Renderiza el vídeo: Chromium fotograma a fotograma -> ffmpeg (H.264).
+// Renderiza el vídeo: Chromium fotograma a fotograma -> ffmpeg (H.264) y, a partir de él, la versión
+// WebM (VP9) que usa la app como primera opción (la reproducen también los navegadores sin H.264).
 // Uso: node video/render.mjs [salida.mp4] [fps]
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
@@ -25,4 +26,7 @@ for (let i = 0; i < n; i++) {
 ff.stdin.end();
 await new Promise((r) => ff.on('close', r));
 await nav.close();
-console.log('listo:', salida);
+const webm = salida.replace(/\.mp4$/, '.webm');
+const vp9 = spawn('ffmpeg', ['-y', '-i', salida, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', '-pix_fmt', 'yuv420p', '-an', webm], { stdio: 'inherit' });
+await new Promise((r) => vp9.on('close', r));
+console.log('listo:', salida, webm);
