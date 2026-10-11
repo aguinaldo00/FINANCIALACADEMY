@@ -358,7 +358,10 @@ Todo es SVG con los tokens de `base.css`.
 
 Se corrigen, no se rehacen (auditoría §3.0–3.1):
 - **`i₁₂`:** `formula.ts` admite subíndices de dos cifras.
-- **Capítulos que acaban a medias** (se ven así con movimiento reducido): simple-montante y descuento-racional. Se añade una prueba automática: pintar `fin − 0,6` y `fin`, y exigir que cambie menos del 0,5 %.
+- **Capítulos que acaban a medias** (se ven así con movimiento reducido).
+  - La prueba `tests/ui/escenasQuietas.dom.test.ts` (incremento 2a) compara lo que se lee en `fin − 0,5` y en `fin`, sin contar el ambiente vivo.
+  - Midió 53 capítulos de las 19 escenas que aún se mueven al final: cámara, rotuladores, flechas y etiquetas que llegan tarde.
+  - Están en la lista `PENDIENTES_2B`, que solo puede encoger. El 2b la deja vacía.
 - **Solapes:** compuesta-capital-inicial, compuesta-intereses, descuento-compuesto-comercial y simple-tiempo.
 - **Móvil:** tamaño mínimo de rótulo.
 - **compuesta-tiempo:** el logaritmo en 8 pasos con la `pizarra` (auditoría §3.3).
@@ -390,6 +393,7 @@ GitHub Pages solo publica un sitio por repositorio. Así se evita pisar producci
   - `main` en la raíz (producción, igual que hoy);
   - la rama de trabajo en `/preview/` (`base: './'` ya permite servir desde una subcarpeta).
 - Se dispara al hacer push a `main` y a `claude/quirky-lovelace-79c6fm`.
+- La previsualización comparte el almacenamiento del navegador con producción (mismo dominio): el progreso guardado es el mismo en las dos.
 - URL de la previsualización: `https://aguinaldo00.github.io/FINANCIALACADEMY/preview/`.
 
 **Bloqueo previsible:** el entorno `github-pages` solo deja desplegar desde `main`.

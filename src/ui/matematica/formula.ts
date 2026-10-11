@@ -46,6 +46,8 @@ function nodoIdentificador(t: string): Nodo {
   const sub = (subCrudo ?? '').replace(/[{}]/g, '');
   const clave = sub ? `${base}_${sub}` : base;
   if (simbolo(clave)) return { tipo: 'sim', clave, base, sub };
+  // Un subíndice numérico concreto (i_{12}, i_{365}, J_{4}) es el mismo símbolo que i_m o J_m con m ya fijado.
+  if (/^\d+$/.test(sub) && simbolo(`${base}_m`)) return { tipo: 'sim', clave: `${base}_m`, base, sub };
   if (base === 'log' || base === 'ln') return { tipo: 'fn', texto: base };
   return { tipo: 'txt', texto: t };
 }

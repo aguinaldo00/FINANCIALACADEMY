@@ -1,10 +1,15 @@
-# Compila la aplicación (Vite) y publica dist/ en GitHub Pages.
-# Requisito único en el repositorio: Settings → Pages → Build and deployment → Source = "GitHub Actions".
+# Compila la aplicación (Vite) y publica en GitHub Pages dos versiones a la vez:
+#   /          → main (producción)
+#   /preview/  → la rama de trabajo (previsualización de cada incremento, sin pisar producción)
+# Cada ejecución construye siempre las dos desde su último commit, así que da igual cuál la dispare.
+# Requisitos en el repositorio: Settings → Pages → Source = "GitHub Actions" y, para que los push de la
+# rama de trabajo puedan desplegar, Settings → Environments → github-pages → Deployment branches con
+# esa rama añadida. Sin eso, los push de la rama fallan en "deploy" y producción no se toca.
 name: Publicar en GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/quirky-lovelace-79c6fm]
   workflow_dispatch:
 
 permissions:
@@ -12,26 +17,52 @@ permissions:
   pages: write
   id-token: write
 
+# Nunca se cancela un despliegue a medias (podría ser el de producción).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  RAMA_PREVIA: claude/quirky-lovelace-79c6fm
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: produccion
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+          cache-dependency-path: produccion/package-lock.json
+      - name: Producción (main)
+        working-directory: produccion
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - uses: actions/checkout@v4
+        id: rama
+        continue-on-error: true
+        with:
+          ref: ${{ env.RAMA_PREVIA }}
+          path: previa
+      - name: Previsualización (rama de trabajo)
+        if: steps.rama.outcome == 'success'
+        working-directory: previa
+        run: |
+          npm ci
+          npm test
+          npm run build
+          mkdir -p ../produccion/dist/preview
+          cp -r dist/. ../produccion/dist/preview/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: produccion/dist
 
   deploy:
     needs: build
