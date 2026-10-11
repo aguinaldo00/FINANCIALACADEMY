@@ -564,7 +564,8 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   ok('vídeo: Espacio lo pausa', await p.evaluate(() => document.querySelector('.vx-marco video').paused));
   await p.screenshot({ path: `${SP}/ver-video-expandido.png` }).catch(() => {});
   await p.keyboard.press('Escape');
-  await p.waitForTimeout(900);
+  // La vuelta dura menos de medio segundo; con WebGL por software el primer fotograma tarda más.
+  await p.waitForSelector('.vx-capa', { state: 'detached', timeout: 4000 }).catch(() => {});
   ok('vídeo: Escape lo devuelve a la miniatura y el foco vuelve a ella', (await p.locator('.vx-capa').count()) === 0 && (await mini.locator('video').count()) === 1 && (await p.evaluate(() => document.activeElement?.dataset.expandir === 'sistema-financiero')));
   await p.goto('http://localhost:4173/#tema/2');
   await p.waitForSelector('.ed-indice-t2', { timeout: 10000 }).catch(() => {});
@@ -574,7 +575,7 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   await p.waitForTimeout(1500);
   ok('animación: la miniatura de la fórmula 7 se expande con su reproductor y arranca', (await p.locator('.vx-capa .mo.mo-reproduciendo').count()) === 1);
   await p.locator('.vx-cerrar').click();
-  await p.waitForTimeout(900);
+  await p.waitForSelector('.vx-capa', { state: 'detached', timeout: 4000 }).catch(() => {});
   ok('animación: Cerrar la devuelve a su miniatura', (await p.locator('.vx-capa').count()) === 0);
   await p.close();
 
