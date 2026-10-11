@@ -14,6 +14,7 @@ import { pintarProgreso } from '../ui/views/progresoView.ts';
 import { pintarRepaso } from '../ui/views/repasoView.ts';
 import { pintarSesion } from '../ui/views/sesionView.ts';
 import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
+import { pintarGlosario } from '../ui/views/glosarioView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
@@ -150,6 +151,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
       else if (ruta.vista === 'sesion') pintarSesion(ctx, estado, practica);
       else if (ruta.vista === 'progreso') pintarProgreso(ctx, estado, practica);
       else if (ruta.vista === 'visual') pintarVisual(ctx, estado);
+      else if (ruta.vista === 'glosario') pintarGlosario(ctx);
       else pintarRepaso(ctx, estado, practica, undefined, 'conceptoId' in ruta ? ruta.conceptoId : undefined);
     } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;

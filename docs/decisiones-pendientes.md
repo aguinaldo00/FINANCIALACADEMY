@@ -108,3 +108,26 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Detalles de las fórmulas en HTML.** Los paréntesis no crecen alrededor de una fracción; en el
   temario el texto plano de las fracciones lleva paréntesis de más («iₘ = (i) / (m)») y el contador
   dice «1 conceptos».
+
+## Infografías del Tema 1 y auditoría (11/10)
+
+Detalle en `docs/infografias-tema1.md` y `docs/auditoria-tema2.md`.
+
+- **Calcografía en el ICO:** está en la app real. ¿Se aprueba para extenderla a las otras 11 infografías?
+- **Exactitud: corregido el 11/10 con permiso del usuario.**
+  - Banco de España: ya no dice que financie a las Administraciones públicas.
+  - AES en plural.
+  - EFC y EDE fuera de las entidades de crédito.
+  - SGR con socios protectores.
+  - ICO: «mínimo 10 M€» y el Estado asume el riesgo en la vía de agencia.
+  - FGD: sucursales de la UE.
+  - Lista de depositarias.
+  - Flashcard de la EDE: la autoriza el Banco de España.
+  - Tema 2: caso 28 (exponente −565/365), caso 29 (pide el descuento, como el libro), resumen del descuento compuesto y rótulo de la ficha de la remesa.
+
+  Las correcciones de los conceptos del Tema 1 quedan registradas en `src/content/temas/tema-01/correcciones.ts`.
+- **Glosario y siglas: hecho.**
+  - Página `#glosario` y botón en cada sigla de las fichas y las infografías (`src/content/glosario.ts`, `src/ui/components/siglas.ts`).
+  - Pendiente: llevarlo a la ficha de los edificios de la ciudad, a las escenas y al Tema 2.
+- **«OMEC»:** no aparece en ningún texto del proyecto. ¿Dónde se vio?
+- **Errores del Tema 2:** caso 28 (exponente −565/365) y la frase del descuento compuesto en `formulas.ts:56`.

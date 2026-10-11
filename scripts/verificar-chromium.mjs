@@ -452,10 +452,12 @@ for (const [ancho, alto, nombre] of [[1300, 900, 'escritorio'], [390, 844, 'móv
   const item = p.locator('#vis-ico');
   await item.scrollIntoViewIfNeeded();
   await item.locator('[data-ig="siguiente"]').click();
-  const flechas = await item.locator('.ig-flecha.activo').count();
+  // El ICO ya es una lámina «Calcografía»: en el paso 2 se dibuja la vía 1 (ICO → banco → pyme).
+  const activos = await item.locator('.ig-actor.activo').evaluateAll((a) => a.map((x) => x.dataset.actor).join(','));
+  const trazos = await item.locator('.lc-e.lc-actual .lc-traza').count();
   // Ningún actor fuera del lienzo.
-  const fuera = await p.evaluate(() => [...document.querySelectorAll('.ig-lienzo')].some((l) => { const b = l.getBoundingClientRect(); return [...l.querySelectorAll('.ig-actor')].some((a) => { const r = a.getBoundingClientRect(); return r.left < b.left - 1 || r.right > b.right + 1 || r.top < b.top - 1 || r.bottom > b.bottom + 1; }); }));
-  ok(`infografías (${nombre}): ${n}, flechas animadas y actores dentro`, n >= 12 && flechas === 2 && !fuera, `flechas ${flechas} · fuera ${fuera}`);
+  const fuera = await p.evaluate(() => [...document.querySelectorAll('.ig-lienzo, .lc-lienzo')].some((l) => { const b = l.getBoundingClientRect(); return [...l.querySelectorAll('.ig-actor')].some((a) => { const r = a.getBoundingClientRect(); return r.left < b.left - 1 || r.right > b.right + 1 || r.top < b.top - 1 || r.bottom > b.bottom + 1; }); }));
+  ok(`infografías (${nombre}): ${n}, vía 1 del ICO dibujándose y actores dentro`, n >= 12 && activos === 'ico,banco,pyme' && trazos > 0 && !fuera, `activos ${activos} · trazos ${trazos} · fuera ${fuera}`);
   ok(`infografías (${nombre}): sin desbordamiento horizontal`, (await p.evaluate(() => document.documentElement.scrollWidth)) <= ancho + 2);
   await item.screenshot({ path: `${SP}/ver-infografia-${ancho}.png` });
   await p.close();

@@ -33,7 +33,7 @@ export function htmlFicha(id: string): string {
     <div class="t2-ficha-cuerpo">
       <figure class="t2-escena" data-escena-ficha="${f.id}"></figure>
       <div class="t2-ficha-info">
-        <p class="t2-calcula">${calcula ? `<span>Calcula</span>${formulaHtml(f.calcula!)}<b>${escaparHtml(calcula.nombre)}</b>` : '<span>Compara</span><b>Simple y compuesta según el plazo</b>'}</p>
+        <p class="t2-calcula">${calcula ? `<span>Calcula</span>${formulaHtml(f.calcula!)}<b>${escaparHtml(calcula.nombre)}</b>` : f.id === 'descuento-remesa' ? '<span>Calcula</span><b>El valor líquido de la remesa</b>' : '<span>Compara</span><b>Simple y compuesta según el plazo</b>'}</p>
         <section class="t2-seccion">
           <h2>Cada símbolo</h2>
           <dl class="t2-simbolos">${claves.map((c) => {

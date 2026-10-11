@@ -7,7 +7,11 @@
 import '../src/styles/fuentes.css';
 import '../src/styles/base.css';
 import '../src/styles/tema2.css';
-import { ESCENAS } from '../src/ui/escenas/index.ts';
+import '../src/styles/escenasTema1.css';
+import { ESCENAS as ESCENAS_TEMA2 } from '../src/ui/escenas/index.ts';
+import { ESCENAS_TEMA1 } from '../src/ui/escenas/tema1/index.ts';
+
+const ESCENAS = { ...ESCENAS_TEMA2, ...ESCENAS_TEMA1 };
 import { montarReproductor, pintarFotograma } from '../src/ui/motion/reproductor.ts';
 
 const q = new URLSearchParams(location.search);

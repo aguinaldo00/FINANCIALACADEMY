@@ -700,7 +700,7 @@ export const conceptos: Concepto[] = [
       "link"
     ],
     color: "#a78bfa",
-    definicion: "El BCE más los bancos centrales de <b>todos los países de la UE</b>, tengan o no el euro. Mantiene la estabilidad de precios y apoya las políticas económicas de la Comunidad.",
+    definicion: "El BCE más los bancos centrales de <b>todos los países de la UE</b>, tengan o no el euro. Mantiene la estabilidad de precios y apoya las políticas económicas de la Unión.",
     ejemploReal: "El banco central de Suecia está en el SEBC, pero no en el Eurosistema.",
     explicaciones: [
       "Toda la plantilla europea: titulares (con euro) y suplentes (sin euro).",
@@ -790,7 +790,7 @@ export const conceptos: Concepto[] = [
       "shield"
     ],
     color: "#ffd23f",
-    definicion: "<b>Autoridad Europea de Supervisión:</b> protege la estabilidad del sistema financiero europeo. <b>Banco Mundial:</b> desarrollo económico mundial y nivel de vida. <b>Fondo Monetario Internacional:</b> estabilidad del sistema monetario internacional.",
+    definicion: "<b>Autoridades Europeas de Supervisión (AES):</b> son tres —la ABE (bancos), la AEVM (valores y mercados) y la AESPJ (seguros y pensiones)— y protegen la estabilidad del sistema financiero europeo. <b>Banco Mundial:</b> desarrollo económico mundial y nivel de vida. <b>Fondo Monetario Internacional:</b> estabilidad del sistema monetario internacional.",
     ejemploReal: "Existen porque la política económica de un país influye en los demás.",
     explicaciones: [
       "Los vigilantes del vecindario: lo que hace un país salpica a los demás.",
@@ -820,7 +820,7 @@ export const conceptos: Concepto[] = [
       "key"
     ],
     color: "#60a5fa",
-    definicion: "Banco central nacional, miembro del SEBC y del Eurosistema y <b>autoridad nacional de supervisión</b> (dentro del MUS desde 2014). Es un <b>intermediario atípico</b>: financia a las Administraciones públicas, no a familias. Lo regula la <b>Ley de Autonomía del Banco de España</b>.",
+    definicion: "Banco central nacional, miembro del SEBC y del Eurosistema y <b>autoridad nacional de supervisión</b> (dentro del MUS desde 2014). Es un <b>intermediario atípico</b>: no trabaja con familias ni empresas, sino con las entidades de crédito y con el Estado, al que lleva la tesorería y la deuda pública. La ley le <b>prohíbe prestar</b> a las Administraciones públicas (art. 13 de su Ley de Autonomía). Lo regula la <b>Ley de Autonomía del Banco de España</b>.",
     ejemploReal: "Bajo su sede de Madrid hay una cámara acorazada a 36 metros que se inundaría ante un intento de asalto.",
     explicaciones: [
       "Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).",
@@ -849,13 +849,13 @@ export const conceptos: Concepto[] = [
       "link"
     ],
     color: "#60a5fa",
-    definicion: "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas), ICO, entidades de dinero electrónico y EFC. Y <b>otras entidades</b>: sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago.",
+    definicion: "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas) e ICO. Y <b>otras entidades</b> que también supervisa: EFC, entidades de dinero electrónico, sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago. Ojo: el libro (figura 1.19) aún pone los EFC y las EDE entre las entidades de crédito, pero los EFC dejaron de serlo con la Ley 5/2015 y las EDE, con la Ley 21/2011.",
     ejemploReal: "Es el esquema de la figura 1.19, que se completa en la actividad 33.",
     explicaciones: [
       "Un organigrama: el Banco de España es el director; las entidades de crédito, el equipo principal; las otras, los colaboradores.",
       "El Banco de España está arriba y vigila a todos los que tienen que ver con préstamos y depósitos.",
-      "BdE → Entidades de crédito {depósito: bancos · cajas · cooperativas · ICO · EDE · EFC} + Otras {tasación · SGR · divisa · pago}",
-      "Entidad de crédito ≠ entidad de depósito: el ICO y los EFC son de crédito pero no de depósito.",
+      "BdE → Entidades de crédito {de depósito: bancos · cajas · cooperativas} + ICO   ·   Otras {EFC · EDE · tasación · SGR · divisa · pago}",
+      "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito pero no de depósito. Los EFC ya no son entidades de crédito (Ley 5/2015), aunque los supervisa el Banco de España.",
       "Comprueba 3: entidades de depósito = bancos, cajas de ahorro y cooperativas de crédito."
     ],
     trampaExamen: "El ICO es entidad de crédito (test, pregunta 5), pero no de depósito.",
@@ -1034,7 +1034,7 @@ export const conceptos: Concepto[] = [
     explicaciones: [
       "Un paraguas gigante con el rótulo \"100.000 €\": lo que sobresalga, se moja.",
       "Si tu banco se arruina, te devuelven tu dinero, pero como mucho 100.000 €.",
-      "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · voluntario para sucursales de la UE",
+      "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · las sucursales de bancos de otros países de la UE las cubre el fondo de su país",
       "FGD (depósitos) ≠ FOGAIN (inversiones en ESI y gestoras de IIC).",
       "Garantiza los depósitos en dinero con un límite de 100.000 €."
     ],
@@ -1207,7 +1207,7 @@ export const conceptos: Concepto[] = [
       "car"
     ],
     color: "#ffd23f",
-    definicion: "Entidades de crédito especializadas que <b>no pueden captar depósitos del público</b>. <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial: condiciones parecidas a los bancos con menos capital. Operaciones: <b>leasing, factoring, confirming</b>, consumo, hipotecas, avales y tarjetas.",
+    definicion: "Entidades financieras especializadas en prestar que <b>no pueden captar depósitos del público</b>. Con la <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial <b>dejaron de ser entidades de crédito</b>, pero las sigue supervisando el Banco de España. Operaciones: <b>leasing, factoring, confirming</b>, consumo, hipotecas, avales y tarjetas.",
     ejemploReal: "Leasing: alquilas una furgoneta con opción de compra. Factoring: cedes tus facturas para cobrar ya.",
     explicaciones: [
       "Una tienda de \"compra ahora, paga después\" que no tiene hucha para guardar tu dinero.",
@@ -1237,7 +1237,7 @@ export const conceptos: Concepto[] = [
       "office"
     ],
     color: "#4ade80",
-    definicion: "Sociedades mercantiles de capital variable que <b>conceden avales a sus socios, las pymes</b>, para que obtengan financiación bancaria en mejores condiciones. Están vinculadas a un territorio o sector y tienen un sistema de reaval (CERSA).",
+    definicion: "Sociedades mercantiles de capital variable que <b>conceden avales a sus socios partícipes, las pymes</b>, para que obtengan financiación bancaria en mejores condiciones. También puede haber <b>socios protectores</b> (por ejemplo, bancos o administraciones), que aportan capital pero no reciben avales. Están vinculadas a un territorio o sector y tienen un sistema de reaval (CERSA).",
     ejemploReal: "Una pyme no consigue el préstamo; la SGR la avala y el banco dice que sí.",
     explicaciones: [
       "El amigo que dice \"yo te avalo\" cuando el banco pregunta quién responde por ti.",
@@ -1246,7 +1246,7 @@ export const conceptos: Concepto[] = [
       "SGR (avala) ≠ EFC (presta).",
       "SGR: especializadas en otorgar garantías (avales) a sus socios."
     ],
-    trampaExamen: "Sus socios son las pymes, no los bancos.",
+    trampaExamen: "Los avales son para las pymes socias (socios partícipes). Un banco puede ser socio protector, pero no recibe avales.",
     pregunta: {
       enunciado: "¿Quiénes son los socios de una SGR?",
       opciones: [

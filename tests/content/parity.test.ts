@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CORRECCIONES_CONCEPTOS } from '../../src/content/temas/tema-01/correcciones.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 import { validarTema } from '../../src/content/validate.ts';
 import { GLYPHS } from '../../src/icons/glyphs.ts';
@@ -6,6 +7,14 @@ import { LEYENDA_GLIFOS } from '../../src/icons/legend.ts';
 import { ciudadLegacy, htmlLegacy, motorLegacy } from '../helpers/legacy.ts';
 
 const { DATA, G } = motorLegacy();
+
+/** Aplica al texto del prototipo las correcciones de exactitud registradas (y solo esas). */
+function corregido<T extends string | string[]>(conceptoId: string, campo: 'definicion' | 'explicaciones' | 'trampaExamen', valor: T): T {
+  return CORRECCIONES_CONCEPTOS.filter((c) => c.conceptoId === conceptoId && c.campo === campo).reduce<string | string[]>(
+    (v, c) => (Array.isArray(v) ? v.map((x) => x.replace(c.antes, c.despues)) : v.replace(c.antes, c.despues)),
+    valor,
+  ) as T;
+}
 
 describe('paridad de contenido con el prototipo', () => {
   it('conserva los metadatos', () => {
@@ -29,7 +38,16 @@ describe('paridad de contenido con el prototipo', () => {
     expect(tema01.modos.map((m) => m.formato)).toEqual(['texto', 'texto', 'esquema', 'texto', 'texto']);
   });
 
-  it('conserva cada concepto literalmente', () => {
+  it('cada corrección registrada existe en el prototipo y cambia algo', () => {
+    for (const c of CORRECCIONES_CONCEPTOS) {
+      const l = DATA.conceptos.find((x) => x.id === c.conceptoId)!;
+      const original = { definicion: l.c, explicaciones: l.o, trampaExamen: l.t }[c.campo];
+      expect([original].flat().some((t) => t.includes(c.antes)), `${c.conceptoId} · ${c.campo}`).toBe(true);
+      expect(c.antes).not.toBe(c.despues);
+    }
+  });
+
+  it('conserva cada concepto literalmente (salvo las correcciones registradas)', () => {
     expect(tema01.conceptos).toHaveLength(DATA.conceptos.length);
     tema01.conceptos.forEach((c, i) => {
       const l = DATA.conceptos[i]!;
@@ -39,10 +57,10 @@ describe('paridad de contenido con el prototipo', () => {
         nombre: l.n,
         iconos: l.ic,
         color: l.col,
-        definicion: l.c,
+        definicion: corregido(l.id, 'definicion', l.c),
         ejemploReal: l.e,
-        explicaciones: l.o,
-        trampaExamen: l.t,
+        explicaciones: corregido(l.id, 'explicaciones', l.o),
+        trampaExamen: corregido(l.id, 'trampaExamen', l.t),
         pregunta: { enunciado: l.q[0], opciones: l.q[1], indiceCorrecta: l.q[2], explicacion: l.q[3] },
       });
     });

@@ -34,6 +34,8 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 - `src/styles/`: `base.css` es el sistema visual (colores, tipos, botones); las demás hojas solo colocan.
 - Identidad editorial (portada de la asignatura e índice del Tema 2): `src/ui/components/editorial.ts` y `src/styles/editorial.css`;
   el reproductor con expansión de las miniaturas de vídeo es `src/ui/components/reproductorExpandido.ts`. Estado en `docs/identidad-editorial.md`.
+- Infografías del Tema 1 en dirección «Calcografía» (de momento solo el ICO): `src/ui/infografias/` y `src/styles/calcografia.css`;
+  análisis y decisión en `docs/infografias-tema1.md`.
 - `src/assets/fuentes/`: fuentes propias (Fraunces, IBM Plex, Barlow Condensed, Big Shoulders); no usar Google Fonts.
 - `docs/`: decisiones y planes; las dudas abiertas van en `docs/decisiones-pendientes.md`.
 - `docs/fuentes/`: análisis de los apuntes de cada tema (conceptos, fórmulas, errores típicos, orden de enseñanza). Son la referencia para contrastar `src/content/`; no se cargan solos, se leen cuando haga falta.

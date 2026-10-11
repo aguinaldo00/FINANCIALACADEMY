@@ -197,6 +197,24 @@ describe('app en el navegador', () => {
     expect($<HTMLButtonElement>('[data-ig="siguiente"]', panel).disabled).toBe(true);
   });
 
+  it('#glosario: siglas y términos explicados, con buscador', () => {
+    navegar('#glosario');
+    expect($('#mt').textContent).toBe('Glosario');
+    expect($$('.gl-entrada').length).toBeGreaterThan(40);
+    expect($('.gl-entrada', $('.gl')).textContent).toBeTruthy();
+    const campo = $<HTMLInputElement>('.gl-buscar input');
+    campo.value = 'cnmv';
+    campo.dispatchEvent(new Event('input'));
+    expect($$('.gl-entrada').filter((e) => !e.hidden).map((e) => $('dt b', e).textContent)).toContain('CNMV');
+    expect($('.sl.on').getAttribute('href')).toBe('#glosario');
+  });
+
+  it('las fichas explican sus siglas al tocarlas', () => {
+    navegar('#s/4.1');
+    const sigla = $('#c-sebc .corta button.sigla');
+    expect(sigla).not.toBeNull();
+  });
+
   it('#visual: galería del Tema 1 conserva sus infografías', () => {
     navegar('#visual');
     expect($('#mt').textContent).toBe('Infografías');
