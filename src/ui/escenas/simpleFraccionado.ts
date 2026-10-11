@@ -28,9 +28,9 @@ export const escenaFraccionadoSimple: Escena = {
   capitulos: [
     { t: 0, texto: 'Con $C_0$ = 10.000 € al $i$ = 7 % anual, la cosecha de un año es $C_0 · i$ = 700 €.' },
     { t: 2.8, texto: 'Si el año se divide en $m$ partes, la cosecha se reparte a partes iguales: $m$ = 2, 4, 12.' },
-    { t: 7.2, texto: 'El tipo se reparte igual. En simple es proporcional: $i_m = \\frac{i}{m}$, y para meses $i_{12}$ = 0,07 / 12.' },
+    { t: 7.2, lectura: 10.4, texto: 'El tipo se reparte igual. En simple es proporcional: $i_m = \\frac{i}{m}$, y para meses $i_{12}$ = 0,07 / 12.' },
     { t: 10.6, texto: 'En $n$ = 3 años hay $n · m$ = 36 meses: el tiempo se cuenta en la unidad del tipo.' },
-    { t: 14.0, texto: '$I = C_0 · i_m · n · m$ = 10.000 · (0,07 / 12) · 36 = 2.100 €. Lo mismo que contando en años.' },
+    { t: 14, lectura: 17.4, texto: '$I = C_0 · i_m · n · m$ = 10.000 · (0,07 / 12) · 36 = 2.100 €. Lo mismo que contando en años.' },
     { t: 17.6, texto: 'Con días, $m$ = 360 si el año es comercial y 365 si es civil. Lo dice el enunciado.' },
   ],
   montar(l) {

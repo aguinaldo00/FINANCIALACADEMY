@@ -37,7 +37,7 @@ export const escenaInteresesSimple: Escena = {
   descripcion: 'Un capital de 10.000 € al 7 % anual da cada año una cosecha de 700 €, siempre calculada sobre el mismo capital. En 3 años, 2.100 € de intereses: I = C₀ · n · i.',
   capitulos: [
     { t: 0, texto: 'Esto es el capital inicial, $C_0$: 10.000 € que se invierten hoy.' },
-    { t: 3.2, texto: 'El tipo, $i$ = 7 % anual, dice qué parte del capital se cosecha cada año: 0,07 de $C_0$.' },
+    { t: 3.2, lectura: 5.95, texto: 'El tipo, $i$ = 7 % anual, dice qué parte del capital se cosecha cada año: 0,07 de $C_0$.' },
     { t: 6.6, texto: 'Año 1: la cosecha es $C_0 · i$ = 10.000 · 0,07 = 700 €.' },
     { t: 10.6, texto: 'Años 2 y 3: cada cosecha se calcula otra vez sobre el mismo $C_0$. Por eso todas valen 700 €.' },
     { t: 15.2, texto: 'En $n$ = 3 años se juntan tres cosechas iguales: 3 · 700 = 2.100 € de intereses.' },

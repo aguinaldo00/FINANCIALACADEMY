@@ -2,41 +2,63 @@
 import { describe, expect, it } from 'vitest';
 import { formulaTexto, simbolosDe } from '../../src/ui/matematica/formula.ts';
 import { LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
-import { finCapitulo, pintarFotograma, textoConFormulas } from '../../src/ui/motion/reproductor.ts';
+import { Lienzo } from '../../src/ui/motion/lienzo.ts';
+import { avanzar, type Escena, finCapitulo, PAUSA_LECTURA, textoConFormulas } from '../../src/ui/motion/reproductor.ts';
 
 /*
- * Con movimiento reducido (y al saltar de capítulo) el reproductor enseña el último instante de cada
- * capítulo. Ese fotograma tiene que ser el capítulo terminado: lo que se ve medio segundo antes del
- * final y al final tiene que ser lo mismo (auditoría del Tema 2, §3.1, regla transversal 1).
+ * Con movimiento reducido (y al saltar de capítulo) el reproductor enseña el instante de lectura de
+ * cada capítulo, y al reproducir se detiene ahí a leer. Ese fotograma tiene que ser el capítulo
+ * terminado y quieto (auditoría del Tema 2, §3.1, regla transversal 1).
  */
 
 /**
  * Lo que el alumno lee en el fotograma: cada elemento con su texto, opacidad, posición y escala, con
- * la tolerancia de lo que mide (3 u en posiciones, 0,02 en escalas, 0,06 en opacidades). Se ignora el
- * ambiente vivo a propósito (la luz que deriva, el «hervor» de los trazos dibujados a mano y los
- * identificadores internos), que se mueve siempre sin cambiar el contenido.
+ * la tolerancia de lo que mide (3 u en posiciones, 0,02 en escalas, 8° en giros —el balanceo de las hojas—, 0,06 en
+ * opacidades). Se ignora el ambiente vivo a propósito (la luz que deriva, el «hervor» de los trazos
+ * dibujados a mano, los bucles marcados con data-vivo y los identificadores internos), que se
+ * mueve siempre sin cambiar el contenido.
  */
-interface Pieza { firma: string; nums: [number, number][] }
+interface Pieza { firma: string; nums: [number, number][]; visible: boolean }
 const POSICION = ['x', 'y', 'cx', 'cy', 'r', 'width', 'height', 'stroke-dashoffset', 'font-size'];
 const OPACIDAD = ['opacity', 'fill-opacity', 'stroke-opacity'];
 const numeros = (texto: string) => (texto.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+/** Si el elemento se ve: ni él ni sus antecesores están ocultos, transparentes o aplastados a cero. */
+function seVe(el: Element): boolean {
+  if (!['text', 'path', 'rect', 'circle', 'line', 'ellipse', 'polygon', 'polyline'].includes(el.tagName.toLowerCase())) return false;
+  let opacidad = 1;
+  for (let n: Element | null = el; n && n.tagName.toLowerCase() !== 'svg'; n = n.parentElement) {
+    if (n.getAttribute('visibility') === 'hidden') return false;
+    const o = n.getAttribute('opacity');
+    if (o) opacidad *= Number.parseFloat(o);
+    const escala = /scale\(([-\d.]+)/.exec(n.getAttribute('transform') ?? '');
+    if (escala && Math.abs(Number(escala[1])) < 0.05) return false;
+  }
+  return opacidad > 0.3;
+}
+
 function foto(contenedor: HTMLElement): Pieza[] {
   const piezas: Pieza[] = [];
   for (const el of contenedor.querySelectorAll('svg *')) {
-    if (el.closest('defs, clipPath') || /url\(#[^)]*luz\)/.test(el.getAttribute('fill') ?? '')) continue;
+    if (el.closest('defs, clipPath, [data-vivo]') || /url\(#[^)]*luz\)/.test(el.getAttribute('fill') ?? '')) continue;
     const nums: [number, number][] = [];
     for (const a of POSICION) { const v = el.getAttribute(a); if (v) nums.push([Number.parseFloat(v), 3]); }
     for (const a of OPACIDAD) { const v = el.getAttribute(a); if (v) nums.push([Number.parseFloat(v), 0.06]); }
     for (const [, fn, args] of (el.getAttribute('transform') ?? '').matchAll(/(\w+)\(([^)]*)\)/g)) {
-      for (const v of numeros(args!)) nums.push([v, fn === 'scale' ? 0.02 : 3]);
+      for (const v of numeros(args!)) nums.push([v, fn === 'scale' ? 0.02 : fn === 'rotate' ? 8 : 3]);
     }
     const estilo = el.getAttribute('style') ?? '';
     for (const v of numeros(estilo)) nums.push([v, 0.06]);
     const texto = el.children.length ? '' : (el.textContent ?? '').trim();
-    piezas.push({ firma: `${el.tagName}.${el.getAttribute('class') ?? ''}|${texto}|${estilo.replace(/-?\d+(?:\.\d+)?/g, '#')}`, nums });
+    piezas.push({ firma: `${el.tagName}.${el.getAttribute('class') ?? ''}|${texto}|${estilo.replace(/-?\d+(?:\.\d+)?/g, '#')}`, nums, visible: seVe(el) });
   }
   return piezas;
 }
+/** Lo que se ve en la foto `despues` y no en `antes` (lo que aparece). */
+function aparecen(antes: Pieza[], despues: Pieza[]): string[] {
+  if (antes.length !== despues.length) return [`${antes.length} piezas frente a ${despues.length}`];
+  return despues.flatMap((p, i) => (p.visible && !antes[i]!.visible ? [p.firma.slice(0, 50)] : []));
+}
+
 /** Diferencias visibles entre dos fotos. */
 function diferencias(a: Pieza[], b: Pieza[]): string[] {
   if (a.length !== b.length) return [`${a.length} piezas frente a ${b.length}`];
@@ -60,55 +82,56 @@ describe('fórmulas con subíndice numérico', () => {
   });
 });
 
-/** Lo que se exige: los últimos 0,5 s de cada capítulo, quietos. */
-const VENTANA = 0.5;
-
-/** Capítulos que se mueven al final, en una escena. */
-function capitulosQueSeMueven(escena: (typeof LISTA_ESCENAS)[number]): number[] {
-  const malos: number[] = [];
-  escena.capitulos.forEach((c, k) => {
-    const fin = finCapitulo(escena, k);
-    if (fin - c.t < 1) return;
-    const a = document.createElement('div');
-    const b = document.createElement('div');
-    pintarFotograma(a, escena, fin - VENTANA);
-    pintarFotograma(b, escena, fin);
-    if (diferencias(foto(a), foto(b)).length) malos.push(k + 1);
-  });
-  return malos;
+/** Monta la escena una vez y devuelve una cámara de fotos: lo que se lee en el instante t. */
+function camaraDe(escena: Escena): (t: number) => Pieza[] {
+  const contenedor = document.createElement('div');
+  const lienzo = new Lienzo(escena.titulo, escena.ambiente);
+  contenedor.append(lienzo.svg);
+  const pintar = escena.montar(lienzo);
+  return (t) => {
+    lienzo.instante = t;
+    pintar(t);
+    return foto(contenedor);
+  };
 }
 
-/*
- * Trinquete: estos capítulos todavía se mueven al final (medido el 12/10, incremento 2a). El
- * incremento 2b los corrige y los quita de aquí. La prueba falla si aparece uno nuevo y también si
- * uno ya está quieto y sigue en la lista, para que la lista solo pueda encoger.
- */
-const PENDIENTES_2B: Record<string, number[]> = {
-  'simple-intereses': [1, 2, 4],
-  'simple-montante': [2, 3, 4],
-  'simple-capital-inicial': [1, 2, 3, 4, 5],
-  'simple-tipo': [1, 3, 4],
-  'simple-tiempo': [2, 3, 4, 5, 6],
-  'simple-fraccionado': [3, 4, 5],
-  'compuesta-montante': [2, 3, 4, 5],
-  'compuesta-intereses': [1, 2, 4, 5],
-  'compuesta-capital-inicial': [2, 3, 4],
-  'compuesta-tiempo': [3, 4],
-  'compuesta-tipo': [3],
-  'compuesta-equivalentes': [2, 3, 4],
-  'compuesta-comparacion': [2, 3],
-  'compuesta-tae': [2, 3, 4],
-  'descuento-comercial': [3],
-  'descuento-racional': [3],
-  'descuento-remesa': [1, 2, 3, 4],
-  'descuento-compuesto-racional': [3],
-  'descuento-compuesto-comercial': [1, 2],
-};
+/** Problemas del instante de lectura de un capítulo (vacío si está bien). */
+function problemasDeLectura(escena: Escena, fotoEn: (t: number) => Pieza[], k: number, lectura = finCapitulo(escena, k)): string[] {
+  const c = escena.capitulos[k]!;
+  const corte = escena.capitulos[k + 1]?.t ?? escena.duracion;
+  if (lectura < c.t || lectura > corte) return [`lectura ${lectura} fuera del capítulo`];
+  const enLectura = fotoEn(lectura);
+  const problemas = diferencias(fotoEn(lectura - 0.1), enLectura).map((d) => `se mueve: ${d}`);
+  // Lo que el capítulo enseña después de la lectura se perdería con movimiento reducido. Se admite
+  // lo que nace en los últimos 0,15 s: es el adelanto del capítulo siguiente.
+  const limite = corte - 0.15;
+  if (limite > lectura) problemas.push(...aparecen(enLectura, fotoEn(limite)).map((d) => `aparece después: ${d}`));
+  return problemas;
+}
 
-describe('cada capítulo termina quieto', () => {
+describe('cada capítulo tiene un instante de lectura completo y quieto', () => {
   for (const escena of LISTA_ESCENAS) {
     it(escena.id, () => {
-      expect(capitulosQueSeMueven(escena)).toEqual(PENDIENTES_2B[escena.id] ?? []);
+      const fotoEn = camaraDe(escena);
+      const malos = escena.capitulos.flatMap((c, k) => {
+        const p = problemasDeLectura(escena, fotoEn, k);
+        return p.length ? [`cap. ${k + 1} (${c.t} s, lectura ${finCapitulo(escena, k)} s): ${p.slice(0, 2).join(' · ')}`] : [];
+      });
+      expect(malos).toEqual([]);
     });
   }
+});
+
+describe('el reproductor se detiene a leer', () => {
+  const escena = LISTA_ESCENAS[0]!;
+  it(`se para ${PAUSA_LECTURA} s en el instante de lectura y luego sigue`, () => {
+    const lectura = finCapitulo(escena, 0);
+    let estado = avanzar(escena, lectura - 0.05, 0, 0.1);
+    expect(estado).toEqual({ t: lectura, espera: PAUSA_LECTURA });
+    for (let i = 0; i < 5; i++) estado = avanzar(escena, estado.t, estado.espera, 0.1);
+    expect(estado.t).toBe(lectura);
+    estado = avanzar(escena, estado.t, estado.espera, 0.1);
+    estado = avanzar(escena, estado.t, estado.espera, 0.1);
+    expect(estado.t).toBeGreaterThan(lectura);
+  });
 });

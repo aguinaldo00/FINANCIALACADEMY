@@ -1,6 +1,6 @@
 import type { Escena } from '../motion/reproductor.ts';
 import { Capsula, Eje, Etiqueta, Guia, Pulso, Rotulo, Salto, suelo } from '../motion/motivos.ts';
-import { arco, claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
+import { arco, claves, curvas, mezclar, retener, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Compuesta · Cₙ = C₀ · (1 + i)ⁿ
@@ -23,15 +23,15 @@ const fmt = (v: number) => new Intl.NumberFormat('de-DE', { minimumFractionDigit
 export const escenaMontanteCompuesta: Escena = {
   id: 'compuesta-montante',
   titulo: 'Capital final en capitalización compuesta',
-  duracion: 18.5,
+  duracion: 19.2,
   descripcion: 'Con 10.000 € al 7 % compuesto, cada año se multiplica el capital por 1,07: 10.700, 11.449 y 12.250,43 €. Tres multiplicaciones: Cₙ = C₀ · (1 + i)ⁿ. En simple serían 12.100 €.',
   capitulos: [
     { t: 0, texto: 'En compuesta, cada cosecha se vuelve a sembrar: el capital de cada año es la semilla del siguiente.' },
-    { t: 2.6, texto: 'Año 1: $C_1 = C_0 · (1 + i)$ = 10.000 · 1,07 = 10.700 €.' },
-    { t: 5.4, texto: 'Año 2: la cosecha se calcula sobre 10.700 €, no sobre 10.000: 749 €. $C_2$ = 11.449 €.' },
-    { t: 8.2, texto: 'Año 3: 11.449 · 1,07 = 12.250,43 €. Cada año se multiplica por $(1 + i)$.' },
-    { t: 11.0, texto: 'Tres multiplicaciones por $(1 + i)$: $C_n = C_0 · (1 + i)^n$. El exponente cuenta los periodos.' },
-    { t: 14.6, texto: 'En simple (contornos) serían 12.100 €. En compuesta, 12.250,43 €: el interés también produce interés.' },
+    { t: 2.6, lectura: 5.2, texto: 'Año 1: $C_1 = C_0 · (1 + i)$ = 10.000 · 1,07 = 10.700 €.' },
+    { t: 5.4, lectura: 8, texto: 'Año 2: la cosecha se calcula sobre 10.700 €, no sobre 10.000: 749 €. $C_2$ = 11.449 €.' },
+    { t: 8.2, lectura: 10.75, texto: 'Año 3: 11.449 · 1,07 = 12.250,43 €. Cada año se multiplica por $(1 + i)$.' },
+    { t: 11, texto: 'Tres multiplicaciones por $(1 + i)$: $C_n = C_0 · (1 + i)^n$. El exponente cuenta los periodos.' },
+    { t: 15.3, texto: 'En simple (contornos) serían 12.100 €. En compuesta, 12.250,43 €: el interés también produce interés.' },
   ],
   montar(l) {
     suelo(l, SUELO);
@@ -53,7 +53,9 @@ export const escenaMontanteCompuesta: Escena = {
     const formula = l.formula('C_n = C_0 · (1 + i)^n', { x: 360, y: 150, tam: 50 });
     const sust = l.formula('C_3 = 10.000 · 1,07^3 = "12.250,43 €"', { x: 360, y: 206, tam: 26 });
 
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t = retener(tReal, 14.6, 0.7);
       const cx = claves(t, [[0, 220], [2.6, 220], [5.4, 300], [8.2, 380], [11.0, 380]]);
       const cy = claves(t, [[0, 330], [10.6, 330], [11.6, 200]]);
       const z = claves(t, [[0, 1.2], [2.6, 1.2], [5.4, 1.12], [8.2, 1.0], [11.0, 1.0], [11.6, 0.85]]);
@@ -95,7 +97,7 @@ export const escenaMontanteCompuesta: Escena = {
 
       const origen = (k: number) => l.aPantalla({ x: (eje.x(k) + eje.x(k + 1)) / 2, y: SUELO - capital(k) * ESC - 56 });
       cadena.opacidad(tramo(t, 11.0, 11.1) * mezclar(1, 0.45, tramo(t, 12.8, 13.4)));
-      cadena.construir(t, 11.1, {
+      cadena.construir(tReal, 11.1, {
         origenes: {
           C_3: l.aPantalla({ x: eje.x(3), y: SUELO - capital(3) * ESC - 50 }),
           C_0: l.aPantalla({ x: X0, y: SUELO - C0 * ESC - 50 }),
@@ -108,7 +110,7 @@ export const escenaMontanteCompuesta: Escena = {
         return p ? cadena.centro(p) : undefined;
       };
       formula.opacidad(tramo(t, 12.7, 12.8));
-      formula.construir(t, 12.8, { origenes: { C_n: centro('C_3'), C_0: centro('C_0'), i: centro('i', 1), n: centro('i', 2) }, duracion: 1.2, resaltar: ['n'] });
+      formula.construir(tReal, 12.8, { origenes: { C_n: centro('C_3'), C_0: centro('C_0'), i: centro('i', 1), n: centro('i', 2) }, duracion: 1.2, resaltar: ['n'] });
       sust.opacidad(tramo(t, 14.0, 14.1));
       sust.construir(t, 14.1, { escalon: 0.05 });
     };

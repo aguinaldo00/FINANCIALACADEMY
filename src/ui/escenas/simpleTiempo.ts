@@ -30,10 +30,10 @@ export const escenaTiempoSimple: Escena = {
   capitulos: [
     { t: 0, texto: 'Caso práctico 13: semilla $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: $C_n$ = 6.500 €. ¿Cuánto tiempo?' },
     { t: 2.8, texto: 'Hay que reunir $C_n - C_0$ = 500 € de intereses.' },
-    { t: 5.2, texto: 'Cada año la semilla da $C_0 · i$ = 6.000 · 0,03 = 180 €.' },
+    { t: 5.2, lectura: 7.55, texto: 'Cada año la semilla da $C_0 · i$ = 6.000 · 0,03 = 180 €.' },
     { t: 7.8, texto: '¿Cuántas cosechas caben? 500 / 180 = 2,78: dos años enteros y 0,78 de otro.' },
     { t: 11.4, texto: 'Los decimales también son tiempo: 0,78 años · 12 = 9,36 meses.' },
-    { t: 14.6, texto: 'Y 0,36 meses · 30 = 10,8 días, que se redondean a 11 (mes de 30 días, como en el libro).' },
+    { t: 14.6, lectura: 17.4, texto: 'Y 0,36 meses · 30 = 10,8 días, que se redondean a 11 (mes de 30 días, como en el libro).' },
     { t: 17.6, texto: 'Tiempo: $n = \\frac{C_n - C_0}{i · C_0}$ = 2,78 años = 2 años, 9 meses y 11 días.' },
   ],
   montar(l) {
@@ -99,8 +99,8 @@ export const escenaTiempoSimple: Escena = {
 
       // Regla de años: avanza con cada cosecha hasta 2,78.
       const avanceAnos = claves(t, [[5.6, 0], [6.8, 1], [8.2, 1], [9.4, 2], [9.4, 2], [10.6, N]], curvas.suave);
-      anos.pintar(tramo(t, 4.6, 5.4), tramo(t, 4.6, 5.4), avanceAnos);
-      etAnos.pintar(AX1 + 20, Y_ANOS + 30, tramo(t, 5.0, 5.4));
+      anos.pintar(tramo(t, 5.2, 6.0), tramo(t, 5.2, 6.0), avanceAnos);
+      etAnos.pintar(AX1 + 20, Y_ANOS + 30, tramo(t, 5.6, 6.0));
       lecturaAnos.pintar(anos.x(N) - 18, Y_ANOS - 22, tramo(t, 10.4, 10.9), '2,78');
 
       // Lupa 1: la parte decimal del tercer año se amplía a 12 meses.

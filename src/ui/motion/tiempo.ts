@@ -59,3 +59,13 @@ export function arco(desde: { x: number; y: number }, hasta: { x: number; y: num
   const curva = Math.sin(Math.PI * p) * distancia * altura;
   return { x: desde.x + dx * p, y: desde.y + dy * p - curva };
 }
+
+/**
+ * Tiempo con una retención: hasta `desde` corre igual; después se queda quieto `segundos` y luego
+ * sigue con ese retraso. Sirve para dar tiempo a que termine algo que llega tarde (una fórmula que
+ * se construye al final de un capítulo) sin mover nada más: lo que acaba tarde se pinta con el
+ * tiempo real y todo lo demás con el retenido. Los capítulos posteriores se retrasan `segundos`.
+ */
+export function retener(t: number, desde: number, segundos: number): number {
+  return t <= desde ? t : Math.max(desde, t - segundos);
+}

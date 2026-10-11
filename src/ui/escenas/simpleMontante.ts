@@ -1,6 +1,6 @@
 import type { Escena } from '../motion/reproductor.ts';
 import { Capsula, Eje, Etiqueta, Llave, Rotulo, suelo } from '../motion/motivos.ts';
-import { arco, claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
+import { arco, claves, curvas, mezclar, retener, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Fórmula 2 · Cₙ = C₀ · (1 + n · i)
@@ -22,14 +22,14 @@ const ANCHO_COL = 70;
 export const escenaMontanteSimple: Escena = {
   id: 'simple-montante',
   titulo: 'Capital final o montante en capitalización simple',
-  duracion: 18,
+  duracion: 19.5,
   descripcion: 'La semilla de 10.000 € y las tres cosechas de 700 € forman una columna de 12.100 €: Cₙ = C₀ + I = C₀ · (1 + n · i).',
   capitulos: [
     { t: 0, texto: 'El montante $C_n$ es todo lo que hay al final: la semilla $C_0$ más las cosechas, $I$.' },
     { t: 2.6, texto: 'La semilla sale de la tierra y las cosechas se apilan encima: $C_n = C_0 + I$ = 12.100 €.' },
-    { t: 6.8, texto: 'Cada cosecha es $C_0 · i$, así que las $n$ cosechas son $I = C_0 · n · i$.' },
-    { t: 9.8, texto: '$C_0$ está en los dos sumandos: sale factor común y queda $C_n = C_0 · (1 + n · i)$.' },
-    { t: 13.4, texto: 'Con los datos: $C_n$ = 10.000 · (1 + 3 · 0,07) = 10.000 · 1,21 = 12.100 €.' },
+    { t: 7.7, texto: 'Cada cosecha es $C_0 · i$, así que las $n$ cosechas son $I = C_0 · n · i$.' },
+    { t: 11.3, lectura: 14.25, texto: '$C_0$ está en los dos sumandos: sale factor común y queda $C_n = C_0 · (1 + n · i)$.' },
+    { t: 14.9, texto: 'Con los datos: $C_n$ = 10.000 · (1 + 3 · 0,07) = 10.000 · 1,21 = 12.100 €.' },
   ],
   montar(l) {
     suelo(l, SUELO);
@@ -52,7 +52,10 @@ export const escenaMontanteSimple: Escena = {
     const l3 = l.formula('C_n = C_0 · (1 + n · i)', { x: 40, y: 234, tam: 40, alinear: 'izquierda' });
     const sust = l.formula('C_n = 10.000 · (1 + 3 · 0,07) = "12.100 €"', { x: 360, y: 560, tam: 26 });
 
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t1 = retener(tReal, 6.8, 0.9);
+      const t = retener(t1, 9.8, 0.6);
       const cx = claves(t, [[0, 380], [2.6, 380], [5.0, 400], [6.0, 470], [12.6, 470], [13.6, 400]]);
       const cy = claves(t, [[0, 420], [2.6, 420], [5.0, 300], [6.0, 280], [12.6, 280], [13.6, 312]]);
       const z = claves(t, [[0, 0.9], [2.6, 0.9], [5.0, 1.0], [6.0, 1.12], [12.6, 1.12], [13.6, 1.0]]);
@@ -99,7 +102,7 @@ export const escenaMontanteSimple: Escena = {
         return p ? f.centro(p) : undefined;
       };
       l1.opacidad(mezclar(1, 0.42, tramo(t, 8.6, 9.2)) * tramo(t, 5.7, 5.8));
-      l1.construir(t, 5.8, {
+      l1.construir(tReal, 5.8, {
         origenes: {
           C_n: l.aPantalla({ x: XF - 40, y: SUELO - ALTO_C0 - N * H - 38 }),
           C_0: l.aPantalla({ x: xl - 34, y: SUELO - ALTO_C0 / 2 }),
@@ -108,7 +111,7 @@ export const escenaMontanteSimple: Escena = {
       });
       l2.opacidad(mezclar(1, 0.42, tramo(t, 10.6, 11.2)) * tramo(t, 8.3, 8.4));
       const desdeI = centro(l1, 'I');
-      l2.construir(t, 8.4, { origenes: { C_n: centro(l1, 'C_n'), C_0: [centro(l1, 'C_0'), desdeI], n: desdeI, i: desdeI } });
+      l2.construir(t1, 8.4, { origenes: { C_n: centro(l1, 'C_n'), C_0: [centro(l1, 'C_0'), desdeI], n: desdeI, i: desdeI } });
       l3.opacidad(tramo(t, 10.3, 10.4));
       l3.construir(t, 10.4, { origenes: { C_n: centro(l2, 'C_n'), C_0: centro(l2, 'C_0', 1), n: centro(l2, 'n'), i: centro(l2, 'i') }, duracion: 1.3, resaltar: ['C_0'] });
       sust.opacidad(tramo(t, 13.7, 13.8));

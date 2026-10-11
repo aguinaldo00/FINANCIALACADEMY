@@ -1,7 +1,7 @@
 import type { Escena } from '../motion/reproductor.ts';
 import { Capsula, Eje, Etiqueta, Grafico, Guia, Llave, Rotulo, Salto, suelo } from '../motion/motivos.ts';
 import { fijar } from '../motion/lienzo.ts';
-import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
+import { claves, curvas, mezclar, retener, tramo, ventana } from '../motion/tiempo.ts';
 
 const fmt = (v: number, d = 2) => new Intl.NumberFormat('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
 
@@ -13,13 +13,13 @@ const fmt = (v: number, d = 2) => new Intl.NumberFormat('de-DE', { minimumFracti
 export const escenaInteresesCompuesta: Escena = {
   id: 'compuesta-intereses',
   titulo: 'Intereses totales en capitalización compuesta',
-  duracion: 16,
+  duracion: 16.8,
   descripcion: 'Caso práctico 15: 4.500 € al 3 % durante 7 años llegan a 5.534,43 €. Los intereses son 1.034,43 €: I = Cₙ − C₀ = C₀ · [(1 + i)ⁿ − 1].',
   capitulos: [
     { t: 0, texto: 'Caso práctico 15: 4.500 € al 3 % de interés compuesto durante 7 años.' },
     { t: 3.0, texto: 'Siete multiplicaciones por 1,03: $C_n$ = 4.500 · 1,03⁷ = 5.534,43 €.' },
     { t: 6.0, texto: 'Los intereses son lo que hay por encima de la semilla: $I = C_n - C_0$ = 1.034,43 €.' },
-    { t: 9.0, texto: 'Medido en semillas, el montante es $(1 + i)^n$ = 1,2299; los intereses, lo que pasa de 1: 0,2299.' },
+    { t: 9, lectura: 12.1, texto: 'Medido en semillas, el montante es $(1 + i)^n$ = 1,2299; los intereses, lo que pasa de 1: 0,2299.' },
     { t: 12.2, texto: 'Por eso $I = C_0 · [(1 + i)^n - 1]$: el factor de capitalización menos la semilla.' },
   ],
   montar(l) {
@@ -60,14 +60,14 @@ export const escenaInteresesCompuesta: Escena = {
       columnas.forEach((c, k) => {
         const t0 = k === 0 ? 0.3 : 3.0 + (k - 1) * 0.36;
         c.pintar(eje.x(k), SUELO, cap(k) * ESC * tramo(t, t0, t0 + 0.5, curvas.salida), tramo(t, t0, t0 + 0.2) * (k > 0 && k < N ? 1 - 0.55 * tramo(t, 6, 6.6) : 1));
-        if (k > 0) saltos[k - 1]!.pintar({ x: eje.x(k - 1) + 6, y: SUELO - cap(k - 1) * ESC - 6 }, { x: eje.x(k) - 6, y: SUELO - cap(k) * ESC - 6 }, tramo(t, t0 - 0.2, t0 + 0.3), 1 - tramo(t, 6, 6.6), 22);
+        if (k > 0) saltos[k - 1]!.pintar({ x: eje.x(k - 1) + 6, y: SUELO - cap(k - 1) * ESC - 6 }, { x: eje.x(k) - 6, y: SUELO - cap(k) * ESC - 6 }, tramo(t, t0 - 0.05, t0 + 0.45), 1 - tramo(t, 6, 6.6), 22);
       });
       etC0.pintar(X0, SUELO - C0 * ESC - 18, tramo(t, 0.8, 1.4) * (1 - tramo(t, 6, 6.4)));
-      etCn.pintar(xN - 30, SUELO - cap(N) * ESC - 20, tramo(t, 5.6, 6.0));
+      etCn.pintar(xN - 30, SUELO - cap(N) * ESC - 20, tramo(t, 5.4, 5.8));
 
       // La semilla se superpone a la última columna: lo que sobresale son los intereses.
       const pS = tramo(t, 6.2, 7.2, curvas.suave);
-      semillaFinal.pintar(mezclar(X0, xN, pS), SUELO, C0 * ESC, ventana(t, 6.2, 16.5, 0.3));
+      semillaFinal.pintar(mezclar(X0, xN, pS), SUELO, C0 * ESC, ventana(t, 6.2, 18, 0.3));
       guia.pintar(X0, SUELO - C0 * ESC, xN, SUELO - C0 * ESC, tramo(t, 6.4, 7.2), 1 - tramo(t, 9.0, 9.4));
       interes.pintar(xN, SUELO - C0 * ESC, (cap(N) - C0) * ESC, tramo(t, 7.2, 7.6));
       const xl = xN - ANCHO / 2 - 10;
@@ -97,14 +97,14 @@ export const escenaInteresesCompuesta: Escena = {
 export const escenaCapitalInicialCompuesta: Escena = {
   id: 'compuesta-capital-inicial',
   titulo: 'Capital inicial en capitalización compuesta',
-  duracion: 17,
+  duracion: 17.7,
   descripcion: '9.000 € a 8 años al 7 % compuesto: cada año hacia atrás se divide entre 1,07. Tras ocho divisiones queda C₀ = 9.000 · 1,07⁻⁸ = 5.238,08 €.',
   capitulos: [
     { t: 0, texto: 'Conoces el final: $C_n$ = 9.000 € a 8 años, al 7 % compuesto. ¿Cuánto se invirtió?' },
-    { t: 2.8, texto: 'Un año hacia atrás es dividir entre $(1 + i)$: 9.000 / 1,07 = 8.411,21 €.' },
-    { t: 5.6, texto: 'Ocho años hacia atrás: ocho divisiones entre 1,07, cada una sobre lo que quedaba.' },
+    { t: 2.8, lectura: 5.45, texto: 'Un año hacia atrás es dividir entre $(1 + i)$: 9.000 / 1,07 = 8.411,21 €.' },
+    { t: 5.6, lectura: 9.45, texto: 'Ocho años hacia atrás: ocho divisiones entre 1,07, cada una sobre lo que quedaba.' },
     { t: 9.6, texto: 'Dividir $n$ veces entre $(1 + i)$ es multiplicar por $(1 + i)^{-n}$: $C_0 = C_n · (1 + i)^{-n}$.' },
-    { t: 13.0, texto: '$C_0$ = 9.000 · 1,07⁻⁸ = 5.238,08 €. Intereses: 9.000 − 5.238,08 = 3.761,92 €.' },
+    { t: 13.7, texto: '$C_0$ = 9.000 · 1,07⁻⁸ = 5.238,08 €. Intereses: 9.000 − 5.238,08 = 3.761,92 €.' },
   ],
   montar(l) {
     const CN = 9000;
@@ -128,7 +128,9 @@ export const escenaCapitalInicialCompuesta: Escena = {
     const alt = l.formula('C_0 = \\frac{C_n}{(1 + i)^n}', { x: 360, y: 176, tam: 30 });
     const sust = l.formula('C_0 = 9.000 · 1,07^{-8} = "5.238,08 €"', { x: 360, y: 562, tam: 24 });
 
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t = retener(tReal, 13, 0.7);
       const xDe = (k: number) => eje.x(N - k); // k años antes del final
       l.camara(claves(t, [[0, 520], [2.8, 520], [5.6, 420], [9.4, 300], [10, 360]]), claves(t, [[0, 340], [9.4, 340], [10.2, 300]]), claves(t, [[0, 1.4], [2.8, 1.4], [5.6, 1.15], [9.4, 1.0], [10.2, 0.95]]));
       l.foco(claves(t, [[0, 600], [5.6, 420], [9.6, 140], [11, 360]]), 330, 300);
@@ -147,12 +149,12 @@ export const escenaCapitalInicialCompuesta: Escena = {
       etC0.pintar(xDe(N), SUELO - atras(N) * ESC - 22, tramo(t, 9.6, 10.2));
 
       formula.opacidad(tramo(t, 9.8, 9.9));
-      formula.construir(t, 9.9, {
+      formula.construir(tReal, 9.9, {
         origenes: { C_0: l.aPantalla({ x: xDe(N), y: SUELO - atras(N) * ESC - 30 }), C_n: l.aPantalla({ x: xDe(0), y: SUELO - CN * ESC - 30 }), i: l.aPantalla({ x: xDe(3), y: SUELO - atras(3) * ESC - 40 }), n: { x: 360, y: 552 } },
         resaltar: ['n'],
       });
       alt.opacidad(tramo(t, 11.6, 11.7) * 0.75);
-      alt.construir(t, 11.7, { escalon: 0.05 });
+      alt.construir(tReal, 11.7, { escalon: 0.05 });
       sust.opacidad(tramo(t, 13.2, 13.3));
       sust.construir(t, 13.3, { escalon: 0.04 });
     };
@@ -168,14 +170,14 @@ export const escenaCapitalInicialCompuesta: Escena = {
 export const escenaTiempoCompuesta: Escena = {
   id: 'compuesta-tiempo',
   titulo: 'Tiempo en capitalización compuesta',
-  duracion: 18,
+  duracion: 18.7,
   descripcion: 'Caso práctico 17: 30.000 € al 10 % hasta 35.000 €. En escala logarítmica cada año sube log 1,1; la meta está a log 1,1667: n = 1,62 años = 1 año, 7 meses y 13 días.',
   capitulos: [
     { t: 0, texto: 'Caso práctico 17: 30.000 € al 10 % compuesto hasta 35.000 €. Hay que crecer 35.000 / 30.000 = 1,1667 veces.' },
-    { t: 3.0, texto: 'Cada año multiplica por 1,1: tras un año, ×1,1; tras dos, ×1,21. La meta queda entre los dos.' },
-    { t: 6.6, texto: 'Con logaritmos, multiplicar se convierte en sumar: cada año sube lo mismo, log 1,1.' },
-    { t: 10.0, texto: '¿Cuántos escalones de log 1,1 caben hasta log 1,1667? $n = \\frac{log(C_n / C_0)}{log(1 + i)}$ = 1,62.' },
-    { t: 13.8, texto: '1,62 años = 1 año, 7 meses y 13 días (0,62 · 12 = 7,44 meses; 0,44 · 30 = 13 días).' },
+    { t: 3, texto: 'Cada año multiplica por 1,1: tras un año, ×1,1; tras dos, ×1,21. La meta queda entre los dos.' },
+    { t: 6.6, lectura: 9.6, texto: 'Con logaritmos, multiplicar se convierte en sumar: cada año sube lo mismo, log 1,1.' },
+    { t: 10, texto: '¿Cuántos escalones de log 1,1 caben hasta log 1,1667? $n = \\frac{log(C_n / C_0)}{log(1 + i)}$ = 1,62.' },
+    { t: 14.5, texto: '1,62 años = 1 año, 7 meses y 13 días (0,62 · 12 = 7,44 meses; 0,44 · 30 = 13 días).' },
   ],
   montar(l) {
     const META = 35000 / 30000;
@@ -197,7 +199,9 @@ export const escenaTiempoCompuesta: Escena = {
     const formula = l.formula('n = \\frac{log(C_n / C_0)}{log(1 + i)}', { x: 360, y: 92, tam: 40 });
     const sust = l.formula('n = \\frac{log 1,1667}{log 1,1} = "1,62 años"', { x: 360, y: 548, tam: 24 });
 
-    return (t) => {
+    return (tReal) => {
+      // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
+      const t = retener(tReal, 13.8, 0.7);
       l.camara(360, claves(t, [[0, 300], [10, 300], [11, 330]]), claves(t, [[0, 1], [10, 1], [11, 0.92]]));
       l.foco(360, 320, 320);
       // Mezcla de escala normal (0) a logarítmica (1): las alturas de los escalones se igualan.
@@ -230,7 +234,7 @@ export const escenaTiempoCompuesta: Escena = {
       fijar(corte, { cx: g.px(n), cy: mapa(META), opacity: pc });
       fijar(bajada, { d: `M${g.px(n)} ${mapa(META)} L${g.px(n)} ${g.op.y0}`, opacity: pc });
       formula.opacidad(tramo(t, 10.4, 10.5));
-      formula.construir(t, 10.5, { origenes: { n: l.aPantalla({ x: g.px(n), y: g.op.y0 + 50 }), C_n: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 20 }), C_0: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 10 }), i: l.aPantalla({ x: g.px(1) + 40, y: mapa(1.05) }) } });
+      formula.construir(tReal, 10.5, { origenes: { n: l.aPantalla({ x: g.px(n), y: g.op.y0 + 50 }), C_n: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 20 }), C_0: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 10 }), i: l.aPantalla({ x: g.px(1) + 40, y: mapa(1.05) }) } });
       sust.opacidad(tramo(t, 12.4, 12.5));
       sust.construir(t, 12.5, { escalon: 0.04 });
       if (t >= 13.8) etN.pintar(g.px(n), g.op.y0 + 58, 1, '1 año, 7 meses y 13 días');
@@ -252,7 +256,7 @@ export const escenaTipoCompuesta: Escena = {
   capitulos: [
     { t: 0, texto: '50.000 € se convierten en 52.000 € en 6 años, en compuesta. Han crecido 52.000 / 50.000 = 1,04 veces.' },
     { t: 3.2, texto: 'Ese 1,04 es el producto de 6 factores iguales: $(1 + i)^6$ = 1,04.' },
-    { t: 6.6, texto: 'Repartir un producto en partes iguales es hacer la raíz: 1 + $i$ = 1,04^(1/6) = 1,006558.' },
+    { t: 6.6, lectura: 9.65, texto: 'Repartir un producto en partes iguales es hacer la raíz: 1 + $i$ = 1,04^(1/6) = 1,006558.' },
     { t: 10.2, texto: '$i = (\\frac{C_n}{C_0})^{1/n} - 1$ = 0,006558, un 0,66 % anual. Raíz de índice $n$, no cuadrada.' },
   ],
   montar(l) {
