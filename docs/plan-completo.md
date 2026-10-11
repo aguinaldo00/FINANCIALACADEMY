@@ -347,6 +347,36 @@ Todo es SVG con los tokens de `base.css`.
 - La matriz del §3 se monta a partir de lo visto, como resumen, no como punto de partida.
 - Botón «Llevar al cuaderno» con el último ejemplo.
 
+### 9.4 Calendario de equivalencias y escenas propias para los casos difíciles (usuario, 12/10)
+
+**El calendario pequeño** es la pieza central. Es una tira de 12 meses que se reagrupa delante del alumno para contestar preguntas como esta:
+
+> 6 meses = 1 semestre = ¿cuántos trimestres? ¿y cuántos cuatrimestres?
+
+- Se ponen dos reagrupaciones una encima de otra y se ve cuántas caben:
+  - 1 semestre = 2 trimestres (la raya coincide);
+  - 1 semestre = 1,5 cuatrimestres (la raya del cuatrimestre cae a mitad del semestre).
+- La regla que se ve: se pasa por los meses, la unidad común. 6 meses ÷ 3 = 2 trimestres; 6 meses ÷ 4 = 1,5 cuatrimestres; 1 cuatrimestre = 4/3 trimestres.
+- Está en tres sitios:
+  - en la escena (acto I);
+  - como pieza interactiva en el laboratorio de las fórmulas 6, 12 y 14 (eliges «de» y «a» y el calendario lo enseña: 6e);
+  - en los ejercicios, como paso de «conversión de unidades».
+- Los días también entran: el año de 360 o de 365 y los meses de 30 días del material.
+
+**Casos difíciles con escena propia.** Son escenas cortas, del mismo estilo que las otras 19, además de los 7 actos:
+
+| # | Caso | Qué se ve |
+|---|---|---|
+| E1 | Duración mixta: «2 años, 3 meses y 10 días» en años y en trimestres | El calendario anidado (años → meses → días) y el convenio 360/365 del enunciado |
+| E2 | Tipo de una fracción del año a otra **en simple** (trimestral → cuatrimestral) | Proporcional pasando por los meses: iₘ · 4/3 |
+| E3 | La misma conversión **en compuesta** | Equivalencia pasando por el año: (1 + i₄)⁴ = (1 + i₃)³. Se ve por qué no da lo mismo que en simple |
+| E4 | Semestral ↔ cuatrimestral (la que no encaja) | La raya del cuatrimestre a mitad del semestre; exponente fraccionario 2/3 en compuesta |
+| E5 | Vencimientos en fechas distintas | Días entre fechas en el calendario y llevar cada capital a la misma fecha |
+| E6 | Nominal de una frecuencia a otra (Jₘ → TAE → Jₖ) | Dos tiras de capitalización distintas que llegan al mismo final |
+
+- E2 a E6 se construyen solo con las fórmulas del temario (proporcionalidad, 1 + i = (1 + iₘ)^m, TIN y TAE). No hay fórmulas nuevas: son combinaciones.
+- Las cifras salen de `periodos.ts`, con pruebas. Lo que no es un caso del libro lleva la marca «Ejercicio de práctica».
+
 **Reglas de la escena**
 - Cada capítulo termina quieto al menos 0,5 s; con movimiento reducido, el último fotograma de cada acto es completo y legible.
 - Rótulos de 22 u como mínimo, o variante móvil.
@@ -444,6 +474,8 @@ GitHub Pages solo publica un sitio por repositorio. Así se evita pisar producci
 | 6b | Piezas `calendario`, `lupa` y `pizarra` + actos I–III | 6a | No | Capítulos quietos y cifras cotejadas |
 | 6c | Actos IV–VII + enlaces desde las fichas 6, 12 y 14 | 6b | Solo los valores sin fuente | Escena completa con movimiento reducido |
 | 6d | Logaritmo en 8 pasos (compuesta-tiempo) | 6b (`pizarra`) | No | Auditoría §3.3 |
+| 6f | Calendario de equivalencias (§9.4) como pieza del motor (`calendario`), usado en la escena, en el laboratorio y en los ejercicios | 3a | No | Las preguntas «X = ¿cuántos Y?» salen bien en todas las parejas de unidades del temario |
+| 6g | Escenas propias E1–E6 (§9.4), una por incremento | 6f | Solo las cifras que no son del libro | Cada escena cuadra con el dominio y termina en un fotograma completo |
 | 6e | **Conversor interactivo** en el laboratorio de las fórmulas 6, 12 y 14: el alumno elige la unidad (semestre, cuatrimestre, trimestre, mes, día 360/365) y ve partirse el calendario, crecer simple frente a compuesta, el tipo proporcional frente al equivalente y el nominal frente al efectivo, todo con `periodos.ts` | 3a, 6b | No | Mover un control cambia las cifras y el dibujo, y cuadran con el dominio |
 | 7 | Matriz de textos de las 19 fórmulas y después los cambios | 4 | **Sí** | El usuario aprueba la matriz |
 | 8 | Tema 1: ICO pulido → 11 infografías; glosario; preguntas generadas | — | **Sí** en partes | Una pieza por incremento |
