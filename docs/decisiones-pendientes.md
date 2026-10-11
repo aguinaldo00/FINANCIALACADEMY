@@ -97,3 +97,15 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
     desde otro ángulo, hacen falta más vistas o un modelo 3D de calidad.
   - **Título:** "Financial Academy" con el lema "Ciclo de Administración y Finanzas". ¿Otro texto?
   - **Sonido:** no tiene. Si se añade, tendría que empezar tras un gesto del usuario.
+
+## Tema 2 y propuesta editorial (11/10)
+
+- **Siguiente fase del rediseño editorial.** La maqueta (`propuesta/editorial/`, ver
+  `docs/propuesta-editorial.md`) está lista para revisar. Falta tu autorización para llevarla a
+  `asignaturaView.ts` y `tema2/indice.ts` y para sustituir la animación de la fórmula 1 por la de
+  referencia.
+- **Fases B, C y D del Tema 2.** Funcionan y tienen pruebas de rutas y de cálculo, pero falta una
+  revisión visual a fondo y pruebas propias de los enunciados y de las escenas.
+- **Detalles de las fórmulas en HTML.** Los paréntesis no crecen alrededor de una fracción; en el
+  temario el texto plano de las fracciones lleva paréntesis de más («iₘ = (i) / (m)») y el contador
+  dice «1 conceptos».
