@@ -133,7 +133,7 @@ Fórmulas como el vencimiento común o el vencimiento medio no constan en `docs/
 - Se guarda en el almacenamiento existente de `src/app/`.
 
 **Laboratorio:** la misma composición en las 19 fórmulas.
-1. La escena existente, centrada, que se expande con `reproductorExpandido`.
+1. La escena existente, centrada, con el botón «Maximizar» (§6.1).
 2. Datos del caso y selector de incógnita (qué despeje).
 3. Calculadora y cuaderno juntos.
 4. Comprobación y explicación.
@@ -147,6 +147,18 @@ Cada fórmula declara en `laboratorio.ts`:
 - **caso ancla:** el del libro.
 
 El primero es C₀ en simple (fórmula 3). Las demás se añaden de una en una y con la misma forma.
+
+### 6.1 Maximizar el vídeo en las 19 fórmulas
+
+Todas las fichas y laboratorios tienen un botón «Maximizar» sobre su escena. Hoy la expansión solo existe en el índice y en la portada.
+- **Animación:** zoom de ventana al estilo macOS.
+  - El vídeo crece desde su sitio hasta ocupar la pantalla, con las esquinas redondeadas que se abren.
+  - Hay una inclinación 3D muy leve que se endereza al llegar.
+  - El fondo se oscurece.
+  - Al cerrar, hace el mismo recorrido al revés.
+- **Reutiliza** el FLIP de `reproductorExpandido.ts`, sin motor nuevo. Solo se añade la fuente «escena ya montada en la página».
+- **Continuidad:** sigue en el mismo segundo y capítulo, y con el mismo estado de pausa, al abrir y al cerrar.
+- **Accesibilidad:** diálogo modal, Esc cierra y el foco vuelve al botón. Con movimiento reducido, un fundido corto.
 
 ## 7. «Explícame cómo lo he hecho» (`explicar.ts`)
 
@@ -212,6 +224,30 @@ Si dos errores dan la misma cifra, el generador cambia de semilla.
 Es la única animación nueva y tiene que ser una de las explicaciones visuales más memorables de la
 aplicación, siempre al servicio de la comprensión matemática.
 
+### 9.0 Principios narrativos (prioridad máxima)
+
+**Orden del relato**
+1. **Primero, la proporcionalidad en interés simple.** Cada trozo del año cosecha sobre el mismo C₀, así que repartir el tipo es exacto.
+2. **Después, la equivalencia de tipos y la acumulación en compuesta.** Cada trozo cosecha sobre lo ya cosechado, así que repartir se queda corto y hace falta la equivalencia financiera.
+
+**Columna vertebral: convertir la duración no es convertir el tipo**
+- Convertir una duración cambia cómo se **mide** el tiempo: el dinero no se mueve.
+- Convertir un tipo cambia **cuánto rinde cada trozo**: el dinero sí se mueve, y depende del régimen.
+- Se cuenta con movimiento narrativo, con cálculos correctos y con ejemplos completos (dato, objetivo, operación, por qué vale, interpretación y comprobación).
+- No es una tabla animada: la matriz del §3 solo aparece al final, como resumen de lo que ya se ha visto.
+
+**Mismo estilo que las otras 19 explicaciones**
+
+Lo nuevo tiene que parecer parte de la misma serie:
+- ambiente `papel` y las piezas de `motivos.ts` (`Capsula`, `Etiqueta`, `Regla`, `Rotulo`);
+- metáfora de la «cosecha» de intereses, como en simple-intereses y simple-fraccionado;
+- colores fijos por variable: C₀ azul, Cₙ naranja, i verde, n rosa, I bermellón y m en su color de `Regla`;
+- fórmulas que se construyen con los símbolos volando desde los objetos de la escena (`formula.construir` con `origenes`), nunca escritas de golpe;
+- un subtítulo por capítulo, con las fórmulas en línea (`$i_m$`);
+- duración por pieza parecida a la de las demás, entre 14 y 27 s.
+
+Por eso cada acto es **una escena corta de unos 15–20 s**, no un vídeo de dos minutos. Los siete forman una serie que se reproduce seguida en el reproductor maximizado y que se puede enlazar acto por acto desde las fichas 6, 12 y 14.
+
 ### 9.1 Requisitos del usuario (literales en lo esencial)
 
 **Lo que no debe ser**
@@ -271,7 +307,7 @@ Todo es SVG con los tokens de `base.css`.
 
 **Antes de programar:** un guion gráfico de 7 fotogramas clave en Figma (plan gratuito), uno por acto, que el usuario aprueba. Es la forma más barata de discutir la estética sin gastar sesiones de código.
 
-### 9.3 Guion (7 actos = 7 capítulos del reproductor, unos 100–120 s en total)
+### 9.3 Guion (7 actos = 7 escenas cortas en serie, unos 15–20 s cada una)
 
 **I. «El año se puede cortar»** (duración)
 - Imagen: la franja de un año se estira y se parte en 2, 3, 4, 12 y 360/365 trozos, y la cámara entra hasta los días.
@@ -284,12 +320,13 @@ Todo es SVG con los tokens de `base.css`.
 - Imagen: dos marcadores, la unidad del tipo y la de n. Si no coinciden, se ve en burdeos «i anual con n en meses ✗».
 - Tres salidas: convertir el tiempo, convertir el tipo o, si ya coinciden, no tocar nada.
 
-**III. Simple: cada trozo cosecha sobre el mismo C₀**
+**III. Simple: cada trozo cosecha sobre el mismo C₀** (proporcionalidad, antes que la compuesta)
 - CP14: 5.000 € al 3 % durante 195 días, año civil.
 - i₃₆₅ = 0,03/365 → Cₙ = 5.000 · (1 + 0,03/365 · 195) = 5.080,14 €.
 - Comprobación: con n = 195/365 años e i anual sale lo mismo. Por eso dividir es exacto en simple.
 
-**IV. Compuesta: cada trozo cosecha sobre lo ya cosechado**
+**IV. Compuesta: cada trozo cosecha sobre lo ya cosechado** (equivalencia y acumulación)
+- Corte por coincidencia: la misma franja del acto III, pero ahora cada cosecha se suma al capital antes de la siguiente.
 - El 10 %/12 reinvertido mes a mes da 1,1047, no 1,10 (lupa sobre un eje de 1,00 a 1,11).
 - Por eso no se divide: 1 + i = (1 + iₘ)^m → i₁₂ = 1,10^{1/12} − 1 = 0,7974 % (CP19).
 - Sentido inverso: un 1 % mensual compuesto es un 12,68 % anual, no un 12 %.
@@ -368,6 +405,7 @@ GitHub Pages solo publica un sitio por repositorio. Así se evita pisar producci
 | 2a | Previsualización (§12) + `i₁₂` + prueba de capítulo quieto | 1 | No | URL `/preview/` funciona; prueba nueva en verde |
 | 2b | Solapes, capítulos a medias y rótulos en móvil | 2a | No | Escenas afectadas grabadas en `fin − 0,6` y `fin` |
 | 2c | compuesta-montante por capas | 2a | No | Se distingue el interés de intereses |
+| 2d | «Maximizar» con zoom estilo macOS en las 19 fichas (§6.1) | 2a | No | Abre y cierra en el mismo segundo de la escena, con teclado y con movimiento reducido |
 | 3a | `periodos.ts` (matriz) | 1 | No | Pruebas con CP13, 14, 19, 20 y 24 |
 | 3b | `expresion.ts` (analizador) | 1 | No | `3000 ÷ (1 + 3 × 0,07)` = 2.479,34 y errores de sintaxis |
 | 3c | `diagnosticar.ts` | 3a, 3b | No | Las mutaciones de la auditoría §4.2 se distinguen |
