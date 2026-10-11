@@ -9,7 +9,8 @@ import { escaparHtml } from '../components/simbolos.ts';
 import { bloque as datosBloque, pestanasBloque, recorridoFases } from './tema2/comun.ts';
 import { htmlElegir, htmlIdentificar, htmlPractica, montarFase } from './tema2/fases.ts';
 import { htmlFicha, montarFicha } from './tema2/ficha.ts';
-import { htmlIndice, montarMiniaturas } from './tema2/indice.ts';
+import { htmlIndice, montarIndice } from './tema2/indice.ts';
+import type { EstadoEstudio } from '../../app/store.ts';
 import type { ContextoVista } from './context.ts';
 
 /*
@@ -87,10 +88,10 @@ function tituloPantalla(p: PantallaTema2): string {
   return p.bloque ? datosBloque(p.bloque).titulo : 'Índice de fórmulas';
 }
 
-export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2): void {
+export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: EstadoEstudio): void {
   detenerTemaDos();
   const p = ruta.pantalla;
-  ctx.pagina.innerHTML = p.tipo === 'formula' ? htmlFicha(p.id) : p.tipo === 'fase' ? htmlFase(p.bloque, p.fase) : htmlIndice();
+  ctx.pagina.innerHTML = p.tipo === 'formula' ? htmlFicha(p.id) : p.tipo === 'fase' ? htmlFase(p.bloque, p.fase) : htmlIndice(estado);
   ctx.tituloMovil.textContent = `Tema ${tema02.numero} · ${tituloPantalla(p)}`;
   const paradas: (() => void)[] = [];
   if (p.tipo === 'formula') paradas.push(montarFicha(ctx.pagina));
@@ -100,7 +101,7 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2): void {
     if (ejemplo) paradas.push(montarCapitalizacionCompuesta(ejemplo));
     if (ctx.pagina.querySelector('[data-mat-error], [data-mat-pregunta]')) paradas.push(montarPracticaCompuesta(ctx.pagina));
   } else {
-    paradas.push(montarMiniaturas(ctx.pagina));
+    paradas.push(montarIndice(ctx.pagina));
   }
   detenerExperiencia = () => paradas.forEach((parar) => parar());
   pantallaMontada = clavePantalla(p);
@@ -115,7 +116,7 @@ function desplazar(ctx: ContextoVista, p: PantallaTema2): void {
 
 /** Si la pantalla pedida ya está montada, solo se desplaza (no se pierde lo hecho). Devuelve si lo ha hecho. */
 export function desplazarTemaDos(ctx: ContextoVista, ruta: RutaTema2): boolean {
-  if (!detenerExperiencia || !ctx.pagina.querySelector('.t2') || pantallaMontada !== clavePantalla(ruta.pantalla)) return false;
+  if (!detenerExperiencia || !ctx.pagina.querySelector('.t2, [data-tema2]') || pantallaMontada !== clavePantalla(ruta.pantalla)) return false;
   if (ruta.scrollArriba) window.scrollTo(0, 0);
   desplazar(ctx, ruta.pantalla);
   return true;

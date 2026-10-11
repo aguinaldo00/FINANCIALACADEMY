@@ -18,6 +18,8 @@ import './styles/intro.css';
 import './styles/responsive.css';
 import './styles/academia.css';
 import './styles/introBarco.css';
+import './styles/editorial.css';
+import './styles/expansion.css';
 import { iniciarApp } from './app/app.ts';
 import { TEMAS, temaActivo } from './content/temas/index.ts';
 

@@ -96,9 +96,13 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     detenerVista?.();
     detenerVista = null;
     // Índice bajo demanda fuera del estudio (selector y asignatura) o si el usuario lo ha ocultado.
-    vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura';
+    const indiceTemaDos = ruta.vista === 'tema2' && ruta.pantalla.tipo === 'indice';
+    vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura' || indiceTemaDos;
     aplicarIndice();
     document.body.dataset.vista = ruta.vista;
+    // Identidad editorial (página a todo el ancho con su propia navegación): hoy, la portada de la
+    // asignatura y el índice del Tema 2. El resto de pantallas usa el esqueleto común.
+    document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || indiceTemaDos);
     seccionActual = null;
     detenerSimulacro();
     detenerVisual();
@@ -117,7 +121,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     if (ruta.vista === 'asignatura') {
       mundo.desmontar();
       const asignatura = buscarAsignatura(ruta.asignaturaId)!;
-      pintarAsignatura(ctx, asignatura, estado, practica, ultimos()[asignatura.id]);
+      detenerVista = pintarAsignatura(ctx, asignatura, estado, practica, ultimos()[asignatura.id]);
       pintarRailAcademia(ctx.rail, asignatura);
       pintarMigas(migas, [{ texto: 'Academia', href: hrefAcademia() }]);
       document.title = `${asignatura.nombre} · Financial Academy`;
@@ -128,7 +132,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     if (ruta.vista === 'tema2') {
       mundo.desmontar();
       // Dentro de la misma lección, cambiar de parte solo desplaza: no se pierde lo que llevas hecho.
-      if (!desplazarTemaDos(ctx, ruta)) pintarTemaDos(ctx, ruta);
+      if (!desplazarTemaDos(ctx, ruta)) pintarTemaDos(ctx, ruta, estado);
       pintarRailTemaDos(ctx.rail, ruta);
       pintarMigas(migas, migasTema(2, hrefTema2()).slice(0, ruta.pantalla.tipo === 'indice' && !ruta.pantalla.bloque ? 2 : 3));
       recordar();

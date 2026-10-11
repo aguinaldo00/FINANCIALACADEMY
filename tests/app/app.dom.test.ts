@@ -209,27 +209,37 @@ describe('app en el navegador', () => {
   it('la asignatura separa el Tema 2 de la ciudad del Tema 1', () => {
     navegar('#temas');
     expect($('#mt').textContent).toBe('Gestión Financiera');
-    expect($$('.as-puerta')).toHaveLength(2);
-    expect($$('.as-puerta')[0]!.getAttribute('href')).toBe('#inicio');
-    expect($$('.as-puerta')[1]!.textContent).toContain('Introducción al cálculo financiero');
-    expect($$('.as-puerta')[1]!.getAttribute('href')).toBe('#tema/2');
+    expect($$('.ed-cap')).toHaveLength(2);
+    expect($('.ed-cap-1 .ed-enlace-fuerte').getAttribute('href')).toBe('#inicio');
+    expect($('.ed-cap-2').textContent).toContain('Introducción al cálculo financiero');
+    expect($('.ed-cap-2 .ed-enlace-fuerte').getAttribute('href')).toBe('#tema/2');
   });
 
   it('el Tema 2 abre su propia experiencia (el índice de fórmulas) y mantiene una ruta separada', () => {
     navegar('#tema/2');
     expect($('#mt').textContent).toBe('Tema 2 · Índice de fórmulas');
-    expect($('.tema-matematica h1').textContent).toBe('Introducción al cálculo financiero');
+    expect($('.ed-indice-t2 h1').textContent).toBe('Introducción al cálculo financiero');
     expect($('.vis')).toBeNull();
-    expect($$('.t2-carta')).toHaveLength(19);
-    expect($$('.t2-bloque').map((b) => b.id)).toEqual(['t2-simple', 't2-compuesta', 't2-descuento']);
-    expect($('.t2-leyenda').textContent).toContain('lo que vale hoy');
+    expect(new Set($$('a.ed-f').map((a) => a.dataset.formula)).size).toBe(19);
+    expect($$('.ed-parte').map((b) => b.id)).toEqual(['t2-simple', 't2-compuesta', 't2-descuento']);
+    expect($('.ed-clave').textContent).toContain('hoy');
     expect($('.rail').textContent).toContain('Gestión Financiera · todos los temas');
+    // Identidad editorial: página propia, índice lateral bajo demanda y barra del capítulo.
+    expect(document.body.classList.contains('editorial')).toBe(true);
+    expect(document.body.classList.contains('rail-bajo-demanda')).toBe(true);
+    expect($$('.ed-barra-partes a').map((a) => a.getAttribute('href'))).toEqual(['#tema/2/simple', '#tema/2/compuesta', '#tema/2/descuento']);
+    expect($('[data-reproductor="simple-intereses"] .mo-svg')).not.toBeNull();
   });
 
   it('el Tema 2 va en orden: fórmulas (A), datos (B), elegir (C) y practicar (D)', () => {
     navegar('#tema/2');
-    expect($$('.t2-recorrido b').map((b) => b.textContent)).toEqual(['A', 'B', 'C', 'D']);
+    expect($$('.ed-ruta b').map((b) => b.textContent)).toEqual(['A', 'B', 'C', 'D']);
+    expect($('.ed-ruta li.on').textContent).toContain('Estás aquí');
+    for (const parte of ['simple', 'compuesta', 'descuento']) {
+      expect($$(`#t2-${parte} .ed-parte-practica a`).map((a) => a.getAttribute('href'))).toEqual(['datos', 'elegir', 'practica'].map((f) => `#tema/2/${parte}/${f}`));
+    }
     navegar('#tema/2/f/simple-intereses');
+    expect(document.body.classList.contains('editorial')).toBe(false);
     expect($('.t2-ficha h1').textContent).toBe('Intereses totales');
     expect($('.mo .mo-svg')).not.toBeNull();
     expect($$('.mo-caps li').length).toBeGreaterThan(3);

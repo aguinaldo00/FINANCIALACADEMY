@@ -100,10 +100,9 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 
 ## Tema 2 y propuesta editorial (11/10)
 
-- **Siguiente fase del rediseño editorial.** La maqueta (`propuesta/editorial/`, ver
-  `docs/propuesta-editorial.md`) está lista para revisar. Falta tu autorización para llevarla a
-  `asignaturaView.ts` y `tema2/indice.ts` y para sustituir la animación de la fórmula 1 por la de
-  referencia.
+- **Identidad editorial en el resto de pantallas.** Ya está en la portada de la asignatura y en el
+  índice del Tema 2 (ver `docs/identidad-editorial.md`). ¿Se extiende a las fichas, a las fases B–D
+  y al estudio del Tema 1?
 - **Fases B, C y D del Tema 2.** Funcionan y tienen pruebas de rutas y de cálculo, pero falta una
   revisión visual a fondo y pruebas propias de los enunciados y de las escenas.
 - **Detalles de las fórmulas en HTML.** Los paréntesis no crecen alrededor de una fracción; en el

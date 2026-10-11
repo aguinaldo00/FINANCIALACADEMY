@@ -1,16 +1,21 @@
 /*
- * Fase A · Índice de fórmulas del Tema 2. Es el centro del tema: una visión de conjunto por bloque
- * (cómo sale cada fórmula de otra), qué hay que memorizar y qué se deduce, y una ficha por fórmula
- * con la miniatura de su animación (el último fotograma, pintado por la propia escena).
+ * Fase A · Índice de fórmulas del Tema 2, con la identidad editorial: apertura con la ruta A → D y la
+ * animación de la fórmula 1, una barra del capítulo que se queda arriba al bajar y las tres partes,
+ * cada una con la composición que refleja su lógica (genealogía, estrella y matriz). Cada parte
+ * termina con su práctica (B, C y D). El temario completo está en el Sumario.
  */
-import { hrefFase } from '../../../app/router.ts';
+import { hrefAcademia, hrefAsignatura, hrefFase } from '../../../app/router.ts';
+import type { EstadoEstudio } from '../../../app/store.ts';
+import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../../../content/academia.ts';
 import { BLOQUES, formulaPorId, formulasDe, type BloqueId } from '../../../content/temas/tema-02/formulas.ts';
 import { tema02 } from '../../../content/temas/tema-02/index.ts';
+import { montarEditorial, navegacionEditorial, ROMANOS, sumarioEditorial } from '../../components/editorial.ts';
+import { conectarMiniaturas, duracionLegible, type FuenteExpandible, miniaturaHtml } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
-import { pintarFotograma } from '../../motion/reproductor.ts';
-import { escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, leyendaColores, recorridoFases, textoT2 } from './comun.ts';
+import { montarReproductor } from '../../motion/reproductor.ts';
+import { escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 
-/** Cómo se obtiene cada fórmula a partir de otra (el mapa de relaciones de cada bloque). */
+/** Cómo se obtiene cada fórmula a partir de otra (las ramas de cada parte). */
 export const DERIVACIONES: Record<BloqueId, { desde: string; hacia: string; como: string }[]> = {
   simple: [
     { desde: 'simple-intereses', hacia: 'simple-montante', como: 'sumar C₀ y sacar factor común' },
@@ -36,80 +41,153 @@ export const DERIVACIONES: Record<BloqueId, { desde: string; hacia: string; como
   ],
 };
 
-function chip(id: string): string {
+const como = (bloque: BloqueId, id: string) => DERIVACIONES[bloque].find((d) => d.hacia === id)?.como ?? '';
+const duracion = (id: string) => duracionLegible(ESCENAS[id]?.duracion ?? 0);
+
+/** Animaciones que se abren con la expansión cinematográfica desde el índice. */
+const MEDIOS: Readonly<Record<string, FuenteExpandible>> = {
+  'compuesta-montante': { tipo: 'escena', escena: ESCENAS['compuesta-montante']!, volanta: 'Parte II · Fórmula 7' },
+};
+
+/** Un nodo de fórmula: número, nombre, fórmula y duración de su animación. Sin caja. */
+function nodo(id: string, clase = ''): string {
   const f = formulaPorId(id)!;
-  return `<a class="t2-chip" href="${hrefFormula(id)}"><b>${f.numero}</b>${formulaHtml(f.expresion)}</a>`;
+  return `<a class="ed-f ${clase}" href="${hrefFormula(id)}" data-formula="${id}">
+    <span class="ed-f-num">${f.numero}</span>
+    <span class="ed-f-nombre">${escaparHtml(f.nombre)}</span>
+    <span class="ed-f-fx">${formulaHtml(f.expresion)}</span>
+    <span class="ed-f-ver"><i aria-hidden="true"></i>Animación · ${duracion(id)}</span>
+  </a>`;
 }
 
-function mapa(bloque: BloqueId): string {
-  return `<ul class="t2-mapa" aria-label="Cómo se obtiene cada fórmula">${DERIVACIONES[bloque].map((d) =>
-    `<li>${chip(d.desde)}<span class="t2-flecha"><span>${escaparHtml(d.como)}</span></span>${chip(d.hacia)}</li>`).join('')}</ul>`;
+const rama = (bloque: BloqueId, id: string) => `<li><span class="ed-rama">${escaparHtml(como(bloque, id))}</span>${nodo(id)}</li>`;
+
+function cabParte(k: number, b: (typeof BLOQUES)[number], cita: string): string {
+  return `<header class="ed-parte-cab">
+    <span class="ed-parte-num" aria-hidden="true">${ROMANOS[k]}</span>
+    <div><p class="ed-volanta">Parte ${ROMANOS[k]} · ${escaparHtml(b.apartado)} · ${formulasDe(b.id).length} fórmulas</p>
+    <h2 id="t2-${b.id}-titulo">${escaparHtml(b.titulo)}</h2>
+    <blockquote>${escaparHtml(cita)}</blockquote></div>
+  </header>`;
 }
 
-function tarjeta(id: string): string {
-  const f = formulaPorId(id)!;
-  const calcula = f.calcula ? `<span class="t2-calcula-mini">Calcula ${formulaHtml(f.calcula)}</span>` : '<span class="t2-calcula-mini">Compara</span>';
-  return `<li><a class="t2-carta" href="${hrefFormula(id)}">
-    <span class="t2-miniatura" data-miniatura="${id}" aria-hidden="true"></span>
-    <span class="t2-carta-texto"><span class="t2-num">Fórmula ${f.numero}</span><span class="t2-carta-nombre">${escaparHtml(f.nombre)}</span>
-    <span class="t2-carta-fx">${formulaHtml(f.expresion)}</span>${calcula}</span></a></li>`;
+function practicaParte(b: BloqueId): string {
+  return `<nav class="ed-parte-practica" aria-label="Practicar esta parte"><span>Cuando la entiendas, practícala</span>
+    <a href="${hrefFase(b, 'datos')}"><b>B</b> Identificar los datos</a>
+    <a href="${hrefFase(b, 'elegir')}"><b>C</b> Elegir la fórmula</a>
+    <a href="${hrefFase(b, 'practica')}"><b>D</b> Resolver en papel</a></nav>`;
 }
 
-export function htmlIndice(): string {
-  return `<div class="tema-matematica t2 t2-indice">
-    <header class="t2-cabecera">
-      <div class="kick"><span class="pill k">Tema ${tema02.numero}</span><span class="pill">${tema02.fuente}</span></div>
-      <h1>${tema02.titulo}</h1>
-      <p class="t2-entradilla">Primero se entiende cada fórmula: qué significa cada símbolo y por qué funciona. Después se aprende a sacar los datos del enunciado, a elegir la fórmula y a resolver en papel, cada vez con menos ayuda.</p>
-      ${recorridoFases(null, 'formulas')}
-      ${leyendaColores()}
-    </header>
-    ${BLOQUES.map((b) => `
-    <section class="t2-bloque" id="t2-${b.id}" aria-labelledby="t2-${b.id}-titulo">
-      <header class="t2-bloque-cabecera">
-        <p class="t2-ceja">${escaparHtml(b.apartado)}</p>
-        <h2 id="t2-${b.id}-titulo"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></h2>
-        <p>${escaparHtml(b.idea)}</p>
-      </header>
-      <ol class="t2-fichas">${formulasDe(b.id).map((f) => tarjeta(f.id)).join('')}</ol>
-      <div class="t2-relacion">
-        <div><h3>Cómo se relacionan</h3>${mapa(b.id)}</div>
-        <aside class="t2-memoriza"><h3>Para no memorizarlo todo</h3><ul>${b.memoriza.map((m) => `<li>${textoT2(m)}</li>`).join('')}</ul></aside>
+function memoriza(b: BloqueId): string {
+  const bloque = BLOQUES.find((x) => x.id === b)!;
+  return `<aside class="ed-margen"><p class="ed-volanta">Para no memorizarlo todo</p><ul>${bloque.memoriza.map((m) => `<li>${textoT2(m)}</li>`).join('')}</ul></aside>`;
+}
+
+const parte = (b: (typeof BLOQUES)[number], cuerpo: string) =>
+  `<section class="ed-parte ed-parte-${b.id}" id="t2-${b.id}" data-ed-parte="${b.id}" aria-labelledby="t2-${b.id}-titulo">${cuerpo}</section>`;
+
+/** Barra del capítulo: la secuencia A → D y las tres partes, siempre a mano al bajar. */
+function barraCapitulo(): string {
+  return `<nav class="ed-barra-cap" aria-label="Capítulo II">
+    <p class="ed-barra-cap-tit"><span>II</span>Cálculo financiero</p>
+    <ol class="ed-barra-fases">
+      <li class="on"><a href="#tema/2" aria-current="step"><b>A</b> Comprender</a></li>
+      <li><a href="${hrefFase('simple', 'datos')}"><b>B</b> Identificar</a></li>
+      <li><a href="${hrefFase('simple', 'elegir')}"><b>C</b> Elegir</a></li>
+      <li><a href="${hrefFase('simple', 'practica')}"><b>D</b> En papel</a></li>
+    </ol>
+    <ol class="ed-barra-partes">${BLOQUES.map((b, k) => `<li><a href="${hrefBloqueTema2(b.id)}" data-parte="${b.id}"><span>${ROMANOS[k]}</span>${escaparHtml(b.titulo.replace('Capitalización ', ''))}</a></li>`).join('')}</ol>
+  </nav>`;
+}
+
+export function htmlIndice(estado: EstadoEstudio): string {
+  const gf = buscarAsignatura(ID_GESTION_FINANCIERA)!;
+  const [simple, compuesta, descuento] = BLOQUES as unknown as [(typeof BLOQUES)[number], (typeof BLOQUES)[number], (typeof BLOQUES)[number]];
+  return `<div class="ed-pagina ed-pagina-papel ed-indice-t2" data-tema2>
+  ${navegacionEditorial('papel', [{ texto: 'Academia', href: hrefAcademia() }, { texto: gf.nombre, href: hrefAsignatura(gf.id) }, { texto: `Capítulo II · Tema ${tema02.numero}` }])}
+  ${barraCapitulo()}
+  <div class="ed">
+    <section class="ed-t2-apertura" aria-labelledby="ed-t2-titular">
+      <div class="ed-t2-titulo">
+        <p class="ed-volanta ed-volanta-tinta"><i></i>Capítulo II · ${escaparHtml(tema02.fuente)}</p>
+        <h1 class="ed-titular-papel" id="ed-t2-titular">${escaparHtml(tema02.titulo).replace('cálculo financiero', '<em>cálculo financiero</em>')}</h1>
+        <p class="ed-entradilla">El dinero no vale lo mismo hoy que dentro de un año. Este capítulo enseña a medir esa diferencia: primero entendiendo cada fórmula y después usándola solo, en papel.</p>
+        <ol class="ed-ruta" aria-label="Cómo se estudia este capítulo">
+          <li class="on"><span class="ed-ruta-paso"><b>A</b><span>Comprender<small>cada fórmula, con su animación</small></span></span><small class="ed-ruta-aqui">Estás aquí</small></li>
+          <li><a href="${hrefFase('simple', 'datos')}"><b>B</b><span>Identificar<small>los datos del enunciado</small></span></a></li>
+          <li><a href="${hrefFase('simple', 'elegir')}"><b>C</b><span>Elegir<small>la fórmula adecuada</small></span></a></li>
+          <li><a href="${hrefFase('simple', 'practica')}"><b>D</b><span>Practicar<small>en papel, sin ayuda</small></span></a></li>
+        </ol>
       </div>
-      <nav class="t2-siguiente" aria-label="Practicar ${escaparHtml(b.titulo.toLowerCase())}">
-        <a class="btn-secundario" href="${hrefFase(b.id, 'datos')}"><b>B</b> Identificar los datos</a>
-        <a class="btn-secundario" href="${hrefFase(b.id, 'elegir')}"><b>C</b> Elegir la fórmula</a>
-        <a class="btn-secundario" href="${hrefFase(b.id, 'practica')}"><b>D</b> Practicar en papel</a>
-      </nav>
-    </section>`).join('')}
-  </div>`;
+      <figure class="ed-t2-pantalla">
+        <div class="ed-reproductor" data-reproductor="simple-intereses"></div>
+        <figcaption><b>Empieza aquí.</b> Fórmula 1 · Intereses totales: el capital, el tipo y las cosechas.</figcaption>
+      </figure>
+    </section>
+
+    <nav class="ed-contenido" aria-label="Partes del capítulo">
+      ${BLOQUES.map((b, k) => `<a href="${hrefBloqueTema2(b.id)}"><span class="ed-contenido-num">${ROMANOS[k]}</span><span class="ed-contenido-tit">${escaparHtml(b.titulo)}<small>${escaparHtml(b.idea)}</small></span><span class="ed-contenido-pag">${formulasDe(b.id).length}</span></a>`).join('')}
+      <div class="ed-clave"><p class="ed-volanta">Clave de colores</p><ul>
+        <li>${formulaHtml('C_0')}<span>hoy</span></li><li>${formulaHtml('C_n')}<span>al final</span></li><li>${formulaHtml('I')}<span>lo que crece</span></li>
+        <li>${formulaHtml('i')}<span>tipos</span></li><li>${formulaHtml('n')}<span>tiempo</span></li><li>${formulaHtml('m')}<span>partes del año</span></li><li>${formulaHtml('D')}<span>descuento</span></li></ul></div>
+    </nav>
+
+    ${parte(simple, `${cabParte(0, simple, '«Los intereses de cada periodo se calculan siempre sobre el capital inicial.»')}
+      <div class="ed-parte-cuerpo">
+        <div class="ed-genealogia">
+          <div class="ed-madres">
+            ${nodo('simple-intereses', 'ed-f-madre')}
+            <span class="ed-union"><span>${escaparHtml(como('simple', 'simple-montante'))}</span></span>
+            ${nodo('simple-montante', 'ed-f-madre')}
+          </div>
+          <div class="ed-hijas">
+            <ul class="ed-hijas-col">${rama('simple', 'simple-tipo')}${rama('simple', 'simple-tiempo')}${rama('simple', 'simple-fraccionado')}</ul>
+            <ul class="ed-hijas-col">${rama('simple', 'simple-capital-inicial')}</ul>
+          </div>
+        </div>
+        ${memoriza('simple')}
+      </div>
+      ${practicaParte('simple')}`)}
+
+    ${parte(compuesta, `${cabParte(1, compuesta, '«Los intereses se suman al capital y producen nuevos intereses.»')}
+      <div class="ed-estrella">
+        <div class="ed-estrella-centro">
+          ${miniaturaHtml('compuesta-montante', MEDIOS['compuesta-montante']!, 'vx-papel')}
+          ${nodo('compuesta-montante', 'ed-f-madre ed-f-centro')}
+        </div>
+        <ul class="ed-estrella-ramas">
+          ${['compuesta-intereses', 'compuesta-capital-inicial', 'compuesta-tiempo', 'compuesta-tipo', 'compuesta-equivalentes', 'compuesta-tae', 'compuesta-comparacion'].map((id) => rama('compuesta', id)).join('')}
+        </ul>
+      </div>
+      ${practicaParte('compuesta')}`)}
+
+    ${parte(descuento, `${cabParte(2, descuento, '«Cobrar hoy lo que vence mañana tiene un precio: el descuento.»')}
+      <p class="ed-siempre">Siempre: <span>${formulaHtml('E = N - D')}</span> lo que recibes hoy es el nominal menos el descuento.</p>
+      <div class="ed-matriz" role="table" aria-label="Descuentos según la base y el régimen">
+        <div class="ed-matriz-fila ed-matriz-cab" role="row"><span role="columnheader"><span class="sr">Régimen</span></span><span role="columnheader">Comercial<small>se calcula sobre el nominal, N</small></span><span role="columnheader">Racional<small>se calcula sobre el efectivo</small></span></div>
+        <div class="ed-matriz-fila" role="row"><span role="rowheader">Simple<small>hasta un año</small></span><span role="cell">${nodo('descuento-comercial')}</span><span role="cell">${nodo('descuento-racional')}</span></div>
+        <div class="ed-matriz-fila" role="row"><span role="rowheader">Compuesto<small>más de un año</small></span><span role="cell">${nodo('descuento-compuesto-comercial')}</span><span role="cell">${nodo('descuento-compuesto-racional')}</span></div>
+      </div>
+      <div class="ed-liquidacion"><span class="ed-rama">En el banco: ${escaparHtml(como('descuento', 'descuento-remesa'))}</span>${nodo('descuento-remesa')}</div>
+      ${practicaParte('descuento')}`)}
+
+    <footer class="ed-siguiente">
+      <p class="ed-volanta ed-volanta-tinta">Cuando hayas visto las fórmulas</p>
+      <a href="${hrefFase('simple', 'datos')}"><b>B</b> Identificar los datos <span aria-hidden="true">→</span></a>
+      <p class="ed-siguiente-nota">Después: <a href="${hrefFase('simple', 'elegir')}">C · Elegir la fórmula</a> y <a href="${hrefFase('simple', 'practica')}">D · Resolver en papel</a>, parte por parte.</p>
+    </footer>
+  </div>
+  ${sumarioEditorial(gf, estado)}
+</div>`;
 }
 
-/** Pinta las miniaturas cuando entran en pantalla. Devuelve la función que lo detiene. */
-export function montarMiniaturas(raiz: HTMLElement): () => void {
-  const pendientes = [...raiz.querySelectorAll<HTMLElement>('[data-miniatura]')];
-  const paradas: (() => void)[] = [];
-  const pintar = (el: HTMLElement) => {
-    const escena = ESCENAS[el.dataset.miniatura ?? ''];
-    if (!escena || el.dataset.pintada) return;
-    el.dataset.pintada = '1';
-    el.classList.add('mo-marco');
-    paradas.push(pintarFotograma(el, escena));
-  };
-  let observador: IntersectionObserver | null = null;
-  if (typeof IntersectionObserver === 'function') {
-    observador = new IntersectionObserver((entradas) => {
-      for (const e of entradas) if (e.isIntersecting) {
-        pintar(e.target as HTMLElement);
-        observador?.unobserve(e.target);
-      }
-    }, { rootMargin: '200px 0px' });
-    pendientes.forEach((el) => observador!.observe(el));
-  } else {
-    pendientes.forEach(pintar);
-  }
-  return () => {
-    observador?.disconnect();
-    paradas.forEach((p) => p());
-  };
+/** Monta la navegación, el Sumario, la animación de la apertura y las miniaturas expandibles. */
+export function montarIndice(pagina: HTMLElement): () => void {
+  const raiz = pagina.querySelector<HTMLElement>('.ed-pagina');
+  if (!raiz) return () => {};
+  const paradas = [montarEditorial(raiz), conectarMiniaturas(raiz, MEDIOS)];
+  const portada = raiz.querySelector<HTMLElement>('[data-reproductor]');
+  const escena = ESCENAS[portada?.dataset.reproductor ?? ''];
+  if (portada && escena) paradas.push(montarReproductor(portada, escena));
+  return () => paradas.forEach((p) => p());
 }

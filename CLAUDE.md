@@ -32,6 +32,8 @@ Idioma de todo (interfaz, código, comentarios, commits y respuestas): español.
 - `src/ui/views/`: una vista por pantalla; el selector de mundos es `academiaView.ts`.
 - `src/ui/intro/` y `src/scene/three/`: la intro del barco y las escenas 3D.
 - `src/styles/`: `base.css` es el sistema visual (colores, tipos, botones); las demás hojas solo colocan.
+- Identidad editorial (portada de la asignatura e índice del Tema 2): `src/ui/components/editorial.ts` y `src/styles/editorial.css`;
+  el reproductor con expansión de las miniaturas de vídeo es `src/ui/components/reproductorExpandido.ts`. Estado en `docs/identidad-editorial.md`.
 - `src/assets/fuentes/`: fuentes propias (Fraunces, IBM Plex, Barlow Condensed, Big Shoulders); no usar Google Fonts.
 - `docs/`: decisiones y planes; las dudas abiertas van en `docs/decisiones-pendientes.md`.
 - `docs/fuentes/`: análisis de los apuntes de cada tema (conceptos, fórmulas, errores típicos, orden de enseñanza). Son la referencia para contrastar `src/content/`; no se cargan solos, se leen cuando haga falta.
