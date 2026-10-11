@@ -257,7 +257,10 @@ describe('app en el navegador', () => {
       expect($$(`#t2-${parte} .ed-parte-practica a`).map((a) => a.getAttribute('href'))).toEqual(['datos', 'elegir', 'practica'].map((f) => `#tema/2/${parte}/${f}`));
     }
     navegar('#tema/2/f/simple-intereses');
-    expect(document.body.classList.contains('editorial')).toBe(false);
+    // Las fichas usan la navegación editorial y el Sumario de papel (no el índice lateral oscuro).
+    expect(document.body.classList.contains('editorial')).toBe(true);
+    expect($('.ed-nav [data-sumario]')).not.toBeNull();
+    expect($('[data-capa-sumario]')).not.toBeNull();
     expect($('.t2-ficha h1').textContent).toBe('Intereses totales');
     expect($('.mo .mo-svg')).not.toBeNull();
     expect($$('.mo-caps li').length).toBeGreaterThan(3);
