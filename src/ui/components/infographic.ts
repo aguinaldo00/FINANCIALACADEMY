@@ -1,6 +1,7 @@
 import type { Infografia, TipoFlujo } from '../../content/schema.ts';
 import { iconoUi } from '../../icons/ui.ts';
 import { montarLaminaIco } from '../infografias/ico.ts';
+import { marcarSiglas } from './siglas.ts';
 
 /** Color y símbolo de lo que viaja por cada tipo de flecha. */
 export const ESTILO_FLUJO: Record<TipoFlujo, { color: string; simbolo: string; nombre: string }> = {
@@ -29,7 +30,7 @@ export function montarInfografia(contenedor: HTMLElement, info: Infografia): () 
   const tipos = [...new Set(info.flujos.map((f) => f.tipo))];
   contenedor.innerHTML = `<figure class="ig" data-ig="${info.id}"><figcaption class="ig-titulo">${iconoUi('proyector')} ${info.titulo}</figcaption>
 <div class="ig-lienzo"><svg class="ig-svg" aria-hidden="true"></svg>${(info.grupos ?? []).map((g, i) => `<div class="ig-grupo" data-g="${i}" style="left:${g.x}%;top:${g.y}%;width:${g.ancho}%;height:${g.alto}%"><span>${g.etiqueta}</span></div>`).join('')}${info.actores.map((a) => `<div class="ig-actor" data-actor="${a.id}" style="left:${a.x}%;top:${a.y}%"><span class="ig-icono">${a.icono}</span><span class="ig-nombre">${a.etiqueta}</span></div>`).join('')}<div class="ig-etiquetas"></div></div>
-<p class="ig-texto" aria-live="polite"></p>
+<p class="ig-texto" aria-live="polite"></p><div class="ig-siglas"></div>
 <div class="ig-ctrl"><button type="button" class="fc-btn" data-ig="anterior">← Anterior</button><span class="ig-puntos">${info.pasos.map((_, i) => `<button type="button" class="ig-punto" data-ig-paso="${i}" aria-label="Paso ${i + 1}"></button>`).join('')}</span><button type="button" class="fc-btn" data-ig="siguiente">Siguiente →</button><button type="button" class="fc-btn ig-play" data-ig="play" aria-pressed="false">▶ Reproducir</button></div>
 ${tipos.length ? `<ul class="ig-ley">${tipos.map((t) => `<li><i style="--c:${ESTILO_FLUJO[t].color}">${ESTILO_FLUJO[t].simbolo}</i>${ESTILO_FLUJO[t].nombre}</li>`).join('')}</ul>` : ''}</figure>`;
   const lienzo = contenedor.querySelector<HTMLElement>('.ig-lienzo')!;
@@ -134,6 +135,9 @@ ${tipos.length ? `<ul class="ig-ley">${tipos.map((t) => `<li><i style="--c:${EST
       el.classList.toggle('activo', (p.grupos ?? []).includes(g));
     }
     texto.innerHTML = `<b>Paso ${paso + 1} de ${info.pasos.length}.</b> ${p.texto}`;
+    const siglas = contenedor.querySelector<HTMLElement>('.ig-siglas')!;
+    siglas.replaceChildren();
+    marcarSiglas(texto, siglas, 1);
     contenedor.querySelectorAll<HTMLButtonElement>('.ig-punto').forEach((b, i) => b.classList.toggle('on', i === paso));
     contenedor.querySelector<HTMLButtonElement>('[data-ig="anterior"]')!.disabled = paso === 0;
     contenedor.querySelector<HTMLButtonElement>('[data-ig="siguiente"]')!.disabled = paso === info.pasos.length - 1;

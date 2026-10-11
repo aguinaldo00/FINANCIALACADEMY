@@ -53,7 +53,7 @@ export const BLOQUES: readonly Bloque[] = [
     memoriza: [
       'Siempre: efectivo = nominal − descuento ($E = N - D$).',
       'Comercial: el descuento se calcula sobre $N$. Racional: sobre el efectivo (es capitalizar al revés).',
-      'Compuesto: la capitalización compuesta al revés, con exponente $n$.',
+      'Compuesto racional: la capitalización compuesta al revés, $(1 + i)^{-n}$. Compuesto comercial: $(1 - d)^n$.',
     ],
   },
 ];

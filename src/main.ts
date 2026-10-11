@@ -11,6 +11,7 @@ import './styles/exam.css';
 import './styles/practice.css';
 import './styles/infographic.css';
 import './styles/calcografia.css';
+import './styles/glosario.css';
 import './styles/capitalizacion.css';
 import './styles/tema2.css';
 import './styles/escenasTema1.css';

@@ -1,3 +1,4 @@
+import { marcarSiglas } from '../components/siglas.ts';
 import { sacudir, saltarMonedas } from '../components/celebrar.ts';
 import { skylineSeccion } from '../components/skyline.ts';
 import { hrefInicio, hrefSeccion } from '../../app/router.ts';
@@ -32,6 +33,8 @@ export function pintarSeccion(ctx: ContextoVista, estado: EstadoEstudio, seccion
  ${conceptos.map((c) => fichaConcepto(c, progreso, infografiasDe(tema.ampliacion?.infografias, c.id).length > 0)).join('')}
  <nav class="pager">${enlaceAnterior}${enlaceSiguiente}</nav></div>`;
   ctx.tituloMovil.textContent = `${s.id} · ${s.titulo}`;
+  // Cada ficha explica sus siglas y términos la primera vez que aparecen (definición y ejemplo).
+  for (const ficha of ctx.pagina.querySelectorAll<HTMLElement>('.cc')) marcarSiglas(ficha, ficha, 1, '.corta, .ej');
   conectarPretest(ctx.pagina.querySelector<HTMLElement>('[data-pretest]'), estado, conceptos);
 
   if (conceptoFoco) {

@@ -18,7 +18,7 @@ export const infografias: Infografia[] = [
       A('ico', 'ICO', '🏦', 46, 45),
       A('banco', 'Banco privado', '🏧', 78, 14),
       A('pyme', 'Pyme o autónomo', '🧑‍💼', 92, 46),
-      A('proyecto', 'Proyecto de más de 10 M€', '🏗️', 78, 80),
+      A('proyecto', 'Proyecto de 10 M€ o más', '🏗️', 78, 80),
       A('ayudas', 'Destinatarios de fondos públicos', '🤝', 46, 88),
     ],
     flujos: [
@@ -33,9 +33,9 @@ export const infografias: Infografia[] = [
     pasos: [
       { texto: 'El ICO es una entidad pública empresarial y agencia financiera del Estado. Se financia en los mercados y sus deudas tienen garantía explícita del Estado.', actores: ['ico', 'mercados', 'estado'], flujos: [0, 1] },
       { texto: 'Como banco público, vía 1 · líneas de mediación: el dinero del ICO llega a pymes y autónomos a través de un banco privado, que tramita, estudia la viabilidad y asume el riesgo.', actores: ['ico', 'banco', 'pyme'], flujos: [2, 3] },
-      { texto: 'Como banco público, vía 2 · financiación directa para proyectos de más de 10 millones de euros: aquí el riesgo lo asume el propio ICO.', actores: ['ico', 'proyecto'], flujos: [4] },
-      { texto: 'Como agencia financiera del Estado: gestiona fondos públicos que le asigna el Gobierno (catástrofes naturales, fomento de exportaciones, ayuda al desarrollo). El ICO no asume el riesgo.', actores: ['estado', 'ico', 'ayudas'], flujos: [5, 6] },
-      { texto: 'Para el examen: mediación → riesgo del banco · directa (> 10 M€) → riesgo del ICO · agencia del Estado → el ICO no arriesga. Es entidad de crédito, pero no de depósito.', actores: ['ico', 'banco', 'proyecto', 'ayudas'], flujos: [] },
+      { texto: 'Como banco público, vía 2 · financiación directa para proyectos de un mínimo de 10 millones de euros: aquí el riesgo lo asume el propio ICO.', actores: ['ico', 'proyecto'], flujos: [4] },
+      { texto: 'Como agencia financiera del Estado: gestiona fondos públicos que le asigna el Gobierno (catástrofes naturales, fomento de exportaciones, ayuda al desarrollo). El ICO no asume el riesgo: actúa por cuenta del Estado, que es quien lo asume.', actores: ['estado', 'ico', 'ayudas'], flujos: [5, 6] },
+      { texto: 'Para el examen: mediación → riesgo del banco · directa (≥ 10 M€) → riesgo del ICO · agencia del Estado → arriesga el Estado, no el ICO. Es entidad de crédito, pero no de depósito.', actores: ['ico', 'banco', 'proyecto', 'ayudas'], flujos: [] },
     ],
   },
   {
@@ -83,9 +83,9 @@ export const infografias: Infografia[] = [
     ],
     pasos: [
       { texto: 'Una pyme pide financiación al banco, pero no consigue el préstamo o le salen malas condiciones.', actores: ['pyme', 'banco'], flujos: [0] },
-      { texto: 'La SGR es una sociedad mercantil de capital variable cuyos socios son las pymes: concede avales a sus socios.', actores: ['pyme', 'sgr'], flujos: [1, 2] },
+      { texto: 'La SGR es una sociedad mercantil de capital variable cuyos socios partícipes son pymes: concede avales a esos socios.', actores: ['pyme', 'sgr'], flujos: [1, 2] },
       { texto: 'Con el aval, el banco dice que sí: la pyme obtiene financiación bancaria en mejores condiciones.', actores: ['banco', 'pyme', 'sgr'], flujos: [3] },
-      { texto: 'Las SGR tienen un sistema de reaval (CERSA). Ojo en el examen: sus socios son las pymes, no los bancos. SGR avala ≠ EFC presta.', actores: ['cersa', 'sgr'], flujos: [4] },
+      { texto: 'Las SGR tienen un sistema de reaval (CERSA). Ojo en el examen: los avales son para las pymes socias; un banco puede ser socio protector, pero no recibe avales. SGR avala ≠ EFC presta.', actores: ['cersa', 'sgr'], flujos: [4] },
     ],
   },
   {
@@ -109,7 +109,7 @@ export const infografias: Infografia[] = [
       F('efc', 'proveedores', 'confirming: gestiona tus pagos', 'dinero'),
     ],
     pasos: [
-      { texto: 'Los EFC son entidades de crédito especializadas (Ley 5/2015) que NO pueden captar depósitos del público. Es la diferencia clave con un banco.', actores: ['efc', 'ahorrador'], flujos: [0] },
+      { texto: 'Los EFC son entidades financieras especializadas en prestar que NO pueden captar depósitos del público: es la diferencia clave con un banco. Desde la Ley 5/2015 ya no son entidades de crédito, aunque los supervisa el Banco de España.', actores: ['efc', 'ahorrador'], flujos: [0] },
       { texto: 'Leasing: arrendamiento financiero con opción de compra. Alquilas una furgoneta y al final puedes comprarla.', actores: ['efc', 'empresa', 'furgoneta'], flujos: [1, 2] },
       { texto: 'Factoring: cesión de la cartera de cobros. Cedes tus facturas para cobrar ya.', actores: ['clientes', 'efc', 'empresa'], flujos: [3, 4] },
       { texto: 'Confirming: gestión integral de los pagos a proveedores. Además: créditos al consumo, hipotecas, avales y tarjetas.', actores: ['efc', 'proveedores'], flujos: [5] },
@@ -131,7 +131,7 @@ export const infografias: Infografia[] = [
       F('fgd', 'recuperas', 'hasta 100.000 € por titular y entidad', 'dinero'),
     ],
     pasos: [
-      { texto: 'Tienes 150.000 € en un banco. Todas las entidades de crédito españolas están adheridas obligatoriamente al Fondo (voluntario para sucursales de la UE).', actores: ['tu', 'banco', 'fgd'], flujos: [0, 1] },
+      { texto: 'Tienes 150.000 € en un banco. Todas las entidades de crédito españolas están adheridas obligatoriamente al Fondo (las sucursales de bancos de otros países de la UE las cubre el fondo de su país).', actores: ['tu', 'banco', 'fgd'], flujos: [0, 1] },
       { texto: 'El banco quiebra: el FGDEC garantiza los depósitos en dinero hasta 100.000 € por titular y entidad. Recuperas 100.000 €, no 150.000.', actores: ['fgd', 'recuperas'], flujos: [2] },
       { texto: 'Real Decreto Ley 16/2011: los tres fondos (bancos, cajas y cooperativas) se unificaron en el FGDEC. Para clientes de ESI y gestoras de IIC existe el FOGAIN. Ojo: el FGD devuelve depósitos; el MUR resuelve la entidad.', actores: ['fgd'], flujos: [] },
     ],
@@ -156,7 +156,7 @@ export const infografias: Infografia[] = [
     pasos: [
       { texto: 'Un fondo es el patrimonio de varios inversores (partícipes), dividido en participaciones. NO tiene personalidad jurídica.', actores: ['participes', 'fondo'], flujos: [0] },
       { texto: 'Por eso necesita obligatoriamente una sociedad gestora, que lo administra e invierte a cambio de una comisión…', actores: ['gestora', 'fondo', 'activos'], flujos: [1, 2] },
-      { texto: '…y una entidad depositaria (banco, caja o sociedad de valores inscrita en la CNMV) que custodia los títulos y vigila a la gestora.', actores: ['depositaria', 'fondo'], flujos: [3] },
+      { texto: '…y una entidad depositaria (banco, caja, cooperativa de crédito, sociedad o agencia de valores, inscrita en la CNMV) que custodia los títulos y vigila a la gestora.', actores: ['depositaria', 'fondo'], flujos: [3] },
       { texto: 'Valor liquidativo = patrimonio ÷ número de participaciones. Caso práctico 5: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €; si el fondo sube a 80.000 €, cada una vale 2.000 €.', actores: ['fondo', 'participes'], flujos: [] },
     ],
   },
@@ -272,7 +272,7 @@ export const infografias: Infografia[] = [
     pasos: [
       { texto: 'La supervisión en España va por el tipo de producto y de mercado, no por la oficina donde se vende. Banco de España: entidades de crédito (y EFC).', actores: ['bde', 'credito'], flujos: [0] },
       { texto: 'CNMV: mercados de valores (bolsa), empresas de servicios de inversión e instituciones de inversión colectiva.', actores: ['cnmv', 'valores'], flujos: [1] },
-      { texto: 'DGSFP (Ministerio de Economía): compañías aseguradoras y fondos de pensiones.', actores: ['dgsfp', 'seguros'], flujos: [2] },
+      { texto: 'DGSFP (Ministerio de Economía, Comercio y Empresa): compañías aseguradoras y fondos de pensiones.', actores: ['dgsfp', 'seguros'], flujos: [2] },
     ],
   },
   {

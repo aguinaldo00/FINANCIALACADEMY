@@ -54,6 +54,7 @@ describe('rutas hash', () => {
     expect(resolverRuta('#repaso/bde', tema01)).toEqual({ vista: 'repaso', conceptoId: 'bde', scrollArriba: true });
     expect(resolverRuta('#repaso/nada', tema01)).toEqual({ vista: 'inicio', scrollArriba: true });
     expect(resolverRuta('#visual', tema01)).toEqual({ vista: 'visual', scrollArriba: true });
+    expect(resolverRuta('#glosario', tema01)).toEqual({ vista: 'glosario', scrollArriba: true });
   });
 
   it('ids desconocidos llevan al inicio', () => {

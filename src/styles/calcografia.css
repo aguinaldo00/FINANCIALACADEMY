@@ -34,7 +34,7 @@
 
 /* Textos dentro del dibujo */
 .lc-nombre{fill:var(--lc-grabado);font:500 22px var(--f-titulo);letter-spacing:.005em}
-.lc-glosa{fill:var(--lc-grabado);fill-opacity:.82;font:400 13.5px var(--f-texto)}
+.lc-glosa{fill:var(--lc-grabado);fill-opacity:.85;font:400 14px var(--f-texto)}
 .lc-nota{fill:currentColor;font:italic 500 18px var(--f-titulo);paint-order:stroke;stroke:#2a2c78;stroke-width:4px;stroke-linejoin:round}
 .lc-caps{font:600 12.5px "Barlow Condensed",var(--f-texto);letter-spacing:.16em;text-transform:uppercase}
 .lc-caps-claro{fill:var(--lc-grabado)}
@@ -70,7 +70,7 @@
 .lc-cupon-titulo{fill:currentColor}
 .lc-cupon-nombre{fill:var(--lc-tinta-papel);font:500 15.5px var(--f-titulo)}
 .lc-cupon-flujo{fill:var(--lc-tinta-papel);font:italic 400 14px var(--f-titulo)}
-.lc-cupon-riesgo{fill:var(--lc-riesgo-papel);font-size:13px;letter-spacing:.12em}
+.lc-cupon-riesgo{fill:var(--lc-riesgo-papel);font-size:12.5px;letter-spacing:.1em}
 .lc-cupon .lc-tinta-cobre{color:var(--lc-cobre-papel)}
 .lc-cupon .lc-tinta-violeta{color:var(--lc-violeta-papel)}
 .lc-p{fill:none;stroke:var(--lc-tinta-papel);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
@@ -128,3 +128,4 @@
   .lc-e,.lc-e *{animation:none!important;transition:none!important}
 }
 .lc-quieto .lc-e,.lc-quieto .lc-e *{animation:none!important;transition:none!important}
+

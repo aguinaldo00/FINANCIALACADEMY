@@ -114,12 +114,20 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 Detalle en `docs/infografias-tema1.md` y `docs/auditoria-tema2.md`.
 
 - **Calcografía en el ICO:** está en la app real. ¿Se aprueba para extenderla a las otras 11 infografías?
-- **Exactitud (necesita permiso, `src/content/`):**
-  - el Banco de España «financia a las Administraciones públicas» (`conceptos.ts:823`) contradice el art. 13 de la Ley 13/1994;
-  - ICO «más de 10 M€» frente a «importe mínimo 10 M€»;
-  - los EFC ya no son entidades de crédito desde la Ley 5/2015;
-  - las SGR también tienen socios protectores;
-  - en la vía de agencia del ICO, el riesgo lo asume el Estado.
-- **Glosario y siglas:** botón de sigla con explicación y glosario por tema. Hay unas 20 entradas nuevas, que necesitan permiso.
+- **Exactitud: corregido el 11/10 con permiso del usuario.**
+  - Banco de España: ya no dice que financie a las Administraciones públicas.
+  - AES en plural.
+  - EFC y EDE fuera de las entidades de crédito.
+  - SGR con socios protectores.
+  - ICO: «mínimo 10 M€» y el Estado asume el riesgo en la vía de agencia.
+  - FGD: sucursales de la UE.
+  - Lista de depositarias.
+  - Flashcard de la EDE: la autoriza el Banco de España.
+  - Tema 2: caso 28 (exponente −565/365), caso 29 (pide el descuento, como el libro), resumen del descuento compuesto y rótulo de la ficha de la remesa.
+
+  Las correcciones de los conceptos del Tema 1 quedan registradas en `src/content/temas/tema-01/correcciones.ts`.
+- **Glosario y siglas: hecho.**
+  - Página `#glosario` y botón en cada sigla de las fichas y las infografías (`src/content/glosario.ts`, `src/ui/components/siglas.ts`).
+  - Pendiente: llevarlo a la ficha de los edificios de la ciudad, a las escenas y al Tema 2.
 - **«OMEC»:** no aparece en ningún texto del proyecto. ¿Dónde se vio?
 - **Errores del Tema 2:** caso 28 (exponente −565/365) y la frase del descuento compuesto en `formulas.ts:56`.

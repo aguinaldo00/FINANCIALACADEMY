@@ -10,6 +10,7 @@
  */
 import type { Infografia } from '../../content/schema.ts';
 import { iconoUi } from '../../icons/ui.ts';
+import { marcarSiglas } from '../components/siglas.ts';
 import { bandaHolografica, cinta, type Curva, curvaD, fachada, filacteria, roseta, vineta } from './calcografia.ts';
 
 type Ancla = 'start' | 'middle' | 'end';
@@ -48,49 +49,51 @@ interface Composicion {
 /** Escritorio: placa a la izquierda, banda holográfica y los tres cupones (vías) a la derecha. */
 const HORIZONTAL: Composicion = {
   w: 1000, h: 620,
-  mercados: [130, 146], estado: [130, 436], ovalo: [96, 66],
-  nombres: { mercados: [130, 244, 'middle'], estado: [130, 534, 'middle'] },
-  glosas: { mercados: [130, 264, 'middle'], estado: [130, 554, 'middle'] },
+  // Todo es simétrico respecto a y = 310, el centro del ICO y del cupón central.
+  mercados: [130, 164], estado: [130, 456], ovalo: [96, 66],
+  nombres: { mercados: [130, 262, 'middle'], estado: [130, 554, 'middle'] },
+  glosas: { mercados: [130, 282, 'middle'], estado: [130, 574, 'middle'] },
   partir: false,
-  ico: [404, 312], roseta: 140, disco: 100, edificio: [136, 114],
-  papelBanco: [404, 160, 190], papelAgencia: [404, 464, 290],
-  financia: [[226, 156], [270, 156], [300, 214], [330, 244]],
-  fondos: [[226, 450], [270, 450], [300, 410], [332, 382]],
+  ico: [404, 310], roseta: 140, disco: 100, edificio: [136, 114],
+  papelBanco: [404, 170, 180], papelAgencia: [404, 450, 290],
+  financia: [[226, 174], [268, 174], [300, 222], [332, 244]],
+  fondos: [[226, 446], [268, 446], [300, 398], [332, 376]],
   vias: [
-    [[475, 241], [580, 160], [630, 112], [702, 108]],
-    [[504, 312], [600, 312], [650, 310], [702, 310]],
-    [[475, 383], [580, 470], [630, 512], [702, 514]],
+    [[475, 239], [580, 158], [630, 110], [702, 107]],
+    [[504, 310], [600, 310], [650, 310], [702, 310]],
+    [[475, 381], [580, 462], [630, 510], [702, 513]],
   ],
-  bono: [272, 192, -10],
-  garantia: [[180, 372], [200, 320], [246, 252], [268, 206]],
-  rotuloGarantia: [22, 300, 'start'],
-  notas: { financia: [300, 132, 'middle'], fondos: [268, 420, 'middle'], v1: [668, 192, 'end'], v2: [668, 298, 'end'] },
+  bono: [282, 201, -10],
+  garantia: [[190, 398], [206, 338], [248, 264], [268, 222]],
+  rotuloGarantia: [22, 318, 'start'],
+  // Las vías 1 y 2 ya se nombran en sus cupones: no se repiten sobre las cintas.
+  notas: { financia: [300, 146, 'middle'], fondos: [300, 486, 'middle'], v1: null, v2: null },
   holo: [678, 14, 10, 592],
   cupones: [[700, 14, 286, 186], [700, 217, 286, 186], [700, 420, 286, 186]],
   interlinea: 20,
-  leyenda: [340, 606, 'middle'],
+  leyenda: [340, 607, 'middle'],
 };
 
 /** Móvil: mercados arriba, el ICO en el centro, el Estado debajo y los tres cupones apilados. */
 const VERTICAL: Composicion = {
   w: 440, h: 1372,
-  mercados: [86, 86], estado: [86, 712], ovalo: [64, 48],
-  nombres: { mercados: [166, 78, 'start'], estado: [166, 704, 'start'] },
-  glosas: { mercados: [166, 102, 'start'], estado: [166, 728, 'start'] },
+  mercados: [86, 86], estado: [86, 724], ovalo: [64, 48],
+  nombres: { mercados: [166, 78, 'start'], estado: [166, 716, 'start'] },
+  glosas: { mercados: [166, 102, 'start'], estado: [166, 740, 'start'] },
   partir: true,
   ico: [220, 470], roseta: 140, disco: 98, edificio: [132, 110],
   papelBanco: [220, 318, 200], papelAgencia: [220, 624, 290],
   financia: [[86, 134], [86, 200], [120, 300], [158, 380]],
-  fondos: [[100, 664], [112, 620], [140, 584], [160, 560]],
+  fondos: [[100, 676], [112, 620], [140, 584], [160, 560]],
   vias: [
     [[290, 404], [380, 380], [392, 560], [392, 786]],
     [[318, 470], [400, 470], [408, 600], [408, 786]],
     [[290, 536], [390, 560], [424, 640], [424, 786]],
   ],
   bono: [90, 190, -8],
-  garantia: [[34, 664], [14, 520], [18, 300], [56, 210]],
+  garantia: [[34, 676], [14, 520], [18, 300], [56, 210]],
   rotuloGarantia: [140, 172, 'start'],
-  notas: { financia: [130, 262, 'start'], fondos: [124, 666, 'start'], v1: null, v2: null },
+  notas: { financia: [130, 262, 'start'], fondos: [124, 660, 'start'], v1: null, v2: null },
   holo: [20, 788, 400, 8],
   cupones: [[20, 806, 400, 176], [20, 994, 400, 176], [20, 1182, 400, 176]],
   interlinea: 22,
@@ -160,6 +163,15 @@ ${d.nombres.map((n, i) => t(x + 124, y + 66 + i * interlinea, n, 'lc-cupon-nombr
 ${t(x + 14, y + h - 36, d.flujo, 'lc-cupon-flujo')}
 <g class="lc-riesgo">${t(x + 14, y + h - 14, d.riesgo, 'lc-caps lc-cupon-riesgo')}</g>
 </g>`;
+}
+
+/** Parte un nombre largo en dos líneas por el espacio más cercano a la mitad. */
+function partir(texto: string, maximo = 16): string[] {
+  if (texto.length <= maximo) return [texto];
+  const espacios = [...texto.matchAll(/ /g)].map((m) => m.index!);
+  if (!espacios.length) return [texto];
+  const corte = espacios.reduce((a, b) => (Math.abs(b - texto.length / 2) < Math.abs(a - texto.length / 2) ? b : a));
+  return [texto.slice(0, corte), texto.slice(corte + 1)];
 }
 
 /** Envuelve un dibujo como actor del contrato común (para destacar y para las pruebas). */
@@ -232,12 +244,10 @@ ${t(ix, iy + c.edificio[1] * 0.4 + 30, 'Instituto de Crédito Oficial', 'lc-caps
   const [directa, riesgo2] = flujo(4).split(' · ');
   let e3 = cinta(c.vias[1], 'lc-tinta-turquesa');
   if (c.notas.v2) e3 += rot(c.notas.v2, directa ?? '', 'lc-nota lc-tinta-turquesa');
-  const proyecto = nombre('proyecto');
-  const corte = proyecto.indexOf(' más');
   e3 += cupon(c.cupones[1], {
     num: '2', titulo: 'Vía 2 · financiación directa', tinta: 'lc-cupon-turquesa',
     vineta: actor('proyecto', VINETAS.proyecto) + VINETAS.icoRiesgo,
-    nombres: corte > 0 ? [proyecto.slice(0, corte), proyecto.slice(corte + 1)] : [proyecto], flujo: directa ?? '', riesgo: riesgo2 ?? '',
+    nombres: partir(nombre('proyecto')), flujo: directa ?? '', riesgo: riesgo2 ?? '',
   }, c.interlinea);
   s += `<g class="lc-e" data-e="3">${e3}</g>`;
 
@@ -245,12 +255,10 @@ ${t(ix, iy + c.edificio[1] * 0.4 + 30, 'Instituto de Crédito Oficial', 'lc-caps
   let e4 = filacteria(...c.papelAgencia, 'como agencia financiera del Estado', 'lc-tinta-violeta');
   e4 += cinta(c.fondos, 'lc-tinta-violeta') + rot(c.notas.fondos, flujo(5), 'lc-nota lc-tinta-violeta');
   e4 += cinta(c.vias[2], 'lc-tinta-violeta');
-  const ayudas = nombre('ayudas');
-  const corteA = ayudas.indexOf(' fondos');
   e4 += cupon(c.cupones[2], {
     num: '3', titulo: 'Vía 3 · agencia del Estado', tinta: 'lc-cupon-violeta',
     vineta: actor('ayudas', VINETAS.ayudas + VINETAS.brote) + VINETAS.sinRiesgo,
-    nombres: corteA > 0 ? [ayudas.slice(0, corteA), ayudas.slice(corteA + 1)] : [ayudas], flujo: flujo(6), riesgo: 'el ICO no asume el riesgo',
+    nombres: partir(nombre('ayudas')), flujo: flujo(6), riesgo: 'el riesgo es del Estado, no del ICO',
   }, c.interlinea);
   s += `<g class="lc-e" data-e="4">${e4}</g>`;
 
@@ -271,7 +279,7 @@ export function montarLaminaIco(contenedor: HTMLElement, info: Infografia): () =
   const prefijo = `lc-${Math.random().toString(36).slice(2, 8)}`;
   contenedor.innerHTML = `<figure class="ig lc" data-ig="${info.id}"><figcaption class="ig-titulo lc-titulo">${iconoUi('proyector')} ${info.titulo}</figcaption>
 <div class="lc-lienzo"><svg class="lc-svg" role="img" aria-label="${esc(info.titulo)}"></svg></div>
-<div class="lc-pie"><p class="lc-num" aria-hidden="true">Nº <span></span></p><p class="ig-texto lc-texto" aria-live="polite"></p></div>
+<div class="lc-pie"><p class="lc-num" aria-hidden="true">Nº <span></span></p><p class="ig-texto lc-texto" aria-live="polite"></p></div><div class="ig-siglas"></div>
 <div class="ig-ctrl"><button type="button" class="fc-btn" data-ig="anterior">← Anterior</button><span class="ig-puntos">${info.pasos.map((_, i) => `<button type="button" class="ig-punto" data-ig-paso="${i}" aria-label="Paso ${i + 1}"></button>`).join('')}</span><button type="button" class="fc-btn" data-ig="siguiente">Siguiente →</button><button type="button" class="fc-btn ig-play" data-ig="play" aria-pressed="false">▶ Reproducir</button></div></figure>`;
   const figura = contenedor.querySelector<HTMLElement>('.lc')!;
   const svg = contenedor.querySelector<SVGSVGElement>('.lc-svg')!;
@@ -298,6 +306,9 @@ export function montarLaminaIco(contenedor: HTMLElement, info: Infografia): () =
     }
     for (const a of svg.querySelectorAll<SVGGElement>('.ig-actor')) a.classList.toggle('activo', p.actores.includes(a.dataset.actor!));
     texto.innerHTML = `<b>Paso ${paso + 1} de ${total}.</b> ${p.texto}`;
+    const siglas = contenedor.querySelector<HTMLElement>('.ig-siglas')!;
+    siglas.replaceChildren();
+    marcarSiglas(texto, siglas, 1);
     num.textContent = `${String(paso + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
     contenedor.querySelectorAll<HTMLButtonElement>('.ig-punto').forEach((b, i) => b.classList.toggle('on', i === paso));
     contenedor.querySelector<HTMLButtonElement>('[data-ig="anterior"]')!.disabled = paso === 0;

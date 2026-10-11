@@ -209,7 +209,7 @@ export const escenaDescuentoCompuestoRacional: Escena = {
   id: 'descuento-compuesto-racional',
   titulo: 'Descuento compuesto racional',
   duracion: 14,
-  descripcion: 'Caso práctico 28: 12.500 € que vencen en 565 días al 4 %. n = 565 / 365 = 1,548 años; C₀ = 12.500 · 1,04^(−1,548) = 11.763,68 €; Dr = 736,32 €.',
+  descripcion: 'Caso práctico 28: 12.500 € que vencen en 565 días al 4 %. n = 565 / 365 = 1,548 años; C₀ = 12.500 · 1,04^(−565/365) = 11.763,68 €; Dr = 736,32 €.',
   capitulos: [
     { t: 0, texto: 'Caso práctico 28: 12.500 € que vencen dentro de 565 días, con descuento compuesto racional al 4 %.' },
     { t: 2.8, texto: 'En compuesta el tiempo va en años: $n$ = 565 / 365 = 1,548 años (año civil, como en el caso).' },
