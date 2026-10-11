@@ -108,3 +108,18 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 - **Detalles de las fórmulas en HTML.** Los paréntesis no crecen alrededor de una fracción; en el
   temario el texto plano de las fracciones lleva paréntesis de más («iₘ = (i) / (m)») y el contador
   dice «1 conceptos».
+
+## Infografías del Tema 1 y auditoría (11/10)
+
+Detalle en `docs/infografias-tema1.md` y `docs/auditoria-tema2.md`.
+
+- **Calcografía en el ICO:** está en la app real. ¿Se aprueba para extenderla a las otras 11 infografías?
+- **Exactitud (necesita permiso, `src/content/`):**
+  - el Banco de España «financia a las Administraciones públicas» (`conceptos.ts:823`) contradice el art. 13 de la Ley 13/1994;
+  - ICO «más de 10 M€» frente a «importe mínimo 10 M€»;
+  - los EFC ya no son entidades de crédito desde la Ley 5/2015;
+  - las SGR también tienen socios protectores;
+  - en la vía de agencia del ICO, el riesgo lo asume el Estado.
+- **Glosario y siglas:** botón de sigla con explicación y glosario por tema. Hay unas 20 entradas nuevas, que necesitan permiso.
+- **«OMEC»:** no aparece en ningún texto del proyecto. ¿Dónde se vio?
+- **Errores del Tema 2:** caso 28 (exponente −565/365) y la frase del descuento compuesto en `formulas.ts:56`.

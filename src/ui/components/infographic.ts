@@ -1,5 +1,6 @@
 import type { Infografia, TipoFlujo } from '../../content/schema.ts';
 import { iconoUi } from '../../icons/ui.ts';
+import { montarLaminaIco } from '../infografias/ico.ts';
 
 /** Color y símbolo de lo que viaja por cada tipo de flecha. */
 export const ESTILO_FLUJO: Record<TipoFlujo, { color: string; simbolo: string; nombre: string }> = {
@@ -20,6 +21,8 @@ const reducido = () => typeof matchMedia === 'function' && matchMedia('(prefers-
  * animan sus flechas (un símbolo viaja por ellas); las de pasos anteriores quedan tenues.
  */
 export function montarInfografia(contenedor: HTMLElement, info: Infografia): () => void {
+  // Primera lámina en dirección «Calcografía»; el resto conserva este dibujo hasta extenderla.
+  if (info.id === 'ico') return montarLaminaIco(contenedor, info);
   let paso = 0;
   let reproduciendo = false;
   let temporizador: ReturnType<typeof setTimeout> | undefined;
