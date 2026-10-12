@@ -148,7 +148,7 @@ export function escenaConversion(p: PeticionConversion): Escena {
             const w = (f.ancho - 4) * lleno;
             cap.pintar(X0 + k * f.ancho + 2 + w / 2, y + ALTO / 2, ALTO, lleno > 0.001 ? opacidad : 0, Math.max(0.001, w));
             const numero = f.numeros[k];
-            if (numero) numero.pintar(X0 + (k + 0.5) * f.ancho, y + ALTO / 2 + 7, lleno > 0.02 ? opacidad : 0, lleno > 0.999 ? String(k + 1) : num(lleno));
+            if (numero) numero.pintar(X0 + (k + 0.5) * f.ancho, y + 8, lleno > 0.02 ? opacidad : 0, lleno > 0.999 ? String(k + 1) : num(lleno));
           });
         } else {
           f.contornos[0]!.pintar((X0 + X1) / 2, y + ALTO / 2, ALTO * aparece, aparece * opacidad * 0.9);

@@ -316,7 +316,7 @@ select.lab-campo{font-family:var(--f-texto);cursor:pointer}
 .conv-pasos:empty{display:none}
 .conv-pasos li{margin:0 0 6px;padding-left:4px}
 .conv-pasos li::marker{font:600 .85rem "Barlow Condensed",var(--f-texto);color:#a24f1c}
-.conv-pasos b{font-weight:600}
+.conv-pasos b{font-weight:600;color:var(--lab-tinta)}
 /* El año partido y el ejercicio aleatorio, debajo del conversor */
 .conv-apoyo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;margin-top:22px;align-items:start}
 .conv-año,.conv-ejercicio{position:relative;padding:20px 22px;border-radius:4px;color:var(--lab-tinta);isolation:isolate;background:var(--lab-papel);box-shadow:0 2px 0 rgba(0,0,0,.25),0 30px 40px -28px rgba(0,0,0,.9)}
@@ -324,13 +324,13 @@ select.lab-campo{font-family:var(--f-texto);cursor:pointer}
 .conv-año h3,.conv-ejercicio h3{margin:0;font:600 .8rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.22em;text-transform:uppercase;color:var(--lab-tinta)}
 .conv-apoyo-texto{margin:6px 0 14px;color:var(--lab-tinta-suave);font-size:.92rem;line-height:1.45}
 .conv-año-tabla{display:grid;gap:5px}
-.conv-año-fila{display:grid;grid-template-columns:7.2rem repeat(12,minmax(0,1fr)) 4.6rem;gap:3px;align-items:stretch}
+.conv-año-fila{display:grid;grid-template-columns:7.2rem repeat(12,minmax(0,1fr)) 5.4rem;gap:3px;align-items:stretch}
 .conv-año-meses span{text-align:center;font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.08em;color:var(--lab-tinta-suave)}
 .conv-año-nombre{align-self:center;font:500 .9rem/1.1 var(--f-texto)}
 .conv-año-trozo{display:flex;align-items:center;justify-content:center;min-height:30px;border:1.5px solid rgba(42,33,24,.32);border-radius:5px;background:rgba(255,255,255,.35);font:600 .95rem/1 var(--f-cifra);white-space:nowrap;overflow:hidden}
 .conv-año-trozo small{font:400 .72rem/1 var(--f-texto);color:var(--lab-tinta-suave)}
 .conv-año-dias{justify-content:flex-start;padding:0 10px;font:400 .82rem/1.2 var(--f-texto);white-space:normal}
-.conv-año-m{align-self:center;justify-self:end;font:500 .85rem/1 var(--f-cifra);color:var(--lab-tinta-suave)}
+.conv-año-m{align-self:center;justify-self:end;font:500 .85rem/1 var(--f-cifra);color:var(--lab-tinta-suave);white-space:nowrap}
 .conv-año-fila[data-papel="de"] .conv-año-trozo{border-color:var(--s-n);background:color-mix(in srgb,var(--s-n) 30%,transparent)}
 .conv-año-fila[data-papel="a"] .conv-año-trozo{border-color:var(--s-m);background:color-mix(in srgb,var(--s-m) 30%,transparent)}
 .conv-año-fila[data-papel="de"] .conv-año-nombre,.conv-año-fila[data-papel="a"] .conv-año-nombre{font-weight:700}
@@ -389,7 +389,7 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .conv-año-nombre{font-size:.72rem}
   .conv-año-trozo{font-size:.78rem;min-height:26px}
   .conv-año-trozo small{display:none}
-  .conv-año-m{font-size:.7rem}
+  .conv-año-m{font-size:.66rem;white-space:normal;text-align:right}
 }
 @media (prefers-reduced-motion:reduce){
   .lab-papel-marco,.lab-papel{transition:none}

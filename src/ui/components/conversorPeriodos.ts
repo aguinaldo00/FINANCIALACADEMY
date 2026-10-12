@@ -123,7 +123,7 @@ function htmlAño(): string {
     <div class="conv-año-tabla" role="img" aria-label="Un año: 2 semestres de 6 meses, 3 cuatrimestres de 4, 4 trimestres de 3 y 12 meses; 360 días en el año comercial y 365 en el civil.">
       <div class="conv-año-fila conv-año-meses" aria-hidden="true"><span></span>${meses.map((l) => `<span>${l}</span>`).join('')}<span></span></div>
       ${(['año', 'semestre', 'cuatrimestre', 'trimestre', 'mes'] as const).map(fila).join('')}
-      <div class="conv-año-fila" data-conv-fila="dia"><span class="conv-año-nombre">Días</span><span class="conv-año-trozo conv-año-dias" style="grid-column:span 12">360 en el año comercial (30 por mes) · 365 en el civil</span><span class="conv-año-m"><i>m</i> = 360 · 365</span></div>
+      <div class="conv-año-fila" data-conv-fila="dia"><span class="conv-año-nombre">Días</span><span class="conv-año-trozo conv-año-dias" style="grid-column:span 12">360 en el año comercial (30 por mes) · 365 en el civil</span><span class="conv-año-m"><i>m</i> = 360/365</span></div>
     </div>
   </section>`;
 }
