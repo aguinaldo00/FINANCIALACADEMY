@@ -35,6 +35,7 @@
 :root[data-theme="dark"]{--bg:#070b14}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-texto);font-size:18px;line-height:1.6;font-weight:var(--p-normal);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 h1,h2{font-family:var(--f-titulo);font-weight:var(--p-titulo);font-optical-sizing:auto;margin:0;line-height:1.08;letter-spacing:-.012em;text-wrap:balance}

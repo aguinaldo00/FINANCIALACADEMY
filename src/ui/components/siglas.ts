@@ -12,10 +12,17 @@ let contador = 0;
 const escapar = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const regexEscape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/*
+ * Los patrones no usan «lookbehind» (Safari anterior a 16.4 no lo entiende): el carácter previo se
+ * captura en el grupo 1 y la sigla va en el grupo 2.
+ */
+const ANTES = '(^|[^\\p{L}\\p{N}])';
+const DESPUES = '(?![\\p{L}\\p{N}])';
+
 /** Patrón de una entrada: las siglas distinguen mayúsculas; los términos, no. */
 function patron(e: EntradaGlosario): RegExp {
   const formas = [e.termino, ...(e.formas ?? [])].sort((a, b) => b.length - a.length).map(regexEscape).join('|');
-  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${formas})(?![\\p{L}\\p{N}])`, e.desarrollo ? 'u' : 'iu');
+  return new RegExp(`${ANTES}(${formas})${DESPUES}`, e.desarrollo ? 'u' : 'iu');
 }
 const PATRONES = new Map(GLOSARIO.map((e) => [e, patron(e)]));
 
@@ -23,6 +30,28 @@ const PATRONES = new Map(GLOSARIO.map((e) => [e, patron(e)]));
 export function explicacionHtml(e: EntradaGlosario, idDescripcion: string): string {
   const cabecera = e.desarrollo ? `<b>${escapar(e.termino)}</b> · ${escapar(e.desarrollo)}` : `<b>${escapar(e.termino)}</b>`;
   return `<p class="sigla-pop-t">${cabecera}</p><p id="${idDescripcion}">${escapar(e.explica)}</p>${e.ejemplo ? `<p class="sigla-pop-ej">Ej.: ${escapar(e.ejemplo)}</p>` : ''}<p class="sigla-pop-enlaces">${e.conceptoId ? `<a href="${hrefConcepto(e.conceptoId)}">Ver ficha</a>` : ''}<a href="#glosario">Glosario</a></p>`;
+}
+
+/*
+ * Respaldo para navegadores sin popover nativo (Safari anterior a 17): el botón abre su tarjeta con
+ * una clase, y un toque fuera o Escape la cierra. Con popover nativo no se instala nada.
+ */
+let respaldoPuesto = false;
+function asegurarRespaldoPopover(): void {
+  if (respaldoPuesto || typeof HTMLElement === 'undefined' || 'popover' in HTMLElement.prototype) return;
+  respaldoPuesto = true;
+  const cerrar = () => document.querySelectorAll('.sigla-pop-abierta').forEach((p) => p.classList.remove('sigla-pop-abierta'));
+  document.addEventListener('click', (ev) => {
+    const objetivo = ev.target as Element | null;
+    const boton = objetivo?.closest?.('.sigla[popovertarget]');
+    if (boton) {
+      const pop = document.getElementById(boton.getAttribute('popovertarget')!);
+      const abierta = pop?.classList.contains('sigla-pop-abierta');
+      cerrar();
+      if (pop && !abierta) pop.classList.add('sigla-pop-abierta');
+    } else if (!objetivo?.closest?.('.sigla-pop')) cerrar();
+  });
+  document.addEventListener('keydown', (ev) => ev.key === 'Escape' && cerrar());
 }
 
 const NO_MARCAR = 'button, a, input, textarea, select, label, svg, code, .sigla, .sigla-pop, [data-sin-siglas]';
@@ -33,6 +62,7 @@ const NO_MARCAR = 'button, a, input, textarea, select, label, svg, code, .sigla,
  * cuántas entradas se han marcado.
  */
 export function marcarSiglas(raiz: HTMLElement, destino: HTMLElement = raiz, tema?: 1 | 2, soloDentro?: string): number {
+  asegurarRespaldoPopover();
   const pendientes = new Set(GLOSARIO.filter((e) => !tema || e.tema === tema));
   // Lo ya marcado en esta raíz no se vuelve a marcar.
   for (const b of raiz.querySelectorAll<HTMLElement>('.sigla[data-termino]')) for (const e of pendientes) if (e.termino === b.dataset.termino) pendientes.delete(e);
@@ -49,7 +79,10 @@ export function marcarSiglas(raiz: HTMLElement, destino: HTMLElement = raiz, tem
       let mejor: { e: EntradaGlosario; i: number; largo: number } | null = null;
       for (const e of pendientes) {
         const m = PATRONES.get(e)!.exec(nodo.data);
-        if (m && (!mejor || m.index < mejor.i || (m.index === mejor.i && m[0].length > mejor.largo))) mejor = { e, i: m.index, largo: m[0].length };
+        if (!m) continue;
+        const i = m.index + m[1]!.length;
+        const largo = m[2]!.length;
+        if (!mejor || i < mejor.i || (i === mejor.i && largo > mejor.largo)) mejor = { e, i, largo };
       }
       if (!mejor) break;
       pendientes.delete(mejor.e);
@@ -86,11 +119,11 @@ export function marcarSiglas(raiz: HTMLElement, destino: HTMLElement = raiz, tem
  * detrás (por CSS, sin cambiar el texto). Al corregir se revelan todas.
  */
 const SIGLAS_PREGUNTA = new Map(GLOSARIO.filter((e) => e.desarrollo).flatMap((e) => [e.termino, ...(e.formas ?? [])].map((f) => [f, e.desarrollo!] as const)));
-const PATRON_SIGLAS = new RegExp(`(?<![\\p{L}\\p{N}])(?:${[...SIGLAS_PREGUNTA.keys()].sort((a, b) => b.length - a.length).map(regexEscape).join('|')})(?![\\p{L}\\p{N}])`, 'gu');
+const PATRON_SIGLAS = new RegExp(`${ANTES}(${[...SIGLAS_PREGUNTA.keys()].sort((a, b) => b.length - a.length).map(regexEscape).join('|')})${DESPUES}`, 'gu');
 
 /** Siglas del glosario que aparecen en un texto (sin repetir). */
 export function siglasEn(texto: string): string[] {
-  return [...new Set(texto.replace(/<[^>]*>/g, ' ').match(PATRON_SIGLAS) ?? [])];
+  return [...new Set([...texto.replace(/<[^>]*>/g, ' ').matchAll(PATRON_SIGLAS)].map((m) => m[2]!))];
 }
 
 /**
@@ -112,7 +145,7 @@ export function siglasProtegidas(enunciado: string, opciones: readonly string[])
 export function marcarSiglasPregunta(html: string, excluir: ReadonlySet<string> = new Set()): string {
   return html
     .split(/(<[^>]*>)/)
-    .map((t) => (t.startsWith('<') ? t : t.replace(PATRON_SIGLAS, (s) => (excluir.has(s) ? s : `<abbr class="sg-q" title="${escapar(SIGLAS_PREGUNTA.get(s)!)}">${s}</abbr>`))))
+    .map((t) => (t.startsWith('<') ? t : t.replace(PATRON_SIGLAS, (_m, antes: string, s: string) => antes + (excluir.has(s) ? s : `<abbr class="sg-q" title="${escapar(SIGLAS_PREGUNTA.get(s)!)}">${s}</abbr>`))))
     .join('');
 }
 

@@ -31,8 +31,9 @@ export function sustitucion(expresion: string, valores: Readonly<Record<string, 
   if (der === undefined) return expresion;
   const claves = Object.keys(valores).sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   if (!claves.length) return expresion;
-  const patron = new RegExp(`(?<![A-Za-z_\\\\])(${claves.join('|')})(?![A-Za-z_0-9])`, 'g');
-  return `${izq} = ${der.replace(patron, (k) => `"${valores[k]}"`)}`;
+  // Sin «lookbehind» (Safari < 16.4): el carácter previo se captura y se devuelve tal cual.
+  const patron = new RegExp(`(^|[^A-Za-z_\\\\])(${claves.join('|')})(?![A-Za-z_0-9])`, 'g');
+  return `${izq} = ${der.replace(patron, (_m, antes: string, k: string) => `${antes}"${valores[k]}"`)}`;
 }
 
 /* --------------------------------------------------------- nombres de variables (Pro) */
