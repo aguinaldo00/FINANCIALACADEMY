@@ -3,6 +3,7 @@ import type { EstadoPractica } from '../../app/practiceStore.ts';
 import { type PendienteConcepto, pendientesPorConcepto } from '../../domain/pendientes.ts';
 import { type Ambiente, siguienteAmbiente } from '../../world/ambiente.ts';
 import { MARCA } from '../components/brandTitle.ts';
+import { colorBloque } from '../blockColors.ts';
 import { hrefConcepto } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
@@ -811,7 +812,7 @@ export class ControladorMundo {
     const filas = this.modelo.barrios
       .map((b) => {
         const [numero = '00', ...resto] = b.titulo.split(' · ');
-        return `<li><button type="button" data-foco="${codificarFoco({ nivel: 'barrio', grupoId: b.grupoId })}"><span class="pz-num">${numero.padStart(2, '0')}</span><span class="pz-txt"><b>${resto.join(' · ') || b.titulo}</b><small>${b.pesoExamen} % del examen</small></span></button></li>`;
+        return `<li style="--pz-color:${colorBloque(b.indice)}"><button type="button" data-foco="${codificarFoco({ nivel: 'barrio', grupoId: b.grupoId })}"><span class="pz-num">${numero.padStart(2, '0')}</span><span class="pz-txt"><b>${resto.join(' · ') || b.titulo}</b><small>${b.pesoExamen} % del examen</small></span></button></li>`;
       })
       .join('');
     nav.innerHTML = `<p class="pz-cab">Índice de la unidad <span>Contenido · Tema 1</span></p><ol>${filas}</ol>`;
