@@ -182,18 +182,20 @@
 .t2-simbolos em{display:block;margin-top:2px;font-style:normal;color:var(--oro2);font-size:.88rem}
 .t2-reconocer p{margin:0;padding:12px 14px;border-radius:var(--radio);background:rgba(255,255,255,.035);font-size:1.02rem}
 .t2-pliegue{border-top:1px solid var(--line);padding-top:12px}
+/* Los plegables ocupan todo el ancho: en una columna estrecha su contenido se estiraba hacia abajo. */
+.t2-ficha-info>.t2-pliegue{grid-column:1/-1}
 .t2-pliegue summary{cursor:pointer;font-weight:var(--p-fuerte);color:var(--ink);list-style:none;display:flex;align-items:center;gap:8px}
 .t2-pliegue summary::before{content:"+";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--line2);font-size:.85rem;color:var(--oro)}
 .t2-pliegue[open] summary::before{content:"−"}
 .t2-pliegue summary small{color:var(--tenue);font-weight:400}
 .t2-pliegue>ul,.t2-pliegue>.t2-errores{margin-top:12px}
-.t2-errores{list-style:none!important;padding:0!important;display:grid;gap:10px}
+.t2-errores{list-style:none!important;padding:0!important;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
 .t2-errores li{padding:12px 14px;border:1px solid var(--line);border-radius:var(--radio)}
 .t2-mal,.t2-bien{margin:0;color:var(--ink)}
-.t2-mal span,.t2-bien span{display:block;margin-bottom:4px;font:var(--p-fuerte) var(--t-mini)/1 var(--f-texto);letter-spacing:.14em;text-transform:uppercase}
-.t2-mal span{color:var(--r)}
+.t2-mal .t2-etq,.t2-bien .t2-etq{display:block;margin-bottom:4px;font:var(--p-fuerte) var(--t-mini)/1 var(--f-texto);letter-spacing:.14em;text-transform:uppercase}
+.t2-mal .t2-etq{color:var(--r)}
 .t2-bien{margin-top:8px}
-.t2-bien span{color:var(--g)}
+.t2-bien .t2-etq{color:var(--g)}
 .t2-relaciones{list-style:none!important;padding:0!important}
 .t2-relaciones li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 .t2-relaciones a{display:inline-flex;gap:8px;align-items:baseline;color:var(--ink);text-decoration:none;font-size:1rem}
@@ -349,3 +351,13 @@
 .mo-svg .ref-sub{fill:var(--bg2);font:500 13px "IBM Plex Sans",sans-serif}
 .ref-guia-fx{stroke:var(--bg2);stroke-width:1.5}
 .mo-svg .ref-significado text{fill:rgba(13,19,33,.78);font:500 12.5px "IBM Plex Sans",sans-serif}
+
+/* Fase D · ejercicio aleatorio: arriba, destacado; los casos guiados, debajo */
+.t2-aleatorio{border-color:color-mix(in srgb,var(--oro) 45%,transparent)}
+.t2-aleatorio .t2-ej-num svg{width:16px;height:16px}
+.t2-aleatorio-tit{margin:0;font:var(--p-fuerte) 1.05rem/1.2 var(--f-texto);color:var(--ink)}
+.t2-aleatorio .t2-instruccion{margin:0 0 10px;font-size:.92rem;color:var(--mut)}
+.t2-aleatorio .t2-pistas{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.t2-aleatorio .t2-pistas svg{width:16px;height:16px;vertical-align:-3px;margin-right:6px}
+.t2-guiados-tit{margin:28px 0 4px;font:var(--p-fuerte) 1.2rem/1.2 var(--f-titulo);color:var(--ink)}
+

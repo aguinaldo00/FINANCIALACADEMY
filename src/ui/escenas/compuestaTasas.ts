@@ -12,10 +12,10 @@ export const escenaEquivalentes: Escena = {
   id: 'compuesta-equivalentes',
   titulo: 'Tantos equivalentes en capitalización compuesta',
   duracion: 17.6,
-  descripcion: 'Caso práctico 19: un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^(1/m) − 1.',
+  descripcion: 'Un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^(1/m) − 1.',
   caso: { i: '10 %', m: '12' },
   capitulos: [
-    { t: 0, texto: 'Caso práctico 19: tipo anual del 10 %. ¿Qué tipo mensual es equivalente en compuesta?' },
+    { t: 0, texto: 'Tipo anual del 10 %. ¿Qué tipo mensual es equivalente en compuesta?' },
     { t: 2.8, texto: 'Un salto anual: cada euro se convierte en 1,10 €.' },
     { t: 5.2, texto: 'Doce saltos mensuales tienen que llegar al mismo sitio: $1 + i = (1 + i_m)^{12}$.' },
     { t: 9.6, texto: 'Por eso $i_m = (1 + i)^{1/m} - 1$: $i_{12}$ = 1,10^(1/12) − 1 = 0,7974 % al mes.' },
@@ -82,13 +82,13 @@ export const escenaComparacion: Escena = {
   id: 'compuesta-comparacion',
   titulo: 'Simple frente a compuesta según el plazo',
   duracion: 16.5,
-  descripcion: 'La recta de simple y la curva de compuesta se cortan en n = 1. Con menos de un año, simple da más (caso práctico 20: 5.080,14 € frente a 5.079,59 €); con más de un año, compuesta.',
+  descripcion: 'La recta de simple y la curva de compuesta se cortan en n = 1. Con menos de un año, simple da más (con 5.000 € al 3 % durante 195 días: 5.080,14 € frente a 5.079,59 €); con más de un año, compuesta.',
   capitulos: [
     { t: 0, texto: 'Mismo capital y mismo tipo: ¿qué da más, simple o compuesta? Depende del plazo.' },
     { t: 2.8, texto: 'Simple crece en línea recta, $C_0 · (1 + n · i)$; compuesta, en curva, $C_0 · (1 + i)^n$.' },
     { t: 6.4, lectura: 9.2, texto: 'Antes del año la recta va por encima: con menos de un año, simple da más.' },
     { t: 9.4, texto: 'En $n$ = 1 dan lo mismo. Después gana la compuesta, y la diferencia crece cada año.' },
-    { t: 12.4, texto: 'Caso práctico 20: 5.000 € al 3 % durante 195 días. Simple: 5.080,14 €. Compuesta: 5.079,59 €.' },
+    { t: 12.4, texto: '5.000 € al 3 % durante 195 días. Simple: 5.080,14 €. Compuesta: 5.079,59 €.' },
   ],
   montar(l) {
     const I = 0.4;
@@ -139,14 +139,14 @@ export const escenaTae: Escena = {
   id: 'compuesta-tae',
   titulo: 'TIN y TAE',
   duracion: 17,
-  descripcion: 'Caso práctico 24: TIN del 12 % con capitalización mensual: 1 % al mes durante 12 meses lleva 10.000 € a 11.268,25 € (TAE 12,68 %). Con una comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.',
+  descripcion: 'TIN del 12 % con capitalización mensual: 1 % al mes durante 12 meses lleva 10.000 € a 11.268,25 € (TAE 12,68 %). Con una comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.',
   caso: { J_m: '12 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'El TIN ($J_m$) es un tipo nominal anual: se reparte entre las $m$ capitalizaciones del año.' },
     { t: 3, lectura: 5.6, texto: 'TIN del 12 % con capitalización mensual: $i_m = \\frac{J_m}{m}$ = 12 % / 12 = 1 % al mes.' },
     { t: 5.8, texto: 'Doce capitalizaciones del 1 %: 10.000 € se convierten en 11.268,25 €.' },
     { t: 9.4, texto: 'Lo que rinde de verdad en un año es la TAE: $TAE = (1 + \\frac{J_m}{m})^m - 1$ = 12,68 %.' },
-    { t: 12.6, texto: 'Caso práctico 24: con una comisión de reembolso del 1,5 % recibes 11.099,23 €. TAE real: 10,99 %.' },
+    { t: 12.6, texto: 'Con una comisión de reembolso del 1,5 % recibes 11.099,23 €. TAE real: 10,99 %.' },
   ],
   montar(l) {
     const C0 = 10_000;

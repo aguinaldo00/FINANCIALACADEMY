@@ -8,6 +8,7 @@
 import { aleatorio } from '../exam.ts';
 import { formatear } from './expresion.ts';
 import { LABORATORIOS } from './laboratorio.ts';
+import { convertirDuracion, convertirTipo, type Convenio, type Regimen, type Unidad } from './periodos.ts';
 
 export interface EjercicioGenerado {
   semilla: number;
@@ -65,3 +66,49 @@ export function generarEjercicio(idFormula: string, semilla: number): EjercicioG
 
 /** Semilla nueva para «Otro ejercicio» (visible y reproducible: 1–99999). */
 export const nuevaSemilla = (anterior = 0): number => ((anterior * 7919 + 104729) % 99991) + 1;
+
+/* ------------------------------------------------------------------------ unidades de tiempo */
+
+export interface PreguntaTiempo {
+  semilla: number;
+  modo: 'duracion' | 'tipo';
+  /** Cantidad (duración) o tipo en tanto por uno. */
+  valor: number;
+  de: Unidad;
+  a: Unidad;
+  convenio: Convenio;
+  regimen: Regimen;
+  /** La respuesta exacta (sin redondear). */
+  resultado: number;
+  /** Lo que daría repartir en proporción: en compuesta, el error típico. */
+  proporcional: number;
+}
+
+const TODAS: readonly Unidad[] = ['año', 'semestre', 'cuatrimestre', 'trimestre', 'mes', 'dia'];
+/** Rangos «de libro» de cada unidad: cantidad (duración) y tipo (tanto por uno), con su paso. */
+const CANTIDAD: Record<Unidad, [number, number, number]> = { año: [0.5, 5, 0.5], semestre: [1, 8, 1], cuatrimestre: [1, 9, 1], trimestre: [1, 10, 1], mes: [1, 30, 1], dia: [15, 400, 5] };
+const TIPO: Record<Unidad, [number, number, number]> = { año: [0.02, 0.12, 0.005], semestre: [0.01, 0.06, 0.005], cuatrimestre: [0.01, 0.04, 0.0025], trimestre: [0.005, 0.03, 0.0025], mes: [0.0025, 0.015, 0.0025], dia: [0.0001, 0.0005, 0.0001] };
+
+/**
+ * Ejercicio aleatorio de unidades de tiempo: pasar una duración, o un tipo de interés (en simple o en
+ * compuesta), de una unidad a otra. Reproducible con la semilla. Con días, el convenio (360 o 365)
+ * también sale al azar, como en los enunciados.
+ */
+export function generarPreguntaTiempo(semilla: number, modo: 'duracion' | 'tipo', regimen?: Regimen): PreguntaTiempo {
+  const azar = aleatorio(semilla * 2654435761 + (modo === 'tipo' ? 17 : 5));
+  const elegir = <T>(lista: readonly T[]) => lista[Math.floor(azar() * lista.length)]!;
+  const entre = ([min, max, paso]: [number, number, number]) => Number((min + Math.floor(azar() * (Math.round((max - min) / paso) + 1)) * paso).toFixed(4));
+  // Un tipo se da por año o por una fracción del año (no por día); la duración, en cualquier unidad.
+  const de = elegir(modo === 'tipo' ? TODAS.filter((u) => u !== 'dia') : TODAS);
+  const a = elegir(TODAS.filter((u) => u !== de));
+  const convenio: Convenio = de === 'dia' || a === 'dia' ? elegir([360, 365] as const) : 360;
+  const reg: Regimen = regimen ?? elegir(['simple', 'compuesta'] as const);
+  if (modo === 'duracion') {
+    const valor = entre(CANTIDAD[de]);
+    const r = convertirDuracion(valor, de, a, convenio).resultado;
+    return { semilla, modo, valor, de, a, convenio, regimen: reg, resultado: r, proporcional: r };
+  }
+  const valor = entre(TIPO[de]);
+  const c = convertirTipo(valor, de, a, reg, convenio);
+  return { semilla, modo, valor, de, a, convenio, regimen: reg, resultado: c.resultado, proporcional: c.proporcional };
+}

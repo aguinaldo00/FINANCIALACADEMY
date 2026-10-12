@@ -77,3 +77,61 @@ export function marcarSiglas(raiz: HTMLElement, destino: HTMLElement = raiz, tem
   }
   return marcadas;
 }
+
+/* ------------------------------------------------- siglas en preguntas tipo test */
+
+/*
+ * En las preguntas, las opciones son botones y no pueden llevar otro botón dentro: allí las siglas
+ * se marcan con <abbr title> y un botón "Ver qué significan las siglas" escribe el desarrollo
+ * detrás (por CSS, sin cambiar el texto). Al corregir se revelan todas.
+ */
+const SIGLAS_PREGUNTA = new Map(GLOSARIO.filter((e) => e.desarrollo).flatMap((e) => [e.termino, ...(e.formas ?? [])].map((f) => [f, e.desarrollo!] as const)));
+const PATRON_SIGLAS = new RegExp(`(?<![\\p{L}\\p{N}])(?:${[...SIGLAS_PREGUNTA.keys()].sort((a, b) => b.length - a.length).map(regexEscape).join('|')})(?![\\p{L}\\p{N}])`, 'gu');
+
+/** Siglas del glosario que aparecen en un texto (sin repetir). */
+export function siglasEn(texto: string): string[] {
+  return [...new Set(texto.replace(/<[^>]*>/g, ' ').match(PATRON_SIGLAS) ?? [])];
+}
+
+/**
+ * Siglas que no se deben revelar en una pregunta: las que pregunta el enunciado ("¿Qué significa
+ * SEBC?") y aquellas cuyo desarrollo aparece en alguna opción (revelarlo daría la respuesta).
+ */
+export function siglasProtegidas(enunciado: string, opciones: readonly string[]): Set<string> {
+  const protegidas = new Set<string>();
+  const preguntaPorSigla = /signific|siglas/i.test(enunciado);
+  const textoOpciones = opciones.join(' ').toLowerCase();
+  for (const s of siglasEn(`${enunciado} ${opciones.join(' ')}`)) {
+    const desarrollo = SIGLAS_PREGUNTA.get(s)!.toLowerCase().replace(/\s*\(.*\)$/, '');
+    if ((preguntaPorSigla && siglasEn(enunciado).includes(s)) || textoOpciones.includes(desarrollo)) protegidas.add(s);
+  }
+  return protegidas;
+}
+
+/** Marca con <abbr> las siglas de un trozo de HTML (solo el texto, nunca las etiquetas). */
+export function marcarSiglasPregunta(html: string, excluir: ReadonlySet<string> = new Set()): string {
+  return html
+    .split(/(<[^>]*>)/)
+    .map((t) => (t.startsWith('<') ? t : t.replace(PATRON_SIGLAS, (s) => (excluir.has(s) ? s : `<abbr class="sg-q" title="${escapar(SIGLAS_PREGUNTA.get(s)!)}">${s}</abbr>`))))
+    .join('');
+}
+
+/** Botón para revelar las siglas (vacío si el HTML no tiene ninguna marcada). */
+export function botonSiglas(html: string): string {
+  return html.includes('class="sg-q"') ? '<button type="button" class="btn-enlace sg-revelar" data-siglas aria-pressed="false">Ver qué significan las siglas</button>' : '';
+}
+
+/** Muestra u oculta el desarrollo de las siglas marcadas dentro de `raiz`. */
+export function revelarSiglas(raiz: HTMLElement, ver: boolean): void {
+  raiz.classList.toggle('siglas-vistas', ver);
+  const b = raiz.querySelector<HTMLButtonElement>('[data-siglas]');
+  if (!b) return;
+  b.setAttribute('aria-pressed', String(ver));
+  b.textContent = ver ? 'Ocultar el significado de las siglas' : 'Ver qué significan las siglas';
+}
+
+/** Conecta el botón de siglas de un panel (si lo tiene). */
+export function conectarSiglas(raiz: HTMLElement): void {
+  const b = raiz.querySelector<HTMLButtonElement>('[data-siglas]');
+  if (b) b.onclick = () => revelarSiglas(raiz, b.getAttribute('aria-pressed') !== 'true');
+}

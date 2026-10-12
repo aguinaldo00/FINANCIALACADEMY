@@ -79,14 +79,21 @@ export function añosDeDuracionMixta(años: number, meses: number, dias: number,
 }
 
 export type Regimen = 'simple' | 'compuesta';
+/**
+ * Cómo se da un tipo al convertirlo: simple, compuesta o nominal. Un tipo nominal (TIN, Jₘ) es anual
+ * «de nombre» y se capitaliza m veces al año: cada periodo se aplica Jₘ / m, en compuesta.
+ */
+export type RegimenTipo = Regimen | 'nominal';
 
 export interface ConversionTipo {
   tipo: number;
   de: Unidad;
   a: Unidad;
-  regimen: Regimen;
+  regimen: RegimenTipo;
   convenio: Convenio;
   resultado: number;
+  /** Tipo efectivo de cada periodo de partida (en nominal, Jₘ / m; si no, el propio tipo). */
+  efectivoDe: number;
   /** Cuántos periodos de cada unidad caben en un año (m). */
   mDe: number;
   mA: number;
@@ -103,11 +110,17 @@ export interface ConversionTipo {
  *  - en compuesta, cada periodo crece sobre el anterior: (1 + iₐ)^mₐ = (1 + i)^m.
  * Entre dos fracciones del año (trimestral → cuatrimestral) es la misma igualdad pasando por el año.
  */
-export function convertirTipo(tipo: number, de: Unidad, a: Unidad, regimen: Regimen, convenio: Convenio = 360): ConversionTipo {
+export function convertirTipo(tipo: number, de: Unidad, a: Unidad, regimen: RegimenTipo, convenio: Convenio = 360): ConversionTipo {
   const mDe = unidad(de).porAño(convenio);
   const mA = unidad(a).porAño(convenio);
+  if (regimen === 'nominal') {
+    // Nominal: el tipo es anual y «de nombre». Se reparte entre los periodos de capitalización y,
+    // desde ahí, en compuesta. Repartir el nominal entre los periodos de llegada es el error típico.
+    const efectivoDe = tipo / mDe;
+    return { tipo, de, a, regimen, convenio, efectivoDe, resultado: (1 + efectivoDe) ** (mDe / mA) - 1, mDe, mA, factorAño: (1 + efectivoDe) ** mDe, proporcional: tipo / mA };
+  }
   const proporcional = (tipo * mDe) / mA;
   const factorAño = regimen === 'simple' ? 1 + tipo * mDe : (1 + tipo) ** mDe;
   const resultado = regimen === 'simple' ? proporcional : (1 + tipo) ** (mDe / mA) - 1;
-  return { tipo, de, a, regimen, convenio, resultado, mDe, mA, factorAño, proporcional };
+  return { tipo, de, a, regimen, convenio, efectivoDe: tipo, resultado, mDe, mA, factorAño, proporcional };
 }

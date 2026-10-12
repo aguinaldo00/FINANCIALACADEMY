@@ -157,7 +157,7 @@ export const infografias: Infografia[] = [
       { texto: 'Un fondo es el patrimonio de varios inversores (partícipes), dividido en participaciones. NO tiene personalidad jurídica.', actores: ['participes', 'fondo'], flujos: [0] },
       { texto: 'Por eso necesita obligatoriamente una sociedad gestora, que lo administra e invierte a cambio de una comisión…', actores: ['gestora', 'fondo', 'activos'], flujos: [1, 2] },
       { texto: '…y una entidad depositaria (banco, caja, cooperativa de crédito, sociedad o agencia de valores, inscrita en la CNMV) que custodia los títulos y vigila a la gestora.', actores: ['depositaria', 'fondo'], flujos: [3] },
-      { texto: 'Valor liquidativo = patrimonio ÷ número de participaciones. Caso práctico 5: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €; si el fondo sube a 80.000 €, cada una vale 2.000 €.', actores: ['fondo', 'participes'], flujos: [] },
+      { texto: 'Valor liquidativo = patrimonio ÷ número de participaciones. Ejemplo: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €; si el fondo sube a 80.000 €, cada una vale 2.000 €.', actores: ['fondo', 'participes'], flujos: [] },
     ],
   },
   {

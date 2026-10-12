@@ -26,15 +26,15 @@ export const escenaTiempoSimple: Escena = {
   id: 'simple-tiempo',
   titulo: 'Tiempo en capitalización simple',
   duracion: 21.5,
-  descripcion: 'Caso práctico 13: 6.000 € al 3 % para llegar a 6.500 €. Hay que reunir 500 € con cosechas de 180 €: caben 2,78. Ampliando, 0,78 años son 9,36 meses y 0,36 meses son 10,8 días: 2 años, 9 meses y 11 días.',
+  descripcion: '6.000 € al 3 % para llegar a 6.500 €. Hay que reunir 500 € con cosechas de 180 €: caben 2,78. Ampliando, 0,78 años son 9,36 meses y 0,36 meses son 10,8 días: 2 años, 9 meses y 11 días.',
   caso: { C_0: '6.000 €', C_n: '6.500 €', i: '3 %' },
   capitulos: [
-    { t: 0, texto: 'Caso práctico 13: semilla $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: $C_n$ = 6.500 €. ¿Cuánto tiempo?' },
+    { t: 0, texto: 'Semilla $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: $C_n$ = 6.500 €. ¿Cuánto tiempo?' },
     { t: 2.8, texto: 'Hay que reunir $C_n - C_0$ = 500 € de intereses.' },
     { t: 5.2, lectura: 7.55, texto: 'Cada año la semilla da $C_0 · i$ = 6.000 · 0,03 = 180 €.' },
     { t: 7.8, texto: '¿Cuántas cosechas caben? 500 / 180 = 2,78: dos años enteros y 0,78 de otro.' },
     { t: 11.4, texto: 'Los decimales también son tiempo: 0,78 años · 12 = 9,36 meses.' },
-    { t: 14.6, lectura: 17.4, texto: 'Y 0,36 meses · 30 = 10,8 días, que se redondean a 11 (mes de 30 días, como en el libro).' },
+    { t: 14.6, lectura: 17.4, texto: 'Y 0,36 meses · 30 = 10,8 días, que se redondean a 11 (se cuentan meses de 30 días).' },
     { t: 17.6, texto: 'Tiempo: $n = \\frac{C_n - C_0}{i · C_0}$ = 2,78 años = 2 años, 9 meses y 11 días.' },
   ],
   montar(l) {

@@ -114,3 +114,9 @@
 .pre-panel .fb a{color:var(--y)}
 .pre-panel .fb .fc-btn{margin-left:8px}
 .pre-fin{margin:0;font-weight:600}
+
+/* Siglas en preguntas (ui/components/siglas.ts): al revelarlas o al corregir, el desarrollo va detrás. */
+.sg-revelar{display:inline-block;margin:-4px 0 12px;font-size:.88rem}
+abbr.sg-q{text-decoration:underline dotted color-mix(in srgb,var(--oro) 60%,transparent);text-underline-offset:3px;cursor:help}
+.siglas-vistas abbr.sg-q{text-decoration:none;cursor:auto}
+.siglas-vistas abbr.sg-q::after{content:" (" attr(title) ")";color:var(--mut);font-weight:400}

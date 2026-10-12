@@ -1,6 +1,8 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
 import { marcarSiglas } from '../../src/ui/components/siglas.ts';
+import { marcarSiglasPregunta, siglasProtegidas } from '../../src/ui/components/siglas.ts';
+import { pintarPreguntaConConfianza } from '../../src/ui/components/conceptPanels.ts';
 
 describe('siglas explicables', () => {
   it('marca solo la primera aparición, con su explicación accesible', () => {
@@ -30,5 +32,31 @@ describe('siglas explicables', () => {
     marcarSiglas(raiz);
     expect(marcarSiglas(raiz)).toBe(0);
     expect(raiz.querySelectorAll('button.sigla')).toHaveLength(1);
+  });
+});
+
+describe('siglas en preguntas tipo test', () => {
+  it('marca las siglas del texto, no las de las etiquetas ni dentro de palabras', () => {
+    const html = marcarSiglasPregunta('<b class="DGSFP">¿Quién?</b> La DGSFP, no la CNMV ni BCEX.');
+    expect(html).toContain('<b class="DGSFP">');
+    expect(html).toContain('<abbr class="sg-q" title="Dirección General de Seguros y Fondos de Pensiones">DGSFP</abbr>');
+    expect(html).toContain('title="Comisión Nacional del Mercado de Valores">CNMV</abbr>');
+    expect(html).toContain('BCEX.');
+  });
+
+  it('no revela las siglas cuyo significado es la propia pregunta', () => {
+    expect(siglasProtegidas('¿Qué significa SEBC?', ['Sistema Europeo del Banco Central', 'Sistema Europeo de Bancos Centrales'])).toEqual(new Set(['SEBC']));
+    expect(siglasProtegidas('¿Quién supervisa las aseguradoras?', ['CNMV', 'DGSFP', 'Banco de España'])).toEqual(new Set());
+  });
+
+  it('en el repaso, "¿Quién supervisa las aseguradoras?" deja ver qué es la DGSFP', () => {
+    const panel = document.createElement('div');
+    pintarPreguntaConConfianza(panel, { enunciado: '¿Quién supervisa las aseguradoras?', opciones: ['CNMV', 'DGSFP', 'Banco de España'], indiceCorrecta: 1, explicacion: '' }, () => {});
+    const boton = panel.querySelector<HTMLButtonElement>('[data-siglas]')!;
+    expect(panel.querySelector('p b')!.textContent).toBe('¿Quién supervisa las aseguradoras?');
+    expect(panel.querySelectorAll('.opt abbr.sg-q')).toHaveLength(2);
+    boton.click();
+    expect(panel.classList.contains('siglas-vistas')).toBe(true);
+    expect(boton.getAttribute('aria-pressed')).toBe('true');
   });
 });
