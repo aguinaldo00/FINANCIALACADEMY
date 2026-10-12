@@ -43,6 +43,7 @@ const INTRO_FASE = {
 function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): string {
   const b = datosBloque(bloque);
   const f = FASES_TEMA2.find((x) => x.id === fase)!;
+  // En D de compuesta: el ejemplo año a año y los errores típicos, después del ejercicio aleatorio.
   const extraAntes = bloque === 'compuesta' && fase === 'practica'
     ? `<section class="t2-extra" aria-labelledby="t2-ejemplo-titulo">
         <h2 id="t2-ejemplo-titulo">Antes de empezar: un ejemplo resuelto, año a año</h2>
@@ -77,8 +78,7 @@ function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): stri
       ${recorridoFases(bloque, fase)}
       ${pestanasBloque(bloque, fase)}
     </header>
-    ${extraAntes}
-    ${fase === 'datos' ? htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque)}
+    ${fase === 'datos' ? htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque, extraAntes)}
     ${extraDespues}
     <nav class="t2-continuar">${continuar}</nav>
   </div>`;

@@ -1,16 +1,42 @@
 /*
  * Fase D · ejercicio aleatorio: un enunciado nuevo cada vez, de cualquiera de las fórmulas del
  * bloque, redactado como en el examen (los mismos datos del generador y los mismos enunciados que
- * el «Modo examen» del laboratorio). Se resuelve en papel y aquí solo se comprueba. Tras el primer
- * intento se pueden ver la fórmula y la solución; el número del ejercicio lo hace reproducible.
+ * el «Modo examen» del laboratorio). Se resuelve como en la ficha de cada fórmula: en DIGITAL, con la
+ * hoja de cálculo (guiada o Pro), o en ANALÓGICO, con el cuaderno de papel; con la calculadora al
+ * lado. «Comprobar» corrige el resultado; tras el primer intento se pueden ver la fórmula y la
+ * solución. El número del ejercicio lo hace reproducible.
  */
 import { enunciadoExamen } from '../../../content/temas/tema-02/enunciados.ts';
 import { type BloqueId, formulaPorId } from '../../../content/temas/tema-02/formulas.ts';
 import { formatear, formatearExacto } from '../../../domain/tema2/expresion.ts';
 import { generarEjercicio, nuevaSemilla } from '../../../domain/tema2/generador.ts';
 import { comprobar, esperado, LABORATORIOS, leerDato, mostrar } from '../../../domain/tema2/laboratorio.ts';
+import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
+import { htmlHoja, montarHoja } from '../../components/hojaCalculo.ts';
 import { escaparHtml, formulaHtml, hrefFormula } from './comun.ts';
-import { formaDespejada, sustitucion } from './laboratorio.ts';
+import { formaDespejada, queEscribir, sustitucion } from './laboratorio.ts';
+
+const CLAVE_MODO = 'fa-lab-modo';
+
+/** Cuaderno de papel genérico (no se sabe la fórmula de antemano): lo que se escribe en cada línea. */
+function papelHtml(): string {
+  const fila = (n: number, titulo: string, cuerpo: string) =>
+    `<li class="lab-paso"><span class="lab-paso-n" aria-hidden="true">${n}</span><div class="lab-paso-cuerpo"><p class="lab-paso-tit">${titulo}:</p>${cuerpo}</div></li>`;
+  const area = (nombre: string, etiqueta: string, pista: string, filas = 2) => `<textarea class="lab-campo" data-al-papel="${nombre}" rows="${filas}" aria-label="${etiqueta}" placeholder="${pista}" spellcheck="false"></textarea>`;
+  const linea = (nombre: string, etiqueta: string, pista: string) => `<input class="lab-campo" type="text" data-al-papel="${nombre}" aria-label="${etiqueta}" placeholder="${pista}" autocomplete="off" spellcheck="false">`;
+  return `<div class="lab-papel" data-al-papel-hoja>
+    <header class="lab-panel-cab"><h2><span>01</span>Cuaderno de papel</h2><button type="button" class="lab-mini" data-al-borrar-papel>Borrar</button></header>
+    <ol class="lab-pasos">
+      ${fila(1, 'Datos', area('datos', 'Datos', 'Cada dato con su letra, uno por línea'))}
+      ${fila(2, 'Incógnita', linea('incognita', 'Incógnita', '¿Qué te piden?'))}
+      ${fila(3, 'Fórmula', linea('formula', 'Fórmula', 'La fórmula que vas a usar'))}
+      ${fila(4, 'Despeje', `${queEscribir('despeje')}${linea('despeje', 'Despeje', 'Incógnita = … (solo letras)')}`)}
+      ${fila(5, 'Sustitución', `${queEscribir('sustitucion')}${linea('sustitucion', 'Sustitución', 'Incógnita = … (con tus números)')}`)}
+      ${fila(6, 'Operaciones', area('operaciones', 'Operaciones', 'Una operación por línea; la calculadora las trae aquí', 3))}
+    </ol>
+    <p class="lab-que">El resultado se escribe abajo, en «Tu resultado», y se comprueba allí.</p>
+  </div>`;
+}
 
 const DADO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="15" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><circle cx="9" cy="15" r="1.5" fill="currentColor"/></svg>';
 
@@ -53,6 +79,21 @@ export function htmlAleatorioPapel(bloque: BloqueId): string {
     <header><span class="t2-ej-num" aria-hidden="true">${DADO}</span><h2 class="t2-aleatorio-tit" id="t2-al-tit">Ejercicio aleatorio</h2><p class="t2-ej-fuente" data-al-origen></p></header>
     <p class="t2-instruccion">Un enunciado nuevo cada vez, de cualquier fórmula de este bloque y como en el examen: sin decirte qué es cada dato ni qué fórmula usar.</p>
     <p class="t2-enunciado" data-al-enunciado></p>
+    <div class="lab-modo t2-al-modo" role="group" aria-label="Forma de trabajar">
+      <button type="button" data-al-modo="digital" aria-pressed="true">Digital</button>
+      <button type="button" data-al-modo="analogico" aria-pressed="false">Analógico</button>
+    </div>
+    <div class="t2-al-trabajo">
+      <section class="lab-panel lab-cuaderno t2-al-zona" data-al-zona="digital" aria-label="Hoja de cálculo">
+        <header class="lab-panel-cab"><h2><span>01</span>Hoja de cálculo</h2></header>
+        <div data-al-hoja-sitio></div>
+      </section>
+      <section class="t2-al-zona t2-al-papel lab-papel-abierto" data-al-zona="analogico" aria-label="Cuaderno de papel" hidden>${papelHtml()}</section>
+      <section class="lab-panel lab-calculadora t2-al-calc" aria-labelledby="t2-al-cal-tit">
+        <header class="lab-panel-cab"><h2 id="t2-al-cal-tit"><span>02</span>Calculadora</h2></header>
+        ${htmlCalculadora({ id: 't2-al-cal' })}
+      </section>
+    </div>
     <form class="t2-respuesta" data-al-respuesta>
       <label for="t2-al-r">Tu resultado</label>
       <span class="t2-campo"><input id="t2-al-r" inputmode="decimal" autocomplete="off" data-al-campo></span>
@@ -76,6 +117,58 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
   const $ = <T extends HTMLElement>(sel: string) => art.querySelector<T>(sel)!;
   let semilla = Math.floor(Math.random() * 99991) + 1;
   let actual: EjercicioAleatorio | null = null;
+  const paradas: (() => void)[] = [];
+
+  /* Hoja de cálculo: su estado vive aquí y se vacía con cada ejercicio (salvo el modo guiada/Pro). */
+  let hojaEstado: Record<string, string> = {};
+  const sitioHoja = $('[data-al-hoja-sitio]');
+  let pararHoja: () => void = () => {};
+  const pintarHoja = () => {
+    pararHoja();
+    hojaEstado = hojaEstado['hoja:modo'] ? { 'hoja:modo': hojaEstado['hoja:modo'] } : {};
+    const leer = (c: string) => hojaEstado[c] ?? '';
+    sitioHoja.innerHTML = htmlHoja('t2-al-hoja', leer);
+    pararHoja = montarHoja(sitioHoja, {
+      leer,
+      // Como en el examen: la hoja calcula, pero no dice si la fórmula o los datos son los buenos.
+      objetivo: () => (actual ? { incognita: LABORATORIOS[actual.formula]!.incognita, datos: actual.datos, examen: true } : null),
+      alCalcular: (texto) => {
+        const campo = $<HTMLInputElement>('[data-al-campo]');
+        if (!campo.value.trim()) campo.value = texto;
+      },
+      alGuardar: (c, v) => { hojaEstado[c] = v; },
+    });
+  };
+  const alEscribirHoja = (e: Event) => {
+    const c = (e.target as Element).closest<HTMLInputElement>('[data-hoja] [data-campo]');
+    if (c) hojaEstado[c.dataset.campo!] = c.value;
+  };
+  sitioHoja.addEventListener('input', alEscribirHoja);
+  sitioHoja.addEventListener('change', alEscribirHoja);
+  paradas.push(() => { pararHoja(); sitioHoja.removeEventListener('input', alEscribirHoja); sitioHoja.removeEventListener('change', alEscribirHoja); });
+
+  /* DIGITAL / ANALÓGICO: el mismo interruptor (y la misma preferencia) que la ficha de cada fórmula. */
+  const ponerModo = (modo: 'digital' | 'analogico') => {
+    art.dataset.modo = modo;
+    art.querySelectorAll<HTMLButtonElement>('[data-al-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.alModo === modo)));
+    art.querySelectorAll<HTMLElement>('[data-al-zona]').forEach((z) => { z.hidden = z.dataset.alZona !== modo; });
+    try { localStorage.setItem(CLAVE_MODO, modo); } catch { /* sin almacenamiento */ }
+  };
+  let modoGuardado: string | null = null;
+  try { modoGuardado = localStorage.getItem(CLAVE_MODO); } catch { modoGuardado = null; }
+  ponerModo(modoGuardado === 'analogico' ? 'analogico' : 'digital');
+
+  const borrarPapel = () => art.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-al-papel]').forEach((c) => { c.value = ''; });
+
+  // La calculadora lleva sus operaciones al papel y, si está vacío, el resultado a «Tu resultado».
+  paradas.push(montarCalculadora($('.t2-al-calc'), {
+    alEnviar: (expresion, resultado) => {
+      const ops = $<HTMLTextAreaElement>('[data-al-papel="operaciones"]');
+      ops.value = `${ops.value.trim() ? `${ops.value.trimEnd()}\n` : ''}${expresion} = ${resultado}`;
+      const campo = $<HTMLInputElement>('[data-al-campo]');
+      if (!campo.value.trim()) campo.value = resultado;
+    },
+  }));
 
   const pintar = () => {
     // Si una semilla no da un ejercicio válido (no debería), se prueba la siguiente.
@@ -94,6 +187,9 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
     art.querySelectorAll<HTMLButtonElement>('[data-al-pista]').forEach((b) => { b.disabled = true; b.classList.remove('usada'); });
     $('[data-al-formula]').hidden = true;
     $('[data-al-solucion]').hidden = true;
+    // Ejercicio nuevo: hoja y papel en blanco.
+    pintarHoja();
+    borrarPapel();
   };
 
   const alEnviar = (e: Event) => {
@@ -112,6 +208,8 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
   const alPulsar = (e: Event) => {
     const b = (e.target as Element).closest<HTMLButtonElement>('button');
     if (!b || !art.contains(b) || !actual) return;
+    if (b.dataset.alModo) return ponerModo(b.dataset.alModo as 'digital' | 'analogico');
+    if (b.hasAttribute('data-al-borrar-papel')) return borrarPapel();
     if (b.hasAttribute('data-al-otro')) {
       semilla = nuevaSemilla(semilla);
       pintar();
@@ -143,6 +241,7 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
   art.addEventListener('click', alPulsar);
   pintar();
   return () => {
+    paradas.forEach((p) => p());
     art.removeEventListener('submit', alEnviar);
     art.removeEventListener('click', alPulsar);
   };
