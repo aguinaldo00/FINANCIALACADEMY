@@ -2,6 +2,9 @@
 /* home */
 .hero h1{font-size:clamp(2.8rem,8.5vw,5.8rem);font-weight:600;line-height:.92;letter-spacing:-.04em;margin:10px 0 14px}
 .hero h1 span{color:var(--y)}
+.hero h1.inicio-unidad-titulo{display:grid;gap:0;font-family:var(--f-titulo);font-weight:400;text-transform:uppercase}
+.hero h1.inicio-unidad-titulo span:first-child{margin-bottom:.35em;color:var(--oro2);font:600 .24em/1 var(--f-texto);letter-spacing:.24em}
+.hero h1.inicio-unidad-titulo span:last-child{color:var(--ink);font:400 1em/.9 var(--f-titulo);letter-spacing:-.05em}
 .hero p{color:var(--mut);font-size:1.2rem;max-width:52ch;margin:0}
 .skyline{margin:26px 0 8px;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:linear-gradient(#04060d,#000)}
 .skyline>svg{display:block;width:100%;height:auto}

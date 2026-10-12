@@ -147,7 +147,9 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
       activarAparicion();
       return;
     }
-    document.title = 'Gestión financiera · La ciudad del dinero';
+    document.title = ruta.vista === 'inicio'
+      ? 'Unidad 1 · El sistema financiero · Financial Academy'
+      : 'Gestión financiera · La ciudad del dinero';
     if (ruta.vista !== 'inicio' && ruta.vista !== 'seccion') {
       seccionActual = ruta.vista;
       mundo.desmontar();

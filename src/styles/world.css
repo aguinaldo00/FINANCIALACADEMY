@@ -158,9 +158,7 @@
 .mundo.portada{margin-top:0;border-top:0}
 .mundo.portada .mundo-vista{height:calc(100svh - var(--alto-topbar,0px))}
 .portada-pista{display:none}
-.mundo.portada .portada-pista{display:flex;position:absolute;left:0;right:0;bottom:22px;justify-content:center;gap:28px;margin:0;pointer-events:none;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--m-tinta);text-shadow:0 1px 3px rgba(0,0,0,.85);animation:pista 1.2s 1s ease both}
-.portada-pista span:last-child{color:var(--m-tinta2)}
-.portada-pista span:last-child::before{content:"↓ "}
+.mundo.portada .portada-pista{display:flex;position:absolute;left:0;right:0;bottom:12px;z-index:5;justify-content:center;margin:0;pointer-events:none;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:rgba(243,238,228,.76);text-shadow:0 1px 3px rgba(0,0,0,.85);animation:pista 1.2s 1s ease both}
 @keyframes pista{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* Inmersión: mientras el mapa domina la pantalla, la barra lateral se retira y el mundo va a sangre. */
@@ -218,9 +216,15 @@ body:has(.mundo.pantalla-completa){overflow:hidden}
 .indice-flotante:hover{background:rgba(7,11,20,.95)}
 body.menu .indice-flotante{display:none!important}
 
-/* Título de marca sobre el mapa de la portada (letras de moneda, ver brand.css). */
+/* Titular de la portada: rótulo editorial a la izquierda, mapa abierto a la derecha. */
 .portada-marca{display:none}
-.mundo.portada .portada-marca{display:flex;justify-content:center;position:absolute;left:16px;right:16px;top:7%;z-index:2;pointer-events:none;filter:drop-shadow(0 4px 18px rgba(0,0,0,.65))}
+.mundo.portada .mundo-vista::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,rgba(5,8,15,.9) 0%,rgba(5,8,15,.72) 25%,rgba(5,8,15,.18) 58%,transparent 78%),linear-gradient(0deg,rgba(5,8,15,.62),transparent 28%)}
+.mundo.portada .mundo-etiquetas{display:none}
+.mundo.portada .portada-marca{display:grid;justify-items:start;position:absolute;left:clamp(24px,6vw,112px);top:10%;z-index:2;width:min(48vw,700px);pointer-events:none;filter:drop-shadow(0 4px 18px rgba(0,0,0,.65))}
+.portada-volanta{display:flex;align-items:center;gap:14px;margin:0 0 14px;color:var(--oro2);font:600 .84rem/1 var(--f-texto);letter-spacing:.32em;text-transform:uppercase}
+.portada-volanta::before{content:"";width:40px;height:1px;background:var(--oro2)}
+.portada-titulo{display:grid;gap:0;margin:0;color:#f3eee4;font:400 clamp(3.2rem,6.2vw,6.4rem)/.88 var(--f-titulo);letter-spacing:-.055em;text-transform:uppercase;text-wrap:balance}
+.portada-titulo span:last-child{color:#e7bc63}
 .brand .brand-ante{display:block;font-size:.66rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--y)}
 
 /* Barra del mundo en pantallas estrechas: migas en una fila y acciones en otra, sin saltos de línea. */
@@ -242,14 +246,15 @@ body.menu .indice-flotante{display:none!important}
   .mb-btn{padding:7px 11px;font-size:.78rem}
 }
 
-/* Portada: las acciones flotan sobre el mapa (sin migas), encima de la pista. */
+/* Portada: controles en la esquina superior derecha, alineados con el titular editorial. */
 .mundo{position:relative}
-.mundo.portada>.mundo-barra{display:block!important;position:absolute;left:16px;right:16px;bottom:58px;z-index:4;padding:0;pointer-events:none}
+.mundo.portada>.mundo-barra{display:block!important;position:absolute;left:16px;right:16px;top:20px;bottom:auto;z-index:4;padding:0;pointer-events:none}
 .mundo.portada>.mundo-barra>nav,.mundo.portada [data-mundo-subir],.mundo.portada [data-mundo-zoom]{display:none!important}
-.mundo.portada .mundo-acciones{justify-content:center;pointer-events:auto}
+.mundo.portada .mundo-acciones{justify-content:flex-end;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
+.mundo.portada .mundo-acciones::-webkit-scrollbar{display:none}
 .mundo.portada .mb-btn{background:rgba(7,11,20,.72);backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .mundo.portada .mb-btn:hover:not(:disabled){background:rgba(7,11,20,.92)}
-@media (max-width:600px){.mundo.portada>.mundo-barra{bottom:132px}}
+@media (max-width:600px){.mundo.portada>.mundo-barra{left:12px;right:12px;top:14px}.mundo.portada .portada-zonas{bottom:42px}.mundo.portada .portada-pista{bottom:10px;font-size:.6rem;letter-spacing:.08em}}
 
 /* Ambiente: día (por defecto), atardecer y noche. El cielo es el fondo del visor; la niebla de la
    escena 3D usa el mismo color de borde para que la maqueta se funda con él. */
@@ -291,18 +296,47 @@ button.ficha-accion{cursor:pointer;background:none;border-top:0;border-left:0;bo
 .rec-pie{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .rec-salir{cursor:pointer;border:0;background:none;color:var(--m-tinta3);font:inherit;font-size:.78rem;text-decoration:underline;padding:0}
 
-/* Portada: "Zonas de la ciudad" (los grupos del tema) y botones del mapa agrupados abajo a la
-   derecha, para que la ciudad mande y no parezca un panel de control. */
+/* Portada B: los apartados pasan a una franja horizontal sobre el mapa. */
 .portada-zonas{display:none}
-.mundo.portada .portada-zonas{display:block;position:absolute;left:20px;top:50%;translate:0 -50%;z-index:3;width:min(270px,30vw);padding:14px 12px;border-radius:var(--radio-g);border:1px solid var(--m-linea);background:rgba(7,11,20,.84);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--m-linea);animation:pista 1.2s .8s ease both}
-.pz-cab{margin:2px 8px 10px;font-family:var(--m-display);font-weight:500;font-size:1.15rem;color:var(--m-tinta)}
-.portada-zonas ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.portada-zonas button{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;width:100%;padding:8px;border:0;border-radius:8px;background:none;color:var(--m-tinta);font:inherit;text-align:left;cursor:pointer}
-.portada-zonas button:hover,.portada-zonas button:focus-visible{background:color-mix(in srgb,var(--c) 18%,transparent);outline:none}
-.pz-num{display:grid;place-items:center;width:28px;height:28px;border-radius:6px;background:color-mix(in srgb,var(--c) 20%,transparent);border:1px solid color-mix(in srgb,var(--c) 70%,transparent);color:var(--ink);font:500 .82rem/1 var(--f-cifra)}
-.pz-txt b{display:block;font-size:.92rem;font-weight:500;line-height:1.25}
-.pz-txt small{color:var(--m-tinta2);font-size:.74rem}
+.mundo.portada .portada-zonas{display:block;position:absolute;left:50%;bottom:42px;translate:-50% 0;z-index:3;width:min(1060px,calc(100vw - 48px));padding:7px 12px 8px;border:1px solid rgba(232,184,74,.42);border-top-color:rgba(232,184,74,.82);border-radius:3px;background:rgba(7,11,20,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 12px 36px rgba(0,0,0,.42);animation:pista 1.2s .8s ease both}
+.pz-cab{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 10px 5px;padding:1px 0 6px;border-bottom:1px solid rgba(243,238,228,.16);font:600 .62rem/1 var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--oro2)}
+.pz-cab span{color:var(--m-tinta2);font:500 .58rem/1 var(--f-cifra);letter-spacing:.1em}
+.portada-zonas ol{display:flex;list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none}
+.portada-zonas ol::-webkit-scrollbar{display:none}
+.portada-zonas li{position:relative;flex:1 0 0;min-width:200px}
+.portada-zonas li+li{border-left:1px solid rgba(243,238,228,.13)}
+.portada-zonas li:first-child::before{content:"";position:absolute;top:0;left:12px;right:12px;height:2px;background:var(--oro2)}
+.portada-zonas button{display:grid;grid-template-columns:48px minmax(0,1fr);gap:11px;align-items:center;width:100%;height:84px;padding:8px 12px;border:0;border-radius:2px;background:none;color:var(--m-tinta);font:inherit;text-align:left;cursor:pointer}
+.portada-zonas button:hover,.portada-zonas button:focus-visible{background:rgba(243,238,228,.06);outline:1px solid rgba(232,184,74,.42);outline-offset:-2px}
+.pz-num{display:block;color:rgba(232,184,74,.78);font:italic 300 2.75rem/.82 var(--f-titulo);font-variant-numeric:lining-nums}
+.portada-zonas li:first-child .pz-num{color:var(--oro2)}
+.pz-txt b{display:block;font-family:var(--f-titulo);font-size:1.06rem;font-weight:500;line-height:1.08;text-wrap:balance}
+.pz-txt small{display:block;margin-top:5px;color:var(--m-tinta2);font:500 .57rem/1.2 var(--f-cifra);letter-spacing:.055em;text-transform:uppercase;white-space:nowrap}
 @media (min-width:1001px){
   .mundo.portada>.mundo-barra .mundo-acciones{justify-content:flex-end}
 }
-@media (max-width:700px){.mundo.portada .portada-zonas{display:none}}
+@media (max-width:1000px){
+  .mundo.portada .portada-zonas{width:calc(100vw - 32px)}
+  .mundo.portada .portada-marca{left:24px;top:9%;width:min(68vw,620px)}
+  .portada-titulo{font-size:clamp(3rem,8vw,5.2rem)}
+}
+@media (max-width:700px){
+  .mundo.portada .portada-marca{left:20px;right:16px;top:10%;width:auto}
+  .portada-volanta{font-size:.72rem;margin-bottom:10px}
+  .portada-titulo{font-size:clamp(2.8rem,11.5vw,4.2rem)}
+  .mundo.portada .portada-zonas{bottom:42px;width:calc(100vw - 24px);padding:6px 7px 7px}
+  .portada-zonas li{flex:0 0 200px;min-width:200px}
+  .pz-cab{margin-inline:8px;font-size:.58rem}
+  .pz-cab span{display:none}
+  .portada-zonas button{grid-template-columns:38px minmax(0,1fr);height:78px;padding:7px 8px;gap:7px}
+  .pz-num{font-size:2.35rem}
+  .pz-txt b{font-size:.9rem}
+  .pz-txt small{font-size:.53rem}
+}
+@media (min-width:601px) and (max-width:800px){
+  .portada-zonas li{flex:1 1 0;min-width:0}
+  .portada-zonas button{grid-template-columns:38px minmax(0,1fr);height:84px;padding:7px 8px;gap:7px}
+  .pz-num{font-size:2.35rem}
+  .pz-txt b{font-size:.88rem}
+  .pz-txt small{font-size:.5rem;letter-spacing:.035em}
+}
