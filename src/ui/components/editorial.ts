@@ -67,6 +67,9 @@ export function sumarioEditorial(a: Asignatura, estado: EstadoEstudio, ultimo?: 
  */
 export function montarEditorial(raiz: HTMLElement): () => void {
   const paradas: (() => void)[] = [];
+  // Restos de una página anterior que no se desmontó bien: sin ellos, nada queda bloqueado.
+  document.querySelectorAll<HTMLElement>('body > [data-capa-sumario]').forEach((c) => c.remove());
+  document.documentElement.classList.remove('ed-sin-scroll');
   const escuchar = <K extends keyof WindowEventMap>(destino: Window | Document, tipo: K, fn: (e: WindowEventMap[K]) => void, opciones?: AddEventListenerOptions) => {
     destino.addEventListener(tipo, fn as EventListener, opciones);
     paradas.push(() => destino.removeEventListener(tipo, fn as EventListener, opciones));
@@ -87,8 +90,10 @@ export function montarEditorial(raiz: HTMLElement): () => void {
     volverA = desde;
     capa.hidden = false;
     document.documentElement.classList.add('ed-sin-scroll');
-    inertes = [...document.body.children].filter((el): el is HTMLElement => el !== capa && el instanceof HTMLElement && !el.inert);
+    // Ninguna capa de sumario se bloquea (si quedara una de otra página, tampoco).
+    inertes = [...document.body.children].filter((el): el is HTMLElement => el !== capa && el instanceof HTMLElement && !el.inert && !el.matches('[data-capa-sumario]'));
     inertes.forEach((el) => { el.inert = true; });
+    capa.inert = false;
     capa.querySelector<HTMLInputElement>('[data-tm-buscar]')?.focus();
   };
   const cerrarSumario = (devolverFoco = true) => {
@@ -109,7 +114,9 @@ export function montarEditorial(raiz: HTMLElement): () => void {
     botonMenu?.setAttribute('aria-expanded', 'false');
   };
 
-  raiz.addEventListener('click', (e) => {
+  // La raíz es el contenedor de la página, el mismo en todas las vistas: el manejador se quita al
+  // salir. Si no, al navegar se acumulaban y uno antiguo dejaba inerte el Sumario nuevo.
+  const alPulsar = (e: Event) => {
     const t = e.target as Element;
     const abre = t.closest<HTMLElement>('[data-sumario]');
     if (abre) {
@@ -119,7 +126,9 @@ export function montarEditorial(raiz: HTMLElement): () => void {
       menu.hidden = !menu.hidden;
       botonMenu.setAttribute('aria-expanded', String(!menu.hidden));
     } else if (!t.closest('#ed-menu')) cerrarMenu();
-  });
+  };
+  raiz.addEventListener('click', alPulsar);
+  paradas.push(() => raiz.removeEventListener('click', alPulsar));
   capa?.addEventListener('click', (e) => {
     const t = e.target as Element;
     // Un enlace del sumario navega; si es a la misma página, al menos la capa se cierra.
