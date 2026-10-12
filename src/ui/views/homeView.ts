@@ -8,7 +8,8 @@ import { ciudadPixel } from '../../scene/pixelCity.ts';
 import { MARCA } from '../components/brandTitle.ts';
 import { anilloDominio } from '../components/ring.ts';
 import { conectarLineaTemporal, lineaTemporal } from '../components/timeline.ts';
-import { colorDominio, porcentaje } from '../format.ts';
+import { colorBloque } from '../blockColors.ts';
+import { porcentaje } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 import { iconoUi } from '../../icons/ui.ts';
 
@@ -21,11 +22,14 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
     .map((s) => `<a href="${hrefSeccion(s.id)}"><b>${s.id}</b>${s.titulo}<span class="w">peso ${s.pesoExamen} % · dominio ${porcentaje(dominioDe(s.id))}</span></a>`)
     .join('');
 
+  const colorPorGrupo = new Map(tema.grupos.map((g, gi) => [g.id, colorBloque(gi)]));
+
   const tiles = tema.secciones
     .map((s) => {
       const d = dominioDe(s.id);
       const n = tema.conceptos.filter((c) => c.seccionId === s.id).length;
-      return `<a class="tile rev" href="${hrefSeccion(s.id)}" style="border-color:${colorDominio(d)}"><span class="i">${s.id}</span><span class="n">${s.titulo}</span><span class="w">Peso ${s.pesoExamen} % · dominio ${porcentaje(d)} · ${n} conceptos</span></a>`;
+      const color = colorPorGrupo.get(s.grupoId);
+      return `<a class="tile rev" href="${hrefSeccion(s.id)}" style="--tile-color:${color ?? 'var(--oro)'}"><span class="i">${s.id}</span><span class="n">${s.titulo}</span><span class="w">Peso ${s.pesoExamen} % · dominio ${porcentaje(d)} · ${n} conceptos</span></a>`;
     })
     .join('');
 
