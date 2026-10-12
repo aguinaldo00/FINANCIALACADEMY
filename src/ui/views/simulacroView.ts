@@ -6,6 +6,7 @@ import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
 import { CONFIANZAS, type Confianza } from '../../domain/practice.ts';
 import { ETIQUETA_CONFIANZA } from '../components/conceptPanels.ts';
 import { anilloDominio } from '../components/ring.ts';
+import { botonSiglas, conectarSiglas, marcarSiglasPregunta, siglasProtegidas } from '../components/siglas.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 import { iconoUi } from '../../icons/ui.ts';
@@ -74,10 +75,14 @@ function jugar(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPractic
   const bloques = estado.tema.ampliacion?.bloques ?? [];
   const bi = bloques.findIndex((b) => b.id === p.bloqueId);
   const bloque = bloques[bi];
+  // Siglas como pista: subrayadas y con «Ver qué significan las siglas» (salvo las que darían la respuesta).
+  const protegidas = siglasProtegidas(p.enunciado, p.opciones);
+  const cabeza = `<h2>${marcarSiglasPregunta(p.enunciado, protegidas)}</h2>`;
+  const opts = `<div class="opts">${p.opciones.map((t, k) => `<button type="button" class="opt" data-k="${k}">${marcarSiglasPregunta(t, protegidas)}</button>`).join('')}</div>`;
   const tiempo = config.conTiempo ? `<div class="sim-reloj" aria-hidden="true"><i data-sim-reloj></i></div><span class="sim-seg" data-sim-seg>${SEGUNDOS_POR_PREGUNTA} s</span>` : '';
   raiz.innerHTML = `<div class="sim-cab"><span class="sim-n">Pregunta <b>${i + 1}</b> de ${preguntas.length}</span>${bloque ? `<span class="sim-bloque" style="--c:${colorBloque(bi)}">${nombreCortoBloque(bloque)}</span>` : ''}<button type="button" class="fc-btn" data-sim-salir>Abandonar</button></div>
 <div class="sim-progreso" role="progressbar" aria-valuemin="0" aria-valuemax="${preguntas.length}" aria-valuenow="${i}"><i style="width:${(i / preguntas.length) * 100}%"></i></div>${tiempo}
-<article class="sim-pregunta"><h2>${p.enunciado}</h2><div class="opts">${p.opciones.map((t, k) => `<button type="button" class="opt" data-k="${k}">${t}</button>`).join('')}</div>
+<article class="sim-pregunta">${cabeza}${botonSiglas(cabeza + opts)}${opts}
 <div class="conf" hidden><span>¿Cómo de seguro estás?</span>${CONFIANZAS.map((c) => `<button type="button" class="conf-btn ${c}" data-conf="${c}">${ETIQUETA_CONFIANZA[c]}</button>`).join('')}</div>
 <div class="sim-pie"><button type="button" class="fc-btn" data-sim-saltar>Dejar en blanco</button></div></article>`;
   const responder = (k: number | null, confianza: Confianza | null = null) => {
@@ -87,6 +92,7 @@ function jugar(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPractic
     // Un instante para ver la elección marcada y se pasa a la siguiente (sin decir si es correcta).
     setTimeout(() => raiz.isConnected && jugar(raiz, estado, practica, config, preguntas, [...respuestas, k], [...confianzas, confianza]), k === null ? 0 : 280);
   };
+  conectarSiglas(raiz.querySelector<HTMLElement>('.sim-pregunta')!);
   let elegida: number | null = null;
   const conf = raiz.querySelector<HTMLElement>('.conf')!;
   for (const b of raiz.querySelectorAll<HTMLButtonElement>('.opt')) {
@@ -133,16 +139,16 @@ function resultado(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPra
     .map((p, i) => {
       const elegida = respuestas[i];
       const bien = elegida === p.indiceCorrecta;
-      const tuya = elegida === null || elegida === undefined ? '<em>En blanco</em>' : p.opciones[elegida];
+      const tuya = elegida === null || elegida === undefined ? '<em>En blanco</em>' : marcarSiglasPregunta(p.opciones[elegida]!);
       const c = confianzas[i];
       const sorpresa = !bien && c === 'seguro';
       const etiquetaC = c ? `<span class="sim-c-conf ${c}${sorpresa ? ' sorpresa' : ''}">${sorpresa ? `${iconoUi('rayo')} ` : ''}${ETIQUETA_CONFIANZA[c]}</span>` : '';
-      return `<li class="${bien ? 'bien' : 'mal'}${sorpresa ? ' sorpresa' : ''}"><div class="sim-c-h"><span class="sim-c-n">${i + 1}</span><b>${p.enunciado}</b><span class="sim-c-r" aria-label="${bien ? 'Correcta' : 'Incorrecta'}">${bien ? `${iconoUi('visto')}` : `${iconoUi('aspa')}`}</span></div>${etiquetaC}${bien ? '' : `<p class="sim-tuya">Tu respuesta: ${tuya}</p>`}<p class="sim-ok">Correcta: <b>${p.opciones[p.indiceCorrecta]}</b></p><p class="sim-exp">${resaltarAviso(p.explicacion)}</p><a class="sim-ficha" href="${hrefConcepto(p.conceptoId)}">Ir a la ficha: ${conceptoNombre(p.conceptoId)} →</a></li>`;
+      return `<li class="${bien ? 'bien' : 'mal'}${sorpresa ? ' sorpresa' : ''}"><div class="sim-c-h"><span class="sim-c-n">${i + 1}</span><b>${marcarSiglasPregunta(p.enunciado)}</b><span class="sim-c-r" aria-label="${bien ? 'Correcta' : 'Incorrecta'}">${bien ? `${iconoUi('visto')}` : `${iconoUi('aspa')}`}</span></div>${etiquetaC}${bien ? '' : `<p class="sim-tuya">Tu respuesta: ${tuya}</p>`}<p class="sim-ok">Correcta: <b>${marcarSiglasPregunta(p.opciones[p.indiceCorrecta]!)}</b></p><p class="sim-exp">${resaltarAviso(p.explicacion)}</p><a class="sim-ficha" href="${hrefConcepto(p.conceptoId)}">Ir a la ficha: ${conceptoNombre(p.conceptoId)} →</a></li>`;
     })
     .join('');
   raiz.innerHTML = `<header class="sim-nota"><div class="sim-anillo">${anilloDominio(r.aciertos / (r.total || 1), 150)}</div><div>${medalla(r.nota)}<span class="pill k">${iconoUi('examen')} Resultado</span><h1><span data-sim-nota>${r.nota.toLocaleString('es-ES')}</span><small>/10</small></h1><p>${r.aciertos} de ${r.total} correctas · ${veredicto}</p><div class="acts"><button type="button" class="ab q" data-sim-repetir>Otro simulacro</button>${r.fallos.length ? `<a class="ab p" href="${hrefRepaso()}">Repasar mis fallos (${r.fallos.length})</a>` : ''}</div></div></header>
 ${calibracionSimulacro(preguntas, respuestas, confianzas)}<figure class="ex-graf"><figcaption><h3>Aciertos por bloque</h3><small>Dónde has fallado más</small></figcaption><div class="ex-plot">${barras}</div></figure>
-<section class="sim-correccion"><h2>Corrección</h2><div class="sim-filtro"><button type="button" class="fc-btn on" data-ver="todas">Todas</button><button type="button" class="fc-btn" data-ver="mal">Solo fallos (${r.fallos.length})</button></div><ol>${correccion}</ol></section>`;
+<section class="sim-correccion siglas-vistas"><h2>Corrección</h2><div class="sim-filtro"><button type="button" class="fc-btn on" data-ver="todas">Todas</button><button type="button" class="fc-btn" data-ver="mal">Solo fallos (${r.fallos.length})</button></div><ol>${correccion}</ol></section>`;
   raiz.querySelector<HTMLButtonElement>('[data-sim-repetir]')!.onclick = () => inicio(raiz, estado, practica, config);
   for (const b of raiz.querySelectorAll<HTMLButtonElement>('[data-ver]')) {
     b.onclick = () => {

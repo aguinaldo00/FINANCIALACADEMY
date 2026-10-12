@@ -1,4 +1,4 @@
-import { marcarSiglas } from '../components/siglas.ts';
+import { botonSiglas, conectarSiglas, marcarSiglas, marcarSiglasPregunta, siglasProtegidas } from '../components/siglas.ts';
 import { sacudir, saltarMonedas } from '../components/celebrar.ts';
 import { skylineSeccion } from '../components/skyline.ts';
 import { hrefInicio, hrefSeccion } from '../../app/router.ts';
@@ -79,7 +79,11 @@ function conectarPretest(raiz: HTMLElement | null, estado: EstadoEstudio, concep
       return;
     }
     const nombre = conceptos.find((c) => c.id === q.conceptoId)?.nombre ?? '';
-    panel.innerHTML = `<p class="pre-n">${i + 1} / ${preguntas.length}</p><p><b>${q.enunciado}</b></p><div class="opts">${q.opciones.map((t, k) => `<button type="button" class="opt" data-k="${k}">${t}</button>`).join('')}</div><div class="fb"></div>`;
+    const protegidas = siglasProtegidas(q.enunciado, q.opciones);
+    const cabeza = `<p><b>${marcarSiglasPregunta(q.enunciado, protegidas)}</b></p>`;
+    const opts = `<div class="opts">${q.opciones.map((t, k) => `<button type="button" class="opt" data-k="${k}">${marcarSiglasPregunta(t, protegidas)}</button>`).join('')}</div>`;
+    panel.innerHTML = `<p class="pre-n">${i + 1} / ${preguntas.length}</p>${cabeza}${botonSiglas(cabeza + opts)}${opts}<div class="fb"></div>`;
+    conectarSiglas(panel);
     for (const b of panel.querySelectorAll<HTMLButtonElement>('.opt')) {
       b.onclick = () => {
         const k = Number(b.dataset.k);
