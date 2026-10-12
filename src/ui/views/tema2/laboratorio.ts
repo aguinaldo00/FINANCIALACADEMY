@@ -131,12 +131,12 @@ export function htmlLaboratorio(id: string): string {
       <div class="lab-caso">
         ${calcula ? `<div class="lab-ejercicios" role="group" aria-label="Qué ejercicio resolver">
           ${hayCaso ? '<button type="button" data-lab-ejercicio="animacion">Caso de la animación</button>' : ''}
-          <button type="button" data-lab-ejercicio="practica">Ejercicio de práctica</button>
+          <button type="button" data-lab-ejercicio="practica">Ejercicio aleatorio</button>
           <button type="button" data-lab-ejercicio="propio">Mis datos</button>
         </div>` : ''}
         <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
         <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
-        <button type="button" class="lab-mini" data-lab-otro hidden>Otro ejercicio</button>
+        <button type="button" class="lab-boton lab-otro" data-lab-otro hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>Generar otro ejercicio</button>
       </div>
       <div class="lab-modo" role="group" aria-label="Forma de trabajar">
         <button type="button" data-lab-modo="digital" aria-pressed="true">Digital</button>
@@ -232,7 +232,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
       texto.innerHTML = enunciado(id, d!);
       nota.textContent = '';
     } else if (e === 'practica') {
-      origen.textContent = `Ejercicio de práctica nº ${semilla()} · generado, no es del libro`;
+      origen.textContent = `Ejercicio aleatorio nº ${semilla()} · generado, no es del libro`;
       texto.innerHTML = enunciado(id, d!);
       nota.textContent = 'La animación enseña su caso de ejemplo; tu ejercicio tiene otros datos.';
     } else {

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { iniciarApp } from '../../src/app/app.ts';
+import { generarPreguntaTiempo } from '../../src/domain/tema2/generador.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 import { CLAVE_PROGRESO } from '../../src/persistence/progressRepository.ts';
 
@@ -327,10 +328,10 @@ describe('app en el navegador', () => {
     expect($('[data-cal-explicacion]').textContent).toContain('12100 es Cₙ.');
     $<HTMLButtonElement>('[data-cal-enviar]').click();
     expect($<HTMLTextAreaElement>('.lab-cuaderno [data-campo="operaciones"]').value).toBe('12100 ÷ (1 + 3 × 0,07) = 10.000,00');
-    // Ejercicio de práctica: generado, con su número; cambiar de ejercicio empieza un cuaderno nuevo.
+    // Ejercicio aleatorio: generado, con su número; cambiar de ejercicio empieza un cuaderno nuevo.
     $<HTMLButtonElement>('[data-lab-ejercicio="practica"]').click();
     expect(lab.dataset.ejercicio).toBe('practica');
-    expect($('[data-lab-caso-origen]').textContent).toContain('Ejercicio de práctica nº');
+    expect($('[data-lab-caso-origen]').textContent).toContain('Ejercicio aleatorio nº');
     expect($<HTMLInputElement>('.lab-cuaderno [data-campo="dato:C_n"]').value).toBe('');
     const primero = $('[data-lab-caso-texto]').textContent;
     $<HTMLButtonElement>('[data-lab-otro]').click();
@@ -364,6 +365,13 @@ describe('app en el navegador', () => {
     const preguntasTipo = $$('[data-conv-atajo-modo="tipo"] button', conv).map((b) => b.textContent ?? '');
     expect(preguntasTipo.length).toBeGreaterThan(0);
     expect(preguntasTipo.every((t) => t.includes('compuesta'))).toBe(true);
+    // Paso a paso con los números de la pregunta, y el año partido con las dos unidades marcadas.
+    const pasos = () => $$('[data-conv-pasos] li', conv).map((li) => li.textContent ?? '').join(' | ');
+    expect(pasos()).toContain('no se reparte');
+    expect(pasos()).toContain('Raíz de índice 12');
+    expect(pasos()).toContain('Error típico');
+    expect($('[data-conv-fila="año"]', conv).dataset.papel).toBe('de');
+    expect($('[data-conv-fila="mes"]', conv).dataset.papel).toBe('a');
     // Entre dos fracciones del año: distinto en compuesta y en simple (simple, solo para comparar).
     atajo(13);
     expect(resultado()).toContain('2 % trimestral = 2,6755 % cuatrimestral');
@@ -375,6 +383,9 @@ describe('app en el navegador', () => {
     $<HTMLButtonElement>('[data-conv-modo="duracion"]', conv).click();
     expect(conv.dataset.modo).toBe('duracion');
     expect(resultado()).toBe('1 semestre = 1,5 cuatrimestres');
+    expect(pasos()).toContain('1 × 6 = 6 meses');
+    expect(pasos()).toContain('6 ÷ 4 = 1,5 cuatrimestres');
+    expect($('[data-conv-fila="semestre"]', conv).dataset.papel).toBe('de');
     atajo(8);
     expect(resultado()).toBe('195 días = 0,5342 años');
     expect($('[data-conv-convenio]', conv).hidden).toBe(false);
@@ -390,6 +401,37 @@ describe('app en el navegador', () => {
     entrada.dispatchEvent(new Event('input', { bubbles: true }));
     $<HTMLButtonElement>('.conv-calculadora [data-cal-enviar]', conv).click();
     expect(valor.value).toBe('1,50');
+    // Ejercicio aleatorio del modo elegido: se resuelve, se comprueba y se puede ver resuelto en el conversor.
+    const ej = $('[data-conv-ejercicio]', conv);
+    $<HTMLButtonElement>('[data-conv-ej-generar]', ej).click();
+    expect($('[data-conv-ej-origen]', ej).textContent).toContain('Ejercicio aleatorio nº');
+    const q = generarPreguntaTiempo(Number(ej.dataset.semilla), 'duracion', 'compuesta');
+    expect($('[data-conv-ej-enunciado]', ej).textContent).toContain(`¿Cuántos ${q.a === 'dia' ? 'días' : ''}`);
+    const respuesta = $<HTMLInputElement>('[data-conv-ej-respuesta]', ej);
+    const nota = () => $('[data-conv-ej-nota]', ej).textContent ?? '';
+    respuesta.value = String(q.resultado * 3 + 1).replace('.', ',');
+    $<HTMLButtonElement>('[data-conv-ej-comprobar]', ej).click();
+    expect(nota()).toContain('No es eso');
+    respuesta.value = String(q.resultado).replace('.', ',');
+    $<HTMLButtonElement>('[data-conv-ej-comprobar]', ej).click();
+    expect(nota()).toContain('Bien');
+    $<HTMLButtonElement>('[data-conv-ej-solucion]', ej).click();
+    expect($<HTMLSelectElement>('[data-conv-de]', conv).value).toBe(q.de);
+    expect($<HTMLSelectElement>('[data-conv-a]', conv).value).toBe(q.a);
+    expect(pasos().length).toBeGreaterThan(0);
+    // En tipos de compuesta, repartir en proporción se reconoce como el error típico.
+    $<HTMLButtonElement>('[data-conv-modo="tipo"]', conv).click();
+    // (se busca uno en que repartir se note: con tipos pequeños entre fracciones parecidas casi coinciden).
+    let qt = generarPreguntaTiempo(1, 'tipo', 'compuesta');
+    for (let intento = 0; intento < 50; intento++) {
+      $<HTMLButtonElement>('[data-conv-ej-generar]', ej).click();
+      qt = generarPreguntaTiempo(Number(ej.dataset.semilla), 'tipo', 'compuesta');
+      if (Math.abs(qt.proporcional - qt.resultado) > qt.resultado * 0.02) break;
+    }
+    expect(Math.abs(qt.proporcional - qt.resultado)).toBeGreaterThan(qt.resultado * 0.02);
+    respuesta.value = String(qt.proporcional).replace('.', ',');
+    $<HTMLButtonElement>('[data-conv-ej-comprobar]', ej).click();
+    expect(nota()).toContain('repartir en proporción');
     // En una ficha de simple, «Tipo de interés» pregunta en simple: se reparte en proporción.
     navegar('#tema/2/f/simple-tiempo');
     const convSimple = $('[data-conversor]');
