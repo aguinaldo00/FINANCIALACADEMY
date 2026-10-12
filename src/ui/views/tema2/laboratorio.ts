@@ -128,10 +128,11 @@ export { formaDespejada, sustitucion } from '../../components/hojaCalculo.ts';
 function enunciado(id: string, datos: Readonly<Record<string, string>>): string {
   const lab = LABORATORIOS[id];
   if (!lab) return '';
-  const partes = lab.datos.map((d) => `${formulaHtml(d.simbolo)} = ${escaparHtml(datos[d.simbolo] ?? '?')}`);
+  // Cada dato va entero en una línea (símbolo, signo y cifra) y la pregunta en la suya: así se lee de un vistazo.
+  const partes = lab.datos.map((d) => `<span class="lab-caso-dato">${formulaHtml(d.simbolo)} = <b>${escaparHtml(datos[d.simbolo] ?? '?')}</b></span>`);
   const lista = partes.length > 1 ? `${partes.slice(0, -1).join(', ')} y ${partes.at(-1)}` : partes[0];
   const inc = lab.incognita.simbolo;
-  return `Te dan ${lista}. Calcula ${formulaHtml(inc)}, ${escaparHtml((simbolo(inc)?.nombre ?? inc).toLowerCase())}.`;
+  return `<span class="lab-caso-datos">Te dan ${lista}.</span> <span class="lab-caso-pide">Calcula ${formulaHtml(inc)}, ${escaparHtml((simbolo(inc)?.nombre ?? inc).toLowerCase())}.</span>`;
 }
 
 export function htmlLaboratorio(id: string): string {
@@ -140,13 +141,13 @@ export function htmlLaboratorio(id: string): string {
   const hayCaso = Boolean(escena?.caso && calcula);
   return `<div class="lab" data-laboratorio="${id}" data-modo="digital" data-ejercicio="${hayCaso ? 'animacion' : 'propio'}">
     <div class="lab-barra">
-      <div class="lab-caso">
-        ${calcula ? `<div class="lab-ejercicios" role="group" aria-label="Qué ejercicio resolver">
-          ${hayCaso ? '<button type="button" data-lab-ejercicio="animacion">Caso de la animación</button>' : ''}
-          <button type="button" data-lab-ejercicio="practica">Ejercicio aleatorio</button>
-          <button type="button" data-lab-ejercicio="propio">Mis datos</button>
-          <button type="button" data-lab-ejercicio="examen">Modo examen</button>
-        </div>` : ''}
+      ${calcula ? `<div class="lab-ejercicios" role="group" aria-label="Qué ejercicio resolver">
+        ${hayCaso ? '<button type="button" data-lab-ejercicio="animacion">Caso de la animación</button>' : ''}
+        <button type="button" data-lab-ejercicio="practica">Ejercicio aleatorio</button>
+        <button type="button" data-lab-ejercicio="propio">Mis datos</button>
+        <button type="button" data-lab-ejercicio="examen">Modo examen</button>
+      </div>` : ''}
+      <div class="lab-caso" role="region" aria-label="Enunciado del ejercicio">
         <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
         <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
         <button type="button" class="lab-boton lab-otro" data-lab-otro hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>Generar otro ejercicio</button>

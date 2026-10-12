@@ -559,6 +559,13 @@ describe('app en el navegador', () => {
       $<HTMLButtonElement>('[data-sim-empezar]').click();
       for (let i = 0; i < 10; i++) {
         expect($('.sim-n b').textContent).toBe(String(i + 1));
+        // Si la pregunta tiene siglas, hay pista para ver qué significan.
+        const pista = document.querySelector<HTMLButtonElement>('.sim-pregunta [data-siglas]');
+        expect(Boolean(pista)).toBe($$('.sim-pregunta abbr.sg-q').length > 0);
+        if (pista) {
+          pista.click();
+          expect($('.sim-pregunta').classList.contains('siglas-vistas')).toBe(true);
+        }
         // Siempre la primera opción: algunas acertarán y otras no.
         $<HTMLButtonElement>('.opt[data-k="0"]').click();
         $<HTMLButtonElement>(i % 2 ? '[data-conf="seguro"]' : '[data-conf="adivino"]').click();
@@ -568,6 +575,8 @@ describe('app en el navegador', () => {
       const nota = $('[data-sim-nota]').textContent!;
       expect(Number(nota.replace(',', '.'))).toBeGreaterThanOrEqual(0);
       expect($$('.sim-correccion li')).toHaveLength(10);
+      // En la corrección las siglas ya se ven desarrolladas.
+      expect($('.sim-correccion').classList.contains('siglas-vistas')).toBe(true);
       // Calibración: aciertos según la seguridad declarada.
       expect($('.sim-cal')).toBeTruthy();
       expect($$('.sim-cal .ex-fila')).toHaveLength(2);

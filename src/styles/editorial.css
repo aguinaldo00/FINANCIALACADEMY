@@ -49,6 +49,10 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-migas a{text-decoration:none}
 .ed-migas a:hover{color:var(--oro2)}
 .ed-migas b{color:inherit;font-weight:500;color:var(--ink)}
+/* Las migas no se parten ni invaden los accesos: entre 761 y 1100 px quedan solo las dos últimas */
+.ed-migas>*{white-space:nowrap}
+.ed-migas b{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1100px){.ed-migas>a:not(:nth-last-child(3)),.ed-migas>span:not(:nth-last-child(2)){display:none}}
 .ed-nav-papel .ed-migas b{color:var(--ed-tinta)}
 .ed-acciones{display:flex;align-items:center;gap:26px}
 .ed-accion{display:inline-flex;align-items:center;gap:8px;padding:0;border:0;background:none;cursor:pointer;color:inherit;text-decoration:none;font:600 .82rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}

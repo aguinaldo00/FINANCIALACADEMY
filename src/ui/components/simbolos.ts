@@ -10,7 +10,9 @@ export function escaparHtml(texto: string): string {
   return texto.replace(/[&<>"']/g, (c) => ESCAPES[c]!);
 }
 
-const SIMBOLO = /C(?:[₀-₉]+|ₙ)|(?<![\p{L}\p{N}])(?:iₘ|i|I|n)(?![\p{L}\p{N}])|ⁿ/gu;
+// Sin «lookbehind» (Safari anterior a 16.4 no lo entiende y rompería toda la página): el carácter
+// previo a i, I o n se captura en `antes` y se devuelve tal cual.
+const SIMBOLO = /(C(?:[₀-₉]+|ₙ)|ⁿ)|(^|[^\p{L}\p{N}])(iₘ|i|I|n)(?![\p{L}\p{N}])/gu;
 
 function clase(simbolo: string): string {
   if (simbolo === 'C₀') return 's-c0';
@@ -22,5 +24,6 @@ function clase(simbolo: string): string {
 
 /** Escapa el texto y envuelve cada símbolo en un `<span class="s s-…">`. Devuelve HTML seguro. */
 export function colorearSimbolos(texto: string): string {
-  return escaparHtml(texto).replace(SIMBOLO, (s) => `<span class="s ${clase(s)}">${s}</span>`);
+  const span = (s: string) => `<span class="s ${clase(s)}">${s}</span>`;
+  return escaparHtml(texto).replace(SIMBOLO, (_m, c: string | undefined, antes: string, s: string) => (c ? span(c) : antes + span(s)));
 }
