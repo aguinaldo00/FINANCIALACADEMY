@@ -74,6 +74,8 @@ export class ControladorMundo {
   private ultimoEspacio = 0;
   /** El mapa está en pantalla completa (API nativa o capa de reserva). */
   private pantallaCompleta = false;
+  /** Si pantalla completa se abrió desde la portada, al salir se recupera esa composición. */
+  private portadaAntesPantallaCompleta = false;
   private zoomRueda: boolean;
   /**
    * Día (aprender) o noche (repasar). Se recuerda mientras la aplicación está abierta; al cargarla,
@@ -187,6 +189,7 @@ export class ControladorMundo {
     // Salir a mitad de la entrada la da por vista: no deja escuchadores ni edificios a medio levantar.
     this.cerrarEntrada?.();
     this.detenerPaseo(false);
+    this.portadaAntesPantallaCompleta = false;
     if (this.pantallaCompleta) void this.salirPantallaCompleta();
     this.observadorPortada?.disconnect();
     this.observadorPortada = null;
@@ -485,6 +488,8 @@ export class ControladorMundo {
   private async entrarPantallaCompleta(): Promise<void> {
     const raiz = this.raiz;
     if (!raiz || !this.activo3d) return;
+    this.portadaAntesPantallaCompleta = this.enPortada;
+    raiz.classList.remove('volviendo-portada');
     if (this.enPortada) this.fijarPortada(false);
     let nativa = false;
     try {
@@ -516,6 +521,22 @@ export class ControladorMundo {
     this.pantallaCompleta = activa;
     this.raiz?.classList.toggle('en-pantalla-completa', activa);
     this.aplicarZoom();
+    if (!activa) {
+      const restaurarPortada = this.portadaAntesPantallaCompleta && this.foco.nivel === 'ciudad' && !this.vistaAtlas;
+      this.portadaAntesPantallaCompleta = false;
+      const raiz = this.raiz;
+      if (restaurarPortada && raiz) {
+        this.fijarPortada(true);
+        window.requestAnimationFrame(() => {
+          if (this.raiz !== raiz) return;
+          raiz.classList.add('volviendo-portada');
+          this.mundo?.enfocar(FOCO_CIUDAD, 'maqueta', true);
+          window.setTimeout(() => {
+            if (this.raiz === raiz) raiz.classList.remove('volviendo-portada');
+          }, 1000);
+        });
+      }
+    }
     if (this.raiz) this.pintarPanel();
   }
 
