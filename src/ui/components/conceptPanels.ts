@@ -79,6 +79,9 @@ export function pintarPreguntaConConfianza(
   contexto = '',
 ): void {
   const { enunciado, opciones, explicacion, indiceCorrecta } = pregunta;
+  // El panel se reutiliza al pasar a la siguiente pregunta; no heredar la pista
+  // revelada al corregir la pregunta anterior.
+  panel.classList.remove('siglas-vistas');
   // Las siglas se pueden revelar mientras se piensa (salvo las que son la propia pregunta).
   const protegidas = siglasProtegidas(enunciado, opciones);
   const cabeza = `<p><b>${marcarSiglasPregunta(enunciado, protegidas)}</b></p>`;
