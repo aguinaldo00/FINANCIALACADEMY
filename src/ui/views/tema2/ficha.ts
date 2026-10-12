@@ -80,9 +80,9 @@ export function htmlFicha(id: string): string {
         <details class="t2-pliegue"><summary>Cuándo se usa</summary>${lista(f.cuando)}</details>
         <details class="t2-pliegue"><summary>Para no memorizarla</summary>${lista(f.consejos)}</details>
         <details class="t2-pliegue" data-errores><summary>Errores habituales <small>${f.errores.length}</small></summary>
-          <ul class="t2-errores">${f.errores.map((e, i) => `<li data-t2-error="${i}"><p class="t2-mal"><span>Así no</span>${textoT2(e.mal)}</p>
+          <ul class="t2-errores">${f.errores.map((e, i) => `<li data-t2-error="${i}"><p class="t2-mal"><span class="t2-etq">Así no</span>${textoT2(e.mal)}</p>
             <button type="button" class="btn-enlace" data-t2-ver-error aria-expanded="false">¿Qué falla?</button>
-            <p class="t2-bien" hidden><span>Así sí</span>${textoT2(e.bien)}</p></li>`).join('')}</ul>
+            <p class="t2-bien" hidden><span class="t2-etq">Así sí</span>${textoT2(e.bien)}</p></li>`).join('')}</ul>
         </details>
         <section class="t2-seccion">
           <h2>Relacionada con</h2>

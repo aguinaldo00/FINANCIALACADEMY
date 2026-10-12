@@ -65,3 +65,21 @@ describe('paso de un tipo de interés de una unidad de tiempo a otra', () => {
     }
   });
 });
+
+describe('tipo nominal capitalizable (TIN)', () => {
+  it('12 % capitalizable mensual: 1 % al mes y TAE 12,6825 %', () => {
+    const c = convertirTipo(0.12, 'mes', 'año', 'nominal');
+    expect(c.efectivoDe).toBeCloseTo(0.01, 12);
+    expect(c.resultado).toBeCloseTo(1.01 ** 12 - 1, 12);
+    // Repartir el TIN entre los periodos de llegada (aquí, el año) es el error típico: da el propio TIN.
+    expect(c.proporcional).toBeCloseTo(0.12, 12);
+  });
+
+  it('6 % capitalizable semestral a efectivo mensual: (1,03)^(1/6) − 1', () => {
+    expect(convertirTipo(0.06, 'semestre', 'mes', 'nominal').resultado).toBeCloseTo(1.03 ** (1 / 6) - 1, 12);
+  });
+
+  it('si se pide el mismo periodo de capitalización, es Jₘ / m', () => {
+    expect(convertirTipo(0.08, 'trimestre', 'trimestre', 'nominal').resultado).toBeCloseTo(0.02, 12);
+  });
+});

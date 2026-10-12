@@ -8,6 +8,7 @@
  *      la solución completa no aparece hasta haberlo intentado.
  * No se guarda nada: el progreso y su persistencia siguen siendo los del resto de la web.
  */
+import { htmlAleatorioPapel, montarAleatorioPapel } from './aleatorioPapel.ts';
 import { formulaPorId, type BloqueId } from '../../../content/temas/tema-02/formulas.ts';
 import { ejerciciosDe, type DatoEnunciado, type EjercicioTema2 } from '../../../content/temas/tema-02/ejercicios.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
@@ -256,7 +257,9 @@ export function comprobar(ej: EjercicioTema2, texto: string): { bien: boolean; a
 export function htmlPractica(bloque: BloqueId): string {
   const ejercicios = [...ejerciciosDe(bloque)].sort((a, b) => a.nivel - b.nivel);
   return `<div class="t2-fase" data-fase="practica">
-    <p class="t2-instruccion"><b>Papel y calculadora.</b> Resuelve cada ejercicio en tu cuaderno; aquí solo compruebas el resultado. Las ayudas se van retirando: al final, como en el examen.</p>
+    <p class="t2-instruccion"><b>Papel y calculadora.</b> Resuelve cada ejercicio en tu cuaderno; aquí solo compruebas el resultado. Empieza por el aleatorio, que no se acaba nunca, o sigue los casos guiados de abajo, en los que las ayudas se van retirando.</p>
+    ${htmlAleatorioPapel(bloque)}
+    <h2 class="t2-guiados-tit">Casos guiados</h2>
     ${ejercicios.map((ej, k) => {
       const f = formulaPorId(ej.formula)!;
       const datos = `<dl class="t2-datos-chips t2-datos-papel">${ej.datos.map((d) => `<div>${formulaHtml(d.clave)}<span>${escaparHtml(d.valor)}</span></div>`).join('')}</dl>`;
@@ -333,9 +336,11 @@ function montarPractica(bloque: BloqueId): { clic: (e: Event) => void; envio: (e
 export function montarFase(raiz: HTMLElement, bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): () => void {
   if (fase === 'practica') {
     const { clic, envio } = montarPractica(bloque);
+    const pararAleatorio = montarAleatorioPapel(raiz);
     raiz.addEventListener('click', clic);
     raiz.addEventListener('submit', envio);
     return () => {
+      pararAleatorio();
       raiz.removeEventListener('click', clic);
       raiz.removeEventListener('submit', envio);
     };

@@ -288,36 +288,57 @@ describe('app en el navegador', () => {
     expect(lab.dataset.ejercicio).toBe('animacion');
     expect($('[data-lab-caso-texto]').textContent).toContain('12.100 €');
     // Ningún campo enseña los números del caso como ejemplo.
-    for (const c of $$('.lab-cuaderno [placeholder]')) expect(c.getAttribute('placeholder')).not.toMatch(/\d/);
-    const escribir = (sel: string, valor: string) => {
-      const c = $<HTMLInputElement>(`.lab-cuaderno ${sel}`);
+    for (const c of $$('.lab [placeholder]')) expect(c.getAttribute('placeholder')).not.toMatch(/\d/);
+    const escribir = (sel: string, valor: string, zona = '.lab-papel') => {
+      const c = $<HTMLInputElement>(`${zona} ${sel}`);
       c.value = valor;
       c.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    escribir('[data-campo="dato:C_n"]', '12.100 €');
-    escribir('[data-campo="dato:n"]', '3');
+    // Digital: una hoja de cálculo. Solo datos, fórmula (lista corta, la del bloque) y «Calcular».
+    const hoja = $('.lab-cuaderno');
+    expect($$('[data-paso]', hoja)).toHaveLength(0);
+    expect($$('select[data-campo="formula"] option', hoja).length).toBe(7);
+    escribir('[data-campo="dato:C_n"]', '12.100 €', '.lab-cuaderno');
+    escribir('[data-campo="dato:n"]', '3', '.lab-cuaderno');
+    escribir('[data-campo="dato:i"]', '7', '.lab-cuaderno');
+    escribir('[data-campo="formula"]', 'simple-capital-inicial', '.lab-cuaderno');
+    $<HTMLButtonElement>('[data-lab-calcular]', hoja).click();
+    // Un tipo sin % no se corrige solo: se avisa y no se calcula.
+    expect($('[data-lab-hoja-nota]', hoja).textContent).toContain('%');
+    expect($('[data-lab-hoja-salida]', hoja).hidden).toBe(true);
+    escribir('[data-campo="dato:i"]', '7 %', '.lab-cuaderno');
+    $<HTMLButtonElement>('[data-lab-calcular]', hoja).click();
+    expect($('[data-lab-hoja-resultado]', hoja).textContent).toContain('10.000,00 €');
+    expect($('[data-lab-hoja-sust]', hoja).textContent).toContain('12.100');
+    expect($('[data-lab-hoja-nota]', hoja).textContent).toContain('coinciden con el enunciado');
+    // Una fórmula que no calcula lo que piden no se calcula.
+    escribir('[data-campo="formula"]', 'simple-intereses', '.lab-cuaderno');
+    $<HTMLButtonElement>('[data-lab-calcular]', hoja).click();
+    expect($('[data-lab-hoja-nota]', hoja).textContent).toContain('no calcula');
+    // El papel (modo analógico) tiene lo mismo: un solo estado para los dos modos.
+    expect($<HTMLInputElement>('.lab-papel [data-campo="dato:C_n"]').value).toBe('12.100 €');
+    // Analógico: los pasos a mano. Despeje y sustitución dicen qué escribir, con un ejemplo de otra fórmula.
+    expect($('.lab-papel [data-paso="despeje"] .lab-ejemplo').textContent).toContain('I = C₀ · n · i');
     escribir('[data-campo="dato:i"]', '7');
     escribir('[data-campo="incognita"]', 'C_0');
     escribir('[data-campo="formula"]', 'simple-capital-inicial');
     escribir('[data-campo="resultado"]', '10.000');
     // Mientras se escribe no se corrige nada.
-    expect($('.lab-cuaderno [data-nota="datos"]').textContent).toBe('');
-    // El papel (modo analógico) tiene lo mismo: un solo estado para los dos modos.
-    expect($<HTMLInputElement>('.lab-papel [data-campo="dato:C_n"]').value).toBe('12.100 €');
+    expect($('.lab-papel [data-nota="datos"]').textContent).toBe('');
     // Comprobar revisa paso a paso: el tipo sin % se marca, sin dar el valor.
-    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
-    expect($('.lab-cuaderno [data-paso="datos"]').dataset.revision).toBe('mal');
-    expect($('.lab-cuaderno [data-nota="datos"]').textContent).toContain('%');
+    $<HTMLButtonElement>('.lab-papel [data-lab-comprobar]').click();
+    expect($('.lab-papel [data-paso="datos"]').dataset.revision).toBe('mal');
+    expect($('.lab-papel [data-nota="datos"]').textContent).toContain('%');
     escribir('[data-campo="dato:i"]', '7 %');
-    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
-    for (const paso of ['datos', 'incognita', 'formula', 'resultado']) expect($(`.lab-cuaderno [data-paso="${paso}"]`).dataset.revision, paso).toBe('bien');
-    expect($('.lab-cuaderno [data-nota="resultado"]').textContent).toBe('Correcto: 10.000,00 €.');
-    expect($('.lab-cuaderno [data-lab-revision]').textContent).toBe('Todo el cuaderno está bien.');
+    $<HTMLButtonElement>('.lab-papel [data-lab-comprobar]').click();
+    for (const paso of ['datos', 'incognita', 'formula', 'resultado']) expect($(`.lab-papel [data-paso="${paso}"]`).dataset.revision, paso).toBe('bien');
+    expect($('.lab-papel [data-nota="resultado"]').textContent).toBe('Correcto: 10.000,00 €.');
+    expect($('.lab-papel [data-lab-revision]').textContent).toBe('Todo el cuaderno está bien.');
     // La fórmula se elige en un desplegable; la del montante también vale (sale despejando).
     escribir('[data-campo="formula"]', 'simple-montante');
-    expect($('.lab-cuaderno [data-lab-formula-elegida]').textContent).toContain('=');
-    $<HTMLButtonElement>('.lab-cuaderno [data-lab-comprobar]').click();
-    expect($('.lab-cuaderno [data-nota="formula"]').textContent).toContain('También vale');
+    expect($('.lab-papel [data-lab-formula-elegida]').textContent).toContain('=');
+    $<HTMLButtonElement>('.lab-papel [data-lab-comprobar]').click();
+    expect($('.lab-papel [data-nota="formula"]').textContent).toContain('También vale');
     // La calculadora calcula de verdad y envía al cuaderno.
     const entrada = $<HTMLInputElement>('[data-cal-entrada]');
     entrada.value = '12100 ÷ (1 + 3 × 0,07)';
@@ -327,7 +348,7 @@ describe('app en el navegador', () => {
     $<HTMLButtonElement>('[data-cal-explicar]').click();
     expect($('[data-cal-explicacion]').textContent).toContain('12100 es Cₙ.');
     $<HTMLButtonElement>('[data-cal-enviar]').click();
-    expect($<HTMLTextAreaElement>('.lab-cuaderno [data-campo="operaciones"]').value).toBe('12100 ÷ (1 + 3 × 0,07) = 10.000,00');
+    expect($<HTMLTextAreaElement>('.lab-papel [data-campo="operaciones"]').value).toBe('12100 ÷ (1 + 3 × 0,07) = 10.000,00');
     // Ejercicio aleatorio: generado, con su número; cambiar de ejercicio empieza un cuaderno nuevo.
     $<HTMLButtonElement>('[data-lab-ejercicio="practica"]').click();
     expect(lab.dataset.ejercicio).toBe('practica');
@@ -336,6 +357,12 @@ describe('app en el navegador', () => {
     const primero = $('[data-lab-caso-texto]').textContent;
     $<HTMLButtonElement>('[data-lab-otro]').click();
     expect($('[data-lab-caso-texto]').textContent).not.toBe(primero);
+    // Modo examen: el mismo generador, redactado como en un examen y sin símbolos ni pistas.
+    $<HTMLButtonElement>('[data-lab-ejercicio="examen"]').click();
+    expect(lab.dataset.ejercicio).toBe('examen');
+    expect($('[data-lab-caso-texto]').textContent).toMatch(/^¿Qué capital inicial debemos invertir hoy para obtener un capital final de [\d.,]+ € al cabo de \d+ años/);
+    expect($$('[data-lab-caso-texto] .fx')).toHaveLength(0);
+    expect($('[data-lab-otro]').hidden).toBe(false);
     $<HTMLButtonElement>('[data-lab-ejercicio="propio"]').click();
     expect($('[data-lab-escena-nota]').textContent).toContain('no tus datos');
     // Analógico: el papel sube desde detrás de la animación.
@@ -364,7 +391,8 @@ describe('app en el navegador', () => {
     expect($('.conv-entrada', conv).textContent).toContain('no se reparte');
     const preguntasTipo = $$('[data-conv-atajo-modo="tipo"] button', conv).map((b) => b.textContent ?? '');
     expect(preguntasTipo.length).toBeGreaterThan(0);
-    expect(preguntasTipo.every((t) => t.includes('compuesta'))).toBe(true);
+    expect(preguntasTipo.some((t) => t.includes('simple'))).toBe(false);
+    expect(preguntasTipo.every((t) => t.includes('compuesta') || t.startsWith('TIN'))).toBe(true);
     // Paso a paso con los números de la pregunta, y el año partido con las dos unidades marcadas.
     const pasos = () => $$('[data-conv-pasos] li', conv).map((li) => li.textContent ?? '').join(' | ');
     expect(pasos()).toContain('no se reparte');

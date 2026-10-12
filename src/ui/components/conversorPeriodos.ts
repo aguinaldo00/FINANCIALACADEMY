@@ -1,15 +1,16 @@
 /*
  * Conversor de unidades de tiempo, con dos modos:
  *  - Duración: cuánto es una cantidad de una unidad en otra (1 semestre = 1,5 cuatrimestres).
- *  - Tipo de interés: qué tipo de una unidad equivale a otro, en simple (proporcional) o en compuesta
- *    (tantos equivalentes), incluido entre dos fracciones del año (trimestral → cuatrimestral).
+ *  - Tipo de interés: qué tipo de una unidad equivale a otro, en simple (proporcional), en compuesta
+ *    (tantos equivalentes), incluido entre dos fracciones del año (trimestral → cuatrimestral), o desde
+ *    un tipo nominal capitalizable (TIN Jₘ → tipo de cada periodo → TAE).
  * En los dos, la animación se genera para la pareja elegida (escenas/conversionPeriodos.ts y
  * escenas/conversionTipos.ts), cubre cualquier unidad del temario hacia cualquier otra y se amplía.
  * Al lado, una calculadora analógica (la misma del laboratorio) para hacer la cuenta a mano.
  */
 import { calcular, formatear } from '../../domain/tema2/expresion.ts';
 import { generarPreguntaTiempo, nuevaSemilla, type PreguntaTiempo } from '../../domain/tema2/generador.ts';
-import { convertirDuracion, convertirTipo, necesitaConvenio, nombreUnidad, unidad, UNIDADES, type Convenio, type Regimen, type Unidad } from '../../domain/tema2/periodos.ts';
+import { convertirDuracion, convertirTipo, necesitaConvenio, nombreUnidad, unidad, UNIDADES, type Convenio, type Regimen, type RegimenTipo, type Unidad } from '../../domain/tema2/periodos.ts';
 import { escenaConversion, sePuedeDibujar } from '../escenas/conversionPeriodos.ts';
 import { escenaConversionTipo, sePuedeDibujarTipo } from '../escenas/conversionTipos.ts';
 import { montarReproductor, type Escena } from '../motion/reproductor.ts';
@@ -18,7 +19,7 @@ import { expandir } from './reproductorExpandido.ts';
 import { escaparHtml } from './simbolos.ts';
 
 export type ModoConversor = 'duracion' | 'tipo';
-type Pregunta = { modo: ModoConversor; valor: string; de: Unidad; a: Unidad; convenio: Convenio; regimen?: Regimen };
+type Pregunta = { modo: ModoConversor; valor: string; de: Unidad; a: Unidad; convenio: Convenio; regimen?: RegimenTipo };
 
 /** Preguntas típicas de cada modo: las que no encajan, las de días con los dos convenios y los casos del libro. */
 export const ATAJOS: readonly Pregunta[] = [
@@ -41,6 +42,9 @@ export const ATAJOS: readonly Pregunta[] = [
   { modo: 'tipo', valor: '6 %', de: 'semestre', a: 'año', convenio: 360, regimen: 'compuesta' },
   { modo: 'tipo', valor: '3 %', de: 'año', a: 'dia', convenio: 365, regimen: 'simple' },
   { modo: 'tipo', valor: '4 %', de: 'año', a: 'trimestre', convenio: 360, regimen: 'compuesta' },
+  { modo: 'tipo', valor: '12 %', de: 'mes', a: 'año', convenio: 360, regimen: 'nominal' },
+  { modo: 'tipo', valor: '8 %', de: 'trimestre', a: 'año', convenio: 360, regimen: 'nominal' },
+  { modo: 'tipo', valor: '6 %', de: 'semestre', a: 'mes', convenio: 360, regimen: 'nominal' },
 ];
 
 const num = (v: number, max = 4) => {
@@ -51,6 +55,7 @@ const pct = (v: number) => `${num(v * 100, 4)} %`;
 
 function textoAtajo(q: Pregunta): string {
   const dias = necesitaConvenio(q.de, q.a) ? ` (${q.convenio})` : '';
+  if (q.modo === 'tipo' && q.regimen === 'nominal') return `TIN ${q.valor} capitalizable ${unidad(q.de).adjetivo} → ${q.a === 'año' ? 'TAE' : `efectivo ${unidad(q.a).adjetivo}`}`;
   if (q.modo === 'tipo') return `${q.valor} ${unidad(q.de).adjetivo} → ${unidad(q.a).adjetivo} · ${q.regimen}${dias}`;
   return `${q.valor} ${nombreUnidad(q.de, Number(q.valor.replace(',', '.')))} → ${unidad(q.a).plural}${dias}`;
 }
@@ -64,6 +69,12 @@ export function pasosDuracion(cantidad: number, de: Unidad, a: Unidad, dias: Con
   const c = convertirDuracion(cantidad, de, a, dias);
   const ua = unidad(a);
   const final = `<b>${num(c.resultado)} ${nombreUnidad(a, c.resultado)}</b>`;
+  const regla = 'La regla: el tiempo es el mismo, solo cambia con qué se mide. Se pasa todo a una medida común y se cuenta cuántas unidades de llegada caben.';
+  const recuerda = `Para qué sirve: en una fórmula, <i>n</i> va en la misma unidad que el tipo. Con un tipo ${ua.adjetivo}, <i>n</i> = ${num(c.resultado)}.`;
+  return [regla, ...pasosDuracionCamino(cantidad, de, a, dias, c, ua, final), recuerda];
+}
+
+function pasosDuracionCamino(cantidad: number, de: Unidad, a: Unidad, dias: Convenio, c: ReturnType<typeof convertirDuracion>, ua: ReturnType<typeof unidad>, final: string): string[] {
   if (c.camino === 'año') {
     const mDe = unidad(de).porAño(dias);
     const mA = ua.porAño(dias);
@@ -86,13 +97,30 @@ export function pasosDuracion(cantidad: number, de: Unidad, a: Unidad, dias: Con
 }
 
 /** Paso a paso de un tipo: proporcional en simple; acumulado y raíz en compuesta. */
-export function pasosTipo(tipo: number, de: Unidad, a: Unidad, regimen: Regimen, dias: Convenio): string[] {
+export function pasosTipo(tipo: number, de: Unidad, a: Unidad, regimen: RegimenTipo, dias: Convenio): string[] {
   const c = convertirTipo(tipo, de, a, regimen, dias);
   const ua = unidad(a);
   const final = `<b>${pct(c.resultado)} ${ua.adjetivo}</b>`;
   const cabe = `En un año caben ${cuantas(de, c.mDe)} y ${cuantas(a, c.mA)}: es la <i>m</i> de cada tipo.`;
+  if (regimen === 'nominal') {
+    const ud = unidad(de);
+    const llegada = a === 'año' ? `<b>TAE = ${pct(c.resultado)}</b>` : `<b>${pct(c.resultado)} ${ua.adjetivo} efectivo</b>`;
+    const pasos = [
+      'La regla: un tipo <b>nominal</b> (TIN, <i>J<sub>m</sub></i>) es anual «de nombre», no lo que rinde. Cada periodo se aplica <i>i<sub>m</sub></i> = <i>J<sub>m</sub></i> / <i>m</i>, y esos periodos se capitalizan en compuesta: TAE = (1 + <i>J<sub>m</sub></i> / <i>m</i>)<sup><i>m</i></sup> − 1.',
+      `Capitalizable ${ud.adjetivo}: en un año hay ${cuantas(de, c.mDe)}, así que <i>m</i> = ${num(c.mDe)}.`,
+      c.mDe === 1 ? `Con capitalización anual, el nominal ya es el efectivo anual: ${pct(c.efectivoDe)}.` : `Tipo de cada ${ud.singular}: ${pct(tipo)} ÷ ${num(c.mDe)} = <b>${pct(c.efectivoDe)} ${ud.adjetivo}</b>. Este sí es efectivo.`,
+    ];
+    if (a === de) pasos.push(`Lo que piden es ese mismo tipo: ${llegada}.`);
+    else {
+      pasos.push(`Desde aquí, compuesta: lleva el tipo al año, (1 + ${num(c.efectivoDe, 6)})<sup>${num(c.mDe)}</sup> = <b>${num(c.factorAño, 6)}</b>.`);
+      pasos.push(c.mA === 1 ? `Resta 1: ${num(c.factorAño, 6)} − 1 = ${llegada}.` : `Raíz de índice ${num(c.mA)}: ${num(c.factorAño, 6)}<sup>1/${num(c.mA)}</sup> = ${num(1 + c.resultado, 6)}. Resta 1: ${llegada}.`);
+      if (Math.abs(c.proporcional - c.resultado) > 1e-12) pasos.push(a === 'año' ? `Error típico: dar el TIN (${pct(tipo)}) como si fuera la TAE. Con más de una capitalización al año, la TAE siempre es mayor.` : `Error típico: dividir el nominal entre ${num(c.mA)} da ${pct(c.proporcional)}.`);
+    }
+    return pasos;
+  }
   if (regimen === 'simple') {
     return [
+      'La regla en simple: dos tipos son equivalentes si rinden lo mismo en un año, <i>i<sub>a</sub></i> · <i>m<sub>a</sub></i> = <i>i</i> · <i>m</i>. Por eso se divide o se multiplica.',
       cabe,
       'En simple cada periodo cosecha sobre el mismo capital: lo que rinde el año se <b>reparte en proporción</b>.',
       ...(c.mDe === 1 ? [] : [`Lo que rinde el año: ${pct(tipo)} × ${num(c.mDe)} = <b>${pct(tipo * c.mDe)}</b>.`]),
@@ -100,6 +128,7 @@ export function pasosTipo(tipo: number, de: Unidad, a: Unidad, regimen: Regimen,
     ];
   }
   const pasos = [
+    'La regla en compuesta: dos tipos son equivalentes si llevan 1 € al mismo sitio en un año, (1 + <i>i<sub>a</sub></i>)<sup><i>m<sub>a</sub></i></sup> = (1 + <i>i</i>)<sup><i>m</i></sup>. Por eso se eleva y se saca raíz, no se divide.',
     cabe,
     'En compuesta cada periodo crece sobre lo acumulado: el tipo <b>no se reparte</b>. Se busca el que lleva 1 € al mismo sitio en un año.',
     c.mDe === 1 ? `En un año, 1 € llega a 1 + ${num(tipo, 6)} = <b>${num(c.factorAño, 6)} €</b>.` : `Lleva el tipo al año: (1 + ${num(tipo, 6)})<sup>${num(c.mDe)}</sup> = <b>${num(c.factorAño, 6)}</b>.`,
@@ -150,7 +179,8 @@ const opcionesUnidad = (modo: ModoConversor, sel: Unidad) => UNIDADES.map((u) =>
 /** Pregunta inicial de cada ficha: la de su tema (tipos en las de tipos; duraciones en el resto). */
 export function preguntaInicial(idFormula: string): number {
   if (idFormula === 'simple-fraccionado') return ATAJOS.findIndex((q) => q.modo === 'tipo' && q.regimen === 'simple');
-  if (idFormula === 'compuesta-equivalentes' || idFormula === 'compuesta-tae') return ATAJOS.findIndex((q) => q.modo === 'tipo' && q.regimen === 'compuesta');
+  if (idFormula === 'compuesta-tae') return ATAJOS.findIndex((q) => q.modo === 'tipo' && q.regimen === 'nominal');
+  if (idFormula === 'compuesta-equivalentes') return ATAJOS.findIndex((q) => q.modo === 'tipo' && q.regimen === 'compuesta');
   return 0;
 }
 
@@ -164,13 +194,13 @@ export function regimenDeFicha(idFormula: string): Regimen | null {
 const ENTRADA: Record<Regimen | 'ambos', string> = {
   ambos: 'Cualquier unidad del tema a cualquier otra: años, semestres, cuatrimestres, trimestres, meses y días (año comercial o civil). Una <b>duración</b> solo cambia cómo se mide el tiempo; un <b>tipo de interés</b> cambia cuánto rinde cada periodo, y ahí importa si es simple o compuesta.',
   simple: 'Una <b>duración</b> solo cambia cómo se mide el tiempo: 1 semestre son 1,5 cuatrimestres. Un <b>tipo de interés</b>, en simple, se reparte en proporción, porque cada periodo cosecha sobre el mismo capital: iₐ · mₐ = i · m.',
-  compuesta: 'Una <b>duración</b> se pasa igual que en simple: el tiempo es el mismo (1 semestre son 1,5 cuatrimestres). Un <b>tipo de interés</b>, en compuesta, <b>no se reparte</b>: cada periodo crece sobre lo acumulado, así que se busca el tipo que llega al mismo sitio en el mismo tiempo: (1 + iₐ)<sup>mₐ</sup> = (1 + i)<sup>m</sup>.',
+  compuesta: 'Una <b>duración</b> se pasa igual que en simple: el tiempo es el mismo (1 semestre son 1,5 cuatrimestres). Un <b>tipo de interés</b>, en compuesta, <b>no se reparte</b>: cada periodo crece sobre lo acumulado, así que se busca el tipo que llega al mismo sitio en el mismo tiempo: (1 + iₐ)<sup>mₐ</sup> = (1 + i)<sup>m</sup>. Un tipo <b>nominal</b> (TIN, Jₘ) sí se divide, pero solo entre sus periodos de capitalización: Jₘ / m es el tipo de cada periodo; de ahí a la TAE, en compuesta.',
 };
 
 export function htmlConversor(k = 0, regimenFicha: Regimen | null = null): string {
   const q = ATAJOS[k] ?? ATAJOS[0]!;
   // En una ficha de un régimen, las preguntas de tipos son solo de ese régimen (la otra se puede comparar con el botón).
-  const ofrecida = (a: Pregunta) => !regimenFicha || !a.regimen || a.regimen === regimenFicha;
+  const ofrecida = (a: Pregunta) => !regimenFicha || !a.regimen || a.regimen === regimenFicha || (a.regimen === 'nominal' && regimenFicha === 'compuesta');
   return `<section class="conv" data-conversor data-modo="${q.modo}"${regimenFicha ? ` data-conv-ficha="${regimenFicha}"` : ''} aria-labelledby="conv-tit">
     <header class="conv-cab">
       <p class="conv-volanta">Calendario de equivalencias${regimenFicha ? ` · ${regimenFicha}` : ''}</p>
@@ -185,11 +215,12 @@ export function htmlConversor(k = 0, regimenFicha: Regimen | null = null): strin
         </div>
         <div class="conv-pregunta">
           <label class="conv-campo"><span data-conv-etiqueta-valor>${q.modo === 'tipo' ? 'Tipo' : 'Cantidad'}</span><input type="text" inputmode="decimal" data-conv-valor value="${escaparHtml(q.valor)}" autocomplete="off"></label>
-          <label class="conv-campo"><span>De</span><select data-conv-de data-inicial="${q.de}">${opcionesUnidad(q.modo, q.de)}</select></label>
+          <label class="conv-campo"><span data-conv-etiqueta-de>De</span><select data-conv-de data-inicial="${q.de}">${opcionesUnidad(q.modo, q.de)}</select></label>
           <label class="conv-campo"><span>A</span><select data-conv-a data-inicial="${q.a}">${opcionesUnidad(q.modo, q.a)}</select></label>
           <fieldset class="conv-convenio conv-regimen" data-conv-regimen${q.modo === 'tipo' ? '' : ' hidden'}><legend>Régimen</legend>
             <label><input type="radio" name="conv-regimen" value="simple"${q.regimen === 'simple' ? ' checked' : ''}> Simple</label>
-            <label><input type="radio" name="conv-regimen" value="compuesta"${q.regimen !== 'simple' ? ' checked' : ''}> Compuesta</label>
+            <label><input type="radio" name="conv-regimen" value="compuesta"${q.regimen === 'compuesta' || !q.regimen ? ' checked' : ''}> Compuesta</label>
+            <label><input type="radio" name="conv-regimen" value="nominal"${q.regimen === 'nominal' ? ' checked' : ''}> Nominal (TIN)</label>
           </fieldset>
           <fieldset class="conv-convenio" data-conv-convenio${necesitaConvenio(q.de, q.a) ? '' : ' hidden'}><legend>Días del año</legend>
             <label><input type="radio" name="conv-convenio" value="360"${q.convenio === 360 ? ' checked' : ''}> Comercial · 360</label>
@@ -219,6 +250,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
   if (!conv) return () => {};
   const valor = conv.querySelector<HTMLInputElement>('[data-conv-valor]')!;
   const etiquetaValor = conv.querySelector<HTMLElement>('[data-conv-etiqueta-valor]')!;
+  const etiquetaDe = conv.querySelector<HTMLElement>('[data-conv-etiqueta-de]')!;
   const de = conv.querySelector<HTMLSelectElement>('[data-conv-de]')!;
   const a = conv.querySelector<HTMLSelectElement>('[data-conv-a]')!;
   const convenio = conv.querySelector<HTMLElement>('[data-conv-convenio]')!;
@@ -241,6 +273,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
     conv.dataset.modo = m;
     conv.querySelectorAll<HTMLButtonElement>('[data-conv-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.convModo === m)));
     etiquetaValor.textContent = m === 'tipo' ? 'Tipo' : 'Cantidad';
+    rotularNominal();
     regimen.hidden = m !== 'tipo';
     for (const sel of [de, a]) {
       const v = sel.value as Unidad;
@@ -250,6 +283,12 @@ export function montarConversor(raiz: HTMLElement): () => void {
     conv.querySelectorAll<HTMLElement>('[data-conv-atajo-modo]').forEach((li) => { li.hidden = li.dataset.convAtajoModo !== m; });
   };
 
+  /** Con un tipo nominal, el campo es el TIN anual y «De» es su capitalización. */
+  function rotularNominal(): void {
+    const nominal = modo() === 'tipo' && marcado(regimen) === 'nominal';
+    etiquetaValor.textContent = modo() === 'tipo' ? (nominal ? 'TIN (anual)' : 'Tipo') : 'Cantidad';
+    etiquetaDe.textContent = nominal ? 'Capitalizable' : 'De';
+  }
   const decir = (html: string, aviso = false) => {
     resultado.innerHTML = html;
     resultado.classList.toggle('conv-aviso', aviso);
@@ -262,6 +301,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
   });
 
   const actualizar = (forzar = false) => {
+    rotularNominal();
     const u1 = de.value as Unidad;
     const u2 = a.value as Unidad;
     const dias = (marcado(convenio) === '365' ? 365 : 360) as Convenio;
@@ -275,11 +315,16 @@ export function montarConversor(raiz: HTMLElement): () => void {
     if (modo() === 'tipo') {
       // Un tipo sin % y mayor que 1 no se corrige: se avisa (¿7 % o 0,07?).
       if (r.valor > 1 && !valor.value.includes('%')) return decir(`¿${escaparHtml(num(r.valor))} %? Escríbelo con el signo % o en tanto por uno.`, true);
-      const reg = (marcado(regimen) === 'simple' ? 'simple' : 'compuesta') as Regimen;
+      const reg = (marcado(regimen) ?? 'compuesta') as RegimenTipo;
       const c = convertirTipo(r.valor, u1, u2, reg, dias);
-      decir(`<b>${escaparHtml(pct(r.valor))} ${escaparHtml(unidad(u1).adjetivo)}</b> = <b>${escaparHtml(pct(c.resultado))} ${escaparHtml(unidad(u2).adjetivo)}</b><small>${reg === 'simple' ? 'En simple: proporcional.' : 'En compuesta: tanto equivalente.'} Los dos llevan 1 € a ${escaparHtml(num(c.factorAño))} € en un año.</small>`);
+      if (reg === 'nominal') {
+        decir(`<b>TIN ${escaparHtml(pct(r.valor))} capitalizable ${escaparHtml(unidad(u1).adjetivo)}</b> = <b>${u2 === 'año' ? `TAE ${escaparHtml(pct(c.resultado))}` : `${escaparHtml(pct(c.resultado))} ${escaparHtml(unidad(u2).adjetivo)} efectivo`}</b><small>Cada ${escaparHtml(unidad(u1).singular)} se aplica ${escaparHtml(pct(c.efectivoDe))}; en un año, 1 € llega a ${escaparHtml(num(c.factorAño))} €.</small>`);
+      } else {
+        decir(`<b>${escaparHtml(pct(r.valor))} ${escaparHtml(unidad(u1).adjetivo)}</b> = <b>${escaparHtml(pct(c.resultado))} ${escaparHtml(unidad(u2).adjetivo)}</b><small>${reg === 'simple' ? 'En simple: proporcional.' : 'En compuesta: tanto equivalente.'} Los dos llevan 1 € a ${escaparHtml(num(c.factorAño))} € en un año.</small>`);
+      }
       ponerPasos(pasosTipo(r.valor, u1, u2, reg, dias));
-      const peticion = { tipo: r.valor, de: u1, a: u2, regimen: reg, convenio: dias };
+      // La animación del nominal es la de compuesta desde el tipo efectivo de cada periodo.
+      const peticion = { tipo: c.efectivoDe, de: u1, a: u2, regimen: (reg === 'nominal' ? 'compuesta' : reg) as Regimen, convenio: dias };
       if (sePuedeDibujarTipo(peticion)) escena = escenaConversionTipo(peticion);
       else nota = '<small>Con un crecimiento tan grande la animación no se lee bien; la regla es la misma.</small>';
     } else {
