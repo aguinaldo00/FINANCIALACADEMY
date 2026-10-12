@@ -343,7 +343,7 @@ export function montarConversor(raiz: HTMLElement): () => void {
     const q = pregunta;
     const dias = necesitaConvenio(q.de, q.a) ? ` Año ${q.convenio === 360 ? 'comercial (360 días)' : 'civil (365 días)'}.` : '';
     ej.dataset.semilla = String(semilla);
-    ejOrigen.textContent = `Ejercicio aleatorio nº ${semilla} · generado, no es del libro`;
+    ejOrigen.textContent = `Ejercicio aleatorio nº ${semilla} · generado al azar`;
     ejEnunciado.textContent = q.modo === 'duracion'
       ? `¿Cuántos ${unidad(q.a).plural} son ${num(q.valor)} ${nombreUnidad(q.de, q.valor)}?${dias}`
       : `Un tipo del ${pct(q.valor)} ${unidad(q.de).adjetivo} en ${q.regimen}: ¿qué tipo ${unidad(q.a).adjetivo} es equivalente?${dias}`;
