@@ -254,11 +254,13 @@ export function comprobar(ej: EjercicioTema2, texto: string): { bien: boolean; a
   return { bien: false, aviso: 'No coincide. Repasa los datos y la unidad del tiempo, y vuelve a calcular.' };
 }
 
-export function htmlPractica(bloque: BloqueId): string {
+/** `entre`: lo que va entre el ejercicio aleatorio y los casos guiados (repasos propios del bloque). */
+export function htmlPractica(bloque: BloqueId, entre = ''): string {
   const ejercicios = [...ejerciciosDe(bloque)].sort((a, b) => a.nivel - b.nivel);
   return `<div class="t2-fase" data-fase="practica">
     <p class="t2-instruccion"><b>Papel y calculadora.</b> Resuelve cada ejercicio en tu cuaderno; aquí solo compruebas el resultado. Empieza por el aleatorio, que no se acaba nunca, o sigue los casos guiados de abajo, en los que las ayudas se van retirando.</p>
     ${htmlAleatorioPapel(bloque)}
+    ${entre}
     <h2 class="t2-guiados-tit">Casos guiados</h2>
     ${ejercicios.map((ej, k) => {
       const f = formulaPorId(ej.formula)!;

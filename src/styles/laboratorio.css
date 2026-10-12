@@ -51,9 +51,9 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 .lab-cinta{position:absolute;z-index:2;left:18%;top:-12px;width:96px;height:26px;background:rgba(242,212,143,.62);transform:rotate(-5deg);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 
 /* ── Laboratorio: tres zonas ── */
-.lab{display:grid;grid-template-columns:minmax(290px,.95fr) minmax(0,1.75fr) minmax(290px,.95fr);grid-template-areas:"barra barra barra" "cuaderno centro calc";gap:22px;align-items:start}
-.lab[data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
-.lab[data-modo="analogico"] .lab-cuaderno{display:none}
+.lab[data-laboratorio]{display:grid;grid-template-columns:minmax(330px,1.15fr) minmax(0,1.6fr) minmax(290px,.9fr);grid-template-areas:"barra barra barra" "cuaderno centro calc";gap:22px;align-items:start}
+.lab[data-laboratorio][data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
+.lab[data-laboratorio][data-modo="analogico"] .lab-cuaderno{display:none}
 .lab-cuaderno{grid-area:cuaderno}
 .lab-centro{grid-area:centro;display:grid;min-width:0;position:sticky;top:20px}
 .lab-calculadora{grid-area:calc}
@@ -185,7 +185,7 @@ select.lab-campo{font-family:var(--f-texto);cursor:pointer}
 .lab-boton svg{width:16px;height:16px}
 .lab-boton:hover{border-color:var(--oro);color:var(--oro2)}
 .lab-boton:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
-.lab[data-modo="digital"] .lab-boton-papel{display:none}
+.lab[data-laboratorio][data-modo="digital"] .lab-boton-papel{display:none}
 .lab-caso .lab-otro{justify-self:start;margin-top:6px}
 .lab-otro svg circle{fill:currentColor}
 
@@ -269,7 +269,7 @@ select.lab-campo{font-family:var(--f-texto);cursor:pointer}
 /* La explicación sale en una tira de papel, como un tique */
 .cal-explicacion{margin:12px 0 0;padding:12px 14px 14px 34px;border-radius:3px;background:var(--lab-papel);color:var(--lab-tinta);font-size:.9rem;line-height:1.45;display:grid;gap:4px;box-shadow:0 10px 20px -12px rgba(0,0,0,.8)}
 /* Analógico: la pantalla pasa a cristal líquido verdoso, como la calculadora de mesa */
-.lab[data-modo="analogico"] .cal-pantalla,.cal-analogica .cal-pantalla{background:linear-gradient(180deg,#c9d3bd,#b9c4ad)}
+.lab[data-laboratorio][data-modo="analogico"] .cal-pantalla,.cal-analogica .cal-pantalla{background:linear-gradient(180deg,#c9d3bd,#b9c4ad)}
 
 /* ── Calendario de equivalencias (conversor de unidades de tiempo) ── */
 .conv{margin-top:56px;padding-top:28px;border-top:1px solid var(--line2)}
@@ -353,9 +353,9 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
 
 /* Pantallas medianas: la animación arriba, a todo el ancho; cuaderno y calculadora debajo */
 @media (max-width:1180px){
-  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"barra barra" "centro centro" "cuaderno calc"}
-  .lab[data-modo="analogico"]{grid-template-areas:"barra barra" "centro centro" "calc calc"}
-  .lab[data-modo="analogico"] .lab-calculadora{max-width:460px;justify-self:center;width:100%}
+  .lab[data-laboratorio],.lab[data-laboratorio][data-modo="analogico"]{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"barra barra" "centro centro" "cuaderno calc"}
+  .lab[data-laboratorio][data-modo="analogico"]{grid-template-areas:"barra barra" "centro centro" "calc calc"}
+  .lab[data-laboratorio][data-modo="analogico"] .lab-calculadora{max-width:460px;justify-self:center;width:100%}
   .lab-centro,.lab-calculadora{position:relative;top:auto}
   .conv-cuerpo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .conv-escena{grid-column:1 / -1;grid-row:1}
@@ -371,8 +371,8 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .lab-barra{grid-template-columns:minmax(0,1fr)}
   .lab-caso{grid-template-columns:minmax(0,1fr)}
   .lab-caso .lab-mini{grid-column:1;grid-row:auto;justify-self:start}
-  .lab,.lab[data-modo="analogico"]{grid-template-columns:minmax(0,1fr);grid-template-areas:"barra" "centro" "cuaderno" "calc"}
-  .lab[data-modo="analogico"]{grid-template-areas:"barra" "centro" "calc"}
+  .lab[data-laboratorio],.lab[data-laboratorio][data-modo="analogico"]{grid-template-columns:minmax(0,1fr);grid-template-areas:"barra" "centro" "cuaderno" "calc"}
+  .lab[data-laboratorio][data-modo="analogico"]{grid-template-areas:"barra" "centro" "calc"}
   .lab-modo{justify-self:stretch;display:flex}
   .lab-modo button{flex:1}
   .lab-cuaderno{padding:18px 14px 22px}
@@ -449,6 +449,53 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
 .lab-ejemplo{margin:0 0 8px;padding:6px 10px;border-left:3px solid rgba(44,90,136,.55);background:rgba(255,255,255,.35);font:400 .88rem/1.45 var(--f-cifra);color:var(--lab-tinta-azul)}
 .lab-ejemplo span{display:block;font:600 .66rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--lab-tinta-suave)}
 /* Modo examen: sin pistas */
-.lab[data-ejercicio="examen"] :is(.lab-ayuda,.lab-ejemplo,.lab-que){display:none}
-.lab[data-ejercicio="examen"] .lab-caso-texto{font-size:clamp(1.05rem,1.4vw,1.22rem)}
+.lab[data-laboratorio][data-ejercicio="examen"] :is(.lab-ayuda,.lab-ejemplo,.lab-que){display:none}
+.lab[data-laboratorio][data-ejercicio="examen"] .lab-caso-texto{font-size:clamp(1.05rem,1.4vw,1.22rem)}
+
+/* ── Hoja de cálculo (components/hojaCalculo.ts): Guiada o Pro, y la guía de variables ── */
+.hoja-barra{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-bottom:12px}
+.hoja-modos{display:inline-flex;padding:3px;border:1px solid var(--line2);border-radius:999px;background:#17120e}
+.hoja-modos button{padding:7px 16px;border:0;border-radius:999px;background:none;color:var(--mut);cursor:pointer;font:600 .74rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase}
+.hoja-modos button[aria-pressed="true"]{background:var(--oro);color:var(--oro-tinta)}
+.hoja-modos button:focus-visible{outline:2px solid var(--oro2);outline-offset:2px}
+.hoja-guia-boton{font-size:.86rem}
+.hoja-guia{margin:0 0 12px;padding:12px 14px;border:1px solid var(--line2);border-radius:10px;background:#17120e;font:400 .86rem/1.45 var(--f-texto);color:var(--mut);max-height:340px;overflow:auto}
+.hoja-guia[hidden]{display:none}
+.hoja-guia>p{margin:0 0 8px;color:var(--ink)}
+.hoja-guia dl{margin:0;display:grid;gap:8px}
+.hoja-guia dl>div{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;align-items:baseline}
+.hoja-guia dt{font-size:1.1rem;text-align:center}
+.hoja-guia dd{margin:0}
+.hoja-guia dd b{color:var(--ink)}
+.hoja-guia small{display:block;margin-top:2px;font-family:var(--f-cifra);color:var(--oro2)}
+.hoja-seccion[hidden]{display:none}
+.hoja-formula label b,.hoja-paso b{display:inline-grid;place-items:center;width:18px;height:18px;margin-right:6px;border-radius:50%;background:var(--oro);color:var(--oro-tinta);font:700 .72rem/1 var(--f-texto);letter-spacing:0}
+.hoja-paso{margin:14px 0 6px;font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.hoja-cal .hoja-formula{margin:0}
+/* Un select mide lo que su opción más larga: sin esto, las 19 fórmulas ensanchan la página en el móvil. */
+.hoja-select{width:100%;min-width:0;max-width:100%;font-size:1rem}
+.hoja-cal,.hoja-formula,.t2-al-trabajo>*{min-width:0}
+.hoja-vacia td{padding:14px 12px;font:italic 400 .9rem/1.4 var(--f-texto);color:rgba(31,26,20,.7)}
+.hoja-pro-ayuda{margin:0 0 10px;font:400 .88rem/1.45 var(--f-texto);color:var(--mut)}
+.hoja-pro td{padding:6px 8px}
+.hoja-pro td:first-child{width:38%}
+.hoja-mas{margin:8px 2px 0;font-size:.86rem}
+.hoja-formula-pro{margin-top:12px}
+.hoja-formula-pro>span{font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.hoja-formula-pro .lab-campo{padding:9px 10px;border:1px solid var(--line2);border-radius:8px;background:#fbf6ea;color:#1a1611;font:500 1rem/1.3 var(--f-cifra)}
+.lab[data-laboratorio][data-ejercicio="examen"] .hoja-guia-boton{display:none}
+
+/* ── Fase D · ejercicio aleatorio con espacio de trabajo: hoja o papel, y la calculadora ── */
+.t2-al-modo{margin:4px 0 14px}
+.t2-al-trabajo{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.85fr);gap:18px;align-items:start;margin-bottom:16px}
+/* Los paneles traen las áreas con nombre del laboratorio («cuaderno», «calc»): aquí no existen. */
+.t2-al-trabajo>*{grid-area:auto}
+.t2-al-zona[hidden]{display:none}
+.t2-al-papel .lab-papel{margin:0}
+.t2-al-papel .lab-que{margin-top:10px}
+@media (max-width:860px){
+  .t2-al-trabajo{grid-template-columns:minmax(0,1fr)}
+  .t2-al-modo{display:flex}
+  .t2-al-modo button{flex:1}
+}
 

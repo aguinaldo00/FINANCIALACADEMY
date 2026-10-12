@@ -15,9 +15,9 @@ import { BLOQUES, FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/te
 import { enunciadoExamen } from '../../../content/temas/tema-02/enunciados.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
 import { generarEjercicio, nuevaSemilla } from '../../../domain/tema2/generador.ts';
-import { formatear, formatearExacto } from '../../../domain/tema2/expresion.ts';
-import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud, mostrar } from '../../../domain/tema2/laboratorio.ts';
+import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud } from '../../../domain/tema2/laboratorio.ts';
 import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
+import { htmlHoja, montarHoja, refrescarHoja } from '../../components/hojaCalculo.ts';
 import { expandir } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
 import { formulaTexto, simbolosDe } from '../../matematica/formula.ts';
@@ -56,7 +56,7 @@ const QUE_ESCRIBIR = {
   despeje: { que: 'Escribe la fórmula con la incógnita sola a la izquierda del igual. Solo letras, todavía sin números.', ejemplo: 'Con otra fórmula: de I = C₀ · n · i, si te piden n → n = I / (C₀ · i)' },
   sustitucion: { que: 'Copia la fórmula despejada y cambia cada letra por su dato, sin operar todavía.', ejemplo: 'Siguiendo el ejemplo, con I = 600 €, C₀ = 5.000 € e i = 4 %: n = 600 / (5.000 · 0,04)' },
 };
-const queEscribir = (paso: keyof typeof QUE_ESCRIBIR) =>
+export const queEscribir = (paso: keyof typeof QUE_ESCRIBIR) =>
   `<p class="lab-que">${escaparHtml(QUE_ESCRIBIR[paso].que)}</p><p class="lab-ejemplo"><span>Ejemplo</span>${escaparHtml(QUE_ESCRIBIR[paso].ejemplo)}</p>`;
 
 /**
@@ -121,49 +121,8 @@ function pasos(id: string, papel: boolean): string {
   <div class="lab-revision" data-lab-revision aria-live="polite"></div>`;
 }
 
-/** Fórmulas del mismo bloque que la ficha: la lista corta del modo digital. */
-function selectorFormulaCorto(id: string): string {
-  const f = formulaPorId(id)!;
-  const opciones = FORMULAS_TEMA2.filter((o) => o.bloque === f.bloque).map((o) => `<option value="${o.id}">Nº ${o.numero} — ${escaparHtml(formulaTexto(o.expresion))}</option>`).join('');
-  return `<select class="lab-campo hoja-select" data-campo="formula" aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${opciones}</select>`;
-}
-
-/**
- * Modo DIGITAL: una hoja de cálculo. Solo se rellenan los datos, se elige la fórmula y se pulsa
- * «Calcular»; la hoja escribe la sustitución y el resultado. Los pasos a mano (despeje,
- * sustitución, operaciones) son del modo ANALÓGICO.
- */
-function hojaDigital(id: string): string {
-  const calcula = Boolean(LABORATORIOS[id]);
-  const filas = datosDe(id).map((d) => {
-    const u = UNIDAD[d.magnitud];
-    const nombre = simbolo(d.simbolo)?.nombre ?? d.simbolo;
-    return `<tr><th scope="row"><span class="hoja-sim">${formulaHtml(d.simbolo)}</span><small>${escaparHtml(nombre)}</small></th>
-      <td>${campo(`dato:${d.simbolo}`, `${nombre} (${u.titulo})`, PISTA_DATO[d.magnitud])}</td><td class="hoja-u"><abbr title="${escaparHtml(u.titulo)}">${u.texto}</abbr></td></tr>`;
-  }).join('');
-  return `<table class="hoja"><thead><tr><th scope="col">Dato</th><th scope="col">Valor</th><th scope="col"><span class="sr">Unidad</span></th></tr></thead><tbody>${filas}</tbody></table>
-    <div class="hoja-formula"><label for="hoja-formula-${id}">Fórmula</label>${selectorFormulaCorto(id).replace('<select ', `<select id="hoja-formula-${id}" `)}
-      <p class="lab-formula-elegida" data-lab-formula-elegida></p></div>
-    ${calcula ? `<button type="button" class="hoja-calcular" data-lab-calcular>Calcular</button>
-    <div class="hoja-salida" data-lab-hoja-salida hidden><p class="hoja-sust" data-lab-hoja-sust></p><output class="hoja-resultado" data-lab-hoja-resultado></output></div>
-    <p class="hoja-nota" data-lab-hoja-nota aria-live="polite"></p>` : '<p class="hoja-nota">Esta fórmula no calcula una sola incógnita: usa la calculadora con tus datos.</p>'}`;
-}
-
-/** La forma de la fórmula que empieza por la incógnita (la de la ficha o una variante despejada). */
-export function formaDespejada(idFormula: string, incognita: string): string {
-  const f = formulaPorId(idFormula)!;
-  return [f.expresion, ...(f.variantes ?? []).map((v) => v.expresion)].find((e) => e.startsWith(`${incognita} = `)) ?? f.expresion;
-}
-
-/** La fórmula con los números en lugar de las letras (sin operar), para enseñar la sustitución. */
-export function sustitucion(expresion: string, valores: Readonly<Record<string, string>>): string {
-  const [izq, der] = expresion.split(/ = (.*)/s);
-  if (der === undefined) return expresion;
-  const claves = Object.keys(valores).sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  if (!claves.length) return expresion;
-  const patron = new RegExp(`(?<![A-Za-z_\\\\])(${claves.join('|')})(?![A-Za-z_0-9])`, 'g');
-  return `${izq} = ${der.replace(patron, (k) => `"${valores[k]}"`)}`;
-}
+// La hoja de cálculo (modo digital) es un componente compartido con la fase D.
+export { formaDespejada, sustitucion } from '../../components/hojaCalculo.ts';
 
 /** Enunciado con unos datos y la incógnita de la fórmula (sin inventar nada más). */
 function enunciado(id: string, datos: Readonly<Record<string, string>>): string {
@@ -200,7 +159,7 @@ export function htmlLaboratorio(id: string): string {
     <section class="lab-panel lab-cuaderno" aria-labelledby="lab-cuaderno-tit">
       <header class="lab-panel-cab"><h2 id="lab-cuaderno-tit"><span>01</span>Hoja de cálculo</h2>
         <button type="button" class="lab-mini" data-lab-limpiar>Borrar</button></header>
-      ${hojaDigital(id)}
+      <div data-lab-hoja-sitio></div>
     </section>
     <section class="lab-centro" aria-label="Animación y cuaderno de papel">
       <div class="lab-papel-marco" data-lab-papel-marco>
@@ -307,65 +266,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     lab.querySelectorAll<HTMLElement>('[data-lab-formula-elegida]').forEach((p) => { p.innerHTML = f ? formulaHtml(f.expresion) : ''; });
   };
 
-  /** Vacía la salida de la hoja (cambia algo: hay que volver a calcular). */
-  const limpiarHoja = () => {
-    const salida = lab.querySelector<HTMLElement>('[data-lab-hoja-salida]');
-    if (salida) salida.hidden = true;
-    const nota = lab.querySelector<HTMLElement>('[data-lab-hoja-nota]');
-    if (nota) { nota.textContent = ''; nota.className = 'hoja-nota'; }
-  };
-
-  /**
-   * «Calcular» de la hoja: con los datos escritos y la fórmula elegida, escribe la sustitución y el
-   * resultado. Si la fórmula no sirve o falta un dato, lo dice sin calcular nada.
-   */
-  const calcularHoja = () => {
-    if (!definicion) return;
-    const salida = lab.querySelector<HTMLElement>('[data-lab-hoja-salida]')!;
-    const nota = lab.querySelector<HTMLElement>('[data-lab-hoja-nota]')!;
-    const decir = (texto: string, clase: 'bien' | 'mal' | 'aviso') => { nota.textContent = texto; nota.className = `hoja-nota hoja-${clase}`; };
-    salida.hidden = true;
-    const problemas: string[] = [];
-    for (const d of datos) {
-      const l = leerDato(estado[`dato:${d.simbolo}`] ?? '', d.magnitud);
-      const nombre = formulaTexto(d.simbolo);
-      if (l.ok === 'vacio') problemas.push(`falta ${nombre}`);
-      else if (l.ok === false) problemas.push(`${nombre}: ${l.error}`);
-      else if (l.aviso) problemas.push(`${nombre}: ${l.aviso}`);
-    }
-    if (problemas.length) return decir(`Antes de calcular: ${problemas.join('; ')}.`, 'mal');
-    const f = estado.formula;
-    if (!f) return decir('Elige la fórmula que vas a usar.', 'mal');
-    const desde = Object.values(DERIVACIONES).flat().filter((x) => x.hacia === id).map((x) => x.desde);
-    if (f !== id && !desde.includes(f)) {
-      return decir(ejercicio() === 'examen' ? 'Con esa fórmula y estos datos no se puede calcular lo que te piden.' : 'Esa fórmula no calcula lo que te piden: elige otra.', 'mal');
-    }
-    const v = valores();
-    const x = esperado(definicion, v);
-    if (x === null) return decir('Con estos datos no sale un resultado: revisa que ningún dato valga 0 donde divide.', 'mal');
-    const inc = definicion.incognita;
-    // Sustitución sobre la fórmula de la ficha (si se eligió otra, sale despejando de ella).
-    const numeros = Object.fromEntries(datos.map((d) => [d.simbolo, d.magnitud === 'euros' ? formatear(v[d.simbolo]!, Number.isInteger(v[d.simbolo]) ? 0 : 2) : formatearExacto(v[d.simbolo]!)]));
-    lab.querySelector<HTMLElement>('[data-lab-hoja-sust]')!.innerHTML = `${f === id ? '' : '<small>Despejando:</small> '}${formulaHtml(sustitucion(formaDespejada(id, inc.simbolo), numeros))}`;
-    const texto = mostrar(x, inc.magnitud);
-    lab.querySelector<HTMLElement>('[data-lab-hoja-resultado]')!.innerHTML = `${formulaHtml(inc.simbolo)} = ${escaparHtml(texto)}${inc.magnitud === 'tipo' ? ` <small>(${escaparHtml(formatearExacto(x))} en tanto por uno)</small>` : ''}`;
-    salida.hidden = false;
-    estado.resultado = texto;
-    campos('resultado').forEach((c) => { c.value = texto; });
-    guardar();
-    // Comparación con el enunciado (no en examen: allí no hay pistas).
-    const enunciadoDatos = datosEnunciado();
-    if (!enunciadoDatos || ejercicio() === 'examen') return decir('Calculado con tus datos.', 'bien');
-    const distintos = datos.filter((d) => {
-      const e = leerDato(enunciadoDatos[d.simbolo] ?? '', d.magnitud);
-      return e.ok === true && Math.abs(e.valor - v[d.simbolo]!) > 1e-9;
-    }).map((d) => formulaTexto(d.simbolo));
-    if (distintos.length) decir(`Calculado, pero ${distintos.join(' y ')} no ${distintos.length > 1 ? 'coinciden' : 'coincide'} con el enunciado.`, 'aviso');
-    else decir('Calculado. Los datos coinciden con el enunciado.', 'bien');
-  };
-
   const limpiarRevision = () => {
-    limpiarHoja();
     lab.querySelectorAll<HTMLElement>('[data-paso]').forEach((li) => { delete li.dataset.revision; });
     lab.querySelectorAll<HTMLElement>('[data-nota]').forEach((n) => { n.textContent = ''; });
     lab.querySelectorAll<HTMLElement>('[data-lab-revision]').forEach((r) => { r.innerHTML = ''; r.className = 'lab-revision'; });
@@ -426,10 +327,28 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   const escribir = (nombre: string, valor: string, origen?: Element) => {
     estado[nombre] = valor;
     campos(nombre).forEach((c) => { if (c !== origen) c.value = valor; });
-    if (nombre === 'formula') pintarFormulaElegida();
+    if (nombre === 'formula') {
+      pintarFormulaElegida();
+      // Si la fórmula se eligió en el papel, la hoja pide los datos de esa fórmula.
+      if (!origen?.closest('[data-hoja]')) refrescarHoja(lab, leerEstado);
+    }
     limpiarRevision();
     guardar();
   };
+
+  // La hoja de cálculo (modo digital), con el estado guardado.
+  const leerEstado = (c: string) => estado[c] ?? '';
+  lab.querySelector<HTMLElement>('[data-lab-hoja-sitio]')!.innerHTML = htmlHoja(`hoja-${id}`, leerEstado);
+  paradas.push(montarHoja(lab, {
+    leer: leerEstado,
+    objetivo: () => (definicion ? { incognita: definicion.incognita, datos: datosEnunciado(), examen: ejercicio() === 'examen' } : null),
+    alCalcular: (texto) => {
+      estado.resultado = texto;
+      campos('resultado').forEach((c) => { c.value = texto; });
+      guardar();
+    },
+    alGuardar: (c, v) => { estado[c] = v; guardar(); },
+  }));
 
   // Estado inicial en todos los campos (los dos modos).
   for (const [nombre, valor] of Object.entries(estado)) campos(nombre).forEach((c) => { c.value = valor; });
@@ -474,9 +393,10 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     const anterior = ejercicio();
     const s = otraSemilla ? nuevaSemilla(semilla()) : semilla();
     if (e !== anterior || otraSemilla) {
-      estado = { ejercicio: e, semilla: String(s) };
+      estado = { ejercicio: e, semilla: String(s), ...(estado['hoja:modo'] ? { 'hoja:modo': estado['hoja:modo'] } : {}) };
       lab.querySelectorAll<HTMLInputElement>('[data-campo]').forEach((c) => { c.value = ''; });
       pintarFormulaElegida();
+      refrescarHoja(lab, leerEstado);
       limpiarRevision();
     }
     estado.ejercicio = e;
@@ -494,13 +414,13 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     else if (b.hasAttribute('data-lab-abrir-papel')) abrirPapel(!lab.classList.contains('lab-papel-abierto'));
     else if (b.hasAttribute('data-lab-ampliar') && escena) expandir(figura, { tipo: 'escena', escena, volanta: `Fórmula ${formulaPorId(id)!.numero} · Laboratorio` });
     else if (b.hasAttribute('data-lab-limpiar')) {
-      estado = { ejercicio: ejercicio(), semilla: String(semilla()) };
+      estado = { ejercicio: ejercicio(), semilla: String(semilla()), ...(estado['hoja:modo'] ? { 'hoja:modo': estado['hoja:modo'] } : {}) };
       guardar();
       lab.querySelectorAll<HTMLInputElement>('[data-campo]').forEach((c) => { c.value = ''; });
       pintarFormulaElegida();
+      refrescarHoja(lab, leerEstado);
       limpiarRevision();
     } else if (b.hasAttribute('data-lab-comprobar')) revisar();
-    else if (b.hasAttribute('data-lab-calcular')) calcularHoja();
   };
   lab.addEventListener('click', alPulsar);
   paradas.push(() => lab.removeEventListener('click', alPulsar));

@@ -46,6 +46,49 @@ describe('fase D · ejercicio aleatorio', () => {
     expect(campo.value).toBe('');
   });
 
+  it('se resuelve en digital (hoja guiada o Pro) o en analógico (papel), con calculadora', () => {
+    localStorage.clear();
+    const raiz = document.createElement('div');
+    raiz.innerHTML = htmlAleatorioPapel('simple');
+    document.body.append(raiz);
+    montarAleatorioPapel(raiz);
+    const art = raiz.querySelector<HTMLElement>('[data-aleatorio]')!;
+    const zona = (m: string) => raiz.querySelector<HTMLElement>(`[data-al-zona="${m}"]`)!;
+    expect(art.dataset.modo).toBe('digital');
+    expect(zona('digital').hidden).toBe(false);
+    expect(zona('analogico').hidden).toBe(true);
+    // La hoja: las 19 fórmulas; al elegir la del ejercicio, pide sus datos y «Calcular» rellena la respuesta.
+    const ej = ejercicioAleatorio('simple', Number(art.dataset.semilla))!;
+    const sel = raiz.querySelector<HTMLSelectElement>('[data-hoja] select[data-campo="formula"]')!;
+    expect(sel.options.length).toBe(20);
+    sel.value = ej.formula;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    for (const [s, v] of Object.entries(ej.datos)) {
+      const c = raiz.querySelector<HTMLInputElement>(`[data-hoja] [data-campo="dato:${s}"]`)!;
+      c.value = v;
+      c.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    raiz.querySelector<HTMLButtonElement>('[data-lab-calcular]')!.click();
+    const campo = raiz.querySelector<HTMLInputElement>('[data-al-campo]')!;
+    expect(campo.value).toBe(mostrar(ej.resultado, LABORATORIOS[ej.formula]!.incognita.magnitud));
+    raiz.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(raiz.querySelector('[data-al-feedback]')!.textContent).toContain('Correcto');
+    // Analógico: el papel, y la calculadora lleva allí sus operaciones.
+    raiz.querySelector<HTMLButtonElement>('[data-al-modo="analogico"]')!.click();
+    expect(zona('analogico').hidden).toBe(false);
+    expect(zona('digital').hidden).toBe(true);
+    const entrada = raiz.querySelector<HTMLInputElement>('[data-cal-entrada]')!;
+    entrada.value = '2 + 3';
+    entrada.dispatchEvent(new Event('input', { bubbles: true }));
+    raiz.querySelector<HTMLButtonElement>('[data-cal-accion="igual"]')!.click();
+    raiz.querySelector<HTMLButtonElement>('[data-cal-enviar]')!.click();
+    expect(raiz.querySelector<HTMLTextAreaElement>('[data-al-papel="operaciones"]')!.value).toBe('2 + 3 = 5,00');
+    // Otro ejercicio: hoja y papel en blanco.
+    raiz.querySelector<HTMLButtonElement>('[data-al-otro]')!.click();
+    expect(raiz.querySelector<HTMLTextAreaElement>('[data-al-papel="operaciones"]')!.value).toBe('');
+    expect(raiz.querySelector<HTMLSelectElement>('[data-hoja] select[data-campo="formula"]')!.value).toBe('');
+  });
+
   it('la solución sustituye los números en la forma despejada de cada fórmula', () => {
     for (const [id, lab] of Object.entries(LABORATORIOS)) {
       const forma = formaDespejada(id, lab.incognita.simbolo);
