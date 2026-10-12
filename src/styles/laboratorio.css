@@ -488,6 +488,17 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
 .hoja-cal .hoja-formula{margin:0}
 /* Un select mide lo que su opción más larga: sin esto, las 19 fórmulas ensanchan la página en el móvil. */
 .hoja-select{width:100%;min-width:0;max-width:100%;font-size:1.05rem}
+/* Desplegables con flecha propia: Safari ignora el fondo de un <select> con la apariencia del sistema
+   (lo pintaría gris claro). La flecha va en reglas con más peso que :hover/:focus de .lab-campo,
+   que reescriben «background» entero. */
+select.lab-campo,.conv-campo select{-webkit-appearance:none;appearance:none;padding-right:30px}
+select.lab-campo,select.lab-campo:hover,select.lab-campo:focus,.conv-campo select,.conv-campo select:focus{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%232a2118' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:12px 8px}
+select.hoja-select,select.hoja-select:hover,select.hoja-select:focus{padding-right:38px;background-color:#2b241d;background-position:right 14px center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23f1ebdf' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+/* La hoja es oscura: al pasar por encima se aclara un poco, no se vuelve gris como un campo de papel */
+select.hoja-select:hover{background-color:#342b22}
 .hoja-cal,.hoja-formula,.t2-al-trabajo>*{min-width:0}
 .hoja-vacia td{padding:18px 14px;font:italic 400 .96rem/1.45 var(--f-texto);color:rgba(31,26,20,.7)}
 .hoja-pro-ayuda{margin:0 0 14px;font:400 .94rem/1.5 var(--f-texto);color:var(--mut)}
@@ -513,3 +524,115 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .t2-al-modo button{flex:1}
 }
 
+
+/* ── Móvil en horizontal: mesa de trabajo de una sola pantalla ──
+   En un teléfono girado (poca altura) todo el laboratorio cabe a la vez: arriba el enunciado en una
+   placa compacta y debajo las tres herramientas en columnas de la altura de la pantalla. Lo que no
+   quepa dentro de una columna se desplaza dentro de ella, sin mover la página. La barra de
+   navegación deja de flotar para no robar altura, y al llegar al laboratorio la página se ajusta a él. */
+@media (orientation:landscape) and (max-height:540px){
+  html:has(body.t2-laboratorio){scroll-snap-type:y proximity;scroll-padding-top:0}
+  body.t2-laboratorio .ed-nav-noche{position:absolute}
+  body.editorial.t2-laboratorio .t2-estudio{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .t2-ficha .t2-ficha-cabecera{margin-bottom:16px}
+
+  .lab[data-laboratorio],.lab[data-laboratorio][data-modo="analogico"]{
+    height:100vh;height:100dvh;box-sizing:border-box;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+    grid-template-columns:minmax(0,1fr) minmax(0,1.12fr) minmax(0,.9fr);grid-template-rows:auto minmax(0,1fr);
+    grid-template-areas:"barra barra barra" "cuaderno centro calc";gap:8px;align-items:stretch;scroll-snap-align:start}
+  .lab[data-laboratorio][data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
+
+  /* Enunciado: una placa baja; mandos pequeños en la misma franja */
+  .lab-barra{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ejercicios caso modo";align-items:stretch;gap:8px;margin:0}
+  .lab-ejercicios{display:grid;grid-template-columns:repeat(2,auto);align-content:center;gap:2px;padding:3px;border-radius:10px}
+  .lab-ejercicios button{padding:6px 8px;font-size:.6rem;letter-spacing:.1em;text-align:left}
+  .lab-modo{flex-direction:column;justify-content:center;align-self:stretch;padding:3px;border-radius:10px}
+  .lab-modo button{padding:7px 10px;border-radius:7px;font-size:.62rem;letter-spacing:.14em}
+  .lab-caso{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"volanta otro" "texto otro";align-items:center;gap:2px 10px;padding:8px 10px 8px 16px;border-radius:12px}
+  .lab-caso::after{top:10px;bottom:10px;width:3px}
+  .lab-caso-volanta{font-size:.62rem;letter-spacing:.18em}
+  .lab-caso-volanta::before{width:6px;height:6px;margin-right:6px}
+  .lab-caso-texto,.lab[data-laboratorio][data-ejercicio="examen"] .lab-caso-texto{max-width:none;font-size:clamp(.92rem,2.2vw,1.1rem);line-height:1.28}
+  .lab-caso-pide{display:inline;margin:0}
+  /* «Generar otro ejercicio» se queda en el icono (el texto sigue siendo su nombre accesible) */
+  .lab-caso .lab-otro{width:36px;height:36px;padding:0;justify-content:center;font-size:0;letter-spacing:0}
+  .lab-caso .lab-otro svg{width:18px;height:18px;flex:none}
+
+  /* Las tres columnas: cada una con su propio desplazamiento */
+  .lab-cuaderno,.lab-centro,.lab-calculadora{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .lab-centro{position:relative;top:auto;align-content:start}
+  .lab-cuaderno,.lab-calculadora{align-self:stretch}
+  .lab-cuaderno{padding:10px 10px 12px;border-radius:14px}
+  .lab-calculadora{padding:8px 10px 10px;border-radius:14px}
+  /* El título de la calculadora sobra a la vista (la sección conserva su nombre accesible) */
+  .lab-calculadora>.lab-panel-cab{display:none}
+  .lab-panel-cab,.lab-cuaderno .lab-panel-cab{margin-bottom:8px}
+  .lab-panel-cab h2{font-size:.7rem;letter-spacing:.16em}
+  .lab-panel-cab h2 span:first-child{font-size:.9rem}
+
+  /* Hoja: mismos controles, en tamaño de bolsillo (los campos siguen a 16 px: Safari no hace zoom) */
+  .hoja-barra{margin-bottom:8px;gap:6px}
+  .hoja-modos button{min-height:28px;padding:6px 12px;font-size:.66rem}
+  .hoja-guia-boton{font-size:.8rem}
+  .hoja-pro-ayuda{display:none}
+  .hoja thead th{padding:6px 8px 5px;font-size:.6rem}
+  .hoja tbody th,.hoja td{padding:4px 6px}
+  .hoja-sim{font-size:1.15rem}
+  .hoja tbody th small{font-size:.66rem}
+  .hoja .lab-campo{min-height:32px;padding:4px 8px;font-size:1rem}
+  .hoja-pro td{padding:3px 5px}
+  .hoja-mas{min-height:26px;margin-top:4px;font-size:.8rem}
+  .hoja-cal .hoja-formula-pro{margin-top:6px}
+  .hoja-select,.hoja-formula-pro .lab-campo{min-height:38px;padding:7px 10px;font-size:1rem}
+  .hoja-formula{gap:5px;margin-top:8px}
+  .hoja-formula label,.hoja-paso,.hoja-formula-pro>span{font-size:.66rem}
+  .hoja-paso{margin:10px 0 5px}
+  .lab-cuaderno .lab-formula-elegida{font-size:1.05rem}
+  .hoja-calcular{min-height:40px;margin-top:10px;font-size:.84rem}
+  .hoja-salida{padding:8px 10px}
+  .hoja-resultado{font-size:1.25rem}
+
+  /* Animación: el marco se ajusta a la altura disponible */
+  .lab-escena{padding:6px 6px 8px}
+  .lab-escena .mo-marco{width:min(100%,calc((100vh - 230px) * 1.2));width:min(100%,calc((100dvh - 230px) * 1.2));margin-inline:auto}
+  .lab-escena .mo-sub{margin:6px 0 0;font-size:.8rem;line-height:1.35}
+  .lab-escena .mo-mandos{margin-top:4px;gap:6px}
+  .lab-escena :is(.mo-play,.mo-repetir){width:32px;height:32px}
+  .lab-escena .mo-caps button{min-height:26px}
+  .lab-escena-nota{font-size:.78rem}
+  .lab-escena-nota:empty{display:none}
+  .lab-escena-pie{margin-top:4px;gap:6px}
+  .lab-boton{padding:6px 10px;font-size:.62rem}
+  /* «Ampliar animación», como icono sobre la esquina del dibujo */
+  .lab-escena [data-lab-ampliar]{position:absolute;top:12px;right:12px;z-index:2;width:32px;height:32px;padding:0;justify-content:center;font-size:0;letter-spacing:0;background:rgba(29,24,19,.82)}
+
+  /* Calculadora compacta: teclas de 30 px */
+  .cal-pantalla{padding:5px 10px 4px}
+  .cal-entrada{line-height:1.2}
+  .cal-resultado{font-size:1.25rem;margin-top:0}
+  .cal-estado{margin-top:2px;padding-top:3px}
+  .cal-ans{white-space:nowrap}
+  .cal-teclas{gap:4px 5px;margin-top:6px}
+  .cal-tecla,.cal-teclas .cal-tecla:nth-child(-n+5){min-height:29px;border-radius:7px;font-size:.92rem}
+  .cal-op{font-size:1rem}
+  .cal-igual{min-height:30px;font-size:1.1rem}
+  .cal-acciones{gap:6px;margin-top:10px}
+  .cal-accion{min-height:34px;padding:6px 8px;font-size:.66rem;letter-spacing:.1em}
+}
+
+/* Teléfonos más bajos (iPhone SE y similares): se recupera altura para que la calculadora quepa entera */
+@media (orientation:landscape) and (max-height:400px){
+  .lab-caso-volanta{display:none}
+  .lab-caso{grid-template-areas:"texto otro"}
+  .lab-caso-texto,.lab[data-laboratorio][data-ejercicio="examen"] .lab-caso-texto{font-size:.9rem}
+  .cal-tecla,.cal-teclas .cal-tecla:nth-child(-n+5){min-height:27px}
+  .cal-igual{min-height:28px}
+}
+/* Y si además es estrecho (667 px): mandos más chicos para que el enunciado tenga más ancho */
+@media (orientation:landscape) and (max-height:400px) and (max-width:720px){
+  .lab-ejercicios button{padding:5px 6px;font-size:.54rem;letter-spacing:.06em}
+  .lab-modo button{padding:6px 8px;font-size:.56rem;letter-spacing:.1em}
+  .lab-caso{padding:6px 8px 6px 14px;gap:2px 8px}
+  .lab-caso-texto,.lab[data-laboratorio][data-ejercicio="examen"] .lab-caso-texto{font-size:.84rem;line-height:1.25}
+  .lab-caso .lab-otro{width:32px;height:32px}
+}
