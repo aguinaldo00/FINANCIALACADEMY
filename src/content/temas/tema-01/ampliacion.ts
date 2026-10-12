@@ -389,7 +389,7 @@ const esquemas: EsquemaConcepto[] = [
 ];
 
 export const ampliacion: AmpliacionTema = {
-  fuente: 'Tus apuntes de la Unidad 1 (resumen y predicción de examen) y el temario del libro',
+  fuente: 'Estimación basada en tus apuntes de la Unidad 1 y el temario',
   bloques,
   preguntas,
   flashcards,

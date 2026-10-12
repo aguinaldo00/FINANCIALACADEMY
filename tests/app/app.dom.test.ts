@@ -38,8 +38,8 @@ describe('app en el navegador', () => {
     // 4.2A tiene 8 conceptos y fgd está dominado: 1/8 → 13 %.
     const tile = $$('.tile').find((t) => t.getAttribute('href') === '#s/4.2A')!;
     expect(tile.textContent).toContain('dominio 13 %');
-    expect($('#mt').textContent).toBe('Gestión financiera · La ciudad del dinero');
-    expect($('.hero h1').getAttribute('aria-label')).toBe('Gestión financiera: La ciudad del dinero');
+    expect($('#mt').textContent).toBe('UNIDAD 1 · EL SISTEMA FINANCIERO');
+    expect($('.hero h1').getAttribute('aria-label')).toBe('Unidad 1. El sistema financiero');
   });
 
   it('abre una sección por hash y marca el índice', () => {

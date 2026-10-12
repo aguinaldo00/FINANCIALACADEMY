@@ -23,7 +23,7 @@ export const conceptos: Concepto[] = [
       "No es lo mismo que \"los bancos\": los bancos son solo una pieza (intermediarios). El sistema incluye también mercados e instrumentos.",
       "Sistema financiero = instituciones, medios y mercados cuyo objetivo es canalizar el ahorro a la inversión."
     ],
-    trampaExamen: "En el test (pregunta 1) la buena es \"instituciones, medios y mercados que canalizan el ahorro a la inversión\". Las trampas lo reducen a \"bancos y cajas\" o a \"instituciones bancarias\".",
+    trampaExamen: "El sistema financiero canaliza el ahorro hacia la inversión mediante instituciones, medios y mercados. Desconfía de las respuestas que lo reducen a \"bancos y cajas\" o a \"instituciones bancarias\".",
     pregunta: {
       enunciado: "INST, SA ingresa 450.000 € y gasta 320.000 €. Es una unidad con…",
       opciones: [
@@ -83,7 +83,7 @@ export const conceptos: Concepto[] = [
       "Su gemela es la indirecta: allí hay un banco en medio y ahorrador e inversor no se conocen.",
       "Directa: entre agentes con déficit, que emiten instrumentos financieros, y agentes con superávit, que los adquieren."
     ],
-    trampaExamen: "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado.",
+    trampaExamen: "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado.",
     pregunta: {
       enunciado: "Compras acciones en la salida a bolsa de una empresa. Es intermediación…",
       opciones: [
@@ -193,7 +193,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff5a5a",
     definicion: "<b>Riesgo:</b> probabilidad de que, al vencimiento, el emisor no pague. <b>Liquidez:</b> facilidad para convertirlo en dinero. <b>Rentabilidad:</b> capacidad de generar intereses.",
-    ejemploReal: "⚠ dato del libro, puede haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
+    ejemploReal: "⚠ Datos orientativos que pueden haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
     explicaciones: [
       "Riesgo: que tu amigo no te devuelva el dinero. Liquidez: un billete frente a un piso (uno se gasta ya, el otro tarda meses en venderse). Rentabilidad: lo que te paga tu dinero por trabajar.",
       "¿Me lo devolverán? (riesgo) ¿Puedo recuperarlo rápido? (liquidez) ¿Cuánto me da? (rentabilidad)",
@@ -291,7 +291,7 @@ export const conceptos: Concepto[] = [
       "El euríbor (tipo medio al que se prestan los bancos europeos) es del monetario, no del de capitales.",
       "Monetarios: vencimiento inferior a 18 meses. De capitales: superior a 18 meses."
     ],
-    trampaExamen: "La frontera son 18 meses, no 12. Es la cifra que más cambian en los test.",
+    trampaExamen: "La frontera son 18 meses, no 12. Es fácil confundir ambos plazos.",
     pregunta: {
       enunciado: "La frontera entre mercado monetario y de capitales es…",
       opciones: [
@@ -318,7 +318,7 @@ export const conceptos: Concepto[] = [
       "Directo: vendes tu moto a un vecino. Intermediado: la vendes en un concesionario que cobra comisión.",
       "O te apañas tú solo con el otro, o alguien os junta y cobra por ello.",
       "Directo: A ⇄ B   ·   Intermediado: A ⇄ 🤝 (comisión) ⇄ B",
-      "Se parece a la intermediación directa/indirecta del punto 2, pero aquí se clasifican mercados.",
+      "No confundas esta clasificación de los mercados con la intermediación directa e indirecta: aquí se distingue si hay un intermediario que cobra comisión.",
       "Directos: sin mediadores. Intermediados: con intermediarios que cobran comisión."
     ],
     trampaExamen: "Ojo: \"uno de los participantes es un intermediario que cobra comisión\" describe un mercado intermediado, no directo.",
@@ -641,7 +641,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#60a5fa",
     definicion: "Banco central de los países de la UE que han adoptado el euro. Mantiene la <b>estabilidad de precios</b> (el poder adquisitivo del euro) e instrumenta la política monetaria. Da la <b>autorización final para crear nuevas entidades de crédito</b>.",
-    ejemploReal: "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. El libro dice 20 países: ⚠ dato del libro, puede haber cambiado (desde el 1-1-2026 Bulgaria usa el euro y son 21).",
+    ejemploReal: "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. La cifra de países puede haber cambiado: desde el 1-1-2026 Bulgaria usa el euro y son 21.",
     explicaciones: [
       "El cerebro que manda sobre el euro.",
       "Es el jefe del euro: cuida que las cosas no se encarezcan demasiado.",
@@ -1000,7 +1000,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#a78bfa",
     definicion: "Emiten <b>dinero electrónico</b>: exigible a su emisor, almacenado en soporte electrónico y aceptado como medio de pago por entidades distintas de la emisora. <b>Ley 21/2011.</b> Las autoriza el <b>Banco de España</b>, previo informe del SEPBLAC.",
-    ejemploReal: "⚠ dato del libro, puede haber cambiado: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
+    ejemploReal: "⚠ Estos ejemplos pueden haber quedado desactualizados: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
     explicaciones: [
       "Un monedero digital con alguien responsable detrás.",
       "Es dinero que vive en una tarjeta o en el móvil y con el que puedes pagar en muchas tiendas.",

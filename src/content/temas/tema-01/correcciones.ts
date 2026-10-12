@@ -543,5 +543,61 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "despues": "La DGSFP (Dirección General de Seguros y Fondos de Pensiones, del Ministerio de Economía) supervisa las compañías aseguradoras y los fondos de pensiones. La CNMV vigila la bolsa y los fondos de inversión, y el Banco de España, los bancos.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
+  },
+  {
+    "conceptoId": "sf",
+    "campo": "trampaExamen",
+    "antes": "En el test (pregunta 1) la buena es \"instituciones, medios y mercados que canalizan el ahorro a la inversión\". Las trampas lo reducen a \"bancos y cajas\" o a \"instituciones bancarias\".",
+    "despues": "El sistema financiero canaliza el ahorro hacia la inversión mediante instituciones, medios y mercados. Desconfía de las respuestas que lo reducen a \"bancos y cajas\" o a \"instituciones bancarias\".",
+    "motivo": "La explicación citaba una pregunta externa en vez de ser autónoma.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "directa",
+    "campo": "trampaExamen",
+    "antes": "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado",
+    "despues": "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado",
+    "motivo": "La explicación remitía a un punto del libro.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "rrl",
+    "campo": "ejemploReal",
+    "antes": "⚠ dato del libro, puede haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
+    "despues": "⚠ Datos orientativos que pueden haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
+    "motivo": "Se conserva el aviso de vigencia y se elimina la referencia al libro.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "activo",
+    "campo": "trampaExamen",
+    "antes": "La frontera son 18 meses, no 12. Es la cifra que más cambian en los test.",
+    "despues": "La frontera son 18 meses, no 12. Es fácil confundir ambos plazos.",
+    "motivo": "La advertencia ahora explica la confusión sin remitir a tests externos.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "estructura-m",
+    "campo": "explicaciones",
+    "antes": "Se parece a la intermediación directa/indirecta del punto 2, pero aquí se clasifican mercados.",
+    "despues": "No confundas esta clasificación de los mercados con la intermediación directa e indirecta: aquí se distingue si hay un intermediario que cobra comisión.",
+    "motivo": "La explicación remitía a un punto del libro.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "bce",
+    "campo": "ejemploReal",
+    "antes": "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. El libro dice 20 países: ⚠ dato del libro, puede haber cambiado (desde el 1-1-2026 Bulgaria usa el euro y son 21).",
+    "despues": "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. La cifra de países puede haber cambiado: desde el 1-1-2026 Bulgaria usa el euro y son 21.",
+    "motivo": "Se sustituye la referencia al libro por un aviso contextual sobre la cifra.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "ejemploReal",
+    "antes": "⚠ dato del libro, puede haber cambiado: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
+    "despues": "⚠ Estos ejemplos pueden haber quedado desactualizados: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
+    "motivo": "Se conserva el aviso de vigencia y se elimina la referencia al libro.",
+    "fuente": "Petición del usuario (13/10)"
   }
 ];

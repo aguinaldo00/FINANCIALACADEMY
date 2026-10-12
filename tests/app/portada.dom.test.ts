@@ -28,7 +28,10 @@ describe('portada sin WebGL', () => {
     expect(document.querySelector('.hero')!.classList.contains('rev')).toBe(true);
   });
 
-  it('la pista de la portada existe pero solo se muestra en modo portada', () => {
-    expect(document.querySelector('.portada-pista')!.textContent).toContain('Pulsa la ciudad para explorarla');
+  it('la intro está disponible sin dejar texto auxiliar detrás del índice', () => {
+    const pista = document.querySelector('.portada-pista')!;
+    expect(pista.querySelector('.ver-intro')?.textContent).toContain('Ver la intro');
+    expect(pista.textContent).not.toContain('Pulsa la ciudad para explorarla');
+    expect(pista.textContent).not.toContain('Desliza para ver el tema');
   });
 });
