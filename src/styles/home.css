@@ -25,9 +25,9 @@
 .ya a .w{margin-left:auto;font-size:.82rem;color:var(--mut);white-space:nowrap}
 .h2{font-size:1.5rem;margin:34px 0 12px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.tile{display:block;text-decoration:none;color:var(--ink);border-radius:20px;padding:16px;background:var(--bg2);border:2px solid var(--bg4);transition:transform .2s,border-color .2s}
-.tile:hover{transform:translateY(-3px);border-color:var(--oro)}
-.tile .i{font-family:var(--f-texto);font-weight:600;font-size:1.5rem}
+.tile{display:block;text-decoration:none;color:var(--ink);border-radius:20px;padding:16px;background:var(--bg2);border:1px solid color-mix(in srgb,var(--tile-color) 48%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--tile-color) 9%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--tile-color) 7%,transparent);transition:transform .2s,border-color .2s,box-shadow .2s}
+.tile:hover,.tile:focus-visible{transform:translateY(-3px);border-color:color-mix(in srgb,var(--tile-color) 84%,transparent);outline:none;box-shadow:0 0 20px color-mix(in srgb,var(--tile-color) 22%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--tile-color) 17%,transparent)}
+.tile .i{font-family:var(--f-texto);font-weight:600;font-size:1.5rem;color:color-mix(in srgb,var(--tile-color) 82%,#fff);text-shadow:0 0 16px color-mix(in srgb,var(--tile-color) 25%,transparent)}
 .tile .n{display:block;font-weight:600;line-height:1.25;margin:2px 0 8px}
 .tile .w{font-size:.82rem;color:var(--mut)}
 .gram{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
