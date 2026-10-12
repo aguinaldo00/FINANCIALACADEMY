@@ -1,9 +1,4 @@
 # Métodos de estudio con evidencia y cómo los aplica la app
-
-Investigación del 02/10 (noche) para la petición: "investigar e implementar métodos más óptimos de
-estudio". Solo se aplican técnicas con evidencia sólida. El contenido académico sale siempre de DATA
-y de la ampliación (apuntes y libro); nada se inventa.
-
 ## Qué dice la investigación
 
 | Técnica | Evidencia | Qué significa para el examen |
