@@ -4,6 +4,7 @@ import { type Confianza, CONFIANZAS, idTarjetaFrase } from '../../domain/practic
 import { compararRecuerdo, ideasClave } from '../../domain/recall.ts';
 import { historiaDeConcepto } from '../../experiences/registry.ts';
 import { resaltarAviso } from '../format.ts';
+import { botonSiglas, conectarSiglas, marcarSiglasPregunta, revelarSiglas, siglasProtegidas } from './siglas.ts';
 import { iconoModo, iconoUi, sinEmoji } from '../../icons/ui.ts';
 
 /** Panel "Explícamelo de otra forma" en el modo indicado. */
@@ -37,7 +38,11 @@ export function pintarPreguntaEn(
   pie = '',
 ): void {
   const { enunciado, opciones, explicacion } = pregunta;
-  panel.innerHTML = `<p><b>${enunciado}</b></p><div class="opts">${opciones.map((t, i) => `<button class="opt" data-k="${i}">${t}</button>`).join('')}</div><div class="fb"></div>${pie}`;
+  const protegidas = siglasProtegidas(enunciado, opciones);
+  const cabeza = `<p><b>${marcarSiglasPregunta(enunciado, protegidas)}</b></p>`;
+  const opts = `<div class="opts">${opciones.map((t, i) => `<button class="opt" data-k="${i}">${marcarSiglasPregunta(t, protegidas)}</button>`).join('')}</div>`;
+  panel.innerHTML = `${cabeza}${botonSiglas(cabeza + opts)}${opts}<div class="fb"></div>${pie}`;
+  conectarSiglas(panel);
   const feedback = panel.querySelector<HTMLElement>('.fb')!;
   const botones = [...panel.querySelectorAll<HTMLButtonElement>('.opt')];
 
@@ -48,6 +53,7 @@ export function pintarPreguntaEn(
         saltarMonedas(boton);
         for (const b of botones) b.disabled = true;
         feedback.innerHTML = `${iconoUi('sello')} <b>Correcto.</b> ${explicacion}`;
+        revelarSiglas(panel, true);
       } else {
         boton.classList.add('no', 'shake');
         feedback.innerHTML = `${iconoUi('tachado')} No es esa. Pulsa "Explícamelo de otra forma" y vuelve a intentarlo.`;
@@ -73,9 +79,14 @@ export function pintarPreguntaConConfianza(
   contexto = '',
 ): void {
   const { enunciado, opciones, explicacion, indiceCorrecta } = pregunta;
-  panel.innerHTML = `<p><b>${enunciado}</b></p>${contexto}<div class="opts">${opciones.map((t, i) => `<button type="button" class="opt" data-k="${i}">${t}</button>`).join('')}</div>
+  // Las siglas se pueden revelar mientras se piensa (salvo las que son la propia pregunta).
+  const protegidas = siglasProtegidas(enunciado, opciones);
+  const cabeza = `<p><b>${marcarSiglasPregunta(enunciado, protegidas)}</b></p>`;
+  const opts = `<div class="opts">${opciones.map((t, i) => `<button type="button" class="opt" data-k="${i}">${marcarSiglasPregunta(t, protegidas)}</button>`).join('')}</div>`;
+  panel.innerHTML = `${cabeza}${botonSiglas(cabeza + opts)}${contexto}${opts}
 <div class="conf" hidden><span>¿Cómo de seguro estás?</span>${CONFIANZAS.map((c) => `<button type="button" class="conf-btn ${c}" data-conf="${c}">${ETIQUETA_CONFIANZA[c]}</button>`).join('')}</div><div class="fb"></div>${pie}`;
   const botones = [...panel.querySelectorAll<HTMLButtonElement>('.opt')];
+  conectarSiglas(panel);
   const conf = panel.querySelector<HTMLElement>('.conf')!;
   const feedback = panel.querySelector<HTMLElement>('.fb')!;
   let elegida: number | null = null;
@@ -114,9 +125,11 @@ export function pintarPreguntaConConfianza(
           ? `${iconoUi('sello')} <b>Correcto.</b> ${exp}`
           : `${iconoUi('sello')} <b>Correcto, pero sin seguridad:</b> volverá pronto a tu repaso para afianzarla. ${exp}`
         : confianza === 'seguro'
-          ? `${iconoUi('rayo')} <b>Error con seguridad.</b> Son los que mejor se corrigen si te fijas ahora: la correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`
-          : `${iconoUi('tachado')} <b>No es esa.</b> La correcta es <b>${opciones[indiceCorrecta]}</b>. ${exp}`;
+          ? `${iconoUi('rayo')} <b>Error con seguridad.</b> Son los que mejor se corrigen si te fijas ahora: la correcta es <b>${marcarSiglasPregunta(opciones[indiceCorrecta]!)}</b>. ${exp}`
+          : `${iconoUi('tachado')} <b>No es esa.</b> La correcta es <b>${marcarSiglasPregunta(opciones[indiceCorrecta]!)}</b>. ${exp}`;
       feedback.classList.toggle('sorpresa', !correcta && confianza === 'seguro');
+      // Ya corregida, se ven todas las siglas con su nombre completo.
+      revelarSiglas(panel, true);
       alTerminar(correcta, confianza);
     };
   }

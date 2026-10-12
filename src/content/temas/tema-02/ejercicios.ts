@@ -4,9 +4,10 @@
  *  C · elegir la fórmula (y entender por qué las otras no),
  *  D · resolver en papel con ayudas que se retiran (nivel 1 → 4).
  *
- * Procedencia en `fuente`: «Caso práctico N» y «caso del libro» son casos resueltos del libro;
- * «Actividad N» es un enunciado del libro cuya solución se calcula aquí; «Propuesta del análisis»
- * y «Ejercicio de práctica» NO son del libro. Las respuestas se comprueban en
+ * Procedencia en `fuente`: «Caso resuelto» es un caso resuelto del libro; «Ejercicio de práctica»
+ * es un enunciado cuya solución se calcula aquí (del libro sin solución o propuesto por nosotros).
+ * La web no cita números de caso, actividad ni página: el alumno no tiene por qué tener el libro.
+ * Las respuestas se comprueban en
  * tests/content/ejerciciosTema2.test.ts con src/domain/calculoFinanciero.ts.
  */
 import type { BloqueId } from './formulas.ts';
@@ -49,7 +50,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-10000',
     bloque: 'simple',
-    fuente: 'Ejercicio de práctica (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Se constituye un capital de 10.000 € al 7 % de interés simple anual durante tres años. ¿Qué intereses produce?',
     datos: [
       { texto: '10.000 €', clave: 'C_0', valor: '10.000 €' },
@@ -68,7 +69,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-maria',
     bloque: 'simple',
-    fuente: 'Caso práctico 9 del libro (el libro imprime 1.450 €: errata)',
+    fuente: 'Caso resuelto',
     enunciado: 'María invierte 15.000 € al 3 % de interés simple anual durante 3 años. ¿Cuál será el importe de los intereses totales?',
     datos: [
       { texto: '15.000 €', clave: 'C_0', valor: '15.000 €' },
@@ -87,7 +88,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-juana',
     bloque: 'simple',
-    fuente: 'Caso del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Juana invierte 18.500 € al 4 % de interés simple anual durante 5 años. ¿Cuál será el capital final?',
     datos: [
       { texto: '18.500 €', clave: 'C_0', valor: '18.500 €' },
@@ -107,7 +108,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-5400',
     bloque: 'simple',
-    fuente: 'Ejercicio de práctica (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: '¿Qué capital hay que invertir hoy al 4 % de interés simple anual para disponer de 5.400 € dentro de 2 años?',
     datos: [
       { texto: '4 % de interés simple anual', clave: 'i', valor: '0,04 anual' },
@@ -127,7 +128,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-3000',
     bloque: 'simple',
-    fuente: 'Ejercicio de práctica (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Un capital de 3.000 € se coloca al 0,5 % de interés simple mensual durante 10 meses. ¿Qué intereses produce?',
     datos: [
       { texto: '3.000 €', clave: 'C_0', valor: '3.000 €' },
@@ -147,7 +148,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-8000',
     bloque: 'simple',
-    fuente: 'Propuesta del análisis del tema (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Un capital de 8.000 € ha producido 720 € de intereses en 18 meses en capitalización simple. ¿A qué tipo de interés anual se invirtió?',
     datos: [
       { texto: '8.000 €', clave: 'C_0', valor: '8.000 €' },
@@ -166,7 +167,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-6000',
     bloque: 'simple',
-    fuente: 'Caso práctico 13 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Un capital de 6.000 € se invierte al 3 % de interés simple anual. ¿Cuánto tiempo tiene que estar invertido para obtener 6.500 €? Exprésalo en años, meses y días.',
     datos: [
       { texto: '6.000 €', clave: 'C_0', valor: '6.000 €' },
@@ -186,7 +187,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-195',
     bloque: 'simple',
-    fuente: 'Caso práctico 14 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Se invierten 5.000 € al 3 % de interés simple anual durante 195 días (año civil). ¿Qué capital final se obtiene?',
     datos: [
       { texto: '5.000 €', clave: 'C_0', valor: '5.000 €' },
@@ -206,7 +207,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-semestral',
     bloque: 'simple',
-    fuente: 'Ejercicio de práctica (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Se invierten 20.000 € al 6 % de interés simple anual durante 2 años, con liquidación semestral de intereses. ¿Qué intereses se obtienen en total?',
     datos: [
       { texto: '20.000 €', clave: 'C_0', valor: '20.000 €' },
@@ -227,7 +228,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 's-act18',
     bloque: 'simple',
-    fuente: 'Actividad 18 del libro (la solución se calcula aquí)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Determina cuántos años, meses y días debe mantenerse una inversión de 12.000 € al 6 % de interés simple anual para obtener 14.850 €.',
     datos: [
       { texto: '12.000 €', clave: 'C_0', valor: '12.000 €' },
@@ -247,7 +248,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-4500',
     bloque: 'compuesta',
-    fuente: 'Caso práctico 15 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Calcula el capital final de invertir 4.500 € al 3 % de interés compuesto anual durante 7 años.',
     datos: [
       { texto: '4.500 €', clave: 'C_0', valor: '4.500 €' },
@@ -266,7 +267,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-9000',
     bloque: 'compuesta',
-    fuente: 'Caso del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Calcula el capital que se invirtió en una operación que duró 8 años y dio como resultado 9.000 € al 7 % de interés compuesto anual.',
     datos: [
       { texto: '8 años', clave: 'n', valor: '8 años' },
@@ -285,7 +286,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-30000',
     bloque: 'compuesta',
-    fuente: 'Caso práctico 17 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Calcula el tiempo que ha estado invertido un capital de 30.000 € al 10 % de interés compuesto anual si ha dado como resultado 35.000 €.',
     datos: [
       { texto: '30.000 €', clave: 'C_0', valor: '30.000 €' },
@@ -304,7 +305,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-50000',
     bloque: 'compuesta',
-    fuente: 'Caso del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Calcula el tipo de interés compuesto anual al que ha estado invertido un capital de 50.000 € durante 6 años si ha dado como resultado 52.000 €.',
     datos: [
       { texto: '50.000 €', clave: 'C_0', valor: '50.000 €' },
@@ -323,7 +324,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-mensual',
     bloque: 'compuesta',
-    fuente: 'Caso práctico 19 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Si el tipo de interés compuesto anual es el 10 %, ¿cuál es el tipo equivalente para periodos mensuales?',
     datos: [
       { texto: '10 %', clave: 'i', valor: '0,10 anual' },
@@ -342,7 +343,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'c-tae',
     bloque: 'compuesta',
-    fuente: 'Propuesta del análisis del tema (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Un depósito ofrece un 4 % TIN con capitalización trimestral y sin comisiones. ¿Cuál es su TAE?',
     datos: [
       { texto: '4 % TIN', clave: 'J_m', valor: '0,04' },
@@ -361,7 +362,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'd-pagare',
     bloque: 'descuento',
-    fuente: 'Propuesta del análisis del tema (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Descuentas hoy un pagaré de 6.000 € que vence dentro de 45 días. El banco aplica un descuento comercial del 5 % anual (año comercial). ¿Qué descuento te cobra?',
     datos: [
       { texto: '6.000 €', clave: 'N', valor: '6.000 € (nominal)' },
@@ -382,7 +383,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'd-racional',
     bloque: 'descuento',
-    fuente: 'Ejercicio de práctica (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Un capital de 6.000 € vence dentro de 45 días. Calcula su descuento racional simple al 5 % anual (año comercial).',
     datos: [
       { texto: '6.000 €', clave: 'C_n', valor: '6.000 € (al vencimiento)' },
@@ -403,7 +404,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'd-remesa',
     bloque: 'descuento',
-    fuente: 'Propuesta del análisis del tema (no es del libro)',
+    fuente: 'Ejercicio de práctica',
     enunciado: 'Liquida el descuento de un pagaré de 6.000 € a 45 días al 5 % de descuento comercial anual (año comercial), con una comisión del 1 % (mínimo 10 €) y 3 € de gastos de correo. ¿Qué valor líquido recibes?',
     datos: [
       { texto: '6.000 €', clave: 'N', valor: '6.000 €' },
@@ -423,7 +424,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'd-cp28',
     bloque: 'descuento',
-    fuente: 'Caso práctico 28 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Calcula el descuento compuesto racional de un capital de 12.500 € que vence dentro de 565 días al 4 % anual (año civil).',
     datos: [
       { texto: '12.500 €', clave: 'C_n', valor: '12.500 €' },
@@ -443,7 +444,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
   {
     id: 'd-cp29',
     bloque: 'descuento',
-    fuente: 'Caso práctico 29 del libro',
+    fuente: 'Caso resuelto',
     enunciado: 'Un efecto de 2.000 € vence dentro de 6 años. Calcula el descuento compuesto comercial al 5 %.',
     datos: [
       { texto: '2.000 €', clave: 'N', valor: '2.000 €' },

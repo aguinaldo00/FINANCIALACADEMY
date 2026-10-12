@@ -6,9 +6,8 @@
  * tests/content/formulasTema2.test.ts con src/domain/calculoFinanciero.ts.
  *
  * Etiquetas de procedencia de los ejemplos:
- *  - «Caso práctico N»: caso resuelto del libro.
- *  - «Actividad N»: enunciado del libro; la solución se calcula aquí.
- *  - «Propuesta del análisis» / «Ejercicio de práctica»: no son del libro.
+ *  - «Caso resuelto»: caso resuelto del libro (sin citar su número: el alumno no tiene el libro).
+ *  - «Ejercicio de práctica»: la solución se calcula aquí.
  */
 
 export type BloqueId = 'simple' | 'compuesta' | 'descuento';
@@ -119,7 +118,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'Tipo anual con n = 18 (meses)', bien: 'n en la unidad del tipo: 18 meses = 1,5 años.' },
       { mal: 'Dar I como resultado cuando piden el capital final', bien: 'I son solo los intereses. Lo que habrá al final es Cₙ = C₀ + I.' },
     ],
-    ejemplo: { fuente: 'Caso práctico 9 (libro)', texto: 'María invierte 15.000 € al 3 % de interés simple anual durante 3 años: I = 15.000 · 3 · 0,03 = 1.350 €. El libro imprime 1.450 €, una errata: el cálculo da 1.350 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: 'María invierte 15.000 € al 3 % de interés simple anual durante 3 años: I = 15.000 · 3 · 0,03 = 1.350 €. El libro imprime 1.450 €, una errata: el cálculo da 1.350 €.' },
   },
   {
     id: 'simple-montante',
@@ -142,7 +141,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'Cₙ = C₀ · n · i', bien: 'Eso son solo los intereses. Falta el 1: Cₙ = C₀ · (1 + n · i).' },
       { mal: 'Cₙ = C₀ · (1 + i)ⁿ en un ejercicio de simple', bien: 'La potencia es de compuesta. En simple, n multiplica a i.' },
     ],
-    ejemplo: { fuente: 'Caso del libro (Juana)', texto: 'Juana invierte 18.500 € al 4 % de interés simple anual durante 5 años: Cₙ = 18.500 · (1 + 5 · 0,04) = 22.200 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: 'Juana invierte 18.500 € al 4 % de interés simple anual durante 5 años: Cₙ = 18.500 · (1 + 5 · 0,04) = 22.200 €.' },
   },
   {
     id: 'simple-capital-inicial',
@@ -163,7 +162,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'C₀ = Cₙ · (1 + n · i)', bien: 'Para ir hacia atrás se divide, no se multiplica.' },
       { mal: 'C₀ = Cₙ / (n · i)', bien: 'No olvides el 1 del paréntesis: C₀ = Cₙ / (1 + n · i).' },
     ],
-    ejemplo: { fuente: 'Ejercicio de práctica (no es del libro)', texto: 'Para tener 5.400 € dentro de 2 años al 4 % simple: C₀ = 5.400 / (1 + 2 · 0,04) = 5.000 €.' },
+    ejemplo: { fuente: 'Ejercicio de práctica', texto: 'Para tener 5.400 € dentro de 2 años al 4 % simple: C₀ = 5.400 / (1 + 2 · 0,04) = 5.000 €.' },
   },
   {
     id: 'simple-tipo',
@@ -184,7 +183,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'Contestar «0,06 %»', bien: '0,06 en tanto por uno es 6 %.' },
       { mal: 'Dejar n = 18 y llamar «anual» al resultado', bien: 'Con n en meses el tipo sale mensual. Para anual, n = 1,5 años.' },
     ],
-    ejemplo: { fuente: 'Propuesta del análisis del tema (no es del libro)', texto: '8.000 € que en 18 meses producen 720 €: i = 720 / (8.000 · 1,5) = 0,06 → 6 % anual.' },
+    ejemplo: { fuente: 'Ejercicio de práctica', texto: '8.000 € que en 18 meses producen 720 €: i = 720 / (8.000 · 1,5) = 0,06 → 6 % anual.' },
   },
   {
     id: 'simple-tiempo',
@@ -193,7 +192,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     nombre: 'Tiempo',
     expresion: 'n = \\frac{C_n - C_0}{i · C_0}',
     calcula: 'n',
-    notas: { n: 'Sale en la unidad del tipo. Los decimales se pasan a meses (× 12) y a días (× 30), como en el libro.' },
+    notas: { n: 'Sale en la unidad del tipo. Los decimales se pasan a meses (× 12) y a días (× 30).' },
     datos: ['«un capital de 6.000 €» → C₀', '«al 3 % anual» → i = 0,03', '«para obtener 6.500 €» → Cₙ', '«¿cuánto tiempo? (años, meses y días)» → n'],
     cuando: ['Conoces el capital, el tipo y el objetivo; falta cuánto dura la operación.'],
     reconocer: 'Te dan C₀, Cₙ e i → te piden el tiempo.',
@@ -203,7 +202,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: '2,78 años = «2 años y 78 días»', bien: '0,78 · 12 = 9,36 meses; 0,36 · 30 = 10,8 → 2 años, 9 meses y 11 días.' },
       { mal: 'n = Cₙ / (i · C₀)', bien: 'Arriba van los intereses: Cₙ − C₀.' },
     ],
-    ejemplo: { fuente: 'Caso práctico 13 (libro)', texto: '6.000 € al 3 % para llegar a 6.500 €: n = 500 / (0,03 · 6.000) = 2,78 años = 2 años, 9 meses y 11 días.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '6.000 € al 3 % para llegar a 6.500 €: n = 500 / (0,03 · 6.000) = 2,78 años = 2 años, 9 meses y 11 días.' },
   },
   {
     id: 'simple-fraccionado',
@@ -226,7 +225,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'Usar 360 cuando el enunciado dice año civil', bien: 'Año civil → 365 días; año comercial → 360.' },
       { mal: 'iₘ = i / m en compuesta', bien: 'Solo en simple. En compuesta, iₘ = (1 + i)^(1/m) − 1.' },
     ],
-    ejemplo: { fuente: 'Caso práctico 14 (libro)', texto: '5.000 € al 3 % anual durante 195 días, año civil: i₃₆₅ = 0,03 / 365 → Cₙ = 5.000 · (1 + 0,03 / 365 · 195) = 5.080,14 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '5.000 € al 3 % anual durante 195 días, año civil: i₃₆₅ = 0,03 / 365 → Cₙ = 5.000 · (1 + 0,03 / 365 · 195) = 5.080,14 €.' },
   },
   /* ---------------------------------------------------------------------------- compuesta */
   {
@@ -251,7 +250,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { mal: 'Cₙ = 1.000 · (1 + 5)³', bien: 'El tipo en tanto por uno: (1 + 0,05)³.' },
       { mal: 'Redondear (1 + i)ⁿ a dos decimales', bien: 'Deja el factor completo (o con 6 decimales) y redondea solo el resultado.' },
     ],
-    ejemplo: { fuente: 'Caso práctico 15 (libro)', texto: '4.500 € al 3 % durante 7 años: Cₙ = 4.500 · 1,03⁷ = 5.534,43 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '4.500 € al 3 % durante 7 años: Cₙ = 4.500 · 1,03⁷ = 5.534,43 €.' },
   },
   {
     id: 'compuesta-intereses',
@@ -267,7 +266,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'compuesta-montante', texto: 'Es Cₙ − C₀ con C₀ factor común.' }],
     consejos: ['El corchete es el factor menos la semilla: lo que pasa de 1 por cada euro.'],
     errores: [{ mal: 'I = C₀ · i · n en compuesta', bien: 'Eso es de simple. En compuesta, I = Cₙ − C₀.' }],
-    ejemplo: { fuente: 'Caso práctico 15 (libro; los intereses se calculan aquí)', texto: 'I = 4.500 · (1,03⁷ − 1) = 1.034,43 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: 'I = 4.500 · (1,03⁷ − 1) = 1.034,43 €.' },
   },
   {
     id: 'compuesta-capital-inicial',
@@ -286,7 +285,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     ],
     consejos: ['Un año hacia atrás es dividir una vez entre (1 + i); n años, n veces: exponente −n.'],
     errores: [{ mal: 'C₀ = Cₙ · (1 + i)ⁿ', bien: 'Hacia atrás se divide: exponente negativo.' }],
-    ejemplo: { fuente: 'Caso del libro', texto: '9.000 € a 8 años al 7 %: C₀ = 9.000 · 1,07⁻⁸ = 5.238,08 €; I = 3.761,92 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '9.000 € a 8 años al 7 %: C₀ = 9.000 · 1,07⁻⁸ = 5.238,08 €; I = 3.761,92 €.' },
   },
   {
     id: 'compuesta-tiempo',
@@ -301,7 +300,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'compuesta-montante', texto: 'Es la fórmula 7 despejando el exponente.' }],
     consejos: ['El logaritmo convierte multiplicar en sumar: cuántos escalones de log(1 + i) caben en log(Cₙ / C₀).', 'Los decimales se pasan a meses y días igual que en simple.'],
     errores: [{ mal: 'n = (Cₙ − C₀) / (i · C₀) en compuesta', bien: 'Eso es de simple. En compuesta hay que usar logaritmos.' }],
-    ejemplo: { fuente: 'Caso práctico 17 (libro)', texto: '30.000 € al 10 % hasta 35.000 €: n = log 1,1667 / log 1,1 = 1,62 años = 1 año, 7 meses y 13 días.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '30.000 € al 10 % hasta 35.000 €: n = log 1,1667 / log 1,1 = 1,62 años = 1 año, 7 meses y 13 días.' },
   },
   {
     id: 'compuesta-tipo',
@@ -316,7 +315,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'compuesta-montante', texto: 'Es la fórmula 7 despejando i con una raíz.' }],
     consejos: ['El crecimiento total se reparte en n factores iguales: eso es la raíz de índice n.'],
     errores: [{ mal: 'i = √(Cₙ / C₀) − 1 siempre', bien: 'Es la raíz de índice n; solo es cuadrada si n = 2 (el libro dice «raíces cuadradas»: errata).' }],
-    ejemplo: { fuente: 'Caso del libro', texto: '50.000 € → 52.000 € en 6 años: i = 1,04^(1/6) − 1 = 0,006558 (0,66 % anual).' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '50.000 € → 52.000 € en 6 años: i = 1,04^(1/6) − 1 = 0,006558 (0,66 % anual).' },
   },
   {
     id: 'compuesta-equivalentes',
@@ -338,7 +337,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     ],
     consejos: ['Dos tipos son equivalentes si llevan el mismo capital al mismo sitio en el mismo tiempo.', '1 % mensual compuesto no es 12 % anual: es 12,68 %.'],
     errores: [{ mal: 'i₁₂ = 0,10 / 12', bien: 'En compuesta: i₁₂ = 1,10^(1/12) − 1 = 0,7974 %.' }],
-    ejemplo: { fuente: 'Caso práctico 19 (libro)', texto: '10 % anual: i₁₂ = (1 + 0,10)^(1/12) − 1 = 0,7974 % mensual.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '10 % anual: i₁₂ = (1 + 0,10)^(1/12) − 1 = 0,7974 % mensual.' },
   },
   {
     id: 'compuesta-comparacion',
@@ -361,7 +360,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     ],
     consejos: ['Antes del año, la recta va por encima; en el año, empatan; después, gana la curva.'],
     errores: [{ mal: '«La compuesta siempre da más»', bien: 'Con menos de un año da más la simple.' }],
-    ejemplo: { fuente: 'Caso práctico 20 (libro)', texto: '5.000 € al 3 % durante 195 días: simple 5.080,14 € y compuesta 5.079,59 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '5.000 € al 3 % durante 195 días: simple 5.080,14 € y compuesta 5.079,59 €.' },
   },
   {
     id: 'compuesta-tae',
@@ -377,7 +376,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'compuesta-equivalentes', texto: 'La TAE es el tanto anual equivalente a iₘ = Jₘ / m.' }],
     consejos: ['Pasos: TIN ÷ m → iₘ; (1 + iₘ)ᵐ − 1 → TAE.', 'Con comisiones, calcula lo que de verdad recibes y compáralo con lo invertido.'],
     errores: [{ mal: 'TAE = TIN', bien: 'Solo coinciden si se capitaliza una vez al año (m = 1).' }],
-    ejemplo: { fuente: 'Caso práctico 24 (libro)', texto: '10.000 € al 12 % TIN mensual: TAE = 1,01¹² − 1 = 12,68 %. Con comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '10.000 € al 12 % TIN mensual: TAE = 1,01¹² − 1 = 12,68 %. Con comisión de reembolso del 1,5 % se reciben 11.099,23 €: TAE real 10,99 %.' },
   },
   /* ---------------------------------------------------------------------------- descuento */
   {
@@ -398,7 +397,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     ],
     consejos: ['Tiene la misma forma que I = C₀ · n · i, pero sobre N y con d.'],
     errores: [{ mal: 'Calcularlo sobre el efectivo', bien: 'El comercial va sobre el nominal N.' }],
-    ejemplo: { fuente: 'Propuesta del análisis del tema (no es del libro)', texto: 'Pagaré de 6.000 € a 45 días al 5 %: Dc = 6.000 · 45/360 · 0,05 = 37,50 €; E = 5.962,50 €.' },
+    ejemplo: { fuente: 'Ejercicio de práctica', texto: 'Pagaré de 6.000 € a 45 días al 5 %: Dc = 6.000 · 45/360 · 0,05 = 37,50 €; E = 5.962,50 €.' },
   },
   {
     id: 'descuento-racional',
@@ -417,7 +416,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     ],
     consejos: ['Racional = el que «tiene sentido»: el descuento son los intereses del efectivo, C₀ · n · i.'],
     errores: [{ mal: 'Dr = Cₙ · n · i', bien: 'Eso es el comercial. El racional divide entre (1 + n · i).' }],
-    ejemplo: { fuente: 'Ejercicio de práctica (no es del libro)', texto: 'El mismo pagaré: Dr = 6.000 · 0,125 · 0,05 / 1,00625 = 37,27 €, menor que el comercial (37,50 €).' },
+    ejemplo: { fuente: 'Ejercicio de práctica', texto: 'El mismo pagaré: Dr = 6.000 · 0,125 · 0,05 / 1,00625 = 37,27 €, menor que el comercial (37,50 €).' },
   },
   {
     id: 'descuento-remesa',
@@ -432,7 +431,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'descuento-comercial', texto: 'El descuento de cada efecto es comercial.' }],
     consejos: ['Haz una tabla: nominal, días, descuento, comisión (aplica el mínimo), gastos; suma columnas y resta.'],
     errores: [{ mal: 'Olvidar el mínimo de la comisión', bien: 'Si el % da menos que el mínimo, se cobra el mínimo.' }],
-    ejemplo: { fuente: 'Propuesta del análisis del tema (no es del libro)', texto: '6.000 € a 45 días al 5 %, comisión 1 % (mín. 10 €) y 3 € de correo: 6.000 − 37,50 − 60 − 3 = 5.899,50 €.' },
+    ejemplo: { fuente: 'Ejercicio de práctica', texto: '6.000 € a 45 días al 5 %, comisión 1 % (mín. 10 €) y 3 € de correo: 6.000 − 37,50 − 60 − 3 = 5.899,50 €.' },
   },
   {
     id: 'descuento-compuesto-racional',
@@ -449,7 +448,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'compuesta-capital-inicial', texto: 'Es la fórmula 9: actualizar y restar.' }],
     consejos: ['Actualiza con (1 + i)⁻ⁿ y resta: lo que falta hasta Cₙ es el descuento.'],
     errores: [{ mal: 'Usar n en días con un tipo anual', bien: 'n = días / 365 (o 360 si lo dice el enunciado).' }],
-    ejemplo: { fuente: 'Caso práctico 28 (libro)', texto: '12.500 € a 565 días al 4 %: Dr = 12.500 · [1 − 1,04^(−565/365)] = 736,32 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '12.500 € a 565 días al 4 %: Dr = 12.500 · [1 − 1,04^(−565/365)] = 736,32 €.' },
   },
   {
     id: 'descuento-compuesto-comercial',
@@ -465,7 +464,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     relaciones: [{ id: 'descuento-comercial', texto: 'En simple se quita d · N cada año; aquí, d de lo que queda.' }],
     consejos: ['Racional: (1 + i)⁻ⁿ. Comercial: (1 − d)ⁿ. No los mezcles.'],
     errores: [{ mal: 'E = N · (1 + d)⁻ⁿ', bien: 'Eso es el racional con i. El comercial es (1 − d)ⁿ.' }],
-    ejemplo: { fuente: 'Caso práctico 29 (libro)', texto: '2.000 € a 6 años al 5 %: Dc = 2.000 · (1 − 0,95⁶) = 529,82 €; E = 1.470,18 €.' },
+    ejemplo: { fuente: 'Caso resuelto', texto: '2.000 € a 6 años al 5 %: Dc = 2.000 · (1 − 0,95⁶) = 529,82 €; E = 1.470,18 €.' },
   },
 ];
 

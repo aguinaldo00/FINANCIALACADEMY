@@ -53,7 +53,7 @@ export const conceptos: Concepto[] = [
       "No confundas la función esencial (una: canalizar ahorro → inversión) con la lista de seis funciones.",
       "Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit."
     ],
-    trampaExamen: "Test, pregunta 9: \"lograr la estabilidad mediante políticas expansivas de los mercados organizados\" suena bien, pero es falso.",
+    trampaExamen: "Pregunta trampa típica: \"lograr la estabilidad mediante políticas expansivas de los mercados organizados\" suena bien, pero es falso.",
     pregunta: {
       enunciado: "¿Cuál es la función ESENCIAL del sistema financiero?",
       opciones: [
@@ -83,7 +83,7 @@ export const conceptos: Concepto[] = [
       "Su gemela es la indirecta: allí hay un banco en medio y ahorrador e inversor no se conocen.",
       "Directa: entre agentes con déficit, que emiten instrumentos financieros, y agentes con superávit, que los adquieren."
     ],
-    trampaExamen: "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado (test, pregunta 8).",
+    trampaExamen: "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado.",
     pregunta: {
       enunciado: "Compras acciones en la salida a bolsa de una empresa. Es intermediación…",
       opciones: [
@@ -112,7 +112,7 @@ export const conceptos: Concepto[] = [
       "Gemela de la directa. Aquí el riesgo lo asume el banco, que cobra el margen.",
       "Indirecta: el agente con superávit ingresa su excedente en el banco y el banco lo hace llegar al agente con déficit."
     ],
-    trampaExamen: "La frase que buscan en la actividad 4: \"ambos agentes no tienen ningún contacto entre ellos\".",
+    trampaExamen: "La frase que buscan en el examen: \"ambos agentes no tienen ningún contacto entre ellos\".",
     pregunta: {
       enunciado: "Metes tus ahorros en un depósito. Es intermediación…",
       opciones: [
@@ -141,7 +141,7 @@ export const conceptos: Concepto[] = [
       "No es lo mismo que el medio de pago (dinero, tarjeta): el sistema es el camino, no el vehículo.",
       "Sustentar el sistema de pagos: garantizar que las transacciones se realicen de forma segura y eficiente."
     ],
-    trampaExamen: "Actividad 7: debe estar saneado porque, si falla, el dinero no llega y la economía se para.",
+    trampaExamen: "¿Por qué debe estar saneado? Porque, si falla, el dinero no llega y la economía se para.",
     pregunta: {
       enunciado: "¿Qué es un sistema de pagos?",
       opciones: [
@@ -201,7 +201,7 @@ export const conceptos: Concepto[] = [
       "Liquidez no es \"tener mucho dinero\": es lo fácil que es convertir algo en dinero.",
       "Las características principales de los instrumentos son el riesgo, la liquidez y la rentabilidad."
     ],
-    trampaExamen: "Actividad 12c: te piden identificar las tres en el producto que recomiendas. No te olvides de ninguna.",
+    trampaExamen: "Si te piden recomendar un producto financiero, identifica en él las tres: riesgo, liquidez y rentabilidad. No te olvides de ninguna.",
     pregunta: {
       enunciado: "La facilidad de convertir un activo en dinero es…",
       opciones: [
@@ -231,16 +231,16 @@ export const conceptos: Concepto[] = [
       "Mercado (el lugar) ≠ intermediario (quien media). En un mercado directo no hay intermediario.",
       "Mercado financiero: lugar o punto de encuentro donde se intercambian activos financieros y se fija su precio."
     ],
-    trampaExamen: "Test, pregunta 9: es función del mercado \"poner en contacto a los agentes que intervienen en las operaciones financieras\".",
+    trampaExamen: "Es función del mercado \"poner en contacto a los agentes que intervienen en las operaciones financieras\".",
     pregunta: {
-      enunciado: "Según el test del libro, es función de un mercado financiero:",
+      enunciado: "Es función de un mercado financiero:",
       opciones: [
         "Poner en contacto a los agentes",
         "Emitir billetes",
         "Estabilizar con políticas expansivas"
       ],
       indiceCorrecta: 0,
-      explicacion: "Pregunta 9 del test de repaso."
+      explicacion: "El mercado es el punto de encuentro donde quienes ofrecen y quienes demandan activos financieros se ponen en contacto para intercambiarlos y fijar su precio. Emitir billetes no es cosa del mercado, y lo de «políticas expansivas» es la opción trampa."
     }
   },
   {
@@ -261,7 +261,7 @@ export const conceptos: Concepto[] = [
       "No confundir primario/secundario (fase) con monetario/capitales (plazo del activo).",
       "Primarios: activos de nueva creación. Secundarios: activos ya existentes; ej.: la bolsa de valores."
     ],
-    trampaExamen: "Comprueba 14: en una emisión de letras del Tesoro los activos son nuevos → primario (y, por plazo, monetario).",
+    trampaExamen: "En una emisión de letras del Tesoro los activos son nuevos → primario (y, por plazo, monetario).",
     pregunta: {
       enunciado: "En una emisión de letras del Tesoro, el mercado es…",
       opciones: [
@@ -321,7 +321,7 @@ export const conceptos: Concepto[] = [
       "Se parece a la intermediación directa/indirecta del punto 2, pero aquí se clasifican mercados.",
       "Directos: sin mediadores. Intermediados: con intermediarios que cobran comisión."
     ],
-    trampaExamen: "Test, pregunta 8: \"uno de los participantes es un intermediario que cobra comisión\" describe un mercado intermediado, no directo.",
+    trampaExamen: "Ojo: \"uno de los participantes es un intermediario que cobra comisión\" describe un mercado intermediado, no directo.",
     pregunta: {
       enunciado: "Si un intermediario cobra comisión por poner en contacto a las partes, el mercado es…",
       opciones: [
@@ -330,7 +330,7 @@ export const conceptos: Concepto[] = [
         "Primario"
       ],
       indiceCorrecta: 1,
-      explicacion: "Pregunta 8 del test."
+      explicacion: "Si un intermediario pone en contacto a las partes a cambio de una comisión, el mercado es intermediado. En el directo no hay intermediarios: comprador y vendedor buscan la contrapartida por su cuenta."
     }
   },
   {
@@ -380,7 +380,7 @@ export const conceptos: Concepto[] = [
       "\"A plazo\" no es \"de capitales\": habla de cuándo se entrega, no de cuánto dura el activo.",
       "Al contado: entrega inmediata. A plazo: futuros y opciones."
     ],
-    trampaExamen: "Actividad 11: en las opciones se paga una prima por el derecho a comprar o vender en el futuro.",
+    trampaExamen: "En las opciones se paga una prima por el derecho a comprar o vender en el futuro.",
     pregunta: {
       enunciado: "Futuros y opciones son mercados…",
       opciones: [
@@ -432,7 +432,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff4f8b",
     definicion: "<b>Libertad</b> (sin barreras de entrada y salida), <b>profundidad</b> (muchas órdenes de compra y venta), <b>transparencia</b> (información fácil de obtener), <b>flexibilidad</b> (precios que reaccionan rápido) y <b>amplitud</b> (muchos activos negociados).",
-    ejemploReal: "Un inversor que quiere diversificar su cartera busca un mercado amplio (actividad 13).",
+    ejemploReal: "Un inversor que quiere diversificar su cartera busca un mercado amplio.",
     explicaciones: [
       "Un buen supermercado: entras y sales libremente, hay mucha gente comprando, los precios están a la vista, cambian rápido y hay de todo.",
       "Un buen mercado deja entrar a cualquiera, tiene mucha gente, no esconde nada, cambia rápido y tiene muchas cosas.",
@@ -470,7 +470,7 @@ export const conceptos: Concepto[] = [
       "No confundas las 5 características con las circunstancias del mercado perfecto (la lista ideal).",
       "No existe ningún mercado financiero perfecto: aparece como unidad de medida."
     ],
-    trampaExamen: "Caso práctico 2 y actividad 15: describirlo usando las 5 características.",
+    trampaExamen: "Para describirlo, usa las 5 características de los mercados: libertad, profundidad, transparencia, flexibilidad y amplitud.",
     pregunta: {
       enunciado: "¿Existe un mercado financiero perfecto?",
       opciones: [
@@ -500,7 +500,7 @@ export const conceptos: Concepto[] = [
       "Intermediario (entidad) ≠ mercado (lugar).",
       "Instituciones que median entre oferentes y demandantes de dinero y canalizan el ahorro."
     ],
-    trampaExamen: "Actividad 23: oferentes buscan seguridad y rentabilidad; demandantes, condiciones adaptadas. No las cruces.",
+    trampaExamen: "Oferentes buscan seguridad y rentabilidad; demandantes, condiciones adaptadas. No las cruces.",
     pregunta: {
       enunciado: "¿Qué buscan los oferentes de fondos en un intermediario?",
       opciones: [
@@ -539,7 +539,7 @@ export const conceptos: Concepto[] = [
         "Más competencia"
       ],
       indiceCorrecta: 1,
-      explicacion: "Lo dice el libro, pág. 15."
+      explicacion: "El margen es la diferencia entre el tipo que el intermediario cobra a quien pide dinero y el que paga a quien ahorra. Si es muy alto, intermediar sale caro: es señal de un sistema poco eficiente."
     }
   },
   {
@@ -557,10 +557,10 @@ export const conceptos: Concepto[] = [
       "Los bancarios fabrican fichas que valen en cualquier tienda; los no bancarios, vales que no sirven para pagar.",
       "Si con lo que te dan puedes pagar en una tienda, es bancario. Si no, no bancario.",
       "💳 medio de pago → bancario   ·   📄 valor pero no paga → no bancario",
-      "Las aseguradoras sí son intermediarios financieros, pero no bancarios (caso práctico 3).",
+      "Las aseguradoras sí son intermediarios financieros, pero no bancarios.",
       "Solo los intermediarios bancarios pueden crear dinero."
     ],
-    trampaExamen: "Test, pregunta 3: ¿quiénes pueden crear dinero? Los bancarios, no \"todos\".",
+    trampaExamen: "¿Quiénes pueden crear dinero? Los bancarios, no \"todos\".",
     pregunta: {
       enunciado: "¿Quiénes pueden crear dinero?",
       opciones: [
@@ -569,7 +569,7 @@ export const conceptos: Concepto[] = [
         "Ninguno"
       ],
       indiceCorrecta: 1,
-      explicacion: "Pregunta 3 del test."
+      explicacion: "Los intermediarios bancarios (por ejemplo, los bancos) emiten instrumentos que se aceptan como medio de pago: por eso crean dinero. Los no bancarios, como las aseguradoras, no."
     }
   },
   {
@@ -587,7 +587,7 @@ export const conceptos: Concepto[] = [
       "Entra trigo, sale pan.",
       "El banco recoge tu dinero de una forma y lo presta de otra distinta.",
       "Depósito (corto, a la vista) ─▶ 🏦 ─▶ Préstamo (largo)",
-      "Mediación (poner en contacto) ≠ transformación (cambiar el activo). Los bancos hacen las dos (pág. 22).",
+      "Mediación (poner en contacto) ≠ transformación (cambiar el activo). Los bancos hacen las dos.",
       "En la vía intermediada se produce transformación de los activos financieros."
     ],
     trampaExamen: "Pregunta típica: ¿qué doble tarea hacen hoy los bancos? Mediación y transformación.",
@@ -611,12 +611,12 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff8a3d",
     definicion: "Facilitan la mediación; <b>captan a corto plazo</b> (cuentas, depósitos) y <b>prestan a largo</b> (préstamos, obligaciones); <b>reducen el riesgo diversificando</b>; cobran comisión o margen; y transmiten información de confianza que agiliza las operaciones.",
-    ejemploReal: "Un banco con miles de clientes reparte el riesgo entre muchos préstamos (actividad 19).",
+    ejemploReal: "Un banco con miles de clientes reparte el riesgo entre muchos préstamos.",
     explicaciones: [
       "No poner todos los huevos en la misma cesta: el intermediario tiene muchas cestas.",
       "Recogen dinero que puede salir pronto y lo prestan para mucho tiempo, repartiéndolo para no jugárselo todo a una carta.",
       "Captan ⏱️ corto → prestan 🏔️ largo · reparten el riesgo 🧺",
-      "Reducen el riesgo, pero no lo eliminan: siempre está presente (pág. 17).",
+      "Reducen el riesgo, pero no lo eliminan: siempre está presente.",
       "Permiten reducir el riesgo diversificando las carteras de inversión."
     ],
     trampaExamen: "\"Minimizan el riesgo, pero este está permanentemente presente.\" Si una opción dice que lo eliminan, es falsa.",
@@ -649,7 +649,7 @@ export const conceptos: Concepto[] = [
       "BCE (una institución) ≠ Eurosistema (BCE + bancos centrales del euro).",
       "BCE: banco central de los países de la UE que han adoptado el euro."
     ],
-    trampaExamen: "Comprueba 2: ¿quién autoriza crear un banco nuevo? El BCE, a propuesta e informe del Banco de España.",
+    trampaExamen: "¿Quién autoriza crear un banco nuevo? El BCE, a propuesta e informe del Banco de España.",
     pregunta: {
       enunciado: "¿Quién da la autorización final para crear un banco?",
       opciones: [
@@ -709,7 +709,7 @@ export const conceptos: Concepto[] = [
       "La diferencia con el Eurosistema existe mientras haya países que conserven su moneda.",
       "SEBC: Sistema Europeo de Bancos Centrales."
     ],
-    trampaExamen: "Test, pregunta 7: SEBC es \"Sistema Europeo de Bancos Centrales\", no \"del Banco Central\" ni \"Español\".",
+    trampaExamen: "SEBC es \"Sistema Europeo de Bancos Centrales\", no \"del Banco Central\" ni \"Español\".",
     pregunta: {
       enunciado: "¿Qué significa SEBC?",
       opciones: [
@@ -718,7 +718,7 @@ export const conceptos: Concepto[] = [
         "Sistema Español de Bancos Centrales"
       ],
       indiceCorrecta: 1,
-      explicacion: "Pregunta 7 del test."
+      explicacion: "SEBC = Sistema Europeo de Bancos Centrales: el BCE más los bancos centrales de todos los países de la UE, tengan o no el euro."
     }
   },
   {
@@ -739,7 +739,7 @@ export const conceptos: Concepto[] = [
       "MUS vigila; MUR resuelve. Van siempre juntos.",
       "MUS: velar por la seguridad y solidez del sistema bancario europeo y aumentar la integración y estabilidad."
     ],
-    trampaExamen: "Actividad 22: la finalidad del supervisor único. Fecha clave: 4-11-2014.",
+    trampaExamen: "Su finalidad: velar por la seguridad y solidez de la banca europea. Fecha clave: 4-11-2014.",
     pregunta: {
       enunciado: "¿Desde cuándo funciona el MUS?",
       opciones: [
@@ -827,7 +827,7 @@ export const conceptos: Concepto[] = [
       "Es el banco de los bancos en España: los vigila y ayuda al jefe europeo del euro.",
       "🔑 SEBC: billetes · política monetaria · divisas · reservas · pagos   |   🔑 Nacional: supervisión · moneda metálica · tesorería · estadística · asesorar",
       "Ya no hace la política monetaria: la define el Eurosistema y él colabora.",
-      "Test 11: máxima autoridad en política monetaria en España, con autonomía respecto al Gobierno e integrada en el SEBC: el Banco de España."
+      "Máxima autoridad en política monetaria en España, con autonomía respecto al Gobierno e integrada en el SEBC: el Banco de España."
     ],
     trampaExamen: "Billetes = función como miembro del SEBC; moneda metálica = función nacional.",
     pregunta: {
@@ -849,25 +849,25 @@ export const conceptos: Concepto[] = [
       "link"
     ],
     color: "#60a5fa",
-    definicion: "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas) e ICO. Y <b>otras entidades</b> que también supervisa: EFC, entidades de dinero electrónico, sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago. Ojo: el libro (figura 1.19) aún pone los EFC y las EDE entre las entidades de crédito, pero los EFC dejaron de serlo con la Ley 5/2015 y las EDE, con la Ley 21/2011.",
-    ejemploReal: "Es el esquema de la figura 1.19, que se completa en la actividad 33.",
+    definicion: "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas) e ICO. Y <b>otras entidades</b> que también supervisa: EFC, entidades de dinero electrónico, sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago. Ojo: en esquemas antiguos aún aparecen los EFC y las EDE entre las entidades de crédito, pero los EFC dejaron de serlo con la Ley 5/2015 y las EDE, con la Ley 21/2011.",
+    ejemploReal: "Piénsalo como un árbol: arriba, el Banco de España; debajo, las entidades de crédito y las otras entidades que supervisa.",
     explicaciones: [
       "Un organigrama: el Banco de España es el director; las entidades de crédito, el equipo principal; las otras, los colaboradores.",
       "El Banco de España está arriba y vigila a todos los que tienen que ver con préstamos y depósitos.",
       "BdE → Entidades de crédito {de depósito: bancos · cajas · cooperativas} + ICO   ·   Otras {EFC · EDE · tasación · SGR · divisa · pago}",
       "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito pero no de depósito. Los EFC ya no son entidades de crédito (Ley 5/2015), aunque los supervisa el Banco de España.",
-      "Comprueba 3: entidades de depósito = bancos, cajas de ahorro y cooperativas de crédito."
+      "Entidades de depósito = bancos, cajas de ahorro y cooperativas de crédito."
     ],
-    trampaExamen: "El ICO es entidad de crédito (test, pregunta 5), pero no de depósito.",
+    trampaExamen: "El ICO es entidad de crédito, pero no de depósito.",
     pregunta: {
-      enunciado: "Según el test del libro, es entidad de crédito…",
+      enunciado: "¿Cuál de estas es una entidad de crédito?",
       opciones: [
         "El ICO",
         "Las compañías de seguros",
         "Las agencias de valores"
       ],
       indiceCorrecta: 0,
-      explicacion: "Pregunta 5 del test."
+      explicacion: "El ICO es entidad de crédito, aunque no de depósito. Las aseguradoras y las agencias de valores son intermediarios no bancarios: las supervisan la DGSFP y la CNMV."
     }
   },
   {
@@ -888,7 +888,7 @@ export const conceptos: Concepto[] = [
       "Su gemela es la caja de ahorro: hacen lo mismo, pero la caja no tiene ánimo de lucro.",
       "Bancos: sociedades anónimas con ánimo de lucro."
     ],
-    trampaExamen: "La diferencia banco-caja es la pregunta más repetida del tema (actividad 30 y actividad final de la síntesis). Y ojo: a los dos los supervisa el Banco de España.",
+    trampaExamen: "La diferencia banco-caja es la pregunta más repetida del tema. Y ojo: a los dos los supervisa el Banco de España.",
     pregunta: {
       enunciado: "La principal diferencia entre bancos y cajas de ahorro es…",
       opciones: [
@@ -918,7 +918,7 @@ export const conceptos: Concepto[] = [
       "Muchas siguen llamándose \"Caja\" o \"Caixa\" y son bancos. Cajamar es una cooperativa.",
       "Cajas de ahorro: no tienen ánimo de lucro, sus fines son sociales."
     ],
-    trampaExamen: "¿Cuántas quedan? Dos. ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No (Comprueba 30).",
+    trampaExamen: "¿Cuántas quedan? Dos. ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No.",
     pregunta: {
       enunciado: "¿Cuántas cajas de ahorro quedan en España?",
       opciones: [
@@ -946,7 +946,7 @@ export const conceptos: Concepto[] = [
       "Es un banco que pertenece a la gente que lo usa, como un club.",
       "🐝 socios ilimitados · beneficios: 20 % FRO (reserva) + 10 % FEP (educación y promoción)",
       "Cooperativa ≠ caja de ahorro: la cooperativa es de sus socios; la caja, una fundación.",
-      "Test 4: las sociedades cooperativas sirven a las necesidades financieras de sus socios mediante actividades de entidades de crédito."
+      "Las sociedades cooperativas sirven a las necesidades financieras de sus socios mediante actividades de entidades de crédito."
     ],
     trampaExamen: "20 % al FRO y 10 % al FEP, no al revés.",
     pregunta: {
@@ -970,7 +970,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff5a5a",
     definicion: "Entidad pública empresarial adscrita al Ministerio de Economía, Comercio y Empresa, con consideración de <b>agencia financiera del Estado</b>. Actúa como <b>banco público</b> (financiación a pymes y autónomos) y como <b>agencia financiera del Estado</b>. Sus deudas tienen garantía explícita, irrevocable, incondicional y directa del Estado.",
-    ejemploReal: "Grupo ICO: ICO, Axis (capital riesgo) y Fundación ICO. Línea del libro para comercio minorista: hasta 150.000 €, sin comisiones salvo por amortización anticipada y con un año de carencia.",
+    ejemploReal: "Grupo ICO: ICO, Axis (capital riesgo) y Fundación ICO. Ejemplo de línea de financiación para comercio minorista: hasta 150.000 €, sin comisiones salvo por amortización anticipada y con un año de carencia.",
     explicaciones: [
       "El banquero del pueblo: el banco del Estado que echa una mano a autónomos y pymes, con dos sombreros.",
       "Es el banco del Gobierno: presta a los pequeños negocios y ayuda cuando hay catástrofes.",
@@ -1006,7 +1006,7 @@ export const conceptos: Concepto[] = [
       "Es dinero que vive en una tarjeta o en el móvil y con el que puedes pagar en muchas tiendas.",
       "📱 EDE ──€──▶ 🏪 otra empresa (Exigible · Electrónico · aceptado por Extraños)",
       "No es un banco tradicional, aunque los bancos también pueden emitir dinero electrónico.",
-      "Comprueba 5: definir las EDE y poner dos ejemplos."
+      "Pregunta típica: define las EDE y pon dos ejemplos (Bnext, MoneyToPay…)."
     ],
     trampaExamen: "Ley 21/2011 = dinero electrónico. RDL 19/2018 = entidades de pago. No las cruces.",
     pregunta: {
@@ -1017,7 +1017,7 @@ export const conceptos: Concepto[] = [
         "La DGSFP"
       ],
       indiceCorrecta: 1,
-      explicacion: "Pág. 25 del libro."
+      explicacion: "Las EDE las autoriza el Banco de España, previo informe del SEPBLAC (el servicio que vigila el blanqueo de capitales). Ni la CNMV ni la DGSFP intervienen."
     }
   },
   {
@@ -1038,7 +1038,7 @@ export const conceptos: Concepto[] = [
       "FGD (depósitos) ≠ FOGAIN (inversiones en ESI y gestoras de IIC).",
       "Garantiza los depósitos en dinero con un límite de 100.000 €."
     ],
-    trampaExamen: "Test, pregunta 10: las opciones de 120.000 € o 150.000 € son trampas.",
+    trampaExamen: "Las opciones de 120.000 € o 150.000 € son trampas.",
     pregunta: {
       enunciado: "Límite del FGD por titular y entidad:",
       opciones: [
@@ -1047,7 +1047,7 @@ export const conceptos: Concepto[] = [
         "150.000 €"
       ],
       indiceCorrecta: 1,
-      explicacion: "Pregunta 10 del test."
+      explicacion: "El FGD (Fondo de Garantía de Depósitos) cubre hasta 100.000 € por titular y entidad. Las cifras de 50.000 € y 150.000 € son trampas."
     }
   },
   {
@@ -1060,7 +1060,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#3ddbd9",
     definicion: "Patrimonio de varios inversores (partícipes), <b>sin personalidad jurídica</b>, dividido en participaciones. Lo administra una <b>sociedad gestora</b> y una <b>entidad depositaria</b> custodia los valores. Su precio diario es el <b>valor liquidativo = patrimonio ÷ número de participaciones</b>.",
-    ejemploReal: "Caso práctico 5: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €. El fondo sube a 80.000 € → cada una vale 2.000 €.",
+    ejemploReal: "Ejemplo: 4 amigos ponen 10.000 € → 40 participaciones de 1.000 €. El fondo sube a 80.000 € → cada una vale 2.000 €.",
     explicaciones: [
       "Una cesta gigante donde mucha gente echa su dinero; un cocinero (gestora) decide qué comprar y un guardia (depositario) vigila la despensa.",
       "Muchas personas juntan su dinero y un experto lo invierte por todos.",
@@ -1090,15 +1090,15 @@ export const conceptos: Concepto[] = [
     ],
     color: "#a78bfa",
     definicion: "IIC con forma de <b>sociedad anónima</b>: por eso <b>no necesitan sociedad gestora</b>, pero <b>sí entidad depositaria</b>. <b>SICAV:</b> invierte en activos financieros; sus socios son accionistas y sus acciones suelen cotizar en bolsa. <b>SII:</b> compra inmuebles urbanos para alquilarlos.",
-    ejemploReal: "La diferencia con los fondos está en la forma jurídica (pág. 27).",
+    ejemploReal: "La diferencia con los fondos está en la forma jurídica: las sociedades de inversión son sociedades anónimas.",
     explicaciones: [
       "El fondo es una cesta; la sociedad, un edificio-empresa del que los inversores son dueños.",
       "Es como un fondo, pero convertido en empresa con nombre propio.",
       "🏢 SA (accionistas) · gestora ✖ · depositaria ✔   ·   SICAV 📈 / SII 🏠",
       "Fondo: gestora ✔ y depositaria ✔. Sociedad: solo depositaria.",
-      "Comprueba 21: ¿necesitan gestora? No. ¿Depositaria? Sí."
+      "¿Necesitan gestora? No. ¿Depositaria? Sí."
     ],
-    trampaExamen: "Las supervisa la CNMV (actividad 20h), no el Banco de España.",
+    trampaExamen: "Las supervisa la CNMV, no el Banco de España.",
     pregunta: {
       enunciado: "Una SICAV necesita…",
       opciones: [
@@ -1157,7 +1157,7 @@ export const conceptos: Concepto[] = [
       "La sociedad de valores, además, opera por cuenta propia.",
       "Agencias de valores: operan únicamente por cuenta ajena."
     ],
-    trampaExamen: "Actividad 42: diferencia entre bróker y dealer, con un ejemplo de cada uno.",
+    trampaExamen: "Bróker ≠ dealer: la agencia de valores (bróker) opera solo por cuenta ajena, con las órdenes de sus clientes; la sociedad de valores (dealer) también opera por cuenta propia.",
     pregunta: {
       enunciado: "La agencia de valores opera…",
       opciones: [
@@ -1216,7 +1216,7 @@ export const conceptos: Concepto[] = [
       "EFC ≠ banco: los dos prestan, pero el EFC no capta depósitos.",
       "Obligaciones: informar al Banco de España, coeficiente de caja del BCE, coeficiente de garantía y normas con los clientes."
     ],
-    trampaExamen: "Test, pregunta 6: son EFC las sociedades de arrendamiento financiero (leasing). Y los supervisa el Banco de España.",
+    trampaExamen: "Son EFC las sociedades de arrendamiento financiero (leasing). Y los supervisa el Banco de España.",
     pregunta: {
       enunciado: "¿Qué tienen prohibido los EFC?",
       opciones: [
@@ -1274,9 +1274,9 @@ export const conceptos: Concepto[] = [
       "Pagas un poco cada mes y, si te pasa algo malo, te dan dinero.",
       "Tomador ─prima─▶ 🛡️ aseguradora ─indemnización─▶ beneficiario (si hay siniestro)",
       "Tomador (contrata y paga) ≠ asegurado (está expuesto) ≠ beneficiario (cobra).",
-      "Actividad 45: define tomador, prima e indemnización."
+      "Tomador: quien contrata el seguro y paga. Prima: lo que paga. Indemnización: lo que cobra el beneficiario si hay siniestro."
     ],
-    trampaExamen: "Son intermediarios financieros no bancarios (caso práctico 3), no \"otra cosa\".",
+    trampaExamen: "Son intermediarios financieros no bancarios, no \"otra cosa\".",
     pregunta: {
       enunciado: "Quien contrata el seguro y paga la prima es el…",
       opciones: [
@@ -1285,7 +1285,7 @@ export const conceptos: Concepto[] = [
         "Beneficiario"
       ],
       indiceCorrecta: 1,
-      explicacion: "Actividad 45."
+      explicacion: "El tomador contrata el seguro y paga la prima. El asegurado es quien está expuesto al riesgo, y el beneficiario, quien cobra la indemnización."
     }
   },
   {
@@ -1304,9 +1304,9 @@ export const conceptos: Concepto[] = [
       "Es quien vigila que nadie haga trampas en la bolsa.",
       "🔎📈 CNMV → bolsa · ESI · IIC",
       "CNMV (valores) ≠ Banco de España (entidades de crédito) ≠ DGSFP (seguros).",
-      "La CNMV supervisa las sociedades de inversión (tabla 1.6)."
+      "La CNMV supervisa las sociedades de inversión."
     ],
-    trampaExamen: "Actividad 20: sociedades de inversión → CNMV.",
+    trampaExamen: "Sociedades de inversión (SICAV y SII) → CNMV, no el Banco de España.",
     pregunta: {
       enunciado: "¿Quién supervisa las SICAV?",
       opciones: [
@@ -1315,7 +1315,7 @@ export const conceptos: Concepto[] = [
         "DGSFP"
       ],
       indiceCorrecta: 1,
-      explicacion: "Tabla 1.6."
+      explicacion: "Las SICAV (sociedades de inversión de capital variable) son instituciones de inversión colectiva, y a esas las supervisa la CNMV (Comisión Nacional del Mercado de Valores)."
     }
   },
   {
@@ -1328,15 +1328,15 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff5a5a",
     definicion: "<b>Dirección General de Seguros y Fondos de Pensiones</b>, adscrita al Ministerio de Economía: supervisa las compañías aseguradoras y los fondos de pensiones.",
-    ejemploReal: "Supervisa la idoneidad de los seguros que se venden en España (Comprueba 27).",
+    ejemploReal: "Supervisa la idoneidad de los seguros que se venden en España.",
     explicaciones: [
       "Un escudo partido en dos: una casa (seguros) y una persona mayor (pensiones).",
       "Vigila a las empresas de seguros y a los planes para cuando te jubiles.",
       "🛡️ DGSFP → 🏠 seguros · 👴 pensiones",
       "La DGSFP supervisa; la aseguradora es supervisada.",
-      "Supervisor de las compañías aseguradoras (tabla 1.6)."
+      "Supervisor de las compañías aseguradoras."
     ],
-    trampaExamen: "Actividad 20a: compañías aseguradoras → DGSFP.",
+    trampaExamen: "Compañías aseguradoras → DGSFP, no la CNMV ni el Banco de España.",
     pregunta: {
       enunciado: "¿Quién supervisa las aseguradoras?",
       opciones: [
@@ -1345,7 +1345,7 @@ export const conceptos: Concepto[] = [
         "Banco de España"
       ],
       indiceCorrecta: 1,
-      explicacion: "Tabla 1.6."
+      explicacion: "La DGSFP (Dirección General de Seguros y Fondos de Pensiones, del Ministerio de Economía) supervisa las compañías aseguradoras y los fondos de pensiones. La CNMV vigila la bolsa y los fondos de inversión, y el Banco de España, los bancos."
     }
   }
 ];

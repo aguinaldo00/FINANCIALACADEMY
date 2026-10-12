@@ -232,7 +232,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
       texto.innerHTML = enunciado(id, d!);
       nota.textContent = '';
     } else if (e === 'practica') {
-      origen.textContent = `Ejercicio aleatorio nº ${semilla()} · generado, no es del libro`;
+      origen.textContent = `Ejercicio aleatorio nº ${semilla()} · generado al azar`;
       texto.innerHTML = enunciado(id, d!);
       nota.textContent = 'La animación enseña su caso de ejemplo; tu ejercicio tiene otros datos.';
     } else {

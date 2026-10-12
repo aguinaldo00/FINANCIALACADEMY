@@ -105,7 +105,7 @@ function ejercicioCapitalFinal(): EjercicioPapel {
     id: 'papel-cn',
     nivel: 'completar',
     enunciado: 'Calcula el capital final de invertir 4.500 € al 3 % de interés compuesto anual durante 7 años.',
-    fuente: 'Caso práctico del libro · Cálculo del capital final',
+    fuente: 'Caso resuelto · Cálculo del capital final',
     ayuda: {
       datos: [['C₀', '4.500 €'], ['i', '0,03 anual'], ['n', '7 años'], ['Incógnita', 'Cₙ']],
       formula: FORMULAS['cn-comp'].expresion,
@@ -130,7 +130,7 @@ function ejercicioCapitalInicial(): EjercicioPapel {
     id: 'papel-c0',
     nivel: 'guiado',
     enunciado: 'Calcula el capital que se invirtió en una operación que duró 8 años y dio como resultado 9.000 € al 7 % de interés anual. Determina los intereses totales.',
-    fuente: 'Caso práctico del libro · Cálculo del capital inicial',
+    fuente: 'Caso resuelto · Cálculo del capital inicial',
     ayuda: { pista: 'Te dan el capital final: la incógnita es C₀. Escribe primero los datos con su símbolo.' },
     solucion: {
       pasos: [
@@ -153,7 +153,7 @@ function ejercicioTiempo(): EjercicioPapel {
     id: 'papel-n',
     nivel: 'solo',
     enunciado: 'Calcula el tiempo que ha estado invertido un capital de 30.000 € al 10 % de interés anual si ha dado como resultado 35.000 €. Exprésalo en años, meses y días.',
-    fuente: 'Caso práctico del libro · Cálculo del tiempo',
+    fuente: 'Caso resuelto · Cálculo del tiempo',
     ayuda: {},
     solucion: {
       pasos: [
@@ -174,7 +174,7 @@ function ejercicioTipo(): EjercicioPapel {
     id: 'papel-i',
     nivel: 'solo',
     enunciado: 'Calcula el tipo de interés al que ha estado invertido un capital de 50.000 € durante 6 años si ha dado como resultado 52.000 €.',
-    fuente: 'Caso práctico del libro · Cálculo del tipo de interés',
+    fuente: 'Caso resuelto · Cálculo del tipo de interés',
     ayuda: {},
     solucion: {
       pasos: [

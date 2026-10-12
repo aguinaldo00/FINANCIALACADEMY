@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CORRECCIONES_CONCEPTOS } from '../../src/content/temas/tema-01/correcciones.ts';
+import { type CampoCorregible, CORRECCIONES_CONCEPTOS } from '../../src/content/temas/tema-01/correcciones.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 import { validarTema } from '../../src/content/validate.ts';
 import { GLYPHS } from '../../src/icons/glyphs.ts';
@@ -9,7 +9,7 @@ import { ciudadLegacy, htmlLegacy, motorLegacy } from '../helpers/legacy.ts';
 const { DATA, G } = motorLegacy();
 
 /** Aplica al texto del prototipo las correcciones de exactitud registradas (y solo esas). */
-function corregido<T extends string | string[]>(conceptoId: string, campo: 'definicion' | 'explicaciones' | 'trampaExamen', valor: T): T {
+function corregido<T extends string | string[]>(conceptoId: string, campo: CampoCorregible, valor: T): T {
   return CORRECCIONES_CONCEPTOS.filter((c) => c.conceptoId === conceptoId && c.campo === campo).reduce<string | string[]>(
     (v, c) => (Array.isArray(v) ? v.map((x) => x.replace(c.antes, c.despues)) : v.replace(c.antes, c.despues)),
     valor,
@@ -41,7 +41,7 @@ describe('paridad de contenido con el prototipo', () => {
   it('cada corrección registrada existe en el prototipo y cambia algo', () => {
     for (const c of CORRECCIONES_CONCEPTOS) {
       const l = DATA.conceptos.find((x) => x.id === c.conceptoId)!;
-      const original = { definicion: l.c, explicaciones: l.o, trampaExamen: l.t }[c.campo];
+      const original = { definicion: l.c, ejemploReal: l.e, explicaciones: l.o, trampaExamen: l.t, enunciado: l.q[0], explicacion: l.q[3] }[c.campo];
       expect([original].flat().some((t) => t.includes(c.antes)), `${c.conceptoId} · ${c.campo}`).toBe(true);
       expect(c.antes).not.toBe(c.despues);
     }
@@ -58,10 +58,10 @@ describe('paridad de contenido con el prototipo', () => {
         iconos: l.ic,
         color: l.col,
         definicion: corregido(l.id, 'definicion', l.c),
-        ejemploReal: l.e,
+        ejemploReal: corregido(l.id, 'ejemploReal', l.e),
         explicaciones: corregido(l.id, 'explicaciones', l.o),
         trampaExamen: corregido(l.id, 'trampaExamen', l.t),
-        pregunta: { enunciado: l.q[0], opciones: l.q[1], indiceCorrecta: l.q[2], explicacion: l.q[3] },
+        pregunta: { enunciado: corregido(l.id, 'enunciado', l.q[0]), opciones: l.q[1], indiceCorrecta: l.q[2], explicacion: corregido(l.id, 'explicacion', l.q[3]) },
       });
     });
   });

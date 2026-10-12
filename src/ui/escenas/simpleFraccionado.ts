@@ -24,12 +24,12 @@ export const escenaFraccionadoSimple: Escena = {
   id: 'simple-fraccionado',
   titulo: 'Fraccionamiento del año en capitalización simple',
   duracion: 21,
-  descripcion: 'Una cosecha anual de 700 € (10.000 € al 7 %) se reparte en m partes iguales y el tipo también: iₘ = i / m. En 3 años hay 36 meses; las 36 cosechas de 58,33 € suman 2.100 €, como con años: I = C₀ · iₘ · n · m.',
+  descripcion: 'Una cosecha anual de 700 € (10.000 € al 7 %) se reparte en m partes iguales y el tipo también: iₘ = i / m. En 3 años hay 36 meses; iₘ = 0,07 / 12 = 0,005833 al mes, y las 36 cosechas de 58,33 € de interés (10.000 · 0,005833) suman 2.100 €, como con años: I = C₀ · iₘ · n · m.',
   caso: { i: '7 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'Con $C_0$ = 10.000 € al $i$ = 7 % anual, la cosecha de un año es $C_0 · i$ = 700 €.' },
-    { t: 2.8, texto: 'Si el año se divide en $m$ partes, la cosecha se reparte a partes iguales: $m$ = 2, 4, 12.' },
-    { t: 7.2, lectura: 10.4, texto: 'El tipo se reparte igual. En simple es proporcional: $i_m = \\frac{i}{m}$, y para meses $i_{12}$ = 0,07 / 12.' },
+    { t: 2.8, texto: 'Si el año se divide en $m$ partes, la cosecha (los euros de interés) se reparte a partes iguales: $m$ = 2, 4, 12.' },
+    { t: 7.2, lectura: 10.4, texto: 'El tipo se reparte igual. En simple es proporcional: $i_m = \\frac{i}{m}$, y para meses $i_{12}$ = 0,07 / 12 = 0,005833 al mes.' },
     { t: 10.6, texto: 'En $n$ = 3 años hay $n · m$ = 36 meses: el tiempo se cuenta en la unidad del tipo.' },
     { t: 14, lectura: 17.4, texto: '$I = C_0 · i_m · n · m$ = 10.000 · (0,07 / 12) · 36 = 2.100 €. Lo mismo que contando en años.' },
     { t: 17.6, texto: 'Con días, $m$ = 360 si el año es comercial y 365 si es civil. Lo dice el enunciado.' },
@@ -102,7 +102,8 @@ export const escenaFraccionadoSimple: Escena = {
         op = (k < 12 ? 1 : tramo(mesesTres * 36, k - 1, k)) * (1 - tramo(t, 14.9, 15.1));
         b.pintar(x, Y, ALTO, op, w);
       });
-      const textoBloque = m === 1 ? '700 €' : m === 2 ? '350 € cada mitad' : m === 4 ? '175 € cada trimestre' : '58,33 € cada mes';
+      // Los bloques son euros de interés, no el tipo: el tipo (0,005833 al mes) es la barra rosa.
+      const textoBloque = m === 1 ? '700 € de interés al año' : m === 2 ? '350 € de interés cada semestre' : m === 4 ? '175 € de interés cada trimestre' : '58,33 € de interés al mes';
       etBloque.pintar(X0 + ANO / 2, Y - ALTO - 18, (t < 2.8 ? tramo(t, 1.2, 1.7) : tramo(t, m === 2 ? 3.4 : m === 4 ? 4.8 : 6.2, (m === 2 ? 3.4 : m === 4 ? 4.8 : 6.2) + 0.4)) * fueraCerca, textoBloque);
 
       // El tipo: una barra rosa que se parte exactamente igual.
