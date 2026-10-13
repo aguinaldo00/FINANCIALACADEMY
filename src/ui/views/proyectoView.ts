@@ -1,4 +1,4 @@
-import { hrefAcademia, hrefInicio, hrefProyecto, hrefSesion, hrefTema2 } from '../../app/router.ts';
+import { hrefAcademia, hrefFormula, hrefInicio, hrefProyecto, hrefSesion, hrefTema2 } from '../../app/router.ts';
 import { montarEditorial, navegacionEditorial } from '../components/editorial.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -9,8 +9,8 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
   ${navegacionEditorial('noche', [{ texto: 'Academia', href: hrefAcademia() }, { texto: 'Sobre el proyecto' }], { sumario: false, proyecto: false })}
   <header class="pr-hero pr-hero-personal" id="arriba">
     <div class="pr-hero-texto">
-      <p class="ed-volanta">Financial Academy · En primera persona</p>
-      <h1 class="ed-titular"><span>Soy Georgi.</span><em>Me llaman Pepe.</em></h1>
+      <p class="ed-volanta">Financial Academy · El creador</p>
+      <h1 class="ed-titular"><span>Sobre mí</span></h1>
       <p class="ed-entradilla">Me llamo Georgi Angelov, aunque en Villarcayo casi todos me conocen como Pepe. Tengo 21 años y estoy en segundo de Administración y Finanzas.</p>
       <div class="ed-cta">
         <a class="ed-boton" href="${hrefAcademia()}"><small>Explora la herramienta</small>Elegir un mundo</a>
@@ -57,7 +57,7 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
       <p class="ed-volanta">02 · El origen</p>
       <h2 id="pr-origen-titulo">Por qué existe</h2>
     </header>
-    <p class="pr-origen-pregunta">Todo empezó con una pregunta: ¿de dónde sale el 1 en <span>C<sub>0</sub> · (1 + i · n)</span>?</p>
+    <p class="pr-origen-pregunta">Todo empezó con una pregunta: ¿de dónde sale el 1 en <a class="pr-formula-ficha" href="${hrefFormula('simple-montante')}" aria-label="Abrir la ficha de la fórmula de capital final o montante en interés simple"><span>C<sub>0</sub> · (1 + i · n)</span></a>?</p>
     <div class="pr-origen-texto">
       <p>En clase y en el libro las fórmulas llegan ya hechas. Hay letras por todas partes, logaritmos, tiempos que no se ven y muchos conceptos nuevos de golpe, todo en texto corrido. Se aprende a aplicar la fórmula, no a entenderla. Y casi no hay contenido actual que lo explique de otra forma.</p>
       <p>Además, a mí el papel no me funciona: me cuesta escribir y no consigo ordenarme. Con Excel, en cambio, nunca he tenido problemas. Así que decidí construir la herramienta que me habría gustado tener desde el principio.</p>

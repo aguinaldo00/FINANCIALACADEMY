@@ -90,6 +90,9 @@
 .pr-origen-pregunta{max-width:850px;margin:24px 0 0;color:var(--oro2);font:400 clamp(1.6rem,3vw,2.5rem)/1.25 var(--f-titulo)}
 .pr-origen-pregunta span{color:var(--ink);white-space:nowrap;font-size:.9em}
 .pr-origen-pregunta sub{font-size:.58em}
+.pr-origen-pregunta .pr-formula-ficha{color:inherit;text-decoration-color:rgba(224,178,94,.58);text-decoration-line:underline;text-decoration-thickness:1px;text-underline-offset:.12em;transition:color var(--anim),text-decoration-color var(--anim)}
+.pr-origen-pregunta .pr-formula-ficha:hover,.pr-origen-pregunta .pr-formula-ficha:focus-visible{color:var(--oro2);text-decoration-color:currentColor}
+.pr-origen-pregunta .pr-formula-ficha:focus-visible{outline:2px solid var(--oro2);outline-offset:4px;border-radius:2px}
 .pr-origen-texto{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,5vw,72px);margin-top:30px;padding-top:18px;border-top:1px solid var(--line2)}
 .pr-que-es-destacada{display:grid;grid-template-columns:minmax(150px,.45fr) minmax(0,1.55fr);gap:clamp(20px,4vw,58px);padding:28px 0;border-block:1px solid var(--line2)}
 .pr-que-es-destacada h3,.pr-que-es-tarjeta h3{margin:0;font:400 clamp(1.55rem,2.7vw,2.45rem)/1.08 var(--f-titulo)}
