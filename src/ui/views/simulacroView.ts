@@ -31,7 +31,7 @@ interface Config {
 }
 
 /**
- * Simulacro del tema: examen tipo test repartido por bloques según la predicción, una pregunta
+ * Simulacro del tema: examen tipo test repartido por bloques según los pesos orientativos, una pregunta
  * cada vez y sin corrección hasta el final. No cambia el dominio; los fallos van al repaso.
  */
 export function pintarSimulacro(ctx: ContextoVista, estado: EstadoEstudio, practica: EstadoPractica): void {
@@ -53,7 +53,7 @@ function inicio(raiz: HTMLElement, estado: EstadoEstudio, practica: EstadoPracti
         .join('')}</ol></div>`
     : '';
   const bloques = estado.tema.ampliacion?.bloques ?? [];
-  raiz.innerHTML = `<header class="sh"><div class="kick"><span class="pill k">${iconoUi('examen')} Simulacro</span><span class="pill">No cambia tu dominio · los fallos van a tu repaso</span></div><h1>Simulacro de examen</h1><p>Preguntas tipo test de todo el tema, repartidas según la predicción (${bloques.map((b) => `${nombreCortoBloque(b)} ${b.probabilidad} %`).join(' · ')}). La corrección llega al final.</p></header>
+  raiz.innerHTML = `<header class="sh"><div class="kick"><span class="pill k">${iconoUi('examen')} Simulacro</span><span class="pill">No cambia tu dominio · los fallos van a tu repaso</span></div><h1>Simulacro de examen</h1><p>Preguntas tipo test de todo el tema, repartidas según los pesos orientativos de tus apuntes (${bloques.map((b) => `${nombreCortoBloque(b)} ${b.probabilidad} %`).join(' · ')}). La corrección llega al final.</p></header>
 <div class="sim-config"><fieldset><legend>Número de preguntas</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="sim-n" value="${n}"${n === config.total ? ' checked' : ''}><span>${n}</span></label>`).join('')}</fieldset>
 <label class="sim-tiempo"><input type="checkbox" name="sim-t"${config.conTiempo ? ' checked' : ''}><span>Con tiempo (${SEGUNDOS_POR_PREGUNTA} s por pregunta)</span></label>
 <label class="sim-tiempo"><input type="checkbox" name="sim-c"${config.conConfianza ? ' checked' : ''}><span>Decir cómo de seguro estoy en cada respuesta</span></label>

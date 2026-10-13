@@ -1,4 +1,4 @@
-/* Predicción de examen: reparto, mapa (treemap), gráficos de barras, tabla y fichas con simulacro. */
+/* Pesos orientativos de estudio: reparto, mapa (treemap), gráficos, tabla y simulacros. */
 .ex{position:relative;
   --ex-of:#16a34a;--ex-pr:#3b82f6; /* validadas (dataviz) sobre #111 */
   --ex-sup:#151515;--ex-borde:var(--bg4);
@@ -125,7 +125,7 @@
   .ex-seg span{display:none}
 }
 
-/* Tarjeta de la portada que lleva a la predicción. */
+/* Tarjeta de la portada que lleva a los pesos orientativos. */
 .home-examen{display:grid;gap:6px;margin:34px 0 8px;padding:22px 24px;border-radius:24px;background:linear-gradient(135deg,#1a1405,#111 60%);border:1px solid #ffd23f55;color:var(--ink);text-decoration:none;transition:transform .15s,border-color .15s}
 .home-examen:hover{transform:translateY(-3px);border-color:var(--y)}
 .he-k{font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--y)}

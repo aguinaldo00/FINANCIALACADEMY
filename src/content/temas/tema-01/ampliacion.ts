@@ -1,4 +1,4 @@
-// Ampliación del Tema 1 a partir de los apuntes del alumno (resumen de la Unidad 1 y predicción de
+// Ampliación del Tema 1 a partir de los apuntes del alumno (resumen de la Unidad 1 y pesos orientativos de
 // examen que aportó el 02/10). No forma parte de DATA: el contenido del prototipo sigue intacto.
 // Las preguntas extra son de práctica y no cambian el dominio.
 // Los apartados 1 y 2 se completaron con el temario del libro (TEMA_1_GESTION_FINANC, 02/10): dinero,
@@ -13,7 +13,7 @@ const bloques: BloqueExamen[] = [
     id: 'intermediarios',
     titulo: 'Intermediarios financieros (bancarios y no bancarios)',
     probabilidad: 30,
-    formato: 'Es la parte con más peso del tema.',
+    formato: 'Bancos y entidades no bancarias: funciones, tipos y diferencias.',
     conceptoIds: [
       'intermediario', 'margen', 'tipos-int', 'transformacion', 'carac-int',
       'estructura-b', 'bancos', 'cajas', 'coop', 'ico', 'ede', 'fgd',
@@ -31,7 +31,7 @@ const bloques: BloqueExamen[] = [
     id: 'supervisores',
     titulo: 'Organismos supervisores (BCE, Banco de España, CNMV, DGSFP)',
     probabilidad: 25,
-    formato: 'Pregunta fija en tipo test o en ejercicios de emparejamiento.',
+    formato: 'Funciones y ámbitos de supervisión de organismos europeos y nacionales.',
     conceptoIds: ['bce', 'eurosistema', 'sebc', 'mus', 'mur', 'otras-ue', 'bde', 'cnmv', 'dgsfp'],
     claves: [
       'Quién vigila qué: Bolsa e IIC → CNMV; seguros y pensiones → DGSFP; banca y EFC → Banco de España.',
@@ -43,7 +43,7 @@ const bloques: BloqueExamen[] = [
     id: 'mercados',
     titulo: 'Clasificación de los mercados financieros',
     probabilidad: 20,
-    formato: 'Suele caer con conceptos cruzados o preguntas de verdadero/falso.',
+    formato: 'Funciones, clasificación y características de los mercados financieros.',
     conceptoIds: ['mercado', 'fase', 'activo', 'estructura-m', 'formalizacion', 'regulados-plazo', 'bolsas', 'caracteristicas-m', 'perfecto'],
     claves: [
       'Primario (activos nuevos, captación de fondos) frente a secundario (activos ya existentes, liquidez).',
@@ -56,7 +56,7 @@ const bloques: BloqueExamen[] = [
     id: 'activos',
     titulo: 'Activos financieros y el trinomio rentabilidad–riesgo–liquidez',
     probabilidad: 15,
-    formato: 'Relaciones entre variables y casos de Letras del Tesoro.',
+    formato: 'Activos financieros: rentabilidad, riesgo, liquidez y ejemplos.',
     conceptoIds: ['instrumento', 'rrl'],
     claves: [
       'A mayor riesgo o menor liquidez, mayor rentabilidad exigida.',
@@ -67,7 +67,7 @@ const bloques: BloqueExamen[] = [
     id: 'basicos',
     titulo: 'Conceptos básicos y flujo del dinero',
     probabilidad: 10,
-    formato: 'Suelen caer al principio del examen, en preguntas de opción múltiple muy directas.',
+    formato: 'Unidades económicas y canalización de recursos entre superávit y déficit.',
     conceptoIds: ['sf', 'funciones', 'directa', 'indirecta', 'pagos'],
     claves: [
       'Identificar unidades con superávit (ahorradores) y con déficit (inversores).',

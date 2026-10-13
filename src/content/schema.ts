@@ -74,16 +74,16 @@ export interface Tema {
  * las preguntas extra son de práctica.
  */
 
-/** Bloque temático del examen con su probabilidad estimada (dato de los apuntes, no de DATA). */
+/** Bloque temático con el peso orientativo recogido en los apuntes; no es una probabilidad real. */
 export interface BloqueExamen {
   id: string;
   titulo: string;
-  /** Probabilidad estimada de aparecer en el examen, en %. Los bloques suman 100. */
+  /** Peso orientativo para organizar el estudio, en %. Los bloques suman 100. */
   probabilidad: number;
   /** Cómo suele preguntarse. */
   formato: string;
   conceptoIds: string[];
-  /** "Qué te preguntarán con total seguridad". */
+  /** Ideas de los apuntes que conviene repasar. */
   claves: string[];
 }
 

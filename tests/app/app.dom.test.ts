@@ -522,11 +522,12 @@ describe('app en el navegador', () => {
     expect($('#c-bce').classList.contains('in')).toBe(true);
   });
 
-  it('#examen: predicción con los 5 bloques ordenados, gráficos, tabla y simulacro', () => {
+  it('#examen: pesos orientativos con 5 bloques, gráficos, tabla y simulacro', () => {
     navegar('#examen');
-    expect($('#mt').textContent).toBe('Predicción de examen');
+    expect($('#mt').textContent).toBe('Pesos orientativos');
+    expect($('.ex-cab h1').textContent).toBe('Pesos orientativos para organizar el estudio');
     expect($('.sl.on').getAttribute('href')).toBe('#examen');
-    // La predicción va al final del índice.
+    // Los pesos orientativos van al final del índice.
     expect($$('#rail a').slice(-6).map((a) => a.getAttribute('href'))).toEqual(['#sesion', '#examen', '#visual', '#simulacro', '#repaso', '#progreso']);
     expect($$('.ex-bloque .ex-pct').map((e) => e.textContent)).toEqual(['30 %', '25 %', '20 %', '15 %', '10 %']);
     // Cada concepto del tema aparece una vez en el mapa.

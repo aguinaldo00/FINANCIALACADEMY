@@ -26,7 +26,7 @@ export type Ruta =
 
 /**
  * Rutas: `#academia` (entrada, también sin hash), `#a/<asignatura>` (y `#temas`, la de Gestión
- * Financiera), `#tema/2`, `#tema/2/f/<fórmula>`, `#tema/2/<bloque>[/<fase>]`; del tema 1: `#inicio`, `#s/<sección>`, `#c/<concepto>`; y `#examen` (predicción),
+ * Financiera), `#tema/2`, `#tema/2/f/<fórmula>`, `#tema/2/<bloque>[/<fase>]`; del tema 1: `#inicio`, `#s/<sección>`, `#c/<concepto>`; y `#examen` (pesos orientativos),
  * `#simulacro`, `#repaso` (o `#repaso/<concepto>`), `#sesion` (estudiar hoy) y `#progreso`, solo si el tema tiene ampliación
  * con bloques.
  * Un id desconocido lleva al inicio. Con `#c/…` no se vuelve arriba porque se hace scroll al concepto.

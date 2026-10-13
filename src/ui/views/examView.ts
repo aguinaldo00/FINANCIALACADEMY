@@ -18,7 +18,7 @@ interface DatosBloque {
   oficiales: Pregunta[];
   practica: Pregunta[];
   dominio: number;
-  /** Probabilidad × lo que falta por dominar: dónde rinde más estudiar ahora. */
+  /** Peso orientativo × lo que falta por dominar: dónde conviene estudiar ahora. */
   prioridad: number;
   /** Color de identidad del bloque (el mismo en todos los gráficos de la vista). */
   color: string;
@@ -48,16 +48,16 @@ const tip = (html: string) => `data-tip="${encodeURIComponent(html)}"`;
 
 /* ------------------------------------------------------------ reparto */
 
-/** Barra 100 % apilada: cómo se reparte el examen entre los cinco bloques. */
+/** Barra 100 % apilada: reparto orientativo para organizar la práctica por bloques. */
 function reparto(datos: DatosBloque[]): string {
   const segmentos = datos
     .map(({ bloque: b, color }) => {
       const ancho = b.probabilidad >= 18 ? `<span>${corto(b)}</span>` : '';
-      return `<a class="ex-seg" href="#ex-${b.id}" style="flex-grow:${b.probabilidad};--c:${color}" ${tip(`<b>${b.titulo}</b><br>${b.probabilidad} % del examen (estimado)`)} aria-label="${b.titulo}: ${b.probabilidad} %"><b>${b.probabilidad} %</b>${ancho}</a>`;
+      return `<a class="ex-seg" href="#ex-${b.id}" style="flex-grow:${b.probabilidad};--c:${color}" ${tip(`<b>${b.titulo}</b><br>Peso orientativo: ${b.probabilidad} %`)} aria-label="${b.titulo}: peso orientativo ${b.probabilidad} %"><b>${b.probabilidad} %</b>${ancho}</a>`;
     })
     .join('');
   const leyenda = datos.map(({ bloque: b, color }) => `<li><i style="--c:${color}"></i>${corto(b)} <b>${b.probabilidad} %</b></li>`).join('');
-  return `<figure class="ex-reparto"><figcaption>Reparto estimado del examen</figcaption><div class="ex-segs">${segmentos}</div><ul class="ex-ley-bloques">${leyenda}</ul></figure>`;
+  return `<figure class="ex-reparto"><figcaption>Reparto orientativo para organizar el estudio</figcaption><div class="ex-segs">${segmentos}</div><ul class="ex-ley-bloques">${leyenda}</ul></figure>`;
 }
 
 /* ------------------------------------------------------------ mapa (treemap) */
@@ -78,7 +78,7 @@ function mapa(datos: DatosBloque[], estado: EstadoEstudio): string {
     })
     .join('');
   const leyenda = `<ul class="ex-ley-dom"><li><i style="--d:${colorDominio(0)}"></i>Sin estudiar</li><li><i style="--d:${colorDominio(0.3)}"></i>Flojo</li><li><i style="--d:${colorDominio(0.6)}"></i>Regular</li><li><i style="--d:${colorDominio(1)}"></i>Dominado</li></ul>`;
-  return `<section class="ex-sec"><h2>Mapa del examen</h2><p class="ex-intro">Cada bloque ocupa el área de su probabilidad. Cada cuadradito es un concepto, con el color de tu dominio: pásale el ratón para ver cuál es y púlsalo para ir a su ficha.</p><div class="ex-treemap">${teselas}</div>${leyenda}</section>`;
+  return `<section class="ex-sec"><h2>Mapa de los bloques</h2><p class="ex-intro">El área de cada bloque representa su peso orientativo en tus apuntes. Cada cuadradito es un concepto, con el color de tu dominio: pásale el ratón para ver cuál es y púlsalo para ir a su ficha.</p><div class="ex-treemap">${teselas}</div>${leyenda}</section>`;
 }
 
 /* ------------------------------------------------------------ gráficos de barras */
@@ -96,12 +96,12 @@ function rejilla(max: number, paso: number): string {
   return `<div class="ex-rejilla" aria-hidden="true">${lineas.join('')}</div>`;
 }
 
-function graficoProbabilidad(datos: DatosBloque[]): string {
+function graficoPesoOrientativo(datos: DatosBloque[]): string {
   const max = 30;
   const filas = datos
-    .map(({ bloque: b, color }) => `<div class="ex-fila"><span class="ex-et">${corto(b)}</span><div class="ex-pista"><i class="ex-barra prob" style="width:${(b.probabilidad / max) * 100}%;--c:${color}" tabindex="0" ${tip(`<b>${b.titulo}</b><br>${b.probabilidad} % de probabilidad estimada<br><span>${b.formato}</span>`)} aria-label="${b.titulo}: ${b.probabilidad} %"></i><b class="ex-val">${b.probabilidad} %</b></div></div>`)
+    .map(({ bloque: b, color }) => `<div class="ex-fila"><span class="ex-et">${corto(b)}</span><div class="ex-pista"><i class="ex-barra prob" style="width:${(b.probabilidad / max) * 100}%;--c:${color}" tabindex="0" ${tip(`<b>${b.titulo}</b><br>Peso orientativo: ${b.probabilidad} %<br><span>${b.formato}</span>`)} aria-label="${b.titulo}: peso orientativo ${b.probabilidad} %"></i><b class="ex-val">${b.probabilidad} %</b></div></div>`)
     .join('');
-  return `<figure class="ex-graf rev"><figcaption><h3>Probabilidad de que caiga</h3><small>Estimada según tus apuntes · % del examen</small></figcaption><div class="ex-plot">${rejilla(max, 10)}${filas}</div>${eje(max, 10, ' %')}</figure>`;
+  return `<figure class="ex-graf rev"><figcaption><h3>Peso orientativo por bloque</h3><small>Según tus apuntes · úsalo para organizar el estudio</small></figcaption><div class="ex-plot">${rejilla(max, 10)}${filas}</div>${eje(max, 10, ' %')}</figure>`;
 }
 
 function graficoPreguntas(datos: DatosBloque[]): string {
@@ -128,7 +128,7 @@ function tabla(datos: DatosBloque[]): string {
   const filas = datos
     .map((d) => `<tr><th scope="row">${d.bloque.titulo}</th><td>${d.bloque.probabilidad} %</td><td>${d.oficiales.length}</td><td>${d.practica.length}</td><td>${porcentaje(d.dominio)}</td></tr>`)
     .join('');
-  return `<details class="ex-tabla"><summary>Ver los datos en tabla</summary><div class="ex-tw"><table><thead><tr><th scope="col">Bloque</th><th scope="col">Probabilidad</th><th scope="col">Compruébalo</th><th scope="col">Práctica</th><th scope="col">Tu dominio</th></tr></thead><tbody>${filas}</tbody></table></div></details>`;
+  return `<details class="ex-tabla"><summary>Ver los datos en tabla</summary><div class="ex-tw"><table><thead><tr><th scope="col">Bloque</th><th scope="col">Peso orientativo</th><th scope="col">Compruébalo</th><th scope="col">Práctica</th><th scope="col">Tu dominio</th></tr></thead><tbody>${filas}</tbody></table></div></details>`;
 }
 
 /* ------------------------------------------------------------ prioridades y fichas */
@@ -138,7 +138,7 @@ function porDondeEmpezar(datos: DatosBloque[]): string {
   if (!orden.length) return `<p class="ex-intro">Dominas todos los bloques. Repasa con los simulacros.</p>`;
   return `<ol class="ex-orden">${orden
     .slice(0, 3)
-    .map((d, i) => `<li style="--c:${d.color}"><a href="#ex-${d.bloque.id}"><span class="ex-on">${i + 1}</span><span><b>${d.bloque.titulo}</b><small>${d.bloque.probabilidad} % del examen · dominas el ${porcentaje(d.dominio)}</small></span></a></li>`)
+    .map((d, i) => `<li style="--c:${d.color}"><a href="#ex-${d.bloque.id}"><span class="ex-on">${i + 1}</span><span><b>${d.bloque.titulo}</b><small>${d.bloque.probabilidad} % orientativo · dominas el ${porcentaje(d.dominio)}</small></span></a></li>`)
     .join('')}</ol>`;
 }
 
@@ -148,24 +148,24 @@ function fichaBloque(d: DatosBloque, i: number, estado: EstadoEstudio): string {
   const chips = d.conceptos
     .map((c) => `<a class="ex-chip" href="${hrefConcepto(c.id)}" style="--d:${colorDominio(dominioConcepto(estado.progreso, c.id))}">${c.nombre}</a>`)
     .join('');
-  return `<article class="cc ex-ficha rev" id="ex-${b.id}" data-bloque="${b.id}" style="--c:${d.color}"><header class="ex-fh"><div class="ex-fpct"><b>${b.probabilidad}<small>%</small></b><span>#${i + 1} más probable</span></div><div><h2>${b.titulo}</h2><p class="ex-formato">${b.formato}</p></div><div class="ex-fdom">${anilloDominio(d.dominio, 64)}<small>tu dominio</small></div></header><h5>Qué te preguntarán</h5><ul class="ex-claves">${b.claves.map((k) => `<li>${k}</li>`).join('')}</ul><h5>Conceptos del bloque</h5><div class="ex-chips">${chips}</div><div class="acts"><button type="button" class="ab p" data-sim="abrir" aria-expanded="false">${iconoUi('diana')} Simulacro del bloque (${n} preguntas)</button></div><div class="pn p" hidden></div></article>`;
+  return `<article class="cc ex-ficha rev" id="ex-${b.id}" data-bloque="${b.id}" style="--c:${d.color}"><header class="ex-fh"><div class="ex-fpct"><b>${b.probabilidad}<small>%</small></b><span>peso orientativo</span></div><div><h2>${b.titulo}</h2><p class="ex-formato">${b.formato}</p></div><div class="ex-fdom">${anilloDominio(d.dominio, 64)}<small>tu dominio</small></div></header><h5>Qué conviene repasar</h5><ul class="ex-claves">${b.claves.map((k) => `<li>${k}</li>`).join('')}</ul><h5>Conceptos del bloque</h5><div class="ex-chips">${chips}</div><div class="acts"><button type="button" class="ab p" data-sim="abrir" aria-expanded="false">${iconoUi('diana')} Simulacro del bloque (${n} preguntas)</button></div><div class="pn p" hidden></div></article>`;
 }
 
 /**
- * Predicción de examen: reparto estimado (según los apuntes del alumno), mapa de bloques y
+ * Pesos orientativos para organizar el estudio: reparto recogido en los apuntes, mapa de bloques y
  * conceptos con el dominio, gráficos, tabla y un simulacro por bloque. El simulacro es práctica:
  * no cambia el dominio (que solo mide "Compruébalo" en cada ficha).
  */
 export function pintarExamen(ctx: ContextoVista, estado: EstadoEstudio, practica?: EstadoPractica): void {
   const datos = datosDe(estado);
   const fuente = estado.tema.ampliacion?.fuente ?? '';
-  ctx.pagina.innerHTML = `<div class="ex" data-examen><header class="sh ex-cab"><div class="kick"><span class="pill k">${iconoUi('barras')} Predicción de examen</span><span class="pill">Fuente: ${fuente}</span></div><h1>¿Qué caerá en el examen?</h1><p>Los cinco bloques del tema, ordenados por la probabilidad de que salgan. Es una estimación de tus apuntes, no un dato oficial.</p>${reparto(datos)}</header>
-<section class="ex-sec"><h2>Por dónde empezar</h2><p class="ex-intro">Lo que más cae y menos dominas.</p>${porDondeEmpezar(datos)}</section>
+  ctx.pagina.innerHTML = `<div class="ex" data-examen><header class="sh ex-cab"><div class="kick"><span class="pill k">${iconoUi('barras')} Pesos orientativos</span><span class="pill">Fuente: ${fuente}</span></div><h1>Pesos orientativos para organizar el estudio</h1><p>Los porcentajes reflejan la ponderación recogida en tus apuntes. Sirven para orientar el estudio; no son probabilidades reales ni se han calculado con exámenes anteriores.</p>${reparto(datos)}</header>
+<section class="ex-sec"><h2>Por dónde empezar</h2><p class="ex-intro">Los bloques con más peso orientativo y que menos dominas.</p>${porDondeEmpezar(datos)}</section>
 ${mapa(datos, estado)}
-<section class="ex-sec"><h2>En cifras</h2><div class="ex-grafs">${graficoProbabilidad(datos)}${graficoPreguntas(datos)}${graficoDominio(datos)}</div>${tabla(datos)}</section>
+<section class="ex-sec"><h2>En cifras</h2><div class="ex-grafs">${graficoPesoOrientativo(datos)}${graficoPreguntas(datos)}${graficoDominio(datos)}</div>${tabla(datos)}</section>
 <section class="ex-sec"><h2>Bloque a bloque</h2>${datos.map((d, i) => fichaBloque(d, i, estado)).join('')}</section>
 <div class="ex-tip" role="tooltip" hidden></div></div>`;
-  ctx.tituloMovil.textContent = 'Predicción de examen';
+  ctx.tituloMovil.textContent = 'Pesos orientativos';
 
   const raiz = ctx.pagina.querySelector<HTMLElement>('[data-examen]')!;
   conectarTooltip(raiz);

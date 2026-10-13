@@ -7,7 +7,7 @@ export const COLORES_BLOQUE = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55
 
 export const colorBloque = (indice: number): string => COLORES_BLOQUE[indice % COLORES_BLOQUE.length]!;
 
-/** Nombre corto de cada bloque para etiquetas (los de la predicción de los apuntes). */
+/** Nombre corto de cada bloque para etiquetas de los pesos orientativos de estudio. */
 const CORTO: Record<string, string> = {
   intermediarios: 'Intermediarios',
   supervisores: 'Supervisores',

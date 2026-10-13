@@ -45,7 +45,7 @@ describe('rutas hash', () => {
     expect(resolverRuta('#c/fgd', tema01)).toEqual({ vista: 'seccion', seccionId: '4.2A', conceptoFoco: 'fgd', scrollArriba: false });
   });
 
-  it('#examen abre la predicción de examen', () => {
+  it('#examen abre los pesos orientativos', () => {
     expect(resolverRuta('#examen', tema01)).toEqual({ vista: 'examen', scrollArriba: true });
     expect(resolverRuta('#examen', { ...tema01, ampliacion: undefined })).toEqual({ vista: 'inicio', scrollArriba: true });
     expect(resolverRuta('#simulacro', tema01)).toEqual({ vista: 'simulacro', scrollArriba: true });

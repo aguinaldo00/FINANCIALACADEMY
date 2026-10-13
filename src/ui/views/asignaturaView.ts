@@ -176,7 +176,7 @@ function cuaderno(estado: EstadoEstudio, practica: EstadoPractica | undefined): 
     <header><p class="ed-volanta">Cuaderno de estudio · Capítulo I</p><h2 id="ed-cuaderno-t">Para cuando toque <em>repasar</em></h2></header>
     <a class="ed-cuaderno-hoy" href="${hrefSesion()}"><small>Estudiar hoy</small><b>${n ? `${n} repasos pendientes` : 'Una sesión corta, a tu ritmo'}</b><span aria-hidden="true">→</span></a>
     <ul class="ed-cuaderno-lista">
-      ${item(hrefExamen(), 'Predicción de examen', 'Qué apartados pesan más y cómo vas en cada uno.')}
+      ${item(hrefExamen(), 'Pesos orientativos', 'Para organizar el estudio y consultar tu dominio por bloque.')}
       ${item(hrefSimulacro(), 'Simulacro', 'Preguntas con tiempo, como el día del examen.')}
       ${item(hrefRepaso(), 'Repaso', 'Lo que toca volver a ver hoy.', n ? ` <span class="ed-insignia" aria-label="${n} pendientes">${n}</span>` : '')}
       ${tema.ampliacion.infografias?.length ? item(hrefVisual(), 'Infografías', 'Los esquemas del capítulo, de un vistazo.') : ''}
