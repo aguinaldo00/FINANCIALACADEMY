@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 import { type CampoCorregible, CORRECCIONES_CONCEPTOS } from '../../src/content/temas/tema-01/correcciones.ts';
 import { tema01 } from '../../src/content/temas/tema-01/index.ts';
 import { validarTema } from '../../src/content/validate.ts';
@@ -85,3 +85,5 @@ describe('paridad de contenido con el prototipo', () => {
     expect(validarTema(tema01)).toEqual([]);
   });
 });
+
+

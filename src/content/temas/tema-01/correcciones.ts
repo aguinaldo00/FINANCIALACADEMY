@@ -35,7 +35,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "bde",
     "campo": "definicion",
-    "antes": "Es un <b>intermediario atípico</b>: financia a las Administraciones públicas, no a familias.",
+    "antes": "Banco central nacional, miembro del SEBC y del Eurosistema y <b>autoridad nacional de supervisión</b> (dentro del MUS desde 2014). Es un <b>intermediario atípico</b>: financia a las Administraciones públicas, no a familias. Lo regula la <b>Ley de Autonomía del Banco de España</b>.",
     "despues": "Banco central nacional, miembro del SEBC y del Eurosistema. Es <b>autoridad nacional de supervisión</b> y trabaja con las entidades de crédito y con el Estado, no con familias ni empresas. Gestiona la tesorería y la deuda pública. Distingue sus funciones nacionales —supervisión y moneda metálica— de las funciones europeas —política monetaria y billetes—.",
     "motivo": "El Banco de España no puede financiar a las Administraciones públicas.",
     "fuente": "Ley 13/1994, art. 13"
@@ -43,7 +43,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "estructura-b",
     "campo": "definicion",
-    "antes": "Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas), ICO, entidades de dinero electrónico y EFC. Y <b>otras entidades</b>: sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago.",
+    "antes": "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas), ICO, entidades de dinero electrónico y EFC. Y <b>otras entidades</b>: sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago.",
     "despues": "El Banco de España supervisa entidades de crédito y otras entidades financieras. <b>Entidades de depósito:</b> bancos, cajas de ahorro y cooperativas. El ICO es entidad de crédito, pero no de depósito. Entre las otras entidades supervisadas están EFC, EDE, SGR, sociedades de tasación y entidades de pago.",
     "motivo": "Los EFC y las EDE ya no son entidades de crédito.",
     "fuente": "Ley 5/2015 (preámbulo) · Ley 21/2011 · Banco de España"
@@ -70,12 +70,12 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "antes": "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · voluntario para sucursales de la UE",
     "despues": "☂️ Hasta 100.000 € por titular y entidad · FGD (depósitos) ≠ FOGAIN (inversiones)",
     "motivo": "Se retira el detalle sobre sucursales UE para centrar la ficha en el límite de cobertura y la diferencia con FOGAIN.",
-    "fuente": "Petición del usuario (13/10)",
+    "fuente": "Petición del usuario (13/10)"
   },
   {
     "conceptoId": "efc",
     "campo": "definicion",
-    "antes": "Entidades de crédito especializadas que <b>no pueden captar depósitos del público</b>. <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial: condiciones parecidas a los bancos con menos capital.",
+    "antes": "Entidades de crédito especializadas que <b>no pueden captar depósitos del público</b>. <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial: condiciones parecidas a los bancos con menos capital. Operaciones: <b>leasing, factoring, confirming</b>, consumo, hipotecas, avales y tarjetas.",
     "despues": "Entidades financieras especializadas en conceder financiación que <b>no pueden captar depósitos del público</b>. Las supervisa el Banco de España. Entre sus operaciones están el <b>leasing, factoring y confirming</b>, además del crédito al consumo, hipotecas, avales y tarjetas.",
     "motivo": "Los EFC ya no son entidades de crédito.",
     "fuente": "Ley 5/2015 (preámbulo) · Banco de España"
@@ -99,24 +99,8 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "funciones",
     "campo": "trampaExamen",
-    "antes": "Test, pregunta 9: \"lograr",
+    "antes": "Test, pregunta 9: \"lograr la estabilidad mediante políticas expansivas de los mercados organizados\" suena bien, pero es falso.",
     "despues": "La función esencial es una sola: canalizar recursos de las unidades con superávit hacia las de déficit. Fomentar el ahorro y sustentar los pagos son funciones complementarias, no la función esencial.",
-    "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
-    "fuente": "Petición del usuario (12/10)"
-  },
-  {
-    "conceptoId": "directa",
-    "campo": "trampaExamen",
-    "antes": " (test, pregunta 8).",
-    "despues": ".",
-    "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
-    "fuente": "Petición del usuario (12/10)"
-  },
-  {
-    "conceptoId": "indirecta",
-    "campo": "trampaExamen",
-    "antes": "La frase que buscan en la actividad 4:",
-    "despues": "La frase que buscan en el examen:",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -299,7 +283,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "mus",
     "campo": "trampaExamen",
-    "antes": "Actividad 22: la finalidad del supervisor único.",
+    "antes": "Actividad 22: la finalidad del supervisor único. Fecha clave: 4-11-2014.",
     "despues": "El MUS supervisa; el MUR organiza la resolución de entidades no viables. No confundas supervisión, garantía de depósitos y resolución.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
@@ -307,7 +291,15 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "bde",
     "campo": "explicaciones",
-    "antes": "Test 11: máxima autoridad",
+    "antes": "Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).",
+    "despues": "Dos escalas de trabajo: la europea, como miembro del SEBC, y la nacional, con tareas como supervisar entidades y gestionar tesorería y deuda pública.",
+    "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
+    "fuente": "Petición del usuario (12/10)"
+  },
+  {
+    "conceptoId": "bde",
+    "campo": "explicaciones",
+    "antes": "Test 11: máxima autoridad en política monetaria en España, con autonomía respecto al Gobierno e integrada en el SEBC: el Banco de España.",
     "despues": "Banco de España: banco central nacional integrado en el SEBC, con funciones propias de supervisión, moneda metálica, tesorería y deuda pública.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
@@ -361,14 +353,6 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "fuente": "Petición del usuario (12/10)"
   },
   {
-    "conceptoId": "cajas",
-    "campo": "trampaExamen",
-    "antes": " No (Comprueba 30).",
-    "despues": " No.",
-    "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
-    "fuente": "Petición del usuario (12/10)"
-  },
-  {
     "conceptoId": "coop",
     "campo": "explicaciones",
     "antes": "Test 4: las sociedades",
@@ -379,7 +363,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "ico",
     "campo": "ejemploReal",
-    "antes": "Línea del libro para comercio minorista",
+    "antes": "Grupo ICO: ICO, Axis (capital riesgo) y Fundación ICO. Línea del libro para comercio minorista: hasta 150.000 €, sin comisiones salvo por amortización anticipada y con un año de carencia.",
     "despues": "Una empresa puede recibir financiación del ICO a través de un banco privado o mediante financiación directa; en cada vía cambia quién estudia la operación y asume el riesgo.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
@@ -397,14 +381,6 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "campo": "explicacion",
     "antes": "Pág. 25 del libro.",
     "despues": "El dinero electrónico es un valor almacenado electrónicamente, exigible al emisor y aceptado como pago por terceros.",
-    "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
-    "fuente": "Petición del usuario (12/10)"
-  },
-  {
-    "conceptoId": "fgd",
-    "campo": "trampaExamen",
-    "antes": "Test, pregunta 10: las opciones",
-    "despues": "Las opciones",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -555,10 +531,10 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "directa",
     "campo": "trampaExamen",
-    "antes": "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado",
+    "antes": "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado (test, pregunta 8).",
     "despues": "En la intermediación directa, el ahorrador compra el instrumento emitido por la unidad con déficit. Que exista un intermediario que cobra comisión es otro criterio: clasifica el mercado como intermediado.",
-    "motivo": "La explicación remitía a un punto del libro.",
-    "fuente": "Petición del usuario (13/10)"
+    "motivo": "Citaba el libro (test y punto 3.2) en vez de explicarlo.",
+    "fuente": "Petición del usuario (12/10 y 13/10)"
   },
   {
     "conceptoId": "rrl",
@@ -625,34 +601,18 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "fuente": "Petición del usuario (13/10)"
   },
   {
-    "conceptoId": "directa",
-    "campo": "trampaExamen",
-    "antes": "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado.",
-    "despues": "En la intermediación directa, el ahorrador compra el instrumento emitido por la unidad con déficit. Que exista un intermediario que cobra comisión es otro criterio: clasifica el mercado como intermediado.",
-    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
-    "fuente": "Petición del usuario (13/10)"
-  },
-  {
     "conceptoId": "indirecta",
     "campo": "trampaExamen",
-    "antes": "La frase que buscan en el examen: \"ambos agentes no tienen ningún contacto entre ellos\".",
+    "antes": "La frase que buscan en la actividad 4: \"ambos agentes no tienen ningún contacto entre ellos\".",
     "despues": "En la intermediación indirecta, el ahorrador trata con el banco y el banco financia a la unidad con déficit: ambos agentes no tienen contacto entre sí.",
     "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
-    "fuente": "Petición del usuario (13/10)"
+    "fuente": "Petición del usuario (12/10 y 13/10)"
   },
   {
     "conceptoId": "bde",
     "campo": "ejemploReal",
     "antes": "Bajo su sede de Madrid hay una cámara acorazada a 36 metros que se inundaría ante un intento de asalto.",
     "despues": "Al repasar esta ficha, separa las funciones europeas del Banco de España como miembro del SEBC de las funciones nacionales que ejerce en España.",
-    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
-    "fuente": "Petición del usuario (13/10)"
-  },
-  {
-    "conceptoId": "bde",
-    "campo": "explicaciones",
-    "antes": "Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).",
-    "despues": "Dos escalas de trabajo: la europea, como miembro del SEBC, y la nacional, con tareas como supervisar entidades y gestionar tesorería y deuda pública.",
     "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
     "fuente": "Petición del usuario (13/10)"
   },
@@ -691,10 +651,10 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "cajas",
     "campo": "trampaExamen",
-    "antes": " ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No.",
+    "antes": " ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No (Comprueba 30).",
     "despues": "",
     "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
-    "fuente": "Petición del usuario (13/10)"
+    "fuente": "Petición del usuario (12/10 y 13/10)"
   },
   {
     "conceptoId": "cajas",
@@ -843,10 +803,10 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
   {
     "conceptoId": "fgd",
     "campo": "trampaExamen",
-    "antes": "Las opciones de 120.000 € o 150.000 € son trampas.",
+    "antes": "Test, pregunta 10: las opciones de 120.000 € o 150.000 € son trampas.",
     "despues": "El límite se aplica por titular y por entidad. Distingue este sistema de la resolución bancaria y de la protección de inversiones.",
     "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
-    "fuente": "Petición del usuario (13/10)"
+    "fuente": "Petición del usuario (12/10 y 13/10)"
   },
   {
     "conceptoId": "mus",
@@ -927,5 +887,5 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "despues": "Una cooperativa de crédito pertenece a sus socios y puede ofrecer servicios financieros tanto a ellos como a terceros.",
     "motivo": "Se eliminan el dato histórico de una patronal y una adscripción institucional que no ayudan a entender el concepto.",
     "fuente": "Petición del usuario (13/10)"
-  },
+  }
 ];
