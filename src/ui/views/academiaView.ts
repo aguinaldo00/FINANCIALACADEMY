@@ -1,8 +1,8 @@
-import { hrefAsignatura, hrefProgreso } from '../../app/router.ts';
+import { hrefAsignatura, hrefProgreso, hrefProyecto } from '../../app/router.ts';
 import { ASIGNATURAS, type Asignatura, disponible, NOMBRE_EXPERIENCIA } from '../../content/academia.ts';
 import { ICONOS_UI } from '../../icons/ui.ts';
 import { webglDisponible } from '../../scene/webgl.ts';
-import { introBarcoPendiente, reproducirIntroBarco } from '../intro/introBarco.ts';
+import { avisoInicialPendiente, reproducirAvisoInicial } from '../intro/avisoInicial.ts';
 import type { ContextoVista } from './context.ts';
 
 /*
@@ -51,6 +51,7 @@ const ICONO_CAB = {
   temario: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h3M10 6h10M4 12h3M10 12h10M4 18h3M10 18h7"/></svg>',
   ajustes: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
   perfil: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>',
+  proyecto: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg>',
 };
 /** Número de capítulo a dos dígitos ("01"–"06"). */
 const capitulo = (i: number) => String(i + 1).padStart(2, '0');
@@ -69,12 +70,13 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
         <button type="button" class="ac-acceso" data-ac-ajustes aria-expanded="false" aria-controls="ac-ajustes">${ICONO_CAB.ajustes}<span>Ajustes</span></button>
         <span class="ac-ajustes" id="ac-ajustes" data-ac-ajustes-panel role="group" aria-label="Ajustes" hidden>
           <span class="ac-rotulo">Ajustes</span>
-          <button type="button" class="ac-ajuste" data-ac-intro>Ver la intro<small>El barco y la llegada al selector</small></button>
+          <button type="button" class="ac-ajuste" data-ac-aviso>Ver aviso<small>Información de uso de la herramienta</small></button>
           <button type="button" class="ac-ajuste" data-ac-temario>Abrir el temario<small>Todas las secciones, sin pasar por el 3D</small></button>
           <span class="ac-ajuste-info"><span>Movimiento</span><b>${reducido ? 'Reducido' : 'Completo'}</b><small>Sigue la preferencia de tu sistema</small></span>
         </span>
       </span>
       <a class="ac-acceso" href="${hrefProgreso()}">${ICONO_CAB.perfil}<span>Mi progreso</span></a>
+      <a class="ac-acceso" href="${hrefProyecto()}" aria-label="Sobre el proyecto" title="Sobre el proyecto">${ICONO_CAB.proyecto}<span>Sobre el proyecto</span></a>
     </nav>
   </header>
   <header class="ac-cab">
@@ -107,12 +109,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
   let activo = true;
   let escena: import('../../scene/three/mundosScene.ts').EscenaMundos | null = null;
   let elegida = Math.max(0, ASIGNATURAS.findIndex(disponible));
-  let temporizadorRevela = 0;
-  let cancelarIntro: (() => void) | null = null;
-  // El selector avisa cuando está listo (3D o plano) para que la intro se retire sobre él.
-  let avisarListo: (es3d: boolean) => void = () => {};
-  const selectorListo = new Promise<boolean>((r) => (avisarListo = r));
-  const conIntro = introBarcoPendiente(reducido) && webglDisponible();
+  let cancelarAviso: (() => void) | null = null;
 
   // Paralaje del selector plano (sin 3D): el puntero inclina levemente el conjunto.
   const mover = (e: PointerEvent) => {
@@ -185,9 +182,9 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
     const paso = destino.closest<HTMLElement>('[data-ac-paso]');
     if (paso) return elegir(elegida + Number(paso.dataset.acPaso));
-    if (destino.closest('[data-ac-intro]')) {
+    if (destino.closest('[data-ac-aviso]')) {
       cerrarAjustes();
-      return lanzarIntro();
+      return lanzarAviso();
     }
     if (destino.closest('[data-ac-temario]')) {
       cerrarAjustes();
@@ -233,7 +230,6 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           elegida,
           {
             reducido,
-            llegada: conIntro,
             alElegir: elegir,
             alEntrar: (i) => {
               const a = ASIGNATURAS[i]!;
@@ -264,8 +260,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
           return new Promise<void>((listo) =>
             requestAnimationFrame(() =>
               requestAnimationFrame(() => {
-                listo();
-                if (!activo) return;
+                if (!activo) return listo();
                 raiz.classList.add('ac-3d');
                 raiz.classList.remove('ac-cargando');
                 // En 3D la cabecera es parte de la escena: sustituye a la barra común.
@@ -274,7 +269,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
                 raiz.querySelector<HTMLElement>('[data-ac-foco]')!.hidden = false;
                 raiz.querySelector<HTMLElement>('[data-ac-nav]')!.hidden = false;
                 pintarFoco();
-                avisarListo(true);
+                listo();
               }),
             ),
           );
@@ -287,32 +282,15 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
         // Sin escena: aparece el selector plano de reserva, con la barra común.
         raiz.classList.remove('ac-cargando');
         document.body.classList.remove('ac-cabecera-escena');
-        avisarListo(false);
       });
     limpiarPendiente = () => pendiente?.destruir();
-  } else avisarListo(false);
-
-  // Intro del barco: sola la primera vez; después, con "Ver intro". Al deslumbrar se revela esto.
-  function lanzarIntro(): void {
-    if (cancelarIntro) return;
-    raiz.classList.add('ac-llegada');
-    escena?.esperarLlegada();
-    cancelarIntro = reproducirIntroBarco({
-      reducido,
-      selectorListo,
-      alRevelar: () => {
-        escena?.llegar();
-        raiz.classList.add('ac-revelando');
-        raiz.classList.remove('ac-llegada');
-        temporizadorRevela = window.setTimeout(() => raiz.classList.remove('ac-revelando'), 2600);
-      },
-      alTerminar: () => {
-        cancelarIntro = null;
-        raiz.classList.remove('ac-llegada');
-      },
-    });
   }
-  if (conIntro) lanzarIntro();
+
+  function lanzarAviso(): void {
+    if (cancelarAviso) return;
+    cancelarAviso = reproducirAvisoInicial(() => { cancelarAviso = null; });
+  }
+  if (avisoInicialPendiente()) lanzarAviso();
 
   return () => {
     activo = false;
@@ -322,8 +300,7 @@ export function pintarAcademia(ctx: ContextoVista, ultimo: Readonly<Record<strin
     document.removeEventListener('pointerdown', fueraDeAjustes);
     document.body.classList.remove('ac-cabecera-escena');
     limpiarPendiente();
-    clearTimeout(temporizadorRevela);
-    cancelarIntro?.();
+    cancelarAviso?.();
     escena?.destruir();
     escena = null;
   };

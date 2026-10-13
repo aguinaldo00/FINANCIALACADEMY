@@ -17,6 +17,7 @@ import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
 import { pintarGlosario } from '../ui/views/glosarioView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
+import { pintarProyecto } from '../ui/views/proyectoView.ts';
 import { pintarSeccion } from '../ui/views/sectionView.ts';
 import { desplazarTemaDos, detenerTemaDos, pintarTemaDos, pintarRailTemaDos } from '../ui/views/topicsView.ts';
 import { ControladorMundo } from '../ui/world/worldController.ts';
@@ -99,12 +100,12 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     // Índice bajo demanda fuera del estudio (selector y asignatura) o si el usuario lo ha ocultado.
     // Todo el Tema 2 (índice, fichas y fases) usa la navegación editorial y el Sumario de papel.
     const indiceTemaDos = ruta.vista === 'tema2';
-    vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura' || indiceTemaDos;
+    vistaAcademia = ruta.vista === 'academia' || ruta.vista === 'asignatura' || ruta.vista === 'proyecto' || indiceTemaDos;
     aplicarIndice();
     document.body.dataset.vista = ruta.vista;
     // Identidad editorial (página a todo el ancho con su propia navegación): hoy, la portada de la
     // asignatura y todo el Tema 2. El resto de pantallas usa el esqueleto común.
-    document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || indiceTemaDos);
+    document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || ruta.vista === 'proyecto' || indiceTemaDos);
     // Fichas de fórmula y fases B–D del Tema 2: escritorio oscuro y cálido; la ficha, a todo el ancho (laboratorio).
     const pantallaT2 = ruta.vista === 'tema2' ? ruta.pantalla.tipo : null;
     document.body.classList.toggle('t2-escritorio', pantallaT2 === 'formula' || pantallaT2 === 'fase');
@@ -113,7 +114,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     detenerSimulacro();
     detenerVisual();
     if (ruta.vista !== 'tema2') detenerTemaDos();
-    vistaTemaUno = ruta.vista !== 'academia' && ruta.vista !== 'asignatura' && ruta.vista !== 'tema2';
+    vistaTemaUno = ruta.vista !== 'academia' && ruta.vista !== 'asignatura' && ruta.vista !== 'proyecto' && ruta.vista !== 'tema2';
     if (ruta.vista === 'academia') {
       mundo.desmontar();
       detenerVista = pintarAcademia(ctx, ultimos());
@@ -144,6 +145,16 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
       recordar();
       document.title = 'Introducción al cálculo financiero · Tema 2';
       if (ruta.scrollArriba) window.scrollTo(0, 0);
+      activarAparicion();
+      return;
+    }
+    if (ruta.vista === 'proyecto') {
+      mundo.desmontar();
+      detenerVista = pintarProyecto(ctx);
+      pintarMigas(migas, [{ texto: 'Academia', href: hrefAcademia() }]);
+      document.title = 'Sobre el proyecto · Financial Academy';
+      if (ruta.ancla) document.getElementById(ruta.ancla)?.scrollIntoView();
+      else window.scrollTo(0, 0);
       activarAparicion();
       return;
     }
