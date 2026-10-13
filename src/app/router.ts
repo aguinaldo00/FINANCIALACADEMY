@@ -1,3 +1,4 @@
+import { PROYECTO_BLOQUEADO } from '../config/bloqueos.ts';
 import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../content/academia.ts';
 import type { Tema } from '../content/schema.ts';
 import { FASES_TEMA2, LECCIONES_TEMA2, type FaseTema2 } from '../content/temas/tema-02/index.ts';
@@ -35,7 +36,7 @@ export function resolverRuta(hash: string, tema: Tema): Ruta {
   const h = (hash || '#academia').slice(1);
   const scrollArriba = !h.startsWith('c/');
 
-  if (h === 'proyecto' || h.startsWith('proyecto/')) {
+  if (!PROYECTO_BLOQUEADO && (h === 'proyecto' || h.startsWith('proyecto/'))) {
     const anclaProyecto = h.slice('proyecto/'.length);
     return { vista: 'proyecto', ancla: h === 'proyecto' ? null : anclaProyecto || null, scrollArriba: h === 'proyecto' };
   }
