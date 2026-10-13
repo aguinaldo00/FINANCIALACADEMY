@@ -44,16 +44,16 @@ export const conceptos: Concepto[] = [
       "eye"
     ],
     color: "#3ddbd9",
-    definicion: "<b>Función esencial:</b> canalizar los recursos de las unidades con superávit hacia las de déficit. Además: analizar la viabilidad de los proyectos, fomentar el ahorro, sustentar el sistema de pagos, asignar eficientemente los recursos, contribuir a la estabilidad monetaria y financiera, y velar por las instituciones.",
+    definicion: "<span class=\"idea-principal\"><b>Función esencial:</b> canalizar los recursos desde las unidades con superávit hacia las unidades con déficit.</span><br><span class=\"idea-apoyo\"><b>Funciones complementarias:</b> analizar la viabilidad · fomentar el ahorro · sustentar los pagos · asignar recursos eficientemente · contribuir a la estabilidad monetaria y financiera · velar por las instituciones.</span>",
     ejemploReal: "El banco estudia tu plan de negocio antes de prestarte (viabilidad) y tu transferencia llega al momento (sistema de pagos).",
     explicaciones: [
       "Es fontanero y árbitro a la vez: hace que el dinero llegue y vigila que nadie rompa las tuberías.",
       "El sistema mira si los proyectos van a salir bien, anima a ahorrar, hace que los pagos lleguen y cuida que todo funcione sin sustos.",
       "Viabilidad · Ahorro · Pagos · Asignación · Estabilidad · Vigilancia → \"Ve A Pagar A Este Vendedor\"",
       "No confundas la función esencial (una: canalizar ahorro → inversión) con la lista de seis funciones.",
-      "Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit."
+      "<span class=\"idea-principal\">Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit.</span> <span class=\"idea-apoyo\">La complementan el ahorro, los pagos seguros, la asignación eficiente, la estabilidad y la vigilancia de las instituciones.</span>"
     ],
-    trampaExamen: "Pregunta trampa típica: \"lograr la estabilidad mediante políticas expansivas de los mercados organizados\" suena bien, pero es falso.",
+    trampaExamen: "La función esencial es una sola: canalizar recursos de las unidades con superávit hacia las de déficit. Fomentar el ahorro y sustentar los pagos son funciones complementarias, no la función esencial.",
     pregunta: {
       enunciado: "¿Cuál es la función ESENCIAL del sistema financiero?",
       opciones: [
@@ -62,7 +62,7 @@ export const conceptos: Concepto[] = [
         "Supervisar a los bancos"
       ],
       indiceCorrecta: 1,
-      explicacion: "Las otras son funciones de organismos concretos."
+      explicacion: "La canalización de recursos desde unidades con superávit hacia unidades con déficit es la función esencial. Fomentar el ahorro y sustentar los pagos son funciones complementarias."
     }
   },
   {
@@ -83,7 +83,7 @@ export const conceptos: Concepto[] = [
       "Su gemela es la indirecta: allí hay un banco en medio y ahorrador e inversor no se conocen.",
       "Directa: entre agentes con déficit, que emiten instrumentos financieros, y agentes con superávit, que los adquieren."
     ],
-    trampaExamen: "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado.",
+    trampaExamen: "En la intermediación directa, el ahorrador compra el instrumento emitido por la unidad con déficit. Que exista un intermediario que cobra comisión es otro criterio: clasifica el mercado como intermediado.",
     pregunta: {
       enunciado: "Compras acciones en la salida a bolsa de una empresa. Es intermediación…",
       opciones: [
@@ -112,7 +112,7 @@ export const conceptos: Concepto[] = [
       "Gemela de la directa. Aquí el riesgo lo asume el banco, que cobra el margen.",
       "Indirecta: el agente con superávit ingresa su excedente en el banco y el banco lo hace llegar al agente con déficit."
     ],
-    trampaExamen: "La frase que buscan en el examen: \"ambos agentes no tienen ningún contacto entre ellos\".",
+    trampaExamen: "En la intermediación indirecta, el ahorrador trata con el banco y el banco financia a la unidad con déficit: ambos agentes no tienen contacto entre sí.",
     pregunta: {
       enunciado: "Metes tus ahorros en un depósito. Es intermediación…",
       opciones: [
@@ -193,7 +193,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff5a5a",
     definicion: "<b>Riesgo:</b> probabilidad de que, al vencimiento, el emisor no pague. <b>Liquidez:</b> facilidad para convertirlo en dinero. <b>Rentabilidad:</b> capacidad de generar intereses.",
-    ejemploReal: "⚠ Datos orientativos que pueden haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
+    ejemploReal: "Al comparar dos inversiones, valora qué puedes perder (riesgo), con qué facilidad recuperas el dinero (liquidez) y qué rendimiento esperas (rentabilidad).",
     explicaciones: [
       "Riesgo: que tu amigo no te devuelva el dinero. Liquidez: un billete frente a un piso (uno se gasta ya, el otro tarda meses en venderse). Rentabilidad: lo que te paga tu dinero por trabajar.",
       "¿Me lo devolverán? (riesgo) ¿Puedo recuperarlo rápido? (liquidez) ¿Cuánto me da? (rentabilidad)",
@@ -641,7 +641,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#60a5fa",
     definicion: "Banco central de los países de la UE que han adoptado el euro. Mantiene la <b>estabilidad de precios</b> (el poder adquisitivo del euro) e instrumenta la política monetaria. Da la <b>autorización final para crear nuevas entidades de crédito</b>.",
-    ejemploReal: "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. La cifra de países puede haber cambiado: desde el 1-1-2026 Bulgaria usa el euro y son 21.",
+    ejemploReal: "Cuando los precios suben en la zona euro, la política monetaria común busca preservar la estabilidad de precios.",
     explicaciones: [
       "El cerebro que manda sobre el euro.",
       "Es el jefe del euro: cuida que las cosas no se encarezcan demasiado.",
@@ -730,7 +730,7 @@ export const conceptos: Concepto[] = [
       "bank"
     ],
     color: "#4ade80",
-    definicion: "Supervisor bancario único de la zona euro, impulsado en 2012 y en funcionamiento desde el <b>4 de noviembre de 2014</b>. Vela por la seguridad y solidez de la banca europea. Cuatro elementos: <b>regulación, supervisión continuada, medidas correctoras y régimen sancionador</b>.",
+    definicion: "Mecanismo de supervisión bancaria de la zona euro, liderado por el BCE. Su labor combina <b>regulación, supervisión continuada, medidas correctoras y régimen sancionador</b>.",
     ejemploReal: "Inspecciones in situ a un gran banco español.",
     explicaciones: [
       "El ojo europeo sobre los bancos: reglamento, mirada, tarjeta amarilla y tarjeta roja.",
@@ -739,16 +739,16 @@ export const conceptos: Concepto[] = [
       "MUS vigila; MUR resuelve. Van siempre juntos.",
       "MUS: velar por la seguridad y solidez del sistema bancario europeo y aumentar la integración y estabilidad."
     ],
-    trampaExamen: "Su finalidad: velar por la seguridad y solidez de la banca europea. Fecha clave: 4-11-2014.",
+    trampaExamen: "El MUS supervisa; el MUR organiza la resolución de entidades no viables. No confundas supervisión, garantía de depósitos y resolución.",
     pregunta: {
-      enunciado: "¿Desde cuándo funciona el MUS?",
+      enunciado: "¿Qué hace principalmente el MUS?",
       opciones: [
-        "1-1-1999",
-        "4-11-2014",
-        "1-11-2019"
+        "Supervisa a las entidades de crédito de la zona euro",
+        "Organiza la resolución de las entidades no viables",
+        "Garantiza los depósitos hasta 100.000 €"
       ],
-      indiceCorrecta: 1,
-      explicacion: "4 de noviembre de 2014."
+      indiceCorrecta: 0,
+      explicacion: "El MUS supervisa a las entidades de crédito de la zona euro; el MUR organiza la resolución y el FGD garantiza depósitos."
     }
   },
   {
@@ -820,14 +820,14 @@ export const conceptos: Concepto[] = [
       "key"
     ],
     color: "#60a5fa",
-    definicion: "Banco central nacional, miembro del SEBC y del Eurosistema y <b>autoridad nacional de supervisión</b> (dentro del MUS desde 2014). Es un <b>intermediario atípico</b>: no trabaja con familias ni empresas, sino con las entidades de crédito y con el Estado, al que lleva la tesorería y la deuda pública. La ley le <b>prohíbe prestar</b> a las Administraciones públicas (art. 13 de su Ley de Autonomía). Lo regula la <b>Ley de Autonomía del Banco de España</b>.",
-    ejemploReal: "Bajo su sede de Madrid hay una cámara acorazada a 36 metros que se inundaría ante un intento de asalto.",
+    definicion: "Banco central nacional, miembro del SEBC y del Eurosistema. Es <b>autoridad nacional de supervisión</b> y trabaja con las entidades de crédito y con el Estado, no con familias ni empresas. Gestiona la tesorería y la deuda pública. Distingue sus funciones nacionales —supervisión y moneda metálica— de las funciones europeas —política monetaria y billetes—.",
+    ejemploReal: "Al repasar esta ficha, separa las funciones europeas del Banco de España como miembro del SEBC de las funciones nacionales que ejerce en España.",
     explicaciones: [
-      "Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).",
+      "Dos escalas de trabajo: la europea, como miembro del SEBC, y la nacional, con tareas como supervisar entidades y gestionar tesorería y deuda pública.",
       "Es el banco de los bancos en España: los vigila y ayuda al jefe europeo del euro.",
       "🔑 SEBC: billetes · política monetaria · divisas · reservas · pagos   |   🔑 Nacional: supervisión · moneda metálica · tesorería · estadística · asesorar",
       "Ya no hace la política monetaria: la define el Eurosistema y él colabora.",
-      "Máxima autoridad en política monetaria en España, con autonomía respecto al Gobierno e integrada en el SEBC: el Banco de España."
+      "Banco de España: banco central nacional integrado en el SEBC, con funciones propias de supervisión, moneda metálica, tesorería y deuda pública."
     ],
     trampaExamen: "Billetes = función como miembro del SEBC; moneda metálica = función nacional.",
     pregunta: {
@@ -849,13 +849,13 @@ export const conceptos: Concepto[] = [
       "link"
     ],
     color: "#60a5fa",
-    definicion: "Arriba, el Banco de España. Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas) e ICO. Y <b>otras entidades</b> que también supervisa: EFC, entidades de dinero electrónico, sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago. Ojo: en esquemas antiguos aún aparecen los EFC y las EDE entre las entidades de crédito, pero los EFC dejaron de serlo con la Ley 5/2015 y las EDE, con la Ley 21/2011.",
+    definicion: "El Banco de España supervisa entidades de crédito y otras entidades financieras. <b>Entidades de depósito:</b> bancos, cajas de ahorro y cooperativas. El ICO es entidad de crédito, pero no de depósito. Entre las otras entidades supervisadas están EFC, EDE, SGR, sociedades de tasación y entidades de pago.",
     ejemploReal: "Piénsalo como un árbol: arriba, el Banco de España; debajo, las entidades de crédito y las otras entidades que supervisa.",
     explicaciones: [
       "Un organigrama: el Banco de España es el director; las entidades de crédito, el equipo principal; las otras, los colaboradores.",
       "El Banco de España está arriba y vigila a todos los que tienen que ver con préstamos y depósitos.",
       "BdE → Entidades de crédito {de depósito: bancos · cajas · cooperativas} + ICO   ·   Otras {EFC · EDE · tasación · SGR · divisa · pago}",
-      "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito pero no de depósito. Los EFC ya no son entidades de crédito (Ley 5/2015), aunque los supervisa el Banco de España.",
+      "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito, pero no capta depósitos. Los EFC y las EDE tampoco son entidades de depósito.",
       "Entidades de depósito = bancos, cajas de ahorro y cooperativas de crédito."
     ],
     trampaExamen: "El ICO es entidad de crédito, pero no de depósito.",
@@ -910,24 +910,24 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff4f8b",
     definicion: "Entidades de crédito <b>sin ánimo de lucro</b>, con forma jurídica de <b>fundación</b> y fines sociales. Sus beneficios no se reparten: se reinvierten en <b>obra social</b>. Su ámbito no supera una comunidad autónoma o un máximo de <b>10 provincias limítrofes</b>.",
-    ejemploReal: "En el año 2000 había más de 40. Hoy solo quedan dos: <b>Caixa Ontinyent</b> y <b>Colonya Caixa Pollença</b>.",
+    ejemploReal: "Para distinguir una caja de un banco privado, fíjate en su forma fundacional, la ausencia de reparto entre accionistas y el destino social de sus resultados.",
     explicaciones: [
-      "Una capilla con cepillo de limosna: lo que se recoge va a la comunidad. Y casi en ruinas: solo quedan dos.",
+      "Como una entidad bancaria organizada para atender fines sociales: sus beneficios no se reparten entre accionistas.",
       "Funciona como un banco, pero lo que gana lo da a cosas buenas para la gente.",
       "⛪ caja ─▶ beneficios ─▶ ❤️ obra social (nunca a dueños)",
-      "Muchas siguen llamándose \"Caja\" o \"Caixa\" y son bancos. Cajamar es una cooperativa.",
+      "Caja de ahorro ≠ cooperativa de crédito: la caja tiene forma fundacional; la cooperativa pertenece a sus socios.",
       "Cajas de ahorro: no tienen ánimo de lucro, sus fines son sociales."
     ],
-    trampaExamen: "¿Cuántas quedan? Dos. ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No.",
+    trampaExamen: "La diferencia clave es la forma jurídica y el destino de los resultados. No confundas una caja de ahorro con una cooperativa de crédito.",
     pregunta: {
-      enunciado: "¿Cuántas cajas de ahorro quedan en España?",
+      enunciado: "¿Qué rasgo distingue a las cajas de ahorro?",
       opciones: [
-        "Más de 40",
-        "2",
-        "10"
+        "Tienen forma fundacional y fines sociales",
+        "No pueden captar depósitos del público",
+        "No las supervisa el Banco de España"
       ],
-      indiceCorrecta: 1,
-      explicacion: "Caixa Ontinyent y Colonya Caixa Pollença."
+      indiceCorrecta: 0,
+      explicacion: "La caja tiene forma fundacional y destina sus resultados a fines sociales; una cooperativa pertenece a sus socios."
     }
   },
   {
@@ -940,7 +940,7 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ffd23f",
     definicion: "Sociedades mercantiles privadas y cooperativas, con <b>número ilimitado de socios</b> y sin ánimo de lucro. Son entidades de depósito y sirven a las necesidades financieras de sus socios y de terceros. Deben destinar como mínimo el <b>20 % de beneficios al FRO</b> y al menos el <b>10 % al FEP</b>.",
-    ejemploReal: "Tipos: cajas rurales (la mayoría), cajas populares y cajas profesionales. Patronal: UNACC (1970). Dependen del Ministerio de Trabajo y Economía Social y del de Economía (Banco de España).",
+    ejemploReal: "Una cooperativa de crédito pertenece a sus socios y puede ofrecer servicios financieros tanto a ellos como a terceros.",
     explicaciones: [
       "Una colmena: el banco es de los socios que lo usan. El 20 % va al granero (reserva) y el 10 % a la escuela (educación).",
       "Es un banco que pertenece a la gente que lo usa, como un club.",
@@ -970,15 +970,15 @@ export const conceptos: Concepto[] = [
     ],
     color: "#ff5a5a",
     definicion: "Entidad pública empresarial adscrita al Ministerio de Economía, Comercio y Empresa, con consideración de <b>agencia financiera del Estado</b>. Actúa como <b>banco público</b> (financiación a pymes y autónomos) y como <b>agencia financiera del Estado</b>. Sus deudas tienen garantía explícita, irrevocable, incondicional y directa del Estado.",
-    ejemploReal: "Grupo ICO: ICO, Axis (capital riesgo) y Fundación ICO. Ejemplo de línea de financiación para comercio minorista: hasta 150.000 €, sin comisiones salvo por amortización anticipada y con un año de carencia.",
+    ejemploReal: "Una empresa puede recibir financiación del ICO a través de un banco privado o mediante financiación directa; en cada vía cambia quién estudia la operación y asume el riesgo.",
     explicaciones: [
       "El banquero del pueblo: el banco del Estado que echa una mano a autónomos y pymes, con dos sombreros.",
       "Es el banco del Gobierno: presta a los pequeños negocios y ayuda cuando hay catástrofes.",
-      "Banco público: mediación (riesgo: tu banco) · directa desde 10 M (riesgo: el ICO)   |   Agencia del Estado (el ICO no arriesga)",
+      "Banco público: mediación (riesgo de la entidad de crédito) · directa (riesgo del ICO)   |   Agencia financiera del Estado (riesgo del Estado)",
       "No es banco privado ni supervisor: es una entidad de crédito pública.",
       "Su objetivo es facilitar a las pymes el acceso a la financiación bancaria."
     ],
-    trampaExamen: "Líneas de mediación: el riesgo lo asume la entidad de crédito, no el ICO. Financiación directa: mínimo 10 millones.",
+    trampaExamen: "Distingue las vías por quién asume el riesgo: mediación → entidad de crédito; financiación directa → ICO; agencia financiera → Estado.",
     pregunta: {
       enunciado: "En las líneas de mediación del ICO, el riesgo lo asume…",
       opciones: [
@@ -993,31 +993,31 @@ export const conceptos: Concepto[] = [
   {
     id: "ede",
     seccionId: "4.2A",
-    nombre: "Entidades de dinero electrónico y de pago",
+    nombre: "Entidades de dinero electrónico (EDE)",
     iconos: [
       "phone",
       "card"
     ],
     color: "#a78bfa",
-    definicion: "Emiten <b>dinero electrónico</b>: exigible a su emisor, almacenado en soporte electrónico y aceptado como medio de pago por entidades distintas de la emisora. <b>Ley 21/2011.</b> Las autoriza el <b>Banco de España</b>, previo informe del SEPBLAC.",
-    ejemploReal: "⚠ Estos ejemplos pueden haber quedado desactualizados: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
+    definicion: "Emiten <b>dinero electrónico</b>: un saldo monetario exigible a su emisor, almacenado electrónicamente y aceptado como medio de pago por personas o entidades distintas del emisor.",
+    ejemploReal: "Ejemplo: recargas 20 € en un monedero electrónico y utilizas ese saldo para pagar en un comercio distinto de quien lo emitió.",
     explicaciones: [
       "Un monedero digital con alguien responsable detrás.",
       "Es dinero que vive en una tarjeta o en el móvil y con el que puedes pagar en muchas tiendas.",
       "📱 EDE ──€──▶ 🏪 otra empresa (Exigible · Electrónico · aceptado por Extraños)",
-      "No es un banco tradicional, aunque los bancos también pueden emitir dinero electrónico.",
-      "Pregunta típica: define las EDE y pon dos ejemplos (Bnext, MoneyToPay…)."
+      "No es lo mismo que un depósito bancario: es un saldo electrónico que puede emitir una entidad habilitada, incluidos los bancos.",
+      "Dinero electrónico: saldo emitido tras recibir fondos, almacenado electrónicamente y aceptado como pago por terceros."
     ],
-    trampaExamen: "Ley 21/2011 = dinero electrónico. RDL 19/2018 = entidades de pago. No las cruces.",
+    trampaExamen: "No confundas el dinero electrónico (el saldo emitido y almacenado) con el servicio de pago (la operación que permite transferir dinero).",
     pregunta: {
-      enunciado: "¿Quién autoriza la creación de una EDE?",
+      enunciado: "¿Qué rasgos definen el dinero electrónico?",
       opciones: [
-        "La CNMV",
-        "El Banco de España, previo informe del SEPBLAC",
-        "La DGSFP"
+        "Es exigible a su emisor, se almacena electrónicamente y lo aceptan terceros.",
+        "Es un depósito bancario que genera intereses y está cubierto por el FGD.",
+        "Son billetes emitidos por el comercio que los acepta."
       ],
-      indiceCorrecta: 1,
-      explicacion: "Las EDE las autoriza el Banco de España, previo informe del SEPBLAC (el servicio que vigila el blanqueo de capitales). Ni la CNMV ni la DGSFP intervienen."
+      indiceCorrecta: 0,
+      explicacion: "El dinero electrónico es un valor almacenado electrónicamente, exigible al emisor y aceptado como pago por terceros."
     }
   },
   {
@@ -1029,16 +1029,16 @@ export const conceptos: Concepto[] = [
       "euro"
     ],
     color: "#4ade80",
-    definicion: "Garantiza los depósitos en dinero (y valores) de las entidades de crédito hasta <b>100.000 € por titular y entidad</b>. Con el <b>Real Decreto Ley 16/2011</b>, los tres fondos (bancos, cajas, cooperativas) se unificaron en el FGDEC.",
+    definicion: "El Fondo de Garantía de Depósitos protege los depósitos en dinero hasta <b>100.000 € por titular y entidad</b>. No confundas la garantía de depósitos con la resolución de una entidad ni con los sistemas de protección de inversiones.",
     ejemploReal: "Tienes 150.000 € en un banco que quiebra: recuperas 100.000 €. Para clientes de ESI y gestoras de IIC existe el FOGAIN.",
     explicaciones: [
       "Un paraguas gigante con el rótulo \"100.000 €\": lo que sobresalga, se moja.",
       "Si tu banco se arruina, te devuelven tu dinero, pero como mucho 100.000 €.",
-      "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · las sucursales de bancos de otros países de la UE las cubre el fondo de su país",
+      "☂️ Hasta 100.000 € por titular y entidad · FGD (depósitos) ≠ FOGAIN (inversiones)",
       "FGD (depósitos) ≠ FOGAIN (inversiones en ESI y gestoras de IIC).",
       "Garantiza los depósitos en dinero con un límite de 100.000 €."
     ],
-    trampaExamen: "Las opciones de 120.000 € o 150.000 € son trampas.",
+    trampaExamen: "El límite se aplica por titular y por entidad. Distingue este sistema de la resolución bancaria y de la protección de inversiones.",
     pregunta: {
       enunciado: "Límite del FGD por titular y entidad:",
       opciones: [
@@ -1207,14 +1207,14 @@ export const conceptos: Concepto[] = [
       "car"
     ],
     color: "#ffd23f",
-    definicion: "Entidades financieras especializadas en prestar que <b>no pueden captar depósitos del público</b>. Con la <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial <b>dejaron de ser entidades de crédito</b>, pero las sigue supervisando el Banco de España. Operaciones: <b>leasing, factoring, confirming</b>, consumo, hipotecas, avales y tarjetas.",
+    definicion: "Entidades financieras especializadas en conceder financiación que <b>no pueden captar depósitos del público</b>. Las supervisa el Banco de España. Entre sus operaciones están el <b>leasing, factoring y confirming</b>, además del crédito al consumo, hipotecas, avales y tarjetas.",
     ejemploReal: "Leasing: alquilas una furgoneta con opción de compra. Factoring: cedes tus facturas para cobrar ya.",
     explicaciones: [
       "Una tienda de \"compra ahora, paga después\" que no tiene hucha para guardar tu dinero.",
       "Prestan dinero para cosas concretas, pero no te dejan guardar tu dinero con ellos.",
       "🏪 EFC: 🚗 leasing · 🧾➡️💰 factoring · confirming · consumo · tarjetas   |   🚫 depósitos",
       "EFC ≠ banco: los dos prestan, pero el EFC no capta depósitos.",
-      "Obligaciones: informar al Banco de España, coeficiente de caja del BCE, coeficiente de garantía y normas con los clientes."
+      "La clave para distinguirlas de una entidad de depósito: pueden conceder financiación, pero no captar depósitos del público."
     ],
     trampaExamen: "Son EFC las sociedades de arrendamiento financiero (leasing). Y los supervisa el Banco de España.",
     pregunta: {
@@ -1225,7 +1225,7 @@ export const conceptos: Concepto[] = [
         "Hacer leasing"
       ],
       indiceCorrecta: 1,
-      explicacion: "Ley 5/2015."
+      explicacion: "Los EFC pueden conceder financiación, pero no captar depósitos del público."
     }
   },
   {

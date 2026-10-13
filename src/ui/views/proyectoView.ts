@@ -1,4 +1,4 @@
-import { hrefAcademia, hrefFormula, hrefInicio, hrefProyecto, hrefSesion, hrefTema2 } from '../../app/router.ts';
+import { hrefAcademia, hrefFormula, hrefInicio, hrefNormativa, hrefProyecto, hrefSesion, hrefTema2 } from '../../app/router.ts';
 import { montarEditorial, navegacionEditorial } from '../components/editorial.ts';
 import type { ContextoVista } from './context.ts';
 
@@ -149,7 +149,7 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
     <a class="ed-boton" href="https://buymeacoffee.com/pepitofinanzas" target="_blank" rel="noopener noreferrer"><small>Apoyo voluntario</small>Invítame a un café ↗</a>
   </section>
 
-  <footer class="pr-pie"><span>Financial Academy · Proyecto personal y educativo</span><p>No sustituye al material oficial, los libros ni a las clases.</p><a href="${hrefProyecto('arriba')}">Volver arriba ↑</a></footer>
+  <footer class="pr-pie"><span>Financial Academy · Proyecto personal y educativo</span><p>No sustituye al material oficial, los libros ni a las clases.</p><a href="${hrefProyecto('arriba')}">Volver arriba ↑</a><a href="${hrefNormativa()}">Referencias normativas</a></footer>
 </div>`;
   return montarEditorial(ctx.pagina);
 }

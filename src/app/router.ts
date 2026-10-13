@@ -11,7 +11,7 @@ export type PantallaTema2 =
 
 export type Ruta =
   | { vista: 'inicio'; scrollArriba: boolean }
-  | { vista: 'examen' | 'simulacro' | 'repaso' | 'sesion' | 'progreso' | 'visual' | 'glosario'; scrollArriba: boolean }
+  | { vista: 'examen' | 'simulacro' | 'repaso' | 'sesion' | 'progreso' | 'visual' | 'glosario' | 'normativa'; scrollArriba: boolean }
   /** Repaso de un solo concepto (desde el modo noche del mapa). */
   | { vista: 'repaso'; conceptoId: string; scrollArriba: boolean }
   | { vista: 'seccion'; seccionId: string; conceptoFoco: string | null; scrollArriba: boolean }
@@ -55,6 +55,7 @@ export function resolverRuta(hash: string, tema: Tema): Ruta {
   if ((h === 'examen' || h === 'simulacro' || h === 'repaso' || h === 'sesion' || h === 'progreso') && tema.ampliacion?.bloques.length) return { vista: h, scrollArriba };
   if (h === 'visual' && tema.ampliacion?.infografias?.length) return { vista: 'visual', scrollArriba };
   if (h === 'glosario') return { vista: 'glosario', scrollArriba };
+  if (h === 'normativa') return { vista: 'normativa', scrollArriba };
   if (h.startsWith('repaso/') && tema.ampliacion?.bloques.length) {
     const id = h.slice(7);
     if (tema.conceptos.some((c) => c.id === id)) return { vista: 'repaso', conceptoId: id, scrollArriba };
@@ -111,3 +112,4 @@ export const hrefSesion = () => '#sesion';
 export const hrefProgreso = () => '#progreso';
 export const hrefVisual = () => '#visual';
 export const hrefGlosario = () => '#glosario';
+export const hrefNormativa = () => '#normativa';
