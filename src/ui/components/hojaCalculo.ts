@@ -168,8 +168,19 @@ function filasGuiadas(idFormula: string, leer: (campo: string) => string): strin
 }
 
 const filaPro = (k: number, leer: (campo: string) => string) => `<tr data-hoja-pro-fila="${k}">
-  <td>${campoHtml(`pro:nombre:${k}`, `Nombre de la variable ${k + 1}`, 'nombre', leer(`pro:nombre:${k}`))}</td>
-  <td>${campoHtml(`pro:valor:${k}`, `Valor de la variable ${k + 1}`, 'valor', leer(`pro:valor:${k}`))}</td></tr>`;
+  <td>${campoHtml(`pro:nombre:${k}`, `Nombre de la variable ${k + 1}`, 'variable', leer(`pro:nombre:${k}`))}</td>
+  <td>${campoHtml(`pro:valor:${k}`, `Valor de la variable ${k + 1}`, 'valor', leer(`pro:valor:${k}`))}</td>
+  <td class="hoja-pro-quitar"><button type="button" data-hoja-pro-quitar aria-label="Eliminar variable ${k + 1}" title="Eliminar variable">×</button></td></tr>`;
+
+function numeroFilasPro(leer: (campo: string) => string): number {
+  let filas = Math.max(1, Math.min(20, Number.parseInt(leer('pro:filas') || '3', 10) || 3));
+  for (let k = 0; k < 20; k++) if (leer(`pro:nombre:${k}`) || leer(`pro:valor:${k}`)) filas = Math.max(filas, k + 1);
+  return filas;
+}
+
+function filasProHtml(filas: number, leer: (campo: string) => string): string {
+  return Array.from({ length: filas }, (_, k) => filaPro(k, leer)).join('');
+}
 
 /** Guía de variables: qué es cada símbolo y cómo se escribe en la hoja Pro. */
 function guiaHtml(): string {
@@ -185,9 +196,7 @@ function guiaHtml(): string {
  */
 export function htmlHoja(prefijo: string, leer: (campo: string) => string = () => ''): string {
   const formula = leer('formula');
-  // Tres filas de variables, o las que tenga guardadas.
-  let filas = 3;
-  for (let k = 0; k < 20; k++) if (leer(`pro:nombre:${k}`) || leer(`pro:valor:${k}`)) filas = Math.max(filas, k + 1);
+  const filas = numeroFilasPro(leer);
   const modo = leer('hoja:modo') === 'pro' ? 'pro' : 'guiada';
   return `<div class="hoja-cal" data-hoja data-hoja-modo="${modo}">
     <div class="hoja-barra">
@@ -206,8 +215,8 @@ export function htmlHoja(prefijo: string, leer: (campo: string) => string = () =
     </section>
     <section class="hoja-seccion" data-hoja-seccion="pro"${modo === 'pro' ? '' : ' hidden'}>
       <p class="hoja-pro-ayuda">Tú decides: escribe tus variables con el nombre que quieras (C0, c0, C_0 o Co valen igual) y la fórmula con esas variables, con × o *, ÷ o /, ^ y paréntesis.</p>
-      <table class="hoja hoja-pro"><thead><tr><th scope="col">Variable</th><th scope="col">Valor</th></tr></thead><tbody data-hoja-pro-filas>${Array.from({ length: filas }, (_, k) => filaPro(k, leer)).join('')}</tbody></table>
-      <button type="button" class="btn-enlace hoja-mas" data-hoja-pro-mas>+ Añadir variable</button>
+      <table class="hoja hoja-pro"><thead><tr><th scope="col">Variable</th><th scope="col">Valor</th><th><span class="sr">Quitar</span></th></tr></thead><tbody data-hoja-pro-filas>${filasProHtml(filas, leer)}</tbody></table>
+      <div class="hoja-pro-acciones"><button type="button" class="btn-enlace hoja-mas" data-hoja-pro-mas>+ Añadir variable</button><button type="button" class="btn-enlace hoja-mas" data-hoja-pro-limpiar>Borrar variables</button></div>
       <label class="hoja-formula hoja-formula-pro"><span>Fórmula</span>${campoHtml('pro:formula', 'Tu fórmula', 'incógnita = expresión con tus variables', leer('pro:formula'))}</label>
     </section>
     <button type="button" class="hoja-calcular" data-lab-calcular>Calcular</button>
@@ -263,6 +272,26 @@ export function montarHoja(raiz: HTMLElement, o: OpcionesHoja = {}): () => void 
     hoja.querySelectorAll<HTMLElement>('[data-hoja-seccion]').forEach((s) => { s.hidden = s.dataset.hojaSeccion !== modo; });
     limpiar();
     o.alGuardar?.('hoja:modo', modo);
+  };
+
+  const leerFilasPro = () => [...hoja.querySelectorAll<HTMLElement>('[data-hoja-pro-fila]')].map((tr) => {
+    const k = tr.dataset.hojaProFila!;
+    return { nombre: valor(`pro:nombre:${k}`), valor: valor(`pro:valor:${k}`) };
+  });
+  const reconstruirFilasPro = (filas: { nombre: string; valor: string }[]) => {
+    const cuerpo = $('[data-hoja-pro-filas]');
+    const cantidad = Math.max(1, Math.min(20, filas.length));
+    const limite = Math.max(cuerpo.children.length, cantidad);
+    for (let k = 0; k < limite; k++) {
+      o.alGuardar?.(`pro:nombre:${k}`, filas[k]?.nombre ?? '');
+      o.alGuardar?.(`pro:valor:${k}`, filas[k]?.valor ?? '');
+    }
+    o.alGuardar?.('pro:filas', String(cantidad));
+    cuerpo.innerHTML = filasProHtml(cantidad, (campo) => {
+      const m = /^pro:(nombre|valor):(\d+)$/.exec(campo);
+      const fila = m ? filas[Number(m[2])] : undefined;
+      return m?.[1] === 'nombre' ? (fila?.nombre ?? '') : (fila?.valor ?? '');
+    });
   };
 
   /* Guiada: la fórmula elegida decide los datos; se calcula con su ley. */
@@ -338,8 +367,20 @@ export function montarHoja(raiz: HTMLElement, o: OpcionesHoja = {}): () => void 
     } else if (b.hasAttribute('data-hoja-pro-mas')) {
       const cuerpo = $('[data-hoja-pro-filas]');
       const k = cuerpo.children.length;
+      if (k >= 20) return;
       cuerpo.insertAdjacentHTML('beforeend', filaPro(k, () => ''));
+      o.alGuardar?.('pro:filas', String(k + 1));
       cuerpo.querySelector<HTMLInputElement>(`[data-campo="pro:nombre:${k}"]`)?.focus();
+    } else if (b.hasAttribute('data-hoja-pro-quitar')) {
+      const fila = b.closest<HTMLElement>('[data-hoja-pro-fila]');
+      if (!fila) return;
+      const filas = leerFilasPro();
+      const k = Number(fila.dataset.hojaProFila);
+      if (filas.length > 1) filas.splice(k, 1);
+      else filas[0] = { nombre: '', valor: '' };
+      reconstruirFilasPro(filas);
+    } else if (b.hasAttribute('data-hoja-pro-limpiar')) {
+      reconstruirFilasPro(leerFilasPro().map(() => ({ nombre: '', valor: '' })));
     } else if (b.hasAttribute('data-lab-calcular')) (hoja.dataset.hojaModo === 'pro' ? calcularModoPro : calcularGuiada)();
   };
   const alCambiar = (e: Event) => {
@@ -367,6 +408,7 @@ export function refrescarHoja(raiz: HTMLElement, leer: (campo: string) => string
   const f = select.value ? formulaPorId(select.value) : undefined;
   hoja.querySelector<HTMLElement>('[data-lab-formula-elegida]')!.innerHTML = f ? formulaHtml(f.expresion) : '';
   hoja.querySelector<HTMLElement>('[data-hoja-filas]')!.innerHTML = filasGuiadas(select.value, leer);
+  hoja.querySelector<HTMLElement>('[data-hoja-pro-filas]')!.innerHTML = filasProHtml(numeroFilasPro(leer), leer);
   hoja.querySelector<HTMLElement>('[data-lab-hoja-salida]')!.hidden = true;
   const nota = hoja.querySelector<HTMLElement>('[data-lab-hoja-nota]')!;
   nota.textContent = '';

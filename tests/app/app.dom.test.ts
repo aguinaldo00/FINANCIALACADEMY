@@ -337,6 +337,8 @@ describe('app en el navegador', () => {
     escribir('[data-campo="pro:formula"]', 'c0 = Cn / (1 + n * i)', '.lab-cuaderno');
     $<HTMLButtonElement>('[data-lab-calcular]', hoja).click();
     expect($('[data-lab-hoja-resultado]', hoja).textContent).toContain('c0 = 10.000,00 €');
+    $<HTMLButtonElement>('[data-hoja-pro-limpiar]', hoja).click();
+    expect($$('.hoja-pro input[data-campo^="pro:nombre:"]', hoja).every((c) => (c as HTMLInputElement).value === '')).toBe(true);
     // La guía de variables dice qué es cada letra y cómo se escribe.
     $<HTMLButtonElement>('[data-hoja-guia]', hoja).click();
     expect($('[data-hoja-guia-panel]', hoja).hidden).toBe(false);
@@ -392,6 +394,30 @@ describe('app en el navegador', () => {
     expect($('[data-lab-caso-texto]').textContent).toMatch(/^¿Qué capital inicial debemos invertir hoy para obtener un capital final de [\d.,]+ € al cabo de \d+ años/);
     expect($$('[data-lab-caso-texto] .fx')).toHaveLength(0);
     expect($('[data-lab-otro]').hidden).toBe(false);
+    const togglePeriodos = $<HTMLInputElement>('[data-lab-todos-periodos]');
+    expect(togglePeriodos.checked).toBe(false);
+    togglePeriodos.checked = true;
+    togglePeriodos.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(localStorage.getItem('fa-lab-todos-periodos')).toBe('true');
+    expect($('[data-lab-periodos-control]').hidden).toBe(false);
+    expect($('[data-lab-caso-texto]').textContent).toMatch(/(anual|semestral|cuatrimestral|trimestral|mensual|diario)/);
+    $<HTMLButtonElement>('[data-lab-ejercicio="examen-real"]').click();
+    expect(lab.dataset.ejercicio).toBe('examen-real');
+    expect($('[data-lab-pista]').hidden).toBe(true);
+    $<HTMLButtonElement>('[data-lab-modo="analogico"]').click();
+    expect($('.lab-papel [data-lab-datos-fijos]').hidden).toBe(true);
+    expect($('.lab-papel [data-lab-datos-manuales]').hidden).toBe(false);
+    expect($('.lab-papel [data-lab-incognita-select]').hidden).toBe(true);
+    expect($('.lab-papel [data-lab-incognita-text]').hidden).toBe(false);
+    expect($('.lab-papel [data-lab-formula-select]').hidden).toBe(true);
+    expect($('.lab-papel [data-lab-formula-text]').hidden).toBe(false);
+    expect($$('.lab-papel [data-lab-datos-manuales] .lab-sim')).toHaveLength(0);
+    $<HTMLButtonElement>('.lab-papel [data-lab-variable-mas]').click();
+    expect($$('.lab-papel [data-lab-variable-fila]')).toHaveLength(4);
+    $<HTMLButtonElement>('.lab-papel [data-lab-variable-quitar]').click();
+    expect($$('.lab-papel [data-lab-variable-fila]')).toHaveLength(3);
+    $<HTMLButtonElement>('.lab-papel [data-lab-variable-limpiar]').click();
+    expect($$('.lab-papel [data-lab-datos-manuales] input').every((c) => (c as HTMLInputElement).value === '')).toBe(true);
     $<HTMLButtonElement>('[data-lab-ejercicio="propio"]').click();
     expect($('[data-lab-escena-nota]').textContent).toContain('no tus datos');
     // Analógico: el papel sube desde detrás de la animación.

@@ -20,4 +20,23 @@ describe('modo examen: enunciados redactados', () => {
       }
     }
   });
+
+  it('redacta la periodicidad generada y usa la misma unidad para el tipo y el tiempo', () => {
+    for (const id of Object.keys(LABORATORIOS)) {
+      for (let semilla = 1; semilla <= 100; semilla++) {
+        const ej = generarEjercicio(id, semilla, { todosLosPeriodos: true })!;
+        const texto = enunciadoExamen(id, ej.datos, ej.periodicidad)!;
+        expect(texto, `${id} ${semilla}`).not.toMatch(/undefined|NaN/);
+        for (const [simbolo, valor] of Object.entries(ej.datos)) {
+          if (simbolo === 'm') continue;
+          expect(texto, `${id} ${semilla} ${simbolo}`).toContain(valor.split('/')[0]);
+        }
+        if (ej.periodicidad) {
+          if (id.startsWith('simple-') && id !== 'simple-fraccionado' || id.startsWith('compuesta-') && !['compuesta-equivalentes', 'compuesta-tae'].includes(id)) {
+            expect(texto, `${id} ${semilla}`).toContain(ej.periodicidad.unidad === 'dia' ? 'diario' : ({ año: 'anual', semestre: 'semestral', cuatrimestre: 'cuatrimestral', trimestre: 'trimestral', mes: 'mensual' } as const)[ej.periodicidad.unidad]);
+          }
+        }
+      }
+    }
+  });
 });

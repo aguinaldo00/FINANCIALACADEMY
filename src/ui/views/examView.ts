@@ -142,7 +142,7 @@ function porDondeEmpezar(datos: DatosBloque[]): string {
     .join('')}</ol>`;
 }
 
-function fichaBloque(d: DatosBloque, i: number, estado: EstadoEstudio): string {
+function fichaBloque(d: DatosBloque, estado: EstadoEstudio): string {
   const b = d.bloque;
   const n = d.oficiales.length + d.practica.length;
   const chips = d.conceptos
@@ -163,7 +163,7 @@ export function pintarExamen(ctx: ContextoVista, estado: EstadoEstudio, practica
 <section class="ex-sec"><h2>Por dónde empezar</h2><p class="ex-intro">Los bloques con más peso orientativo y que menos dominas.</p>${porDondeEmpezar(datos)}</section>
 ${mapa(datos, estado)}
 <section class="ex-sec"><h2>En cifras</h2><div class="ex-grafs">${graficoPesoOrientativo(datos)}${graficoPreguntas(datos)}${graficoDominio(datos)}</div>${tabla(datos)}</section>
-<section class="ex-sec"><h2>Bloque a bloque</h2>${datos.map((d, i) => fichaBloque(d, i, estado)).join('')}</section>
+<section class="ex-sec"><h2>Bloque a bloque</h2>${datos.map((d) => fichaBloque(d, estado)).join('')}</section>
 <div class="ex-tip" role="tooltip" hidden></div></div>`;
   ctx.tituloMovil.textContent = 'Pesos orientativos';
 

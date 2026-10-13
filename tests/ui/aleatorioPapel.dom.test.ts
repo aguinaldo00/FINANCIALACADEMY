@@ -44,6 +44,13 @@ describe('fase D · ejercicio aleatorio', () => {
     raiz.querySelector<HTMLButtonElement>('[data-al-otro]')!.click();
     expect(art.dataset.semilla).not.toBe(String(ej.semilla));
     expect(campo.value).toBe('');
+    const togglePeriodos = raiz.querySelector<HTMLInputElement>('[data-al-todos-periodos]')!;
+    expect(togglePeriodos.checked).toBe(false);
+    togglePeriodos.checked = true;
+    togglePeriodos.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(localStorage.getItem('fa-lab-todos-periodos')).toBe('true');
+    const nuevaSemilla = Number(art.dataset.semilla);
+    expect(raiz.querySelector('[data-al-enunciado]')!.textContent).toBe(ejercicioAleatorio('simple', nuevaSemilla, { todosLosPeriodos: true })!.enunciado);
   });
 
   it('se resuelve en digital (hoja guiada o Pro) o en analógico (papel), con calculadora', () => {

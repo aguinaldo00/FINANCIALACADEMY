@@ -17,6 +17,7 @@ import { escaparHtml, formulaHtml, hrefFormula } from './comun.ts';
 import { formaDespejada, queEscribir, sustitucion } from './laboratorio.ts';
 
 const CLAVE_MODO = 'fa-lab-modo';
+const CLAVE_PERIODOS = 'fa-lab-todos-periodos';
 
 /** Cuaderno de papel genérico (no se sabe la fórmula de antemano): lo que se escribe en cada línea. */
 function papelHtml(): string {
@@ -54,13 +55,14 @@ export interface EjercicioAleatorio {
 }
 
 /** El ejercicio de una semilla: la fórmula también sale de la semilla, así que es reproducible. */
-export function ejercicioAleatorio(bloque: BloqueId, semilla: number): EjercicioAleatorio | null {
+export function ejercicioAleatorio(bloque: BloqueId, semilla: number, opciones: { todosLosPeriodos?: boolean } = {}): EjercicioAleatorio | null {
   const ids = formulasAleatorias(bloque);
   if (!ids.length) return null;
   const formula = ids[semilla % ids.length]!;
   const lab = LABORATORIOS[formula]!;
-  const datos = generarEjercicio(formula, semilla)?.datos;
-  const enunciado = datos ? enunciadoExamen(formula, datos) : null;
+  const generado = generarEjercicio(formula, semilla, opciones);
+  const datos = generado?.datos;
+  const enunciado = datos ? enunciadoExamen(formula, datos, generado?.periodicidad) : null;
   if (!datos || !enunciado) return null;
   const valores: Record<string, number> = {};
   for (const d of lab.datos) {
@@ -78,6 +80,11 @@ export function htmlAleatorioPapel(bloque: BloqueId): string {
   return `<article class="t2-practica t2-aleatorio" data-aleatorio="${bloque}" aria-labelledby="t2-al-tit">
     <header><span class="t2-ej-num" aria-hidden="true">${DADO}</span><h2 class="t2-aleatorio-tit" id="t2-al-tit">Ejercicio aleatorio</h2><p class="t2-ej-fuente" data-al-origen></p></header>
     <p class="t2-instruccion">Un enunciado nuevo cada vez, de cualquier fórmula de este bloque y como en el examen: sin decirte qué es cada dato ni qué fórmula usar.</p>
+    <label class="lab-periodos t2-al-periodos">
+      <input type="checkbox" role="switch" data-al-todos-periodos aria-label="Incluir varios periodos de interés">
+      <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
+      <span class="lab-periodos-texto"><b>Todos los tipos de interés</b><small>Alterna anual, semestral, cuatrimestral, trimestral, mensual y diario</small></span>
+    </label>
     <p class="t2-enunciado" data-al-enunciado></p>
     <div class="lab-modo t2-al-modo" role="group" aria-label="Forma de trabajar">
       <button type="button" data-al-modo="digital" aria-pressed="true">Digital</button>
@@ -117,6 +124,8 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
   const $ = <T extends HTMLElement>(sel: string) => art.querySelector<T>(sel)!;
   let semilla = Math.floor(Math.random() * 99991) + 1;
   let actual: EjercicioAleatorio | null = null;
+  let todosLosPeriodos = false;
+  try { todosLosPeriodos = localStorage.getItem(CLAVE_PERIODOS) === 'true'; } catch { todosLosPeriodos = false; }
   const paradas: (() => void)[] = [];
 
   /* Hoja de cálculo: su estado vive aquí y se vacía con cada ejercicio (salvo el modo guiada/Pro). */
@@ -172,12 +181,13 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
 
   const pintar = () => {
     // Si una semilla no da un ejercicio válido (no debería), se prueba la siguiente.
-    for (let k = 0; k < 5 && !(actual = ejercicioAleatorio(bloque, semilla)); k++) semilla = nuevaSemilla(semilla);
+    for (let k = 0; k < 5 && !(actual = ejercicioAleatorio(bloque, semilla, { todosLosPeriodos })); k++) semilla = nuevaSemilla(semilla);
     if (!actual) return;
     const lab = LABORATORIOS[actual.formula]!;
     art.dataset.semilla = String(semilla);
     $('[data-al-origen]').textContent = `Nº ${semilla} · generado al azar`;
     $('[data-al-enunciado]').textContent = actual.enunciado;
+    $<HTMLInputElement>('[data-al-todos-periodos]').checked = todosLosPeriodos;
     const campo = $<HTMLInputElement>('[data-al-campo]');
     campo.value = '';
     campo.placeholder = PISTA_RESULTADO[lab.incognita.magnitud];
@@ -237,12 +247,23 @@ export function montarAleatorioPapel(raiz: HTMLElement): () => void {
     b.classList.add('usada');
   };
 
+  const alCambiarPeriodos = (e: Event) => {
+    const control = (e.target as Element).closest<HTMLInputElement>('[data-al-todos-periodos]');
+    if (!control) return;
+    todosLosPeriodos = control.checked;
+    try { localStorage.setItem(CLAVE_PERIODOS, String(todosLosPeriodos)); } catch { /* sin almacenamiento */ }
+    semilla = nuevaSemilla(semilla);
+    pintar();
+  };
+
   art.addEventListener('submit', alEnviar);
   art.addEventListener('click', alPulsar);
+  art.addEventListener('change', alCambiarPeriodos);
   pintar();
   return () => {
     paradas.forEach((p) => p());
     art.removeEventListener('submit', alEnviar);
     art.removeEventListener('click', alPulsar);
+    art.removeEventListener('change', alCambiarPeriodos);
   };
 }

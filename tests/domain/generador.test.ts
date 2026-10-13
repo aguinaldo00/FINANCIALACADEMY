@@ -29,6 +29,29 @@ describe('generador de ejercicios de práctica', () => {
     expect(generarEjercicio('compuesta-comparacion', 1)).toBeNull();
   });
 
+  it('activa tasas anuales, semestrales, cuatrimestrales, trimestrales, mensuales y diarias en los ejercicios aleatorios', () => {
+    const periodicidades = new Set<string>();
+    for (let s = 1; s <= 600; s++) {
+      const e = generarEjercicio('simple-montante', s, { todosLosPeriodos: true })!;
+      expect(e.periodicidad).toBeTruthy();
+      periodicidades.add(e.periodicidad!.unidad);
+      const n = Number(e.datos.n);
+      expect(n).toBe(e.periodicidad!.duracionAnios * e.periodicidad!.m);
+      expect(e.periodicidad!.unidad === 'dia' ? [360, 365] : [360]).toContain(e.periodicidad!.convenio);
+    }
+    expect([...periodicidades].sort()).toEqual(['año', 'cuatrimestre', 'dia', 'mes', 'semestre', 'trimestre']);
+  });
+
+  it('permite esos periodos en los ejercicios de equivalencia y TAE', () => {
+    for (const id of ['simple-fraccionado', 'compuesta-equivalentes', 'compuesta-tae']) {
+      for (let s = 1; s <= 100; s++) {
+        const e = generarEjercicio(id, s, { todosLosPeriodos: true })!;
+        expect(e.periodicidad, `${id} ${s}`).toBeTruthy();
+        expect(Number(e.datos.m), `${id} ${s}`).toBe(e.periodicidad!.m);
+      }
+    }
+  });
+
   it('los ejercicios de unidades de tiempo: dos unidades distintas, convenio solo con días, respuesta exacta y animación dibujable', () => {
     for (const modo of ['duracion', 'tipo'] as const) {
       for (let s = 1; s <= 300; s++) {
