@@ -19,6 +19,8 @@ export type Ruta =
   | { vista: 'academia'; scrollArriba: boolean }
   /** Una asignatura: sus temas y su temario. `#temas` lleva a la de Gestión Financiera. */
   | { vista: 'asignatura'; asignaturaId: string; scrollArriba: boolean }
+  /** Información y guía global del proyecto; el segundo hash es un ancla dentro de esa página. */
+  | { vista: 'proyecto'; ancla: string | null; scrollArriba: boolean }
   /** Tema 2: índice de fórmulas, ficha de una fórmula o una fase de práctica de un bloque. */
   | { vista: 'tema2'; pantalla: PantallaTema2; scrollArriba: boolean };
 
@@ -33,6 +35,10 @@ export function resolverRuta(hash: string, tema: Tema): Ruta {
   const h = (hash || '#academia').slice(1);
   const scrollArriba = !h.startsWith('c/');
 
+  if (h === 'proyecto' || h.startsWith('proyecto/')) {
+    const anclaProyecto = h.slice('proyecto/'.length);
+    return { vista: 'proyecto', ancla: h === 'proyecto' ? null : anclaProyecto || null, scrollArriba: h === 'proyecto' };
+  }
   if (h === 'academia' || h === '') return { vista: 'academia', scrollArriba: true };
   if (h === 'temas') return { vista: 'asignatura', asignaturaId: ID_GESTION_FINANCIERA, scrollArriba: true };
   if (h.startsWith('a/')) {
@@ -90,6 +96,7 @@ function pantallaTema2(partes: string[]): { pantalla: PantallaTema2; scrollArrib
 export const hrefInicio = () => '#inicio';
 export const hrefTemas = () => `#a/${ID_GESTION_FINANCIERA}`;
 export const hrefAcademia = () => '#academia';
+export const hrefProyecto = (ancla?: string) => ancla ? `#proyecto/${ancla}` : '#proyecto';
 export const hrefAsignatura = (id: string) => `#a/${id}`;
 export const hrefTema2 = () => '#tema/2';
 export const hrefBloqueTema2 = (bloque: BloqueId) => `#tema/2/${bloque}`;

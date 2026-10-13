@@ -4,7 +4,7 @@
  * dominio, en una capa de papel) y la barra de un capítulo, que marca la parte que se está leyendo.
  * Las usan la portada de la asignatura y el índice del Tema 2.
  */
-import { hrefAcademia, hrefInicio, hrefProgreso, hrefSesion } from '../../app/router.ts';
+import { hrefAcademia, hrefInicio, hrefProgreso, hrefProyecto, hrefSesion } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { Asignatura } from '../../content/academia.ts';
 import type { UltimoSitio } from '../views/academiaView.ts';
@@ -22,12 +22,17 @@ const migasHtml = (migas: readonly MigaEditorial[]) =>
   migas.map((m) => (m.href ? `<a href="${m.href}">${escaparHtml(m.texto)}</a>` : `<b>${escaparHtml(m.texto)}</b>`)).join('<span aria-hidden="true">/</span>');
 
 /** Barra superior. «noche» flota sobre una apertura oscura; «papel», fija sobre la lectura. */
-export function navegacionEditorial(variante: 'noche' | 'papel', migas: readonly MigaEditorial[]): string {
+export function navegacionEditorial(
+  variante: 'noche' | 'papel',
+  migas: readonly MigaEditorial[],
+  opciones: { sumario?: boolean; proyecto?: boolean } = {},
+): string {
   const accesos = `
-      <button type="button" class="ed-accion" data-sumario aria-haspopup="dialog"><span class="ed-ico ed-ico-sumario" aria-hidden="true"></span>Sumario</button>
+      ${opciones.sumario === false ? '' : '<button type="button" class="ed-accion" data-sumario aria-haspopup="dialog"><span class="ed-ico ed-ico-sumario" aria-hidden="true"></span>Sumario</button>'}
       <a class="ed-accion" href="${hrefInicio()}" title="El Atlas se abre dentro de la Ciudad del Dinero"><span class="ed-ico ed-ico-atlas" aria-hidden="true"></span>Atlas</a>
-      <a class="ed-accion" href="${hrefSesion()}">Cuaderno</a>
-      <a class="ed-accion" href="${hrefProgreso()}">Mi progreso</a>`;
+      <a class="ed-accion" href="${hrefSesion()}">Estudiar hoy</a>
+      <a class="ed-accion" href="${hrefProgreso()}">Mi progreso</a>
+      ${opciones.proyecto === false ? '' : `<a class="ed-accion" href="${hrefProyecto()}">Sobre el proyecto</a>`}`;
   return `<header class="ed-nav ed-nav-${variante}" data-ed-nav>
     <a class="ed-marca" href="${hrefAcademia()}" aria-label="Financial Academy: todas las asignaturas"><b>Financial</b><b>Academy</b></a>
     <nav class="ed-migas" aria-label="Estás en">${migasHtml(migas)}</nav>
