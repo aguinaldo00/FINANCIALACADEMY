@@ -1,34 +1,114 @@
-import { hrefAcademia, hrefInicio, hrefProyecto, hrefProgreso, hrefSesion, hrefTema2 } from '../../app/router.ts';
+import { hrefAcademia, hrefInicio, hrefProyecto, hrefSesion, hrefTema2 } from '../../app/router.ts';
 import { montarEditorial, navegacionEditorial } from '../components/editorial.ts';
 import type { ContextoVista } from './context.ts';
 
-/** Guía global del proyecto, sus recorridos y sus recursos de estudio. */
+/** Historia, propósito, guía y recursos del proyecto. */
 export function pintarProyecto(ctx: ContextoVista): () => void {
   ctx.tituloMovil.textContent = 'Sobre el proyecto';
   ctx.pagina.innerHTML = `<div class="ed-pagina ed-pagina-noche pr-proyecto">
   ${navegacionEditorial('noche', [{ texto: 'Academia', href: hrefAcademia() }, { texto: 'Sobre el proyecto' }], { sumario: false, proyecto: false })}
-  <header class="pr-hero" id="arriba">
+  <header class="pr-hero pr-hero-personal" id="arriba">
     <div class="pr-hero-texto">
-      <p class="ed-volanta">Financial Academy · El proyecto</p>
-      <h1 class="ed-titular"><span>Estudiar finanzas</span><em>explorándolas</em></h1>
-      <p class="ed-entradilla">Una herramienta de estudio creada por un alumno del ciclo de Administración y Finanzas. Aquí puedes conocer sus recorridos, aprender a usar sus recursos y encontrar las funciones que mejor encajan contigo.</p>
-      <div class="ed-cta"><a class="ed-boton" href="${hrefAcademia()}"><small>Empieza por aquí</small>Elegir un mundo</a><a class="ed-enlace" href="${hrefProyecto('guia')}">Ver la guía de uso ↓</a></div>
+      <p class="ed-volanta">Financial Academy · En primera persona</p>
+      <h1 class="ed-titular"><span>Soy Georgi.</span><em>Me llaman Pepe.</em></h1>
+      <p class="ed-entradilla">Me llamo Georgi Angelov, aunque en Villarcayo casi todos me conocen como Pepe. Tengo 21 años y estoy en segundo de Administración y Finanzas.</p>
+      <div class="ed-cta">
+        <a class="ed-boton" href="${hrefAcademia()}"><small>Explora la herramienta</small>Elegir un mundo</a>
+        <a class="ed-enlace" href="${hrefProyecto('origen')}">Por qué existe ↓</a>
+      </div>
     </div>
-    <aside class="pr-hero-rutas" aria-label="Dos recorridos de estudio">
-      <a href="${hrefInicio()}"><span>01</span><b>La Ciudad del Dinero</b><small>Explora el sistema financiero español</small><i aria-hidden="true">↗</i></a>
-      <a href="${hrefTema2()}"><span>02</span><b>Cálculo financiero</b><small>Entiende fórmulas y practica paso a paso</small><i aria-hidden="true">↗</i></a>
+    <aside class="pr-hero-pregunta" aria-labelledby="pr-pregunta-titulo">
+      <p class="ed-volanta">La pregunta que lo empezó todo</p>
+      <p class="pr-formula" aria-label="C sub cero por uno más i por n">C<sub>0</sub> · (<span class="pr-formula-uno">1</span> + i · n)</p>
+      <h2 id="pr-pregunta-titulo">¿De dónde sale el 1?</h2>
+      <a class="pr-pregunta-link" href="${hrefProyecto('origen')}">Descubre la historia <span aria-hidden="true">↗</span></a>
     </aside>
   </header>
 
   <nav class="pr-indice" aria-label="Apartados de Sobre el proyecto">
-    <a href="${hrefProyecto('guia')}">Guía de uso</a>
-    <a href="${hrefProyecto('funciones')}">Funciones</a>
+    <a href="${hrefProyecto('historia')}">De dónde vengo</a>
+    <a href="${hrefProyecto('origen')}">Por qué existe</a>
+    <a href="${hrefProyecto('academia')}">Qué es</a>
+    <a href="${hrefProyecto('futuro')}">Hacia dónde va</a>
+    <a href="${hrefProyecto('guia')}">Guía</a>
     <a href="${hrefProyecto('contacto')}">Contacto</a>
-    <a href="${hrefProyecto('apoyo')}">Apoyar al creador</a>
+    <a href="${hrefProyecto('apoyo')}">Apoyo</a>
   </nav>
 
-  <section class="pr-seccion" id="guia" aria-labelledby="pr-guia-titulo">
-    <header class="pr-seccion-cab"><p class="ed-volanta">01 · Una guía rápida</p><h2 id="pr-guia-titulo">Empieza a tu manera</h2><p>La web reúne dos recorridos distintos. Puedes entrar por una asignatura o ir directo a un recurso de estudio.</p></header>
+  <section class="pr-seccion pr-historia" id="historia" aria-labelledby="pr-historia-titulo">
+    <header class="pr-seccion-cab">
+      <p class="ed-volanta">01 · El camino hasta aquí</p>
+      <h2 id="pr-historia-titulo">De dónde vengo</h2>
+    </header>
+    <div class="pr-historia-grid">
+      <article class="pr-hito">
+        <span class="pr-hito-numero">01 <i>·</i> Antes del ciclo</span>
+        <p>Antes del ciclo trabajé de lo que salía y estudié atención sociosanitaria. Luego empecé el grado medio de Gestión Administrativa. Como se me quedaba corto, preparé por mi cuenta la prueba de acceso a grado superior mientras seguía trabajando y estudiando. Lo hice con un método propio: los exámenes de otros años son públicos, así que los analicé para ver qué se repetía y practiqué justo eso. Aprobé.</p>
+      </article>
+      <article class="pr-hito">
+        <span class="pr-hito-numero">02 <i>·</i> De reparar a crear</span>
+        <p>Siempre me ha gustado entender cómo funcionan las cosas. Empecé reparando ordenadores, consolas y aparatos electrónicos. El año pasado di el salto al software: aprendí Python en un curso de Samsung y, por mi cuenta, desarrollo web y diseño. Este año he decidido usar todo eso en algo real.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="pr-seccion pr-origen" id="origen" aria-labelledby="pr-origen-titulo">
+    <header class="pr-seccion-cab">
+      <p class="ed-volanta">02 · El origen</p>
+      <h2 id="pr-origen-titulo">Por qué existe</h2>
+    </header>
+    <p class="pr-origen-pregunta">Todo empezó con una pregunta: ¿de dónde sale el 1 en <span>C<sub>0</sub> · (1 + i · n)</span>?</p>
+    <div class="pr-origen-texto">
+      <p>En clase y en el libro las fórmulas llegan ya hechas. Hay letras por todas partes, logaritmos, tiempos que no se ven y muchos conceptos nuevos de golpe, todo en texto corrido. Se aprende a aplicar la fórmula, no a entenderla. Y casi no hay contenido actual que lo explique de otra forma.</p>
+      <p>Además, a mí el papel no me funciona: me cuesta escribir y no consigo ordenarme. Con Excel, en cambio, nunca he tenido problemas. Así que decidí construir la herramienta que me habría gustado tener desde el principio.</p>
+    </div>
+  </section>
+
+  <section class="pr-seccion pr-que-es" id="academia" aria-labelledby="pr-academia-titulo">
+    <header class="pr-seccion-cab">
+      <p class="ed-volanta">03 · La herramienta</p>
+      <h2 id="pr-academia-titulo">Qué es Financial Academy</h2>
+      <p>Financial Academy es una web para estudiar Gestión Financiera. De momento tiene dos temas: el sistema financiero español (teoría) y la matemática financiera (cálculo).</p>
+    </header>
+    <article class="pr-que-es-destacada">
+      <span>01 / ENTENDER</span>
+      <div>
+        <h3>La fórmula está junto al ejercicio</h3>
+        <p>Lo que más me enorgullece es esto: la fórmula no está en una página y el ejercicio en otra. Ves la fórmula mientras trabajas con ella. Cuando cambias un dato, ves qué le pasa al capital, al tiempo y al interés. Cada concepto tiene su animación al lado, así que no te imaginas lo que ocurre: lo ves. Mientras el profesor explica, puedes tener delante la animación y calcular a la vez, sin cambiar de pestaña.</p>
+      </div>
+    </article>
+    <div class="pr-que-es-grid">
+      <article class="pr-que-es-tarjeta">
+        <span>02 / PRACTICAR</span>
+        <h3>Ejercicios que no se acaban</h3>
+        <p>Los ejercicios se generan al azar para cada concepto, así que nunca se acaban. Puedes resolverlos en papel o en la web, con pistas o sin ellas. No hace falta copiar enunciados: la web los genera, igual que las preguntas tipo test y las infografías.</p>
+      </article>
+      <article class="pr-que-es-tarjeta">
+        <span>03 / AVANZAR</span>
+        <h3>Progreso que cuenta los fallos</h3>
+        <p>Hay también un sistema de progreso. Cada ejercicio que haces cuenta, y los fallos también, de modo que la puntuación mide si lo entiendes y no si lo has memorizado.</p>
+      </article>
+      <article class="pr-que-es-tarjeta">
+        <span>04 / EXPLORAR</span>
+        <h3>Cada asignatura, un mundo</h3>
+        <p>Cada asignatura es un “mundo”. No es decoración: quería que abrir la web no pareciera ponerse a estudiar, porque eso también ayuda a empezar.</p>
+      </article>
+    </div>
+    <div class="pr-temas">
+      <p class="ed-volanta">Dos temas para empezar</p>
+      <div class="pr-hero-rutas" aria-label="Accesos a los temas disponibles">
+        <a href="${hrefInicio()}"><span>01</span><b>Sistema financiero español</b><small>Teoría en La Ciudad del Dinero</small><i aria-hidden="true">↗</i></a>
+        <a href="${hrefTema2()}"><span>02</span><b>Matemática financiera</b><small>Cálculo, fórmulas y práctica guiada</small><i aria-hidden="true">↗</i></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="pr-seccion pr-guia" id="guia" aria-labelledby="pr-guia-titulo">
+    <header class="pr-seccion-cab">
+      <p class="ed-volanta">04 · Una guía rápida</p>
+      <h2 id="pr-guia-titulo">Empieza a tu manera</h2>
+      <p>La web reúne dos recorridos distintos. Puedes entrar por una asignatura o ir directo a un recurso de estudio.</p>
+    </header>
     <div class="pr-pasos">
       <article class="pr-paso"><span>01</span><h3>Elige un mundo</h3><p>En el selector, Gestión Financiera es la asignatura con contenido disponible. Las demás aparecen como próximas.</p><a href="${hrefAcademia()}">Ir al selector <b aria-hidden="true">↗</b></a></article>
       <article class="pr-paso"><span>02</span><h3>Explora o consulta</h3><p>En el Tema 1 puedes recorrer la Ciudad del Dinero o usar el Atlas HTML. En el Tema 2, abre el sumario para localizar bloques y fórmulas.</p><a href="${hrefInicio()}">Abrir el Tema 1 <b aria-hidden="true">↗</b></a></article>
@@ -36,23 +116,31 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
     </div>
   </section>
 
-  <section class="pr-seccion pr-funciones" id="funciones" aria-labelledby="pr-funciones-titulo">
-    <header class="pr-seccion-cab"><p class="ed-volanta">02 · Dentro de la academia</p><h2 id="pr-funciones-titulo">Recursos para entender y practicar</h2><p>La interfaz combina explicación visual, consulta rápida y práctica. Puedes entrar en cada función desde aquí.</p></header>
-    <div class="pr-funciones-grid">
-      <a class="pr-funcion" href="${hrefInicio()}"><span>01 / TEMA 1</span><h3>La Ciudad del Dinero</h3><p>Mapa explorable, fichas de conceptos, Atlas HTML, glosario e infografías interactivas.</p><b aria-hidden="true">↗</b></a>
-      <a class="pr-funcion" href="${hrefTema2()}"><span>02 / TEMA 2</span><h3>Cálculo financiero</h3><p>19 fórmulas en tres bloques, explicaciones paso a paso, calculadora y práctica guiada.</p><b aria-hidden="true">↗</b></a>
-      <a class="pr-funcion" href="${hrefSesion()}"><span>03 / PRÁCTICA</span><h3>Sesión de hoy</h3><p>Elige una duración aproximada de 10, 15 o 25 minutos y mezcla repasos con preguntas nuevas.</p><b aria-hidden="true">↗</b></a>
-      <a class="pr-funcion" href="${hrefProgreso()}"><span>04 / SEGUIMIENTO</span><h3>Mi progreso</h3><p>Consulta racha, actividad, memoria a largo plazo y evolución de los simulacros.</p><b aria-hidden="true">↗</b></a>
+  <section class="pr-seccion pr-futuro" id="futuro" aria-labelledby="pr-futuro-titulo">
+    <header class="pr-seccion-cab">
+      <p class="ed-volanta">05 · Lo que viene</p>
+      <h2 id="pr-futuro-titulo">Hacia dónde va</h2>
+    </header>
+    <div class="pr-futuro-texto">
+      <p>Ahora es gratis para mi clase. Mi idea es sumar el resto de asignaturas del ciclo y que siga siendo gratis para quien estudia. Para que el proyecto pueda crecer, quiero ofrecerlo a centros, academias y empresas de formación que quieran usarlo con sus alumnos.</p>
+      <p>Todavía no sé a qué me dedicaré. Me interesan campos muy distintos, de las finanzas a la biotecnología. Lo que sí sé es que muchas formas de enseñar se pueden mejorar, y este proyecto es mi manera de intentarlo.</p>
     </div>
+    <blockquote class="pr-cierre">
+      <p>Detrás de esta web hay muchas horas: diseñar el método, programar, crear las animaciones, escribir las explicaciones e inventar los tipos de ejercicio. Si te ayuda a entender algo que antes solo memorizabas, habrá merecido la pena.</p>
+    </blockquote>
   </section>
 
   <section class="pr-contacto" id="contacto" aria-labelledby="pr-contacto-titulo">
-    <div><p class="ed-volanta">03 · Hablemos</p><h2 id="pr-contacto-titulo">Contacto</h2><p>¿Has encontrado un error o quieres dejar una sugerencia? Puedes escribirme directamente.</p></div>
+    <div>
+      <p class="ed-volanta">06 · Colaboraciones</p>
+      <h2 id="pr-contacto-titulo">¿Te interesa para tu centro?</h2>
+      <p>¿Eres un centro, un profesor o una empresa y te interesa? Escríbeme.</p>
+    </div>
     <a class="pr-contacto-enlace" href="mailto:jorgeangelov2020@gmail.com">jorgeangelov2020@gmail.com <span aria-hidden="true">↗</span></a>
   </section>
 
   <section class="pr-apoyo" id="apoyo" aria-labelledby="pr-apoyo-titulo">
-    <div><p class="ed-volanta">04 · Apoyo</p><h2 id="pr-apoyo-titulo">Ayuda a que el proyecto siga creciendo</h2><p>Si esta herramienta te está sirviendo, puedes apoyar al creador a través de Buy Me a Coffee.</p></div>
+    <div><p class="ed-volanta">07 · Apoyo</p><h2 id="pr-apoyo-titulo">Ayuda a que el proyecto siga creciendo</h2><p>Si esta herramienta te está sirviendo, puedes apoyar al creador a través de Buy Me a Coffee.</p></div>
     <a class="ed-boton" href="https://buymeacoffee.com/pepitofinanzas" target="_blank" rel="noopener noreferrer"><small>Apoyo voluntario</small>Invítame a un café ↗</a>
   </section>
 
