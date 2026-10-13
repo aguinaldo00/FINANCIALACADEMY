@@ -32,11 +32,11 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
   const n = practica?.pendientes() ?? 0;
   const insignia = n ? `<span class="pw insignia" aria-label="${n} pendientes">${n}</span>` : '';
   const examen = tema.ampliacion?.bloques.length
-    ? `<div class="grp">Estudio y examen</div>${enlace('glosario', hrefGlosario(), `${iconoUi('pergamino')}`, 'Glosario', 'Siglas y términos explicados')}${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}${enlace('proyecto', hrefProyecto(), `${iconoUi('pergamino')}`, 'Sobre el proyecto', 'Guía de uso y recursos')}`
+    ? `<div class="grp">Estudio y examen</div>${enlace('glosario', hrefGlosario(), `${iconoUi('pergamino')}`, 'Glosario', 'Siglas y términos explicados')}${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}`
     : '';
   const proyecto = `<div class="grp">Información</div>${enlace('proyecto', hrefProyecto(), `${iconoUi('pergamino')}`, 'Sobre el proyecto', 'Guía de uso y recursos')}`;
   const scroll = rail.scrollTop;
-  rail.innerHTML = enlaceTodosLosTemas() + cabecera + grupos + examen + proyecto;
+  rail.innerHTML = enlaceTodosLosTemas() + cabecera + grupos + proyecto + examen;
   rail.scrollTop = scroll;
   // El apartado activo siempre a la vista dentro del índice (p. ej. el grupo Examen, al final).
   const activo = rail.querySelector<HTMLElement>('.sl.on');
