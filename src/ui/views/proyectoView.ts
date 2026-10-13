@@ -74,22 +74,27 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
       <span>01 / ENTENDER</span>
       <div>
         <h3>La fórmula está junto al ejercicio</h3>
-        <p>Lo que más me enorgullece es esto: la fórmula no está en una página y el ejercicio en otra. Ves la fórmula mientras trabajas con ella. Cuando cambias un dato, ves qué le pasa al capital, al tiempo y al interés. Cada concepto tiene su animación al lado, así que no te imaginas lo que ocurre: lo ves. Mientras el profesor explica, puedes tener delante la animación y calcular a la vez, sin cambiar de pestaña.</p>
+        <p>Lo que más me enorgullece es esto: la fórmula no está en una página y el ejercicio en otra. Trabajas con ella mientras cambias los datos y ves qué le ocurre al capital, al tiempo y al interés. Explicación y práctica conviven en la misma pantalla: puedes calcular a la vez que el profesor explica, sin saltar entre pestañas ni copiar enunciados.</p>
       </div>
     </article>
     <div class="pr-que-es-grid">
       <article class="pr-que-es-tarjeta">
-        <span>02 / PRACTICAR</span>
+        <span>02 / VISUALIZAR</span>
+        <h3>Animaciones para comprender</h3>
+        <p>Las animaciones convierten las letras de la fórmula en algo que puedes ver: cómo cambian el capital, el tiempo y el interés. Así entiendes qué representa cada dato, en vez de limitarte a memorizar dónde colocarlo. Y como explicación y ejercicio están juntos, estudias sin perder tiempo saltando entre recursos.</p>
+      </article>
+      <article class="pr-que-es-tarjeta">
+        <span>03 / PRACTICAR</span>
         <h3>Ejercicios que no se acaban</h3>
         <p>Los ejercicios se generan al azar para cada concepto, así que nunca se acaban. Puedes resolverlos en papel o en la web, con pistas o sin ellas. No hace falta copiar enunciados: la web los genera, igual que las preguntas tipo test y las infografías.</p>
       </article>
       <article class="pr-que-es-tarjeta">
-        <span>03 / AVANZAR</span>
+        <span>04 / AVANZAR</span>
         <h3>Progreso que cuenta los fallos</h3>
         <p>Hay también un sistema de progreso. Cada ejercicio que haces cuenta, y los fallos también, de modo que la puntuación mide si lo entiendes y no si lo has memorizado.</p>
       </article>
       <article class="pr-que-es-tarjeta">
-        <span>04 / EXPLORAR</span>
+        <span>05 / EXPLORAR</span>
         <h3>Cada asignatura, un mundo</h3>
         <p>Cada asignatura es un “mundo”. No es decoración: quería que abrir la web no pareciera ponerse a estudiar, porque eso también ayuda a empezar.</p>
       </article>
