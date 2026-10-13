@@ -14,10 +14,10 @@
 import { BLOQUES, FORMULAS_TEMA2, formulaPorId } from '../../../content/temas/tema-02/formulas.ts';
 import { enunciadoExamen } from '../../../content/temas/tema-02/enunciados.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
-import { generarEjercicio, nuevaSemilla } from '../../../domain/tema2/generador.ts';
+import { generarEjercicio, nuevaSemilla, type PeriodicidadEjercicio } from '../../../domain/tema2/generador.ts';
 import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud } from '../../../domain/tema2/laboratorio.ts';
 import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
-import { htmlHoja, montarHoja, refrescarHoja } from '../../components/hojaCalculo.ts';
+import { htmlHoja, montarHoja, refrescarHoja, simboloDeNombre } from '../../components/hojaCalculo.ts';
 import { expandir } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
 import { formulaTexto, simbolosDe } from '../../matematica/formula.ts';
@@ -27,8 +27,9 @@ import { escaparHtml, formulaHtml } from './comun.ts';
 import { DERIVACIONES } from './indice.ts';
 
 type Modo = 'digital' | 'analogico';
-type Ejercicio = 'animacion' | 'practica' | 'examen' | 'propio';
+type Ejercicio = 'animacion' | 'practica' | 'examen' | 'examen-real' | 'propio';
 const CLAVE_MODO = 'fa-lab-modo';
+const CLAVE_PERIODOS = 'fa-lab-todos-periodos';
 const claveEstado = (id: string) => `fa-lab:${id}`;
 
 /** Datos que pide la fórmula: los de su laboratorio o, si no calcula una incógnita, todos sus símbolos. */
@@ -85,23 +86,41 @@ const campo = (nombre: string, etiqueta: string, pista: string) =>
 const ayuda = (texto: string) => `<details class="lab-ayuda"><summary>¿Qué es?</summary><p>${escaparHtml(texto)}</p></details>`;
 
 function filaDatos(id: string, papel: boolean): string {
-  return `<div class="lab-datos">${datosDe(id).map((d) => {
+  const guiados = `<div class="lab-datos" data-lab-datos-fijos>${datosDe(id).map((d) => {
     const u = UNIDAD[d.magnitud];
     return `<label class="lab-dato"><span class="lab-sim">${formulaHtml(d.simbolo)}${papel ? ' =' : ''}</span>
     <span class="lab-dato-celda">${campo(`dato:${d.simbolo}`, `${simbolo(d.simbolo)?.nombre ?? d.simbolo} (${u.titulo})`, PISTA_DATO[d.magnitud])}<abbr class="lab-unidad" title="${escaparHtml(u.titulo)}">${u.texto}</abbr></span></label>`;
   }).join('')}</div>`;
+  if (!papel) return guiados;
+  return `${guiados}<div class="lab-variables-manuales" data-lab-datos-manuales hidden>
+    <div class="lab-variables-filas" data-lab-variables-filas>${filasVariablesManuales(3)}</div>
+    <div class="lab-variables-acciones"><button type="button" data-lab-variable-mas>+ Añadir variable</button><button type="button" data-lab-variable-limpiar>Borrar variables</button></div>
+  </div>`;
+}
+
+function filaVariableManual(k: number): string {
+  return `<div class="lab-variable-fila" data-lab-variable-fila="${k}">
+    <input class="lab-campo" type="text" data-campo="manual:nombre:${k}" aria-label="Nombre de la variable ${k + 1}" placeholder="Variable" autocomplete="off" spellcheck="false">
+    <input class="lab-campo" type="text" data-campo="manual:valor:${k}" aria-label="Valor de la variable ${k + 1}" placeholder="Valor" autocomplete="off" spellcheck="false">
+    <button type="button" class="lab-variable-quitar" data-lab-variable-quitar aria-label="Eliminar variable ${k + 1}" title="Eliminar variable">×</button></div>`;
+}
+
+function filasVariablesManuales(cantidad: number): string {
+  return Array.from({ length: Math.max(1, Math.min(20, cantidad)) }, (_, k) => filaVariableManual(k)).join('');
 }
 
 function selectorIncognita(id: string): string {
   const f = formulaPorId(id)!;
   const opciones = simbolosDe(f.expresion).map((s) => `<option value="${s}">${escaparHtml(formulaTexto(s))} · ${escaparHtml(simbolo(s)?.nombre ?? s)}</option>`).join('');
-  return `<select class="lab-campo" data-campo="incognita" aria-label="Incógnita"><option value="">¿Qué te piden?</option>${opciones}</select>`;
+  return `<select class="lab-campo" data-campo="incognita" data-lab-incognita-select aria-label="Incógnita"><option value="">¿Qué te piden?</option>${opciones}</select>
+    <input class="lab-campo" type="text" data-campo="incognita" data-lab-incognita-text aria-label="Qué te piden" placeholder="¿Qué te piden?" autocomplete="off" spellcheck="false" hidden>`;
 }
 
 /** Desplegable con las 19 fórmulas del tema, por bloques: se elige la que se va a usar sin salir de la página. */
 function selectorFormula(): string {
   const grupos = BLOQUES.map((b) => `<optgroup label="${escaparHtml(b.titulo)}">${FORMULAS_TEMA2.filter((f) => f.bloque === b.id).map((f) => `<option value="${f.id}">Nº ${f.numero} — ${escaparHtml(formulaTexto(f.expresion))}</option>`).join('')}</optgroup>`).join('');
-  return `<select class="lab-campo lab-campo-formula" data-campo="formula" aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select><p class="lab-formula-elegida" data-lab-formula-elegida></p>`;
+  return `<select class="lab-campo lab-campo-formula" data-campo="formula" data-lab-formula-select aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select>
+    <input class="lab-campo" type="text" data-campo="formula" data-lab-formula-text aria-label="Fórmula escrita" placeholder="Escribe la fórmula que usarás" autocomplete="off" spellcheck="false" hidden><p class="lab-formula-elegida" data-lab-formula-elegida></p>`;
 }
 
 /** Los pasos del cuaderno; `papel` cambia solo la forma (papel pautado y letra manuscrita). */
@@ -112,11 +131,10 @@ function pasos(id: string, papel: boolean): string {
     ${fila(1, 'datos', 'Datos', filaDatos(id, papel))}
     ${fila(2, 'incognita', 'Incógnita', selectorIncognita(id))}
     ${fila(3, 'formula', 'Fórmula', selectorFormula())}
-    ${fila(4, 'despeje', 'Despeje', `${queEscribir('despeje')}${campo('despeje', 'Despeje', 'Incógnita = … (solo letras)')}${ayuda(AYUDA_DESPEJE)}`)}
-    ${fila(5, 'sustitucion', 'Sustitución', `${queEscribir('sustitucion')}${campo('sustitucion', 'Sustitución', 'Incógnita = … (con tus números)')}${ayuda(AYUDA_SUSTITUCION)}`)}
+    ${fila(4, 'despeje', 'Despeje (opcional)', `${queEscribir('despeje')}${campo('despeje', 'Despeje opcional', 'Incógnita = … (solo letras)')}${ayuda(AYUDA_DESPEJE)}`)}
+    ${fila(5, 'sustitucion', 'Sustitución (opcional)', `${queEscribir('sustitucion')}${campo('sustitucion', 'Sustitución opcional', 'Incógnita = … (con tus números)')}${ayuda(AYUDA_SUSTITUCION)}`)}
     ${fila(6, 'operaciones', 'Operaciones', `<textarea class="lab-campo" data-campo="operaciones" rows="3" aria-label="Operaciones" placeholder="Una operación por línea" spellcheck="false"></textarea>`)}
     ${fila(7, 'resultado', 'Resultado', `<div class="lab-resultado">${campo('resultado', 'Resultado', 'Tu resultado')}<button type="button" class="lab-comprobar" data-lab-comprobar>Comprobar</button></div>`)}
-    ${papel ? fila(8, 'notas', 'Siguiente paso', `<textarea class="lab-campo" data-campo="notas" rows="2" aria-label="Notas" placeholder="Escribe aquí el siguiente paso…"></textarea>`) : ''}
   </ol>
   <div class="lab-revision" data-lab-revision aria-live="polite"></div>`;
 }
@@ -125,11 +143,21 @@ function pasos(id: string, papel: boolean): string {
 export { formaDespejada, sustitucion } from '../../components/hojaCalculo.ts';
 
 /** Enunciado con unos datos y la incógnita de la fórmula (sin inventar nada más). */
-function enunciado(id: string, datos: Readonly<Record<string, string>>): string {
+function enunciado(id: string, datos: Readonly<Record<string, string>>, periodicidad?: PeriodicidadEjercicio): string {
   const lab = LABORATORIOS[id];
   if (!lab) return '';
+  const adj: Record<PeriodicidadEjercicio['unidad'], string> = { año: 'anual', semestre: 'semestral', cuatrimestre: 'cuatrimestral', trimestre: 'trimestral', mes: 'mensual', dia: 'diario' };
+  const anuales = id === 'simple-fraccionado' || id === 'compuesta-equivalentes' || id === 'compuesta-tae';
   // Cada dato va entero en una línea (símbolo, signo y cifra) y la pregunta en la suya: así se lee de un vistazo.
-  const partes = lab.datos.map((d) => `<span class="lab-caso-dato">${formulaHtml(d.simbolo)} = <b>${escaparHtml(datos[d.simbolo] ?? '?')}</b></span>`);
+  const partes = lab.datos.map((d) => {
+    const plural: Record<PeriodicidadEjercicio['unidad'], string> = { año: 'años', semestre: 'semestres', cuatrimestre: 'cuatrimestres', trimestre: 'trimestres', mes: 'meses', dia: 'días' };
+    const unidadDato = periodicidad && d.simbolo === 'n' ? ` ${plural[periodicidad.unidad]}` : '';
+    const baseDia = periodicidad?.unidad === 'dia' && !anuales ? ` (año ${periodicidad.convenio === 360 ? 'comercial de 360 días' : 'civil de 365 días'})` : '';
+    const tipoDato = periodicidad && ['i', 'd'].includes(d.simbolo) ? ` ${anuales ? 'anual' : `${adj[periodicidad.unidad]}${baseDia}`}` : d.simbolo === 'J_m' && periodicidad ? ' anual nominal' : '';
+    const frecuencia = periodicidad && d.simbolo === 'm' ? ` (${periodicidad.unidad === 'dia' ? 'diaria' : adj[periodicidad.unidad]}; ${periodicidad.m} al año${periodicidad.unidad === 'dia' ? `, año ${periodicidad.convenio === 360 ? 'comercial de 360 días' : 'civil de 365 días'}` : ''})` : '';
+    const valor = `${datos[d.simbolo] ?? '?'}${unidadDato}${tipoDato}${frecuencia}`;
+    return `<span class="lab-caso-dato">${formulaHtml(d.simbolo)} = <b>${escaparHtml(valor)}</b></span>`;
+  });
   const lista = partes.length > 1 ? `${partes.slice(0, -1).join(', ')} y ${partes.at(-1)}` : partes[0];
   const inc = lab.incognita.simbolo;
   return `<span class="lab-caso-datos">Te dan ${lista}.</span> <span class="lab-caso-pide">Calcula ${formulaHtml(inc)}, ${escaparHtml((simbolo(inc)?.nombre ?? inc).toLowerCase())}.</span>`;
@@ -139,17 +167,25 @@ export function htmlLaboratorio(id: string): string {
   const escena = ESCENAS[id];
   const calcula = Boolean(LABORATORIOS[id]);
   const hayCaso = Boolean(escena?.caso && calcula);
-  return `<div class="lab" data-laboratorio="${id}" data-modo="digital" data-ejercicio="${hayCaso ? 'animacion' : 'propio'}">
+  return `<div class="lab" data-laboratorio="${id}" data-modo="digital" data-ejercicio="${hayCaso ? 'animacion' : 'propio'}" role="region" aria-label="Cuadro de mando">
     <div class="lab-barra">
       ${calcula ? `<div class="lab-ejercicios" role="group" aria-label="Qué ejercicio resolver">
         ${hayCaso ? '<button type="button" data-lab-ejercicio="animacion">Caso de la animación</button>' : ''}
         <button type="button" data-lab-ejercicio="practica">Ejercicio aleatorio</button>
         <button type="button" data-lab-ejercicio="propio">Mis datos</button>
-        <button type="button" data-lab-ejercicio="examen">Modo examen</button>
+        <button type="button" data-lab-ejercicio="examen">Práctica</button>
+        <button type="button" data-lab-ejercicio="examen-real">Examen real</button>
       </div>` : ''}
       <div class="lab-caso" role="region" aria-label="Enunciado del ejercicio">
         <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
         <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
+        <label class="lab-periodos" data-lab-periodos-control hidden>
+          <input type="checkbox" role="switch" data-lab-todos-periodos aria-label="Incluir varios periodos de interés">
+          <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
+          <span class="lab-periodos-texto"><b>Todos los tipos de interés</b><small>Alterna anual, semestral, cuatrimestral, trimestral, mensual y diario</small></span>
+        </label>
+        <button type="button" class="lab-pista" data-lab-pista hidden>Ver una pista</button>
+        <p class="lab-pista-texto" data-lab-pista-texto hidden></p>
         <button type="button" class="lab-boton lab-otro" data-lab-otro hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>Generar otro ejercicio</button>
       </div>
       <div class="lab-modo" role="group" aria-label="Forma de trabajar">
@@ -162,14 +198,14 @@ export function htmlLaboratorio(id: string): string {
         <button type="button" class="lab-mini" data-lab-limpiar>Borrar</button></header>
       <div data-lab-hoja-sitio></div>
     </section>
-    <section class="lab-centro" aria-label="Animación y cuaderno de papel">
+    <div class="lab-centro">
       <div class="lab-papel-marco" data-lab-papel-marco>
         <div class="lab-papel-pliegue"><div class="lab-papel" data-lab-papel aria-hidden="true">
           <header class="lab-panel-cab"><h2><span>02</span>Cuaderno de papel</h2><button type="button" class="lab-mini" data-lab-limpiar>Borrar el cuaderno</button></header>
           ${pasos(id, true)}
         </div></div>
       </div>
-      <figure class="lab-escena" data-lab-escena>
+      <figure class="lab-escena" data-lab-escena aria-label="Animación de la fórmula">
         <div class="lab-escena-medio" data-vx-medio><div data-escena-ficha="${id}"></div></div>
         <figcaption class="lab-escena-pie">
           <span class="lab-escena-nota" data-lab-escena-nota></span>
@@ -178,8 +214,9 @@ export function htmlLaboratorio(id: string): string {
             ${escena ? '<button type="button" class="lab-boton" data-lab-ampliar aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Ampliar animación</button>' : ''}
           </span>
         </figcaption>
+        <div class="lab-crt-apagado" aria-hidden="true"><span>SIN SEÑAL</span></div>
       </figure>
-    </section>
+    </div>
     <section class="lab-panel lab-calculadora" aria-labelledby="lab-cal-tit">
       <header class="lab-panel-cab"><h2 id="lab-cal-tit"><span>03</span>Calculadora</h2></header>
       ${htmlCalculadora()}
@@ -201,8 +238,46 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   // Estado compartido por los dos modos, guardado por fórmula.
   let estado: Record<string, string> = {};
   try { estado = JSON.parse(localStorage.getItem(claveEstado(id)) ?? '{}') as Record<string, string>; } catch { estado = {}; }
+  let todosLosPeriodos = false;
+  try { todosLosPeriodos = localStorage.getItem(CLAVE_PERIODOS) === 'true'; } catch { todosLosPeriodos = false; }
   const guardar = () => { try { localStorage.setItem(claveEstado(id), JSON.stringify(estado)); } catch { /* sin almacenamiento: se trabaja igual */ } };
   const campos = (nombre: string) => [...lab.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[data-campo="${nombre}"]`)];
+
+  const leerFilasManual = () => [...lab.querySelectorAll<HTMLElement>('[data-lab-variable-fila]')].map((fila) => {
+    const k = fila.dataset.labVariableFila!;
+    return { nombre: estado[`manual:nombre:${k}`] ?? '', valor: estado[`manual:valor:${k}`] ?? '' };
+  });
+  const pintarFilasManual = (filas = leerFilasManual()) => {
+    const cuerpo = lab.querySelector<HTMLElement>('[data-lab-variables-filas]');
+    if (!cuerpo) return;
+    const cantidadGuardada = Math.max(1, Number.parseInt(estado['manual:filas'] ?? '3', 10) || 3);
+    const cantidad = Math.min(20, Math.max(cantidadGuardada, filas.length, ...Object.keys(estado).flatMap((k) => {
+      const m = /^manual:(?:nombre|valor):(\d+)$/.exec(k);
+      return m && estado[k] ? [Number(m[1]) + 1] : [];
+    })));
+    cuerpo.innerHTML = filasVariablesManuales(cantidad);
+    for (let k = 0; k < cantidad; k++) {
+      const nombre = cuerpo.querySelector<HTMLInputElement>(`[data-campo="manual:nombre:${k}"]`);
+      const valor = cuerpo.querySelector<HTMLInputElement>(`[data-campo="manual:valor:${k}"]`);
+      if (nombre) nombre.value = filas[k]?.nombre ?? estado[`manual:nombre:${k}`] ?? '';
+      if (valor) valor.value = filas[k]?.valor ?? estado[`manual:valor:${k}`] ?? '';
+    }
+    estado['manual:filas'] = String(cantidad);
+  };
+  const reconstruirFilasManual = (filas: { nombre: string; valor: string }[]) => {
+    for (let k = 0; k < 20; k++) {
+      delete estado[`manual:nombre:${k}`];
+      delete estado[`manual:valor:${k}`];
+    }
+    const cantidad = Math.max(1, Math.min(20, filas.length));
+    estado['manual:filas'] = String(cantidad);
+    for (let k = 0; k < cantidad; k++) {
+      estado[`manual:nombre:${k}`] = filas[k]?.nombre ?? '';
+      estado[`manual:valor:${k}`] = filas[k]?.valor ?? '';
+    }
+    pintarFilasManual(filas);
+    guardar();
+  };
 
   const ejercicio = (): Ejercicio => {
     const e = estado.ejercicio as Ejercicio | undefined;
@@ -211,13 +286,15 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     return e ?? (caso ? 'animacion' : 'practica');
   };
   const semilla = () => Number(estado.semilla) || 1;
+  const ejercicioGenerado = () => generarEjercicio(id, semilla(), { todosLosPeriodos });
   /** Datos del enunciado del ejercicio elegido (ninguno si son los del alumno). */
   const datosEnunciado = (): Readonly<Record<string, string>> | null => {
     const e = ejercicio();
     if (e === 'animacion') return caso ?? null;
-    if (e === 'practica' || e === 'examen') return generarEjercicio(id, semilla())?.datos ?? null;
+    if (e === 'practica' || e === 'examen' || e === 'examen-real') return ejercicioGenerado()?.datos ?? null;
     return null;
   };
+  const periodicidadEnunciado = () => ejercicioGenerado()?.periodicidad;
   const leerValores = (fuente: (s: string) => string | undefined): Record<string, number> => {
     const v: Record<string, number> = {};
     for (const d of datos) {
@@ -237,23 +314,51 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     const origen = lab.querySelector<HTMLElement>('[data-lab-caso-origen]')!;
     const texto = lab.querySelector<HTMLElement>('[data-lab-caso-texto]')!;
     const otro = lab.querySelector<HTMLButtonElement>('[data-lab-otro]')!;
+    const pista = lab.querySelector<HTMLButtonElement>('[data-lab-pista]')!;
+    const pistaTexto = lab.querySelector<HTMLElement>('[data-lab-pista-texto]')!;
+    const controlPeriodos = lab.querySelector<HTMLElement>('[data-lab-periodos-control]')!;
+    const togglePeriodos = lab.querySelector<HTMLInputElement>('[data-lab-todos-periodos]')!;
     const nota = lab.querySelector<HTMLElement>('[data-lab-escena-nota]')!;
     if (!definicion) return;
     const d = datosEnunciado();
-    otro.hidden = e !== 'practica' && e !== 'examen';
+    const periodicidad = periodicidadEnunciado();
+    otro.hidden = e !== 'practica' && e !== 'examen' && e !== 'examen-real';
+    pista.hidden = e !== 'examen';
+    pistaTexto.hidden = true;
+    controlPeriodos.hidden = e !== 'practica' && e !== 'examen' && e !== 'examen-real';
+    togglePeriodos.checked = todosLosPeriodos;
+    const examenManual = e === 'examen-real' && lab.dataset.modo === 'analogico';
+    const datosFijos = lab.querySelector<HTMLElement>('[data-lab-datos-fijos]');
+    const datosManuales = lab.querySelector<HTMLElement>('[data-lab-datos-manuales]');
+    if (datosFijos) datosFijos.hidden = examenManual;
+    if (datosManuales) datosManuales.hidden = !examenManual;
+    const incSelect = lab.querySelector<HTMLElement>('[data-lab-incognita-select]');
+    const incTexto = lab.querySelector<HTMLElement>('[data-lab-incognita-text]');
+    const formulaSelect = lab.querySelector<HTMLElement>('[data-lab-formula-select]');
+    const formulaTexto = lab.querySelector<HTMLElement>('[data-lab-formula-text]');
+    if (incSelect) incSelect.hidden = examenManual;
+    if (incTexto) incTexto.hidden = !examenManual;
+    if (formulaSelect) formulaSelect.hidden = examenManual;
+    if (formulaTexto) formulaTexto.hidden = !examenManual;
+    if (examenManual) pintarFilasManual();
     if (e === 'animacion') {
       origen.textContent = 'El caso de la animación';
       texto.innerHTML = enunciado(id, d!);
       nota.textContent = '';
     } else if (e === 'practica') {
       origen.textContent = `Ejercicio aleatorio nº ${semilla()} · generado al azar`;
-      texto.innerHTML = enunciado(id, d!);
+      texto.innerHTML = enunciado(id, d!, periodicidad);
       nota.textContent = 'La animación enseña su caso de ejemplo; tu ejercicio tiene otros datos.';
     } else if (e === 'examen') {
-      // Como en un examen: el enunciado redactado, sin decir qué letra es cada dato.
-      origen.textContent = `Modo examen · ejercicio nº ${semilla()}`;
-      texto.textContent = enunciadoExamen(id, d!) ?? '';
+      // Práctica con enunciado redactado y una única pista opcional.
+      origen.textContent = `Práctica · ejercicio nº ${semilla()}`;
+      texto.textContent = enunciadoExamen(id, d!, periodicidad) ?? enunciado(id, d!, periodicidad) ?? '';
       nota.textContent = 'La animación enseña su caso de ejemplo; tu ejercicio tiene otros datos.';
+    } else if (e === 'examen-real') {
+      // Evaluación estricta: el enunciado no etiqueta las variables y no ofrece pistas.
+      origen.textContent = `Examen real · ejercicio nº ${semilla()}`;
+      texto.textContent = enunciadoExamen(id, d!, periodicidad) ?? enunciado(id, d!, periodicidad) ?? '';
+      nota.textContent = 'La animación queda apagada durante el examen.';
     } else {
       origen.textContent = 'Mis datos';
       texto.textContent = 'Escribe tus propios datos en el cuaderno: la calculadora y la comprobación usan los tuyos.';
@@ -282,11 +387,17 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     if (!definicion) return;
     const notas: Record<string, { bien: boolean; texto: string }> = {};
     const enunciadoDatos = datosEnunciado();
+    const examenManual = ejercicio() === 'examen-real' && lab.dataset.modo === 'analogico';
     // Datos
     const fallos: string[] = [];
     for (const d of datos) {
       const nombre = formulaTexto(d.simbolo);
-      const l = leerDato(estado[`dato:${d.simbolo}`] ?? '', d.magnitud);
+      let valorEscrito = estado[`dato:${d.simbolo}`] ?? '';
+      if (examenManual) {
+        const fila = leerFilasManual().find((f) => simboloDeNombre(f.nombre) === d.simbolo);
+        valorEscrito = fila?.valor ?? '';
+      }
+      const l = leerDato(valorEscrito, d.magnitud);
       if (l.ok === 'vacio') { fallos.push(`falta ${nombre}`); continue; }
       if (l.ok === false) { fallos.push(`${nombre}: ${l.error}`); continue; }
       if (l.aviso) { fallos.push(`${nombre}: ${l.aviso}`); continue; }
@@ -295,17 +406,25 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
         if (e.ok === true && Math.abs(e.valor - l.valor) > 1e-9) fallos.push(`${nombre} no es el del enunciado`);
       }
     }
-    notas.datos = fallos.length ? { bien: false, texto: `Revisa: ${fallos.join('; ')}.` } : { bien: true, texto: 'Datos bien copiados.' };
+    notas.datos = fallos.length
+      ? { bien: false, texto: `Revisa: ${fallos.join('; ')}.` }
+      : { bien: true, texto: examenManual ? 'Variables y valores bien anotados.' : 'Datos bien copiados.' };
     // Incógnita
-    const inc = estado.incognita;
-    notas.incognita = !inc ? { bien: false, texto: 'Elige qué te piden.' } : inc === definicion.incognita.simbolo ? { bien: true, texto: 'Es lo que te piden.' } : { bien: false, texto: 'Mira la pregunta: ¿qué cantidad no conoces?' };
+    const incManual = (estado['manual:incognita'] ?? '').trim();
+    const normalizar = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const inc = examenManual
+      ? simboloDeNombre(incManual) ?? (normalizar(incManual) === normalizar(simbolo(definicion.incognita.simbolo)?.nombre ?? '') ? definicion.incognita.simbolo : '')
+      : estado.incognita;
+    notas.incognita = !inc ? { bien: false, texto: 'Escribe qué te piden.' } : inc === definicion.incognita.simbolo ? { bien: true, texto: 'Es lo que te piden.' } : { bien: false, texto: 'Mira la pregunta: ¿qué cantidad no conoces?' };
     // Fórmula: la de la ficha o una de la que sale despejando
     const f = estado.formula;
     const desde = Object.values(DERIVACIONES).flat().filter((x) => x.hacia === id).map((x) => x.desde);
-    notas.formula = !f ? { bien: false, texto: 'Elige la fórmula que vas a usar.' }
-      : f === id ? { bien: true, texto: 'Es la fórmula que calcula lo que te piden.' }
-        : desde.includes(f) ? { bien: true, texto: 'También vale: de esa fórmula sale despejando.' }
-          : { bien: false, texto: 'Esa fórmula no calcula lo que te piden.' };
+    if (!examenManual) {
+      notas.formula = !f ? { bien: false, texto: 'Elige la fórmula que vas a usar.' }
+        : f === id ? { bien: true, texto: 'Es la fórmula que calcula lo que te piden.' }
+          : desde.includes(f) ? { bien: true, texto: 'También vale: de esa fórmula sale despejando.' }
+            : { bien: false, texto: 'Esa fórmula no calcula lo que te piden.' };
+    }
     // Resultado
     const v = enunciadoDatos ? leerValores((s) => enunciadoDatos[s]) : valores();
     const x = esperado(definicion, v);
@@ -342,7 +461,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   lab.querySelector<HTMLElement>('[data-lab-hoja-sitio]')!.innerHTML = htmlHoja(`hoja-${id}`, leerEstado);
   paradas.push(montarHoja(lab, {
     leer: leerEstado,
-    objetivo: () => (definicion ? { incognita: definicion.incognita, datos: datosEnunciado(), examen: ejercicio() === 'examen' } : null),
+    objetivo: () => (definicion ? { incognita: definicion.incognita, datos: datosEnunciado(), examen: ejercicio() === 'examen-real' } : null),
     alCalcular: (texto) => {
       estado.resultado = texto;
       campos('resultado').forEach((c) => { c.value = texto; });
@@ -367,6 +486,15 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   // Modo DIGITAL / ANALÓGICO (se recuerda) y el papel que sube desde detrás de la animación.
   const papel = lab.querySelector<HTMLElement>('[data-lab-papel]')!;
   const botonPapel = lab.querySelector<HTMLButtonElement>('[data-lab-abrir-papel]')!;
+  const cartulina = lab.closest<HTMLElement>('.t2-ficha')?.querySelector<HTMLElement>('.lab-cartulina');
+  const animarCartulina = (cae: boolean) => {
+    if (!cartulina) return;
+    cartulina.classList.remove('lab-cartulina-cae', 'lab-cartulina-aparece');
+    void cartulina.offsetWidth;
+    const clase = cae ? 'lab-cartulina-cae' : 'lab-cartulina-aparece';
+    cartulina.classList.add(clase);
+    cartulina.addEventListener('animationend', () => cartulina.classList.remove(clase), { once: true });
+  };
   const abrirPapel = (abrir: boolean) => {
     lab.classList.toggle('lab-papel-abierto', abrir);
     papel.setAttribute('aria-hidden', String(!abrir));
@@ -378,6 +506,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     lab.dataset.modo = modo;
     lab.querySelectorAll<HTMLButtonElement>('[data-lab-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.labModo === modo)));
     abrirPapel(modo === 'analogico');
+    pintarEjercicio();
     try { localStorage.setItem(CLAVE_MODO, modo); } catch { /* sin almacenamiento */ }
   };
   let modoGuardado: string | null = null;
@@ -404,6 +533,18 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     estado.semilla = String(s);
     guardar();
     pintarEjercicio();
+    if (anterior !== 'examen-real' && e === 'examen-real') animarCartulina(true);
+    else if (anterior === 'examen-real' && e !== 'examen-real') animarCartulina(false);
+  };
+
+  const alCambiarPeriodos = (ev: Event) => {
+    const control = (ev.target as Element).closest<HTMLInputElement>('[data-lab-todos-periodos]');
+    if (!control) return;
+    todosLosPeriodos = control.checked;
+    try { localStorage.setItem(CLAVE_PERIODOS, String(todosLosPeriodos)); } catch { /* sin almacenamiento */ }
+    const actual = ejercicio();
+    if (actual === 'practica' || actual === 'examen' || actual === 'examen-real') cambiarEjercicio(actual, true);
+    else pintarEjercicio();
   };
 
   const alPulsar = (ev: Event) => {
@@ -411,7 +552,31 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     if (!b || !lab.contains(b)) return;
     if (b.dataset.labModo) ponerModo(b.dataset.labModo as Modo);
     else if (b.dataset.labEjercicio) cambiarEjercicio(b.dataset.labEjercicio as Ejercicio);
-    else if (b.hasAttribute('data-lab-otro')) cambiarEjercicio(ejercicio() === 'examen' ? 'examen' : 'practica', true);
+    else if (b.hasAttribute('data-lab-otro')) {
+      const actual = ejercicio();
+      cambiarEjercicio(actual === 'examen-real' ? 'examen-real' : actual === 'examen' ? 'examen' : 'practica', true);
+    } else if (b.hasAttribute('data-lab-pista')) {
+      b.hidden = true;
+      const p = lab.querySelector<HTMLElement>('[data-lab-pista-texto]')!;
+      p.textContent = 'Pista: identifica qué cantidad te piden y busca una fórmula que permita calcularla con los datos del enunciado.';
+      p.hidden = false;
+    }
+    else if (b.hasAttribute('data-lab-variable-mas')) {
+      const filas = leerFilasManual();
+      if (filas.length < 20) filas.push({ nombre: '', valor: '' });
+      reconstruirFilasManual(filas);
+      lab.querySelector<HTMLInputElement>(`[data-campo="manual:nombre:${filas.length - 1}"]`)?.focus();
+    } else if (b.hasAttribute('data-lab-variable-quitar')) {
+      const fila = b.closest<HTMLElement>('[data-lab-variable-fila]');
+      if (!fila) return;
+      const filas = leerFilasManual();
+      const indice = Number(fila.dataset.labVariableFila);
+      if (filas.length > 1) filas.splice(indice, 1);
+      else filas[0] = { nombre: '', valor: '' };
+      reconstruirFilasManual(filas);
+    } else if (b.hasAttribute('data-lab-variable-limpiar')) {
+      reconstruirFilasManual(leerFilasManual().map(() => ({ nombre: '', valor: '' })));
+    }
     else if (b.hasAttribute('data-lab-abrir-papel')) abrirPapel(!lab.classList.contains('lab-papel-abierto'));
     else if (b.hasAttribute('data-lab-ampliar') && escena) expandir(figura, { tipo: 'escena', escena, volanta: `Fórmula ${formulaPorId(id)!.numero} · Laboratorio` });
     else if (b.hasAttribute('data-lab-limpiar')) {
@@ -424,7 +589,8 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     } else if (b.hasAttribute('data-lab-comprobar')) revisar();
   };
   lab.addEventListener('click', alPulsar);
-  paradas.push(() => lab.removeEventListener('click', alPulsar));
+  lab.addEventListener('change', alCambiarPeriodos);
+  paradas.push(() => { lab.removeEventListener('click', alPulsar); lab.removeEventListener('change', alCambiarPeriodos); });
 
   // La calculadora conoce los datos del cuaderno y le envía sus operaciones.
   paradas.push(montarCalculadora(lab, {

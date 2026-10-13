@@ -13,7 +13,7 @@ El catálogo muestra seis asignaturas del ciclo, pero solo **Gestión Financiera
 | **1 · El sistema financiero español** | 4 bloques, 12 apartados y 45 conceptos | Ciudad 3D, Atlas HTML, fichas, preguntas, glosario, flashcards e infografías |
 | **2 · Matemática financiera** | 19 fórmulas en capitalización simple, compuesta y descuento | Lecciones paso a paso y una secuencia para identificar datos, elegir fórmula y practicar |
 
-El Tema 1 tiene también una **predicción de examen**: ordena cinco bloques con porcentajes tomados de los apuntes del curso. Es una estimación de esos apuntes, **no una probabilidad oficial**. Algunos ejemplos de actualidad incluidos en el temario pueden quedar desfasados; el contenido se mantiene en el repositorio, no se consulta en tiempo real.
+El Tema 1 incluye **pesos orientativos para organizar el estudio**: distribuye cinco bloques según los apuntes del curso. No son probabilidades reales ni se han calculado con exámenes anteriores. Algunos ejemplos de actualidad incluidos en el temario pueden quedar desfasados; el contenido se mantiene en el repositorio, no se consulta en tiempo real.
 
 Las otras cinco asignaturas aparecen en el selector, todavía sin contenido de estudio.
 
@@ -86,7 +86,7 @@ El navegador guarda datos en `localStorage`: el dominio del tema y la actividad 
 ## Límites conocidos
 
 - El contenido académico está compilado en la aplicación; no se actualiza automáticamente desde fuentes externas.
-- La predicción de examen depende de los apuntes del curso y no debe leerse como dato oficial.
+- Los pesos orientativos dependen de los apuntes del curso; no son probabilidades reales ni datos oficiales.
 - La práctica de selección de fórmulas del Tema 2 todavía no forma parte del repaso espaciado de preguntas y flashcards.
 - La identidad visual nueva y la nueva gramática urbana de la ciudad están desplegadas por partes; hay pantallas y zonas con sistemas anteriores.
 

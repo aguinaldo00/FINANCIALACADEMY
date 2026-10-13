@@ -1,4 +1,4 @@
-import { hrefAcademia, hrefAsignatura, hrefProyecto } from '../../app/router.ts';
+import { hrefAcademia, hrefAsignatura, hrefProyecto, hrefNormativa } from '../../app/router.ts';
 import { ASIGNATURAS, type Asignatura, disponible } from '../../content/academia.ts';
 import { medallonAsignatura } from '../views/academiaView.ts';
 
@@ -29,5 +29,5 @@ export function pintarRailAcademia(rail: HTMLElement, activa?: Asignatura): void
     const temas = abierta ? a.temas.map((t) => `<a class="sl ra-tema" href="${t.href}"><div class="top"><span class="id">${t.numero}</span><span>${t.titulo}</span></div></a>`).join('') : '';
     return cab + temas;
   }).join('');
-  rail.innerHTML = `<a class="brand" href="${hrefAcademia()}"><span class="ring tema-anillo" aria-hidden="true">FA</span><span><small class="brand-ante">Financial Academy</small><b>Asignaturas</b><small>Ciclo de Administración y Finanzas</small></span></a><div class="grp">Mundos</div>${filas}<div class="grp">Información</div><a class="sl exn" href="${hrefProyecto()}"><div class="top"><span class="id" aria-hidden="true">i</span><span>Sobre el proyecto</span></div><small class="ex-sub">Guía de uso y recursos</small></a>`;
+  rail.innerHTML = `<a class="brand" href="${hrefAcademia()}"><span class="ring tema-anillo" aria-hidden="true">FA</span><span><small class="brand-ante">Financial Academy</small><b>Asignaturas</b><small>Ciclo de Administración y Finanzas</small></span></a><div class="grp">Mundos</div>${filas}<div class="grp">Información</div><a class="sl exn" href="${hrefProyecto()}"><div class="top"><span class="id" aria-hidden="true">i</span><span>Sobre el proyecto</span></div><small class="ex-sub">Guía de uso y recursos</small></a><a class="sl exn" href="${hrefNormativa()}"><div class="top"><span class="id" aria-hidden="true">§</span><span>Normativa</span></div><small class="ex-sub">Referencias oficiales (consulta)</small></a>`;
 }

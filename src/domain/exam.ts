@@ -94,7 +94,7 @@ export interface OpcionesSimulacro {
 }
 
 /**
- * Simulacro del tema: preguntas repartidas por bloque según la predicción, elegidas al azar entre
+ * Simulacro del tema: preguntas repartidas por bloque según los pesos orientativos, elegidas al azar entre
  * las oficiales y las de práctica (sin repetir) y en orden barajado.
  */
 export function construirSimulacro(tema: Tema, { total = 20, semilla = Date.now() }: OpcionesSimulacro = {}): PreguntaExamen[] {

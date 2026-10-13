@@ -18,7 +18,7 @@ export const infografias: Infografia[] = [
       A('ico', 'ICO', '🏦', 46, 45),
       A('banco', 'Banco privado', '🏧', 78, 14),
       A('pyme', 'Pyme o autónomo', '🧑‍💼', 92, 46),
-      A('proyecto', 'Proyecto de 10 M€ o más', '🏗️', 78, 80),
+      A('proyecto', 'Proyecto financiado directamente', '🏗️', 78, 80),
       A('ayudas', 'Destinatarios de fondos públicos', '🤝', 46, 88),
     ],
     flujos: [
@@ -33,9 +33,9 @@ export const infografias: Infografia[] = [
     pasos: [
       { texto: 'El ICO es una entidad pública empresarial y agencia financiera del Estado. Se financia en los mercados y sus deudas tienen garantía explícita del Estado.', actores: ['ico', 'mercados', 'estado'], flujos: [0, 1] },
       { texto: 'Como banco público, vía 1 · líneas de mediación: el dinero del ICO llega a pymes y autónomos a través de un banco privado, que tramita, estudia la viabilidad y asume el riesgo.', actores: ['ico', 'banco', 'pyme'], flujos: [2, 3] },
-      { texto: 'Como banco público, vía 2 · financiación directa para proyectos de un mínimo de 10 millones de euros: aquí el riesgo lo asume el propio ICO.', actores: ['ico', 'proyecto'], flujos: [4] },
+      { texto: 'Como banco público, vía 2 · financiación directa: aquí el riesgo lo asume el propio ICO.', actores: ['ico', 'proyecto'], flujos: [4] },
       { texto: 'Como agencia financiera del Estado: gestiona fondos públicos que le asigna el Gobierno (catástrofes naturales, fomento de exportaciones, ayuda al desarrollo). El ICO no asume el riesgo: actúa por cuenta del Estado, que es quien lo asume.', actores: ['estado', 'ico', 'ayudas'], flujos: [5, 6] },
-      { texto: 'Para el examen: mediación → riesgo del banco · directa (≥ 10 M€) → riesgo del ICO · agencia del Estado → arriesga el Estado, no el ICO. Es entidad de crédito, pero no de depósito.', actores: ['ico', 'banco', 'proyecto', 'ayudas'], flujos: [] },
+      { texto: 'Para distinguir las tres vías: mediación → riesgo de la entidad de crédito · directa → riesgo del ICO · agencia financiera → riesgo del Estado. El ICO es entidad de crédito, pero no de depósito.', actores: ['ico', 'banco', 'proyecto', 'ayudas'], flujos: [] },
     ],
   },
   {
@@ -46,22 +46,18 @@ export const infografias: Infografia[] = [
       A('cliente', 'Tú', '👤', 12, 50),
       A('ede', 'Entidad de dinero electrónico', '📱', 46, 50),
       A('comercio', 'Otra empresa (comercio)', '🏪', 84, 50),
-      A('bde', 'Banco de España', '🏛️', 46, 12),
-      A('sepblac', 'SEPBLAC', '🔎', 84, 12),
     ],
     flujos: [
       F('cliente', 'ede', 'entregas dinero', 'dinero'),
       F('ede', 'cliente', 'saldo electrónico', 'documento'),
       F('cliente', 'comercio', 'pagas con ese saldo', 'dinero'),
       F('comercio', 'ede', 'lo exige a la EDE', 'documento'),
-      F('sepblac', 'bde', 'informe previo', 'supervision'),
-      F('bde', 'ede', 'autoriza', 'supervision'),
     ],
     pasos: [
       { texto: 'Una EDE emite dinero electrónico: le das dinero y te devuelve un saldo almacenado en soporte electrónico.', actores: ['cliente', 'ede'], flujos: [0, 1] },
       { texto: 'Ese saldo es un medio de pago aceptado por empresas distintas de la emisora ("extraños").', actores: ['cliente', 'comercio'], flujos: [2] },
       { texto: 'Es exigible a su emisor: quien lo recibe puede pedírselo a la EDE.', actores: ['comercio', 'ede'], flujos: [3] },
-      { texto: 'Ley 21/2011. Las autoriza el Banco de España, previo informe del SEPBLAC. Truco: Exigible · Electrónico · aceptado por Extraños.', actores: ['bde', 'sepblac', 'ede'], flujos: [4, 5] },
+      { texto: 'Repasa las tres características del saldo: es exigible al emisor, electrónico y aceptado por terceros.', actores: ['cliente', 'ede', 'comercio'], flujos: [0, 1, 2, 3] },
     ],
   },
   {
@@ -109,7 +105,7 @@ export const infografias: Infografia[] = [
       F('efc', 'proveedores', 'confirming: gestiona tus pagos', 'dinero'),
     ],
     pasos: [
-      { texto: 'Los EFC son entidades financieras especializadas en prestar que NO pueden captar depósitos del público: es la diferencia clave con un banco. Desde la Ley 5/2015 ya no son entidades de crédito, aunque los supervisa el Banco de España.', actores: ['efc', 'ahorrador'], flujos: [0] },
+      { texto: 'Los EFC conceden financiación, pero NO captan depósitos del público. Esa es la diferencia que permite distinguirlos de una entidad de depósito.', actores: ['efc', 'ahorrador'], flujos: [0] },
       { texto: 'Leasing: arrendamiento financiero con opción de compra. Alquilas una furgoneta y al final puedes comprarla.', actores: ['efc', 'empresa', 'furgoneta'], flujos: [1, 2] },
       { texto: 'Factoring: cesión de la cartera de cobros. Cedes tus facturas para cobrar ya.', actores: ['clientes', 'efc', 'empresa'], flujos: [3, 4] },
       { texto: 'Confirming: gestión integral de los pagos a proveedores. Además: créditos al consumo, hipotecas, avales y tarjetas.', actores: ['efc', 'proveedores'], flujos: [5] },
@@ -131,9 +127,9 @@ export const infografias: Infografia[] = [
       F('fgd', 'recuperas', 'hasta 100.000 € por titular y entidad', 'dinero'),
     ],
     pasos: [
-      { texto: 'Tienes 150.000 € en un banco. Todas las entidades de crédito españolas están adheridas obligatoriamente al Fondo (las sucursales de bancos de otros países de la UE las cubre el fondo de su país).', actores: ['tu', 'banco', 'fgd'], flujos: [0, 1] },
+      { texto: 'Tienes un depósito en una entidad adherida al Fondo. El límite de cobertura se calcula por titular y por entidad.', actores: ['tu', 'banco', 'fgd'], flujos: [0, 1] },
       { texto: 'El banco quiebra: el FGDEC garantiza los depósitos en dinero hasta 100.000 € por titular y entidad. Recuperas 100.000 €, no 150.000.', actores: ['fgd', 'recuperas'], flujos: [2] },
-      { texto: 'Real Decreto Ley 16/2011: los tres fondos (bancos, cajas y cooperativas) se unificaron en el FGDEC. Para clientes de ESI y gestoras de IIC existe el FOGAIN. Ojo: el FGD devuelve depósitos; el MUR resuelve la entidad.', actores: ['fgd'], flujos: [] },
+      { texto: 'El FGD protege depósitos dentro de su límite. No confundas su función con el MUR, que organiza la resolución de entidades no viables.', actores: ['fgd'], flujos: [] },
     ],
   },
   {
@@ -291,7 +287,7 @@ export const infografias: Infografia[] = [
       F('mur', 'crisis', 'resolución ordenada', 'supervision'),
     ],
     pasos: [
-      { texto: 'El MUS es el supervisor bancario único de la zona euro, en funcionamiento desde el 4 de noviembre de 2014. Cuatro elementos: regulación, supervisión continuada, medidas correctoras y régimen sancionador.', actores: ['mus', 'banco'], flujos: [0] },
+      { texto: 'El MUS supervisa a las entidades de crédito de la zona euro. Sus herramientas incluyen regulación, supervisión continuada, medidas correctoras y régimen sancionador.', actores: ['mus', 'banco'], flujos: [0] },
       { texto: 'Si una entidad deja de ser viable, entra en juego el MUR, que trabaja junto al MUS para gestionar su crisis.', actores: ['banco', 'crisis', 'mur'], flujos: [1, 2] },
       { texto: 'MUS = "te vigilo"; MUR = "si hay incendio, intervengo". No confundas el MUR con el FGD: el FGD devuelve depósitos; el MUR resuelve la entidad.', actores: ['mus', 'mur'], flujos: [] },
     ],

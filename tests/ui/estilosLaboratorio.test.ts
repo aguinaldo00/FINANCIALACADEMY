@@ -6,4 +6,11 @@ describe('estilos del laboratorio', () => {
     const css = readFileSync(new URL('../../src/styles/laboratorio.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     expect(css.match(/(?<![\w-])\.lab(?![\w-]|\[data-laboratorio\])/g) ?? []).toEqual([]);
   });
+
+  it('deja que el Cuadro de mando use el scroll de la página, no barras internas en móvil', () => {
+    const css = readFileSync(new URL('../../src/styles/laboratorio.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).not.toMatch(/\.lab-(?:cuaderno|centro|calculadora|escena)[^{]*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:auto|scroll)/);
+    expect(css).not.toMatch(/\.hoja-(?:guia|sust)[^{]*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:auto|scroll)/);
+    expect(css).not.toMatch(/\.cal-resultado[^{]*\{[^}]*overflow(?:-[xy])?\s*:\s*(?:auto|scroll)/);
+  });
 });

@@ -1,6 +1,6 @@
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { EstadoPractica } from '../../app/practiceStore.ts';
-import { hrefExamen, hrefGlosario, hrefInicio, hrefTemas, hrefProgreso, hrefProyecto, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro, hrefVisual } from '../../app/router.ts';
+import { hrefExamen, hrefGlosario, hrefInicio, hrefTemas, hrefProgreso, hrefProyecto, hrefNormativa, hrefRepaso, hrefSeccion, hrefSesion, hrefSimulacro, hrefVisual } from '../../app/router.ts';
 import { dominioGlobal, dominioSeccion } from '../../domain/mastery.ts';
 import { colorDominio } from '../format.ts';
 import { MARCA } from './brandTitle.ts';
@@ -32,9 +32,9 @@ export function pintarRail(rail: HTMLElement, estado: EstadoEstudio, seccionActu
   const n = practica?.pendientes() ?? 0;
   const insignia = n ? `<span class="pw insignia" aria-label="${n} pendientes">${n}</span>` : '';
   const examen = tema.ampliacion?.bloques.length
-    ? `<div class="grp">Estudio y examen</div>${enlace('glosario', hrefGlosario(), `${iconoUi('pergamino')}`, 'Glosario', 'Siglas y términos explicados')}${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Predicción de examen', 'Qué es más probable que caiga')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}`
+    ? `<div class="grp">Estudio y examen</div>${enlace('glosario', hrefGlosario(), `${iconoUi('pergamino')}`, 'Glosario', 'Siglas y términos explicados')}${enlace('sesion', hrefSesion(), `${iconoUi('diana')}`, 'Estudiar hoy', 'Sesión mezclada y espaciada')}${enlace('examen', hrefExamen(), `${iconoUi('barras')}`, 'Pesos orientativos', 'Para organizar el estudio')}${tema.ampliacion?.infografias?.length ? enlace('visual', hrefVisual(), `${iconoUi('proyector')}`, 'Infografías', 'Lo difícil, paso a paso') : ''}${enlace('simulacro', hrefSimulacro(), `${iconoUi('examen')}`, 'Simulacro', 'Examen tipo test con nota')}${enlace('repaso', hrefRepaso(), `${iconoUi('repaso')}`, 'Repaso', 'Tus fallos y flashcards de hoy', insignia)}${enlace('progreso', hrefProgreso(), `${iconoUi('progreso')}`, 'Mi progreso', 'Racha, calibración y evolución')}`
     : '';
-  const proyecto = `<div class="grp">Información</div>${enlace('proyecto', hrefProyecto(), `${iconoUi('pergamino')}`, 'Sobre el proyecto', 'Guía de uso y recursos')}`;
+  const proyecto = `<div class="grp">Información</div>${enlace('proyecto', hrefProyecto(), `${iconoUi('pergamino')}`, 'Sobre el proyecto', 'Guía de uso y recursos')}${enlace('normativa', hrefNormativa(), `${iconoUi('pergamino')}`, 'Normativa', 'Referencias oficiales (consulta)')}`;
   const scroll = rail.scrollTop;
   rail.innerHTML = enlaceTodosLosTemas() + cabecera + grupos + proyecto + examen;
   rail.scrollTop = scroll;

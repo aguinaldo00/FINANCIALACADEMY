@@ -1,10 +1,10 @@
 /*
- * Correcciones de exactitud aprobadas por el usuario (11/10) sobre el contenido heredado del prototipo
+ * Correcciones de exactitud del contenido registradas durante su revisión sobre el contenido heredado del prototipo
  * (legacy/ciudad-del-dinero-tema1.html). La prueba de paridad aplica estas sustituciones al prototipo
  * y exige que el resultado sea exactamente el contenido actual: nada cambia sin quedar registrado aquí.
  */
 /** Campos de un concepto que admiten correcciones (enunciado y explicacion son los de su pregunta). */
-export type CampoCorregible = 'definicion' | 'ejemploReal' | 'explicaciones' | 'trampaExamen' | 'enunciado' | 'explicacion';
+export type CampoCorregible = 'nombre' | 'definicion' | 'ejemploReal' | 'explicaciones' | 'trampaExamen' | 'enunciado' | 'opciones' | 'indiceCorrecta' | 'explicacion';
 
 export interface CorreccionConcepto {
   conceptoId: string;
@@ -36,7 +36,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "bde",
     "campo": "definicion",
     "antes": "Es un <b>intermediario atípico</b>: financia a las Administraciones públicas, no a familias.",
-    "despues": "Es un <b>intermediario atípico</b>: no trabaja con familias ni empresas, sino con las entidades de crédito y con el Estado, al que lleva la tesorería y la deuda pública. La ley le <b>prohíbe prestar</b> a las Administraciones públicas (art. 13 de su Ley de Autonomía).",
+    "despues": "Banco central nacional, miembro del SEBC y del Eurosistema. Es <b>autoridad nacional de supervisión</b> y trabaja con las entidades de crédito y con el Estado, no con familias ni empresas. Gestiona la tesorería y la deuda pública. Distingue sus funciones nacionales —supervisión y moneda metálica— de las funciones europeas —política monetaria y billetes—.",
     "motivo": "El Banco de España no puede financiar a las Administraciones públicas.",
     "fuente": "Ley 13/1994, art. 13"
   },
@@ -44,7 +44,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "estructura-b",
     "campo": "definicion",
     "antes": "Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas), ICO, entidades de dinero electrónico y EFC. Y <b>otras entidades</b>: sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago.",
-    "despues": "Debajo, las <b>entidades de crédito</b>: entidades de depósito (bancos, cajas, cooperativas) e ICO. Y <b>otras entidades</b> que también supervisa: EFC, entidades de dinero electrónico, sociedades de tasación, SGR, entidades de cambio de divisa y entidades de pago. Ojo: en esquemas antiguos aún aparecen los EFC y las EDE entre las entidades de crédito, pero los EFC dejaron de serlo con la Ley 5/2015 y las EDE, con la Ley 21/2011.",
+    "despues": "El Banco de España supervisa entidades de crédito y otras entidades financieras. <b>Entidades de depósito:</b> bancos, cajas de ahorro y cooperativas. El ICO es entidad de crédito, pero no de depósito. Entre las otras entidades supervisadas están EFC, EDE, SGR, sociedades de tasación y entidades de pago.",
     "motivo": "Los EFC y las EDE ya no son entidades de crédito.",
     "fuente": "Ley 5/2015 (preámbulo) · Ley 21/2011 · Banco de España"
   },
@@ -60,7 +60,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "estructura-b",
     "campo": "explicaciones",
     "antes": "Entidad de crédito ≠ entidad de depósito: el ICO y los EFC son de crédito pero no de depósito.",
-    "despues": "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito pero no de depósito. Los EFC ya no son entidades de crédito (Ley 5/2015), aunque los supervisa el Banco de España.",
+    "despues": "Entidad de crédito ≠ entidad de depósito: el ICO es de crédito, pero no capta depósitos. Los EFC y las EDE tampoco son entidades de depósito.",
     "motivo": "Los EFC ya no son entidades de crédito.",
     "fuente": "Ley 5/2015"
   },
@@ -68,15 +68,15 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "fgd",
     "campo": "explicaciones",
     "antes": "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · voluntario para sucursales de la UE",
-    "despues": "☂️ 100.000 € por titular y entidad · obligatorio para entidades españolas · las sucursales de bancos de otros países de la UE las cubre el fondo de su país",
-    "motivo": "Dato desactualizado: las sucursales de la UE las cubre el fondo de su país de origen.",
-    "fuente": "Directiva 2014/49/UE, art. 14"
+    "despues": "☂️ Hasta 100.000 € por titular y entidad · FGD (depósitos) ≠ FOGAIN (inversiones)",
+    "motivo": "Se retira el detalle sobre sucursales UE para centrar la ficha en el límite de cobertura y la diferencia con FOGAIN.",
+    "fuente": "Petición del usuario (13/10)",
   },
   {
     "conceptoId": "efc",
     "campo": "definicion",
     "antes": "Entidades de crédito especializadas que <b>no pueden captar depósitos del público</b>. <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial: condiciones parecidas a los bancos con menos capital.",
-    "despues": "Entidades financieras especializadas en prestar que <b>no pueden captar depósitos del público</b>. Con la <b>Ley 5/2015</b> de Fomento de la Financiación Empresarial <b>dejaron de ser entidades de crédito</b>, pero las sigue supervisando el Banco de España.",
+    "despues": "Entidades financieras especializadas en conceder financiación que <b>no pueden captar depósitos del público</b>. Las supervisa el Banco de España. Entre sus operaciones están el <b>leasing, factoring y confirming</b>, además del crédito al consumo, hipotecas, avales y tarjetas.",
     "motivo": "Los EFC ya no son entidades de crédito.",
     "fuente": "Ley 5/2015 (preámbulo) · Banco de España"
   },
@@ -100,7 +100,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "funciones",
     "campo": "trampaExamen",
     "antes": "Test, pregunta 9: \"lograr",
-    "despues": "Pregunta trampa típica: \"lograr",
+    "despues": "La función esencial es una sola: canalizar recursos de las unidades con superávit hacia las de déficit. Fomentar el ahorro y sustentar los pagos son funciones complementarias, no la función esencial.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -300,7 +300,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "mus",
     "campo": "trampaExamen",
     "antes": "Actividad 22: la finalidad del supervisor único.",
-    "despues": "Su finalidad: velar por la seguridad y solidez de la banca europea.",
+    "despues": "El MUS supervisa; el MUR organiza la resolución de entidades no viables. No confundas supervisión, garantía de depósitos y resolución.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -308,7 +308,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "bde",
     "campo": "explicaciones",
     "antes": "Test 11: máxima autoridad",
-    "despues": "Máxima autoridad",
+    "despues": "Banco de España: banco central nacional integrado en el SEBC, con funciones propias de supervisión, moneda metálica, tesorería y deuda pública.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -380,7 +380,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "ico",
     "campo": "ejemploReal",
     "antes": "Línea del libro para comercio minorista",
-    "despues": "Ejemplo de línea de financiación para comercio minorista",
+    "despues": "Una empresa puede recibir financiación del ICO a través de un banco privado o mediante financiación directa; en cada vía cambia quién estudia la operación y asume el riesgo.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -388,7 +388,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "ede",
     "campo": "explicaciones",
     "antes": "Comprueba 5: definir las EDE y poner dos ejemplos.",
-    "despues": "Pregunta típica: define las EDE y pon dos ejemplos (Bnext, MoneyToPay…).",
+    "despues": "Dinero electrónico: saldo emitido tras recibir fondos, almacenado electrónicamente y aceptado como pago por terceros.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -396,7 +396,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "ede",
     "campo": "explicacion",
     "antes": "Pág. 25 del libro.",
-    "despues": "Las EDE las autoriza el Banco de España, previo informe del SEPBLAC (el servicio que vigila el blanqueo de capitales). Ni la CNMV ni la DGSFP intervienen.",
+    "despues": "El dinero electrónico es un valor almacenado electrónicamente, exigible al emisor y aceptado como pago por terceros.",
     "motivo": "Citaba el libro (test, actividad, tabla o página) en vez de explicarlo.",
     "fuente": "Petición del usuario (12/10)"
   },
@@ -556,7 +556,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "directa",
     "campo": "trampaExamen",
     "antes": "No la confundas con el \"mercado directo\" del punto 3.2: si hay un intermediario que cobra comisión, el mercado es intermediado",
-    "despues": "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado",
+    "despues": "En la intermediación directa, el ahorrador compra el instrumento emitido por la unidad con déficit. Que exista un intermediario que cobra comisión es otro criterio: clasifica el mercado como intermediado.",
     "motivo": "La explicación remitía a un punto del libro.",
     "fuente": "Petición del usuario (13/10)"
   },
@@ -564,7 +564,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "rrl",
     "campo": "ejemploReal",
     "antes": "⚠ dato del libro, puede haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
-    "despues": "⚠ Datos orientativos que pueden haber cambiado: letras del Tesoro en torno al 2,6 % a 12 meses y depósitos entre el 2 y el 3 %.",
+    "despues": "Al comparar dos inversiones, valora qué puedes perder (riesgo), con qué facilidad recuperas el dinero (liquidez) y qué rendimiento esperas (rentabilidad).",
     "motivo": "Se conserva el aviso de vigencia y se elimina la referencia al libro.",
     "fuente": "Petición del usuario (13/10)"
   },
@@ -588,7 +588,7 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "bce",
     "campo": "ejemploReal",
     "antes": "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. El libro dice 20 países: ⚠ dato del libro, puede haber cambiado (desde el 1-1-2026 Bulgaria usa el euro y son 21).",
-    "despues": "Sede en Frankfurt. Presidenta desde el 1-11-2019: Christine Lagarde, mandato de 8 años no renovable. La cifra de países puede haber cambiado: desde el 1-1-2026 Bulgaria usa el euro y son 21.",
+    "despues": "Cuando los precios suben en la zona euro, la política monetaria común busca preservar la estabilidad de precios.",
     "motivo": "Se sustituye la referencia al libro por un aviso contextual sobre la cifra.",
     "fuente": "Petición del usuario (13/10)"
   },
@@ -596,8 +596,336 @@ export const CORRECCIONES_CONCEPTOS: readonly CorreccionConcepto[] = [
     "conceptoId": "ede",
     "campo": "ejemploReal",
     "antes": "⚠ dato del libro, puede haber cambiado: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
-    "despues": "⚠ Estos ejemplos pueden haber quedado desactualizados: Bnext, MoneyToPay, PFS Card y Pecunia Cards. Entidades de pago (RDL 19/2018): Moneytrans y Safetypay.",
+    "despues": "Ejemplo: recargas 20 € en un monedero electrónico y utilizas ese saldo para pagar en un comercio distinto de quien lo emitió.",
     "motivo": "Se conserva el aviso de vigencia y se elimina la referencia al libro.",
     "fuente": "Petición del usuario (13/10)"
-  }
+  },
+  {
+    "conceptoId": "funciones",
+    "campo": "definicion",
+    "antes": "<b>Función esencial:</b> canalizar los recursos de las unidades con superávit hacia las de déficit. Además: analizar la viabilidad de los proyectos, fomentar el ahorro, sustentar el sistema de pagos, asignar eficientemente los recursos, contribuir a la estabilidad monetaria y financiera, y velar por las instituciones.",
+    "despues": "<span class=\"idea-principal\"><b>Función esencial:</b> canalizar los recursos desde las unidades con superávit hacia las unidades con déficit.</span><br><span class=\"idea-apoyo\"><b>Funciones complementarias:</b> analizar la viabilidad · fomentar el ahorro · sustentar los pagos · asignar recursos eficientemente · contribuir a la estabilidad monetaria y financiera · velar por las instituciones.</span>",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "funciones",
+    "campo": "explicaciones",
+    "antes": "Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit.",
+    "despues": "<span class=\"idea-principal\">Función esencial: canalizar los recursos de las unidades con superávit hacia las unidades con déficit.</span> <span class=\"idea-apoyo\">La complementan el ahorro, los pagos seguros, la asignación eficiente, la estabilidad y la vigilancia de las instituciones.</span>",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "funciones",
+    "campo": "explicacion",
+    "antes": "Las otras son funciones de organismos concretos.",
+    "despues": "La canalización de recursos desde unidades con superávit hacia unidades con déficit es la función esencial. Fomentar el ahorro y sustentar los pagos son funciones complementarias.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "directa",
+    "campo": "trampaExamen",
+    "antes": "No la confundas con la clasificación de los mercados: si hay un intermediario que cobra comisión, el mercado es intermediado.",
+    "despues": "En la intermediación directa, el ahorrador compra el instrumento emitido por la unidad con déficit. Que exista un intermediario que cobra comisión es otro criterio: clasifica el mercado como intermediado.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "indirecta",
+    "campo": "trampaExamen",
+    "antes": "La frase que buscan en el examen: \"ambos agentes no tienen ningún contacto entre ellos\".",
+    "despues": "En la intermediación indirecta, el ahorrador trata con el banco y el banco financia a la unidad con déficit: ambos agentes no tienen contacto entre sí.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "bde",
+    "campo": "ejemploReal",
+    "antes": "Bajo su sede de Madrid hay una cámara acorazada a 36 metros que se inundaría ante un intento de asalto.",
+    "despues": "Al repasar esta ficha, separa las funciones europeas del Banco de España como miembro del SEBC de las funciones nacionales que ejerce en España.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "bde",
+    "campo": "explicaciones",
+    "antes": "Una cámara acorazada con dos llaves: la europea (billetes, política monetaria del euro, divisas, reservas, pagos) y la nacional (supervisar solvencia, moneda metálica, tesorería y deuda pública, estadísticas, asesorar al Gobierno).",
+    "despues": "Dos escalas de trabajo: la europea, como miembro del SEBC, y la nacional, con tareas como supervisar entidades y gestionar tesorería y deuda pública.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "ejemploReal",
+    "antes": "En el año 2000 había más de 40. Hoy solo quedan dos: <b>Caixa Ontinyent</b> y <b>Colonya Caixa Pollença</b>.",
+    "despues": "Para distinguir una caja de un banco privado, fíjate en su forma fundacional, la ausencia de reparto entre accionistas y el destino social de sus resultados.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "explicaciones",
+    "antes": "Una capilla con cepillo de limosna: lo que se recoge va a la comunidad. Y casi en ruinas: solo quedan dos.",
+    "despues": "Como una entidad bancaria organizada para atender fines sociales: sus beneficios no se reparten entre accionistas.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "explicaciones",
+    "antes": "Muchas siguen llamándose \"Caja\" o \"Caixa\" y son bancos. Cajamar es una cooperativa.",
+    "despues": "Caja de ahorro ≠ cooperativa de crédito: la caja tiene forma fundacional; la cooperativa pertenece a sus socios.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "trampaExamen",
+    "antes": "¿Cuántas quedan? Dos.",
+    "despues": "La diferencia clave es la forma jurídica y el destino de los resultados. No confundas una caja de ahorro con una cooperativa de crédito.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "trampaExamen",
+    "antes": " ¿La Caja de Ingenieros o Cajamar son cajas de ahorro? No.",
+    "despues": "",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "enunciado",
+    "antes": "¿Cuántas cajas de ahorro quedan en España?",
+    "despues": "¿Qué rasgo distingue a las cajas de ahorro?",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "opciones",
+    "antes": "Más de 40",
+    "despues": "Tienen forma fundacional y fines sociales",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "opciones",
+    "antes": "2",
+    "despues": "No pueden captar depósitos del público",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "opciones",
+    "antes": "10",
+    "despues": "No las supervisa el Banco de España",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "indiceCorrecta",
+    "antes": "1",
+    "despues": "0",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "cajas",
+    "campo": "explicacion",
+    "antes": "Caixa Ontinyent y Colonya Caixa Pollença.",
+    "despues": "La caja tiene forma fundacional y destina sus resultados a fines sociales; una cooperativa pertenece a sus socios.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ico",
+    "campo": "explicaciones",
+    "antes": "Banco público: mediación (riesgo: tu banco) · directa desde 10 M (riesgo: el ICO)   |   Agencia del Estado (el ICO no arriesga)",
+    "despues": "Banco público: mediación (riesgo de la entidad de crédito) · directa (riesgo del ICO)   |   Agencia financiera del Estado (riesgo del Estado)",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ico",
+    "campo": "trampaExamen",
+    "antes": "Líneas de mediación: el riesgo lo asume la entidad de crédito, no el ICO. Financiación directa: mínimo 10 millones.",
+    "despues": "Distingue las vías por quién asume el riesgo: mediación → entidad de crédito; financiación directa → ICO; agencia financiera → Estado.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "nombre",
+    "antes": "Entidades de dinero electrónico y de pago",
+    "despues": "Entidades de dinero electrónico (EDE)",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "definicion",
+    "antes": "Emiten <b>dinero electrónico</b>: exigible a su emisor, almacenado en soporte electrónico y aceptado como medio de pago por entidades distintas de la emisora. <b>Ley 21/2011.</b> Las autoriza el <b>Banco de España</b>, previo informe del SEPBLAC.",
+    "despues": "Emiten <b>dinero electrónico</b>: un saldo monetario exigible a su emisor, almacenado electrónicamente y aceptado como medio de pago por personas o entidades distintas del emisor.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "explicaciones",
+    "antes": "No es un banco tradicional, aunque los bancos también pueden emitir dinero electrónico.",
+    "despues": "No es lo mismo que un depósito bancario: es un saldo electrónico que puede emitir una entidad habilitada, incluidos los bancos.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "trampaExamen",
+    "antes": "Ley 21/2011 = dinero electrónico. RDL 19/2018 = entidades de pago. No las cruces.",
+    "despues": "No confundas el dinero electrónico (el saldo emitido y almacenado) con el servicio de pago (la operación que permite transferir dinero).",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "enunciado",
+    "antes": "¿Quién autoriza la creación de una EDE?",
+    "despues": "¿Qué rasgos definen el dinero electrónico?",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "opciones",
+    "antes": "La CNMV",
+    "despues": "Es exigible a su emisor, se almacena electrónicamente y lo aceptan terceros.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "opciones",
+    "antes": "El Banco de España, previo informe del SEPBLAC",
+    "despues": "Es un depósito bancario que genera intereses y está cubierto por el FGD.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "opciones",
+    "antes": "La DGSFP",
+    "despues": "Son billetes emitidos por el comercio que los acepta.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "ede",
+    "campo": "indiceCorrecta",
+    "antes": "1",
+    "despues": "0",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "fgd",
+    "campo": "definicion",
+    "antes": "Garantiza los depósitos en dinero (y valores) de las entidades de crédito hasta <b>100.000 € por titular y entidad</b>. Con el <b>Real Decreto Ley 16/2011</b>, los tres fondos (bancos, cajas, cooperativas) se unificaron en el FGDEC.",
+    "despues": "El Fondo de Garantía de Depósitos protege los depósitos en dinero hasta <b>100.000 € por titular y entidad</b>. No confundas la garantía de depósitos con la resolución de una entidad ni con los sistemas de protección de inversiones.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "fgd",
+    "campo": "trampaExamen",
+    "antes": "Las opciones de 120.000 € o 150.000 € son trampas.",
+    "despues": "El límite se aplica por titular y por entidad. Distingue este sistema de la resolución bancaria y de la protección de inversiones.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "definicion",
+    "antes": "Supervisor bancario único de la zona euro, impulsado en 2012 y en funcionamiento desde el <b>4 de noviembre de 2014</b>. Vela por la seguridad y solidez de la banca europea. Cuatro elementos: <b>regulación, supervisión continuada, medidas correctoras y régimen sancionador</b>.",
+    "despues": "Mecanismo de supervisión bancaria de la zona euro, liderado por el BCE. Su labor combina <b>regulación, supervisión continuada, medidas correctoras y régimen sancionador</b>.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "explicacion",
+    "antes": "4 de noviembre de 2014.",
+    "despues": "El MUS supervisa a las entidades de crédito de la zona euro; el MUR organiza la resolución y el FGD garantiza depósitos.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "efc",
+    "campo": "explicaciones",
+    "antes": "Obligaciones: informar al Banco de España, coeficiente de caja del BCE, coeficiente de garantía y normas con los clientes.",
+    "despues": "La clave para distinguirlas de una entidad de depósito: pueden conceder financiación, pero no captar depósitos del público.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "efc",
+    "campo": "explicacion",
+    "antes": "Ley 5/2015.",
+    "despues": "Los EFC pueden conceder financiación, pero no captar depósitos del público.",
+    "motivo": "Contenido depurado para que la ficha y sus botones refuercen el concepto de la plataforma, sin datos anecdóticos, variables ni referencias legales en el estudio.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "enunciado",
+    "antes": "¿Desde cuándo funciona el MUS?",
+    "despues": "¿Qué hace principalmente el MUS?",
+    "motivo": "La ficha estudia la función del MUS y su diferencia con el MUR y el FGD, no una fecha.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "opciones",
+    "antes": "1-1-1999",
+    "despues": "Supervisa a las entidades de crédito de la zona euro",
+    "motivo": "La pregunta comprueba la función del MUS.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "opciones",
+    "antes": "4-11-2014",
+    "despues": "Organiza la resolución de las entidades no viables",
+    "motivo": "La opción refuerza la diferencia entre MUS y MUR.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "opciones",
+    "antes": "1-11-2019",
+    "despues": "Garantiza los depósitos hasta 100.000 €",
+    "motivo": "La opción refuerza la diferencia entre supervisión y garantía de depósitos.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "mus",
+    "campo": "indiceCorrecta",
+    "antes": "1",
+    "despues": "0",
+    "motivo": "La opción correcta ahora describe la función del MUS.",
+    "fuente": "Petición del usuario (13/10)"
+  },
+  {
+    "conceptoId": "coop",
+    "campo": "ejemploReal",
+    "antes": "Tipos: cajas rurales (la mayoría), cajas populares y cajas profesionales. Patronal: UNACC (1970). Dependen del Ministerio de Trabajo y Economía Social y del de Economía (Banco de España).",
+    "despues": "Una cooperativa de crédito pertenece a sus socios y puede ofrecer servicios financieros tanto a ellos como a terceros.",
+    "motivo": "Se eliminan el dato histórico de una patronal y una adscripción institucional que no ayudan a entender el concepto.",
+    "fuente": "Petición del usuario (13/10)"
+  },
 ];

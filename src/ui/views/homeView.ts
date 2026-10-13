@@ -50,10 +50,10 @@ export function pintarInicio(ctx: ContextoVista, estado: EstadoEstudio): void {
   conectarLineaTemporal(ctx.pagina.querySelector<HTMLElement>('.tl'));
 }
 
-/** Al final de la portada: acceso a la predicción de examen (si el tema tiene ampliación). */
+/** Al final de la portada: acceso a los pesos orientativos (si el tema tiene ampliación). */
 function tarjetaExamen(estado: EstadoEstudio): string {
   const bloques = estado.tema.ampliacion?.bloques ?? [];
   if (!bloques.length) return '';
-  const barras = bloques.map((b) => `<i style="flex-grow:${b.probabilidad}" title="${b.titulo}: ${b.probabilidad} %"></i>`).join('');
-  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">${iconoUi('barras')} Predicción de examen</span><b>¿Qué caerá en el examen?</b><span class="he-t">Los ${bloques.length} bloques ordenados por probabilidad, tu dominio en cada uno y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver la predicción →</span></a><p class="home-practica"><a class="principal" href="${hrefSesion()}">${iconoUi('diana')} Estudiar hoy</a><a href="${hrefVisual()}">${iconoUi('proyector')} Infografías</a><a href="${hrefSimulacro()}">${iconoUi('examen')} Hacer un simulacro</a><a href="${hrefRepaso()}">${iconoUi('repaso')} Mi repaso de hoy</a><a href="${hrefProgreso()}">${iconoUi('progreso')} Mi progreso</a></p>`;
+  const barras = bloques.map((b) => `<i style="flex-grow:${b.probabilidad}" title="${b.titulo}: peso orientativo ${b.probabilidad} %"></i>`).join('');
+  return `<a class="home-examen rev" href="${hrefExamen()}"><span class="he-k">${iconoUi('barras')} Pesos orientativos</span><b>Organiza tu estudio</b><span class="he-t">Consulta el peso orientativo de los ${bloques.length} bloques, tu dominio y un simulacro por bloque.</span><span class="he-barras" aria-hidden="true">${barras}</span><span class="he-ir">Ver los pesos orientativos →</span></a><p class="home-practica"><a class="principal" href="${hrefSesion()}">${iconoUi('diana')} Estudiar hoy</a><a href="${hrefVisual()}">${iconoUi('proyector')} Infografías</a><a href="${hrefSimulacro()}">${iconoUi('examen')} Hacer un simulacro</a><a href="${hrefRepaso()}">${iconoUi('repaso')} Mi repaso de hoy</a><a href="${hrefProgreso()}">${iconoUi('progreso')} Mi progreso</a></p>`;
 }

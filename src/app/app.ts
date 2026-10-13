@@ -15,6 +15,7 @@ import { pintarRepaso } from '../ui/views/repasoView.ts';
 import { pintarSesion } from '../ui/views/sesionView.ts';
 import { detenerVisual, pintarVisual } from '../ui/views/visualView.ts';
 import { pintarGlosario } from '../ui/views/glosarioView.ts';
+import { pintarNormativa } from '../ui/views/normativaView.ts';
 import { detenerSimulacro, pintarSimulacro } from '../ui/views/simulacroView.ts';
 import { pintarInicio } from '../ui/views/homeView.ts';
 import { pintarProyecto } from '../ui/views/proyectoView.ts';
@@ -160,7 +161,9 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     }
     document.title = ruta.vista === 'inicio'
       ? 'Unidad 1 · El sistema financiero · Financial Academy'
-      : 'Gestión financiera · La ciudad del dinero';
+      : ruta.vista === 'normativa'
+        ? 'Referencias normativas · Financial Academy'
+        : 'Gestión financiera · La ciudad del dinero';
     if (ruta.vista !== 'inicio' && ruta.vista !== 'seccion') {
       seccionActual = ruta.vista;
       mundo.desmontar();
@@ -170,6 +173,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
       else if (ruta.vista === 'progreso') pintarProgreso(ctx, estado, practica);
       else if (ruta.vista === 'visual') pintarVisual(ctx, estado);
       else if (ruta.vista === 'glosario') pintarGlosario(ctx);
+      else if (ruta.vista === 'normativa') pintarNormativa(ctx);
       else pintarRepaso(ctx, estado, practica, undefined, 'conceptoId' in ruta ? ruta.conceptoId : undefined);
     } else if (ruta.vista === 'seccion') {
       seccionActual = ruta.seccionId;

@@ -41,8 +41,8 @@ describe('paridad de contenido con el prototipo', () => {
   it('cada corrección registrada existe en el prototipo y cambia algo', () => {
     for (const c of CORRECCIONES_CONCEPTOS) {
       const l = DATA.conceptos.find((x) => x.id === c.conceptoId)!;
-      const original = { definicion: l.c, ejemploReal: l.e, explicaciones: l.o, trampaExamen: l.t, enunciado: l.q[0], explicacion: l.q[3] }[c.campo];
-      expect([original].flat().some((t) => t.includes(c.antes)), `${c.conceptoId} · ${c.campo}`).toBe(true);
+      const original = { nombre: l.n, definicion: l.c, ejemploReal: l.e, explicaciones: l.o, trampaExamen: l.t, enunciado: l.q[0], opciones: l.q[1], indiceCorrecta: String(l.q[2]), explicacion: l.q[3] }[c.campo];
+      expect([original].flat().some((t) => String(t).includes(c.antes)), `${c.conceptoId} · ${c.campo}`).toBe(true);
       expect(c.antes).not.toBe(c.despues);
     }
   });
@@ -54,14 +54,14 @@ describe('paridad de contenido con el prototipo', () => {
       expect(c).toEqual({
         id: l.id,
         seccionId: l.s,
-        nombre: l.n,
+        nombre: corregido(l.id, 'nombre', l.n),
         iconos: l.ic,
         color: l.col,
         definicion: corregido(l.id, 'definicion', l.c),
         ejemploReal: corregido(l.id, 'ejemploReal', l.e),
         explicaciones: corregido(l.id, 'explicaciones', l.o),
         trampaExamen: corregido(l.id, 'trampaExamen', l.t),
-        pregunta: { enunciado: corregido(l.id, 'enunciado', l.q[0]), opciones: l.q[1], indiceCorrecta: l.q[2], explicacion: corregido(l.id, 'explicacion', l.q[3]) },
+        pregunta: { enunciado: corregido(l.id, 'enunciado', l.q[0]), opciones: corregido(l.id, 'opciones', l.q[1]), indiceCorrecta: Number(corregido(l.id, 'indiceCorrecta', String(l.q[2]))), explicacion: corregido(l.id, 'explicacion', l.q[3]) },
       });
     });
   });

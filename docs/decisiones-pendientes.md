@@ -20,11 +20,11 @@ Dudas encontradas durante el trabajo autónomo. Ninguna bloquea lo ya hecho.
 8. **Colisiones del paseo.** Hoy solo chocan los edificios; el personaje atraviesa fuentes, árboles
    y bancos. ¿Merece la pena añadirlos como obstáculos?
 
-## Predicción de examen y preguntas de práctica (02/10)
+## Pesos orientativos y preguntas de práctica (02/10)
 
-- **Probabilidades:** las de los bloques (30/25/20/15/10) son las de los apuntes del alumno y se
-  muestran como "estimadas según tus apuntes". No sustituyen al `pesoExamen` de DATA, que sigue
-  dando el tamaño de los barrios del mapa.
+- **Pesos orientativos:** los valores de los bloques (30/25/20/15/10) se toman de los apuntes del
+  alumno y sirven para organizar el estudio; no representan probabilidades reales. No sustituyen al
+  `pesoExamen` de DATA, que sigue dando el tamaño de los barrios del mapa.
   - **¿Unificar?** Decidir si el mapa debería usar también estos pesos.
 - **Práctica y dominio:** las preguntas de práctica y los simulacros no suben el dominio.
   - **¿Contar parcialmente?** Decidir si deberían contar en parte (p. ej. hasta 0,5).

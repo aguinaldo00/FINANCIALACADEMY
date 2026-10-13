@@ -34,7 +34,7 @@ export const ICONOS_UI = {
   calle: '<path d="M8 22 L14 8h36l6 14"/><path d="M8 22 Q12 29 16 22 Q20 29 24 22 Q28 29 32 22 Q36 29 40 22 Q44 29 48 22 Q52 29 56 22"/><path d="M12 27v29h40V27"/><path d="M27 56V39h10v17"/>',
   /** Estudiar hoy / frase de examen: diana con una moneda en el centro. */
   diana: '<circle cx="32" cy="32" r="25"/><circle cx="32" cy="32" r="15"/><circle cx="32" cy="32" r="5"/>',
-  /** Predicción de examen: barras de cotización. */
+  /** Pesos orientativos de estudio: barras de cotización. */
   barras: '<path d="M6 56h52"/><path d="M14 56V36h8v20M28 56V24h8v32M42 56V10h8v46"/>',
   /** Simulacro: hoja de examen tipo test. */
   examen: '<rect x="12" y="5" width="40" height="54" rx="4"/><rect x="19" y="14" width="7" height="7"/><path d="M31 18h14"/><path d="M19 33 L22 36 L27 29"/><path d="M31 33h14"/><rect x="19" y="43" width="7" height="7"/><path d="M31 47h14"/>',
