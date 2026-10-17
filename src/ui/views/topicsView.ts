@@ -12,6 +12,8 @@ import { bloque as datosBloque, pestanasBloque, recorridoFases } from './tema2/c
 import { htmlElegir, htmlIdentificar, htmlPractica, montarFase } from './tema2/fases.ts';
 import { htmlLectura, montarLectura } from './tema2/lectura.ts';
 import { htmlSimulacroT2, montarSimulacroT2 } from './tema2/simulacro.ts';
+import { htmlRemesaPractica, montarRemesaPractica } from './tema2/remesaPractica.ts';
+import { htmlFocalPractica, montarFocalPractica } from './tema2/focalPractica.ts';
 import { htmlFicha, montarFicha } from './tema2/ficha.ts';
 import { htmlIndice, montarIndice } from './tema2/indice.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
@@ -82,7 +84,7 @@ function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): stri
       ${recorridoFases(bloque, fase)}
       ${pestanasBloque(bloque, fase)}
     </header>
-    ${fase === 'datos' ? htmlLectura(bloque) + htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque, extraAntes) + htmlSimulacroT2()}
+    ${fase === 'datos' ? htmlLectura(bloque) + htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque, bloque === 'descuento' ? htmlRemesaPractica() + htmlFocalPractica() + extraAntes : extraAntes) + htmlSimulacroT2()}
     ${extraDespues}
     <nav class="t2-continuar">${continuar}</nav>
   </div>`;
@@ -111,7 +113,7 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: Estad
   else if (p.tipo === 'fase') {
     paradas.push(montarFase(ctx.pagina, p.bloque, p.fase));
     if (p.fase === 'datos') paradas.push(montarLectura(ctx.pagina, p.bloque));
-    if (p.fase === 'practica') paradas.push(montarSimulacroT2(ctx.pagina));
+    if (p.fase === 'practica') paradas.push(montarRemesaPractica(ctx.pagina), montarFocalPractica(ctx.pagina), montarSimulacroT2(ctx.pagina));
     const ejemplo = ctx.pagina.querySelector<HTMLElement>('[data-capitalizacion-compuesta]');
     if (ejemplo) paradas.push(montarCapitalizacionCompuesta(ejemplo));
     if (ctx.pagina.querySelector('[data-mat-error], [data-mat-pregunta]')) paradas.push(montarPracticaCompuesta(ctx.pagina));

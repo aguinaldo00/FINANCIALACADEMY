@@ -4,7 +4,7 @@ import { formulaTexto, simbolosDe } from '../../src/ui/matematica/formula.ts';
 import { UNIDADES } from '../../src/domain/tema2/periodos.ts';
 import { escenaConversion } from '../../src/ui/escenas/conversionPeriodos.ts';
 import { escenaConversionTipo } from '../../src/ui/escenas/conversionTipos.ts';
-import { LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
+import { ESCENAS_EXTRA, LISTA_ESCENAS } from '../../src/ui/escenas/index.ts';
 import { Lienzo } from '../../src/ui/motion/lienzo.ts';
 import { avanzar, type Escena, finCapitulo, PAUSA_LECTURA, textoConFormulas } from '../../src/ui/motion/reproductor.ts';
 
@@ -113,7 +113,7 @@ function problemasDeLectura(escena: Escena, fotoEn: (t: number) => Pieza[], k: n
 }
 
 describe('cada capítulo tiene un instante de lectura completo y quieto', () => {
-  for (const escena of LISTA_ESCENAS) {
+  for (const escena of [...LISTA_ESCENAS, ...ESCENAS_EXTRA]) {
     it(escena.id, () => {
       const fotoEn = camaraDe(escena);
       const malos = escena.capitulos.flatMap((c, k) => {
