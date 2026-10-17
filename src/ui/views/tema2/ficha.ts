@@ -61,9 +61,12 @@ export function htmlFicha(id: string): string {
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}
-    ${f.id === 'descuento-remesa' ? `<section class="t2-remesa" aria-labelledby="t2-remesa-tit">
-      <h2 id="t2-remesa-tit">Una sola letra, paso a paso</h2>
-      <p>Lo que se hace con cada letra de la remesa: del nominal se restan su descuento, su comisión y sus gastos.</p>
+    ${f.id === 'descuento-remesa' ? `<section class="t2-remesa t2-una-letra" aria-labelledby="t2-remesa-tit">
+      <div class="t2-una-letra-texto">
+        <h2 id="t2-remesa-tit">Una sola letra, paso a paso</h2>
+        <p>Lo que se hace con cada letra de la remesa: del nominal se restan su descuento, su comisión y sus gastos.</p>
+        <ol>${escenaRemesa.capitulos.map((c) => `<li>${textoT2(c.texto)}</li>`).join('')}</ol>
+      </div>
       <div data-remesa-anim></div>
     </section>` : ''}
     ${f.bloque === 'descuento' ? tarjetaLetras() : ''}

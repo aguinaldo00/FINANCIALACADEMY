@@ -842,3 +842,22 @@ select.hoja-select:hover{background-color:#342b22}
 @media (max-width:760px){
   .lab[data-laboratorio][data-ejercicio="examen-real"] .lab-caso{grid-template-columns:minmax(0,1fr)}
 }
+/* Cuaderno libre (fórmulas 13 y 17, sin «Caso de la animación»): la misma mesa que el caso de la
+   animación, con la animación en el centro, entre la hoja y la calculadora. */
+.lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]){grid-template-columns:minmax(360px,1.3fr) minmax(0,1.55fr) minmax(300px,.92fr);grid-template-areas:"barra barra barra" "cuaderno centro calc"}
+.lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
+.lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]) .lab-centro{display:grid}
+.lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]) .lab-escena{grid-area:auto;width:auto;justify-self:stretch}
+.lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]) .lab-papel-marco{grid-area:auto;display:grid}
+@media (max-width:1180px){
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]){grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"barra barra" "centro centro" "cuaderno calc"}
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-areas:"barra barra" "centro centro" "calc calc"}
+}
+@media (max-width:760px){
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]){grid-template-columns:minmax(0,1fr);grid-template-areas:"barra" "centro" "cuaderno" "calc"}
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-areas:"barra" "centro" "calc"}
+}
+@media (orientation:landscape) and (min-width:700px) and (max-width:1180px){
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"]){grid-template-columns:minmax(0,1.15fr) minmax(0,1.2fr) minmax(0,.9fr);grid-template-areas:"barra barra barra" "cuaderno centro calc"}
+  .lab[data-laboratorio][data-libre]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
+}
