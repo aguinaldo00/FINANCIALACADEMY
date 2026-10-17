@@ -183,22 +183,22 @@ export function htmlLaboratorio(id: string): string {
         <button type="button" data-lab-ejercicio="examen">Práctica</button>
         <button type="button" data-lab-ejercicio="examen-real">Examen real</button>
       </div>` : ''}
-      <div class="lab-caso" role="region" aria-label="Enunciado del ejercicio">
-        <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
-        ${calcula ? htmlRelojExamen() : ''}
-        <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
-        <div class="lab-opciones">
-        <label class="lab-periodos" data-lab-periodos-control hidden>
+      <div class="lab-opciones">
+        <label class="lab-periodos" data-lab-periodos-control hidden title="Alterna anual, semestral, cuatrimestral, trimestral, mensual y diario">
           <input type="checkbox" role="switch" data-lab-todos-periodos aria-label="Incluir varios periodos de interés">
           <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
           <span class="lab-periodos-texto"><b>Todos los tipos de interés</b><small>Alterna anual, semestral, cuatrimestral, trimestral, mensual y diario</small></span>
         </label>
-        <label class="lab-periodos lab-redactado" data-lab-redactado-control hidden>
+        <label class="lab-periodos lab-redactado" data-lab-redactado-control hidden title="Como en el examen, con cada dato en su color">
           <input type="checkbox" role="switch" data-lab-redactado aria-label="Enunciado redactado">
           <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
           <span class="lab-periodos-texto"><b>Enunciado redactado</b><small>Como en el examen, con cada dato en su color</small></span>
         </label>
-        </div>
+      </div>
+      <div class="lab-caso" role="region" aria-label="Enunciado del ejercicio">
+        <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
+        ${calcula ? htmlRelojExamen() : ''}
+        <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
         <button type="button" class="lab-pista" data-lab-pista hidden>Ver una pista</button>
         <button type="button" class="lab-mini lab-compartir" data-lab-compartir hidden title="Copia un enlace que abre este mismo ejercicio (para hacerlo toda la clase a la vez)">Copiar enlace a este ejercicio</button>
         <p class="lab-pista-texto" data-lab-pista-texto hidden></p>

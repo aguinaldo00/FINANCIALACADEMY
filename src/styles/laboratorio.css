@@ -110,11 +110,15 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 /* Barra del ejercicio: arriba los mandos (qué ejercicio y DIGITAL / ANALÓGICO), debajo el enunciado.
    El enunciado es una placa con la carcasa de la hoja y la calculadora, y su letra es la del h2 del
    sistema (--t-h2): por debajo solo del título de la ficha, por encima de todo lo demás. */
-.lab-barra{grid-area:barra;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"ejercicios modo" "caso caso";align-items:center;gap:18px 30px;margin-bottom:8px}
+/* Barra: los ejercicios, los interruptores del enunciado y Digital/Analógico en una línea (si no caben, bajan);
+   debajo, el enunciado a todo el ancho. */
+.lab-barra{grid-area:barra;display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;margin-bottom:8px}
+.lab-barra>.lab-modo{margin-left:auto}
+.lab-barra>.lab-caso{flex:1 1 100%;order:5;min-width:0}
 .lab-ejercicios{grid-area:ejercicios}
 .lab-modo{grid-area:modo}
-.lab-caso{grid-area:caso;position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"volanta reloj" "texto otro" "periodos periodos" "pista pista";align-items:end;gap:14px clamp(20px,3vw,48px);
-  padding:clamp(22px,2.4vw,34px) clamp(22px,3vw,44px) clamp(24px,2.6vw,36px) clamp(28px,3.4vw,52px);border-radius:20px;isolation:isolate;
+.lab-caso{grid-area:caso;position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"volanta reloj otro" "texto texto texto" "pista pista compartir";align-items:center;gap:10px clamp(20px,3vw,48px);
+  padding:clamp(16px,1.6vw,24px) clamp(20px,2.4vw,36px) clamp(16px,1.8vw,26px) clamp(26px,3vw,44px);border-radius:20px;isolation:isolate;
   background:linear-gradient(170deg,#2c241c 0%,#1f1914 55%,#1a1511 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.4),0 2px 0 #0c0907,0 34px 46px -28px rgba(0,0,0,.95)}
 /* Reloj del examen real: arriba a la derecha de la placa, en cifras grandes y tabulares */
@@ -139,7 +143,7 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 .lab-caso::after{content:"";position:absolute;left:0;top:clamp(22px,2.4vw,34px);bottom:clamp(24px,2.6vw,36px);width:4px;border-radius:0 3px 3px 0;background:var(--oro)}
 .lab-caso-volanta{grid-area:volanta;margin:0;font:600 .8rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.24em;text-transform:uppercase;color:var(--oro)}
 .lab-caso-volanta::before{content:"";display:inline-block;width:8px;height:8px;margin-right:10px;background:var(--r);vertical-align:1px}
-.lab-caso-texto{grid-area:texto;margin:0;max-width:34em;font:400 var(--t-h2)/1.28 var(--f-titulo);letter-spacing:-.01em;color:var(--ink);text-wrap:pretty}
+.lab-caso-texto{grid-area:texto;margin:0;max-width:none;font:400 var(--t-h2)/1.28 var(--f-titulo);letter-spacing:-.01em;color:var(--ink);text-wrap:pretty}
 .lab-caso-texto .fx{font-size:1em}
 /* Los datos con su cifra en peso fuerte y sin partirse; la pregunta, en su propia línea */
 .lab-caso-datos{color:var(--mut)}
@@ -150,12 +154,15 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 .lab-marca-pide{text-decoration:underline 1.5px dashed var(--m);text-underline-offset:.24em;text-decoration-skip-ink:none}
 .lab-marca-pide.s-c0{--m:var(--s-c0)}.lab-marca-pide.s-cn{--m:var(--s-cn)}.lab-marca-pide.s-I{--m:var(--s-I)}.lab-marca-pide.s-i{--m:var(--s-i)}.lab-marca-pide.s-n{--m:var(--s-n)}.lab-marca-pide.s-m{--m:var(--s-m)}.lab-marca-pide.s-D{--m:var(--s-D)}
 .lab-marca-pide:not(.lab-marca){color:var(--ink)}
-.lab-opciones{grid-area:periodos;display:flex;flex-wrap:wrap;gap:10px;min-width:0}
+.lab-opciones{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+/* En la barra, cada interruptor solo con su nombre (la explicación queda en el title). */
+.lab-opciones .lab-periodos{padding:6px 10px}
+.lab-opciones .lab-periodos-texto small{display:none}
 .lab-opciones:not(:has(>:not([hidden]))){display:none}
 .lab-opciones .lab-periodos{grid-area:auto}
 .lab-caso-dato b{font-weight:var(--p-fuerte)}
 .lab-caso-pide{display:block;margin-top:.12em;color:var(--ink)}
-.lab-caso .lab-otro{grid-area:otro;align-self:end;justify-self:end;white-space:nowrap}
+.lab-caso .lab-otro{grid-area:otro;align-self:center;justify-self:end;white-space:nowrap}
 .lab-pista{grid-area:pista;justify-self:start;border:0;border-bottom:1px solid var(--oro2);padding:2px 0;background:transparent;color:var(--oro2);cursor:pointer;font:600 .78rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.15em;text-transform:uppercase}
 .lab-pista:focus-visible{outline:2px solid var(--oro2);outline-offset:3px}
 .lab-pista-texto{grid-area:pista;margin:0;max-width:60em;color:var(--oro2);font:500 .92rem/1.4 var(--f-texto)}
@@ -492,12 +499,12 @@ body.t2-laboratorio .t2-ficha .t2-ficha-nav{max-width:1120px;margin-left:auto;ma
   .lab-cartulina{justify-self:start;max-width:100%}
   .lab-cartulina-papel{padding:20px 22px 24px}
   .t2-practicar{justify-self:start}
-  .lab-barra{grid-template-columns:minmax(0,1fr);grid-template-areas:"ejercicios" "modo" "caso";gap:12px}
+  .lab-barra{gap:12px}
   .lab-ejercicios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;box-sizing:border-box}
   .lab-ejercicios button{min-height:40px;padding:9px 10px;font-size:.72rem;letter-spacing:.11em;line-height:1.2}
   .lab-ejercicios button[data-lab-ejercicio="examen"]{border-left:1px solid var(--line2)}
   .lab-modo button{min-height:44px}
-  .lab-caso{grid-template-columns:minmax(0,1fr);grid-template-areas:"volanta" "reloj" "texto" "periodos" "pista" "otro";gap:12px;padding:20px 18px 20px 24px;border-radius:16px}
+  .lab-caso{grid-template-columns:minmax(0,1fr);grid-template-areas:"volanta" "reloj" "texto" "pista" "compartir" "otro";gap:12px;padding:20px 18px 20px 24px;border-radius:16px}
   .lab-reloj{justify-self:start}
   .lab-caso::after{top:20px;bottom:20px}
   .lab-caso .lab-otro{justify-self:start;white-space:normal}
@@ -643,7 +650,7 @@ select.hoja-select:hover{background-color:#342b22}
 .t2-al-zona[hidden]{display:none}
 .t2-al-papel .lab-papel{margin:0}
 .t2-al-papel .lab-que{margin-top:10px}
-@media (max-width:860px){
+@media (max-width:860px) and (orientation:portrait),(max-width:640px){
   .t2-al-trabajo{grid-template-columns:minmax(0,1fr)}
   .t2-al-modo{display:flex}
   .t2-al-modo button{flex:1}
@@ -676,12 +683,12 @@ select.hoja-select:hover{background-color:#342b22}
   .lab[data-laboratorio][data-modo="analogico"] .lab-calculadora{grid-column:2}
   .lab[data-laboratorio]:not([data-ejercicio="animacion"])[data-modo="digital"]{grid-template-areas:"barra barra barra" "cuaderno calc escena"}
   .lab[data-laboratorio]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-areas:"barra barra" "papel calc" "escena escena"}
-  .lab-barra{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"ejercicios modo" "caso caso";gap:6px 10px;margin-bottom:0}
+  .lab-barra{gap:6px 10px;margin-bottom:0}
   .lab-ejercicios{gap:1px;padding:2px;border-radius:8px}
   .lab-ejercicios button{min-width:0;padding:6px 7px;font-size:.64rem;letter-spacing:.08em;white-space:nowrap}
   .lab-modo{display:flex;white-space:nowrap}
   .lab-modo button{min-height:32px;padding:6px 10px;font-size:.66rem;letter-spacing:.1em}
-  .lab-caso{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"volanta reloj otro" "texto texto texto" "periodos periodos periodos" "pista pista pista";gap:4px 12px;padding:10px 14px 11px 18px;border-radius:12px}
+  .lab-caso{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"volanta reloj otro" "texto texto texto" "pista pista compartir";gap:4px 12px;padding:10px 14px 11px 18px;border-radius:12px}
   .lab-caso::after{top:10px;bottom:10px;width:3px}
   .lab-caso-volanta{font-size:.62rem}
   .lab-caso-texto{max-width:none;font-size:clamp(.94rem,1.7vw,1.15rem);line-height:1.18}
@@ -781,7 +788,7 @@ select.hoja-select:hover{background-color:#342b22}
 
 /* Acciones de la cabecera del cuaderno (imprimir y borrar) y enlace para compartir el ejercicio. */
 .lab-cab-acciones{display:inline-flex;flex-wrap:wrap;gap:6px 14px;justify-content:flex-end}
-.lab-compartir{grid-column:1/-1;justify-self:start}
+.lab-compartir{grid-area:compartir;justify-self:end;align-self:center}
 /* Pantallas muy anchas: el laboratorio no se estira más allá de una mesa cómoda. */
 @media (min-width:1700px){body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:1560px;margin-inline:auto}}
 /* Móvil: un atajo flotante a la calculadora (queda debajo del cuaderno). */
@@ -804,3 +811,28 @@ select.hoja-select:hover{background-color:#342b22}
    leen; lo mismo lo dice el subtítulo. */
 @media (max-width:600px){.mo-svg .ref-significado,.mo-svg .ref-guia-fx{display:none}}
 .t2-ficha:has(.lab[data-laboratorio][data-ejercicio="examen-real"]) .t2-de-donde{visibility:hidden}
+
+/* Tableta y móvil en horizontal: la misma mesa que en el ordenador, todo a la vista a la vez.
+   Con la animación, tres columnas (hoja · animación · calculadora); en el resto de ejercicios, hoja y
+   calculadora lado a lado y la animación debajo. Las columnas no pueden crecer con su contenido: así
+   la animación no se come el ancho de la hoja y de la calculadora. La calculadora no se queda fija. */
+@media (orientation:landscape) and (min-width:700px) and (max-width:1180px){
+  .lab[data-laboratorio],.lab[data-laboratorio][data-modo="analogico"]{grid-template-columns:minmax(0,1.15fr) minmax(0,1.2fr) minmax(0,.9fr);grid-template-areas:"barra barra barra" "cuaderno centro calc"}
+  .lab[data-laboratorio][data-modo="analogico"]{grid-template-areas:"barra barra barra" "centro centro calc"}
+  .lab[data-laboratorio][data-modo="analogico"] .lab-centro{grid-column:centro}
+  .lab[data-laboratorio][data-modo="analogico"] .lab-calculadora{grid-column:calc}
+  .lab[data-laboratorio]:not([data-ejercicio="animacion"])[data-modo="digital"]{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);grid-template-areas:"barra barra" "cuaderno calc" "escena escena"}
+  .lab[data-laboratorio]:not([data-ejercicio="animacion"])[data-modo="analogico"]{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);grid-template-areas:"barra barra" "papel calc" "escena escena"}
+  .lab[data-laboratorio]:not([data-ejercicio="animacion"]):not([data-ejercicio="examen-real"]) .lab-escena{width:min(100%,640px);justify-self:center}
+}
+/* Horizontal con poca altura (móvil): la barra de arriba se va con el desplazamiento en vez de quedarse
+   fija, para que el enunciado, la hoja y la calculadora quepan a la vez. */
+@media (orientation:landscape) and (max-height:540px){
+  body.t2-escritorio .ed-nav-noche{position:absolute}
+}
+/* Examen real: el reloj, centrado en la fila de arriba del enunciado (mismo recuadro), para que destaque. */
+.lab[data-laboratorio][data-ejercicio="examen-real"] .lab-caso{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.lab[data-laboratorio][data-ejercicio="examen-real"] .lab-reloj{justify-self:center}
+@media (max-width:760px){
+  .lab[data-laboratorio][data-ejercicio="examen-real"] .lab-caso{grid-template-columns:minmax(0,1fr)}
+}
