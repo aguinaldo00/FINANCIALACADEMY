@@ -266,7 +266,9 @@ describe('app en el navegador', () => {
     expect($('.ed-ruta li.on').textContent).toContain('Estás aquí');
     expect($('.ed-ruta-nota a').getAttribute('href')).toBe('#tema/2/simple/datos');
     for (const parte of ['simple', 'compuesta', 'descuento']) {
-      expect($$(`#t2-${parte} .ed-parte-practica a`).map((a) => a.getAttribute('href'))).toEqual(['datos', 'elegir', 'practica'].map((f) => `#tema/2/${parte}/${f}`));
+      // Descuento añade, al final, el apartado de varias letras (ejercicios de examen).
+      const fases = parte === 'descuento' ? ['datos', 'elegir', 'practica', 'letras'] : ['datos', 'elegir', 'practica'];
+      expect($$(`#t2-${parte} .ed-parte-practica a`).map((a) => a.getAttribute('href'))).toEqual(fases.map((f) => `#tema/2/${parte}/${f}`));
     }
     navegar('#tema/2/f/simple-intereses');
     // Las fichas usan la navegación editorial y el Sumario de papel (no el índice lateral oscuro).
@@ -280,6 +282,23 @@ describe('app en el navegador', () => {
     navegar('#tema/2/simple/datos');
     expect($('.t2-recorrido li.on').textContent).toContain('Identificar los datos');
     expect($('.rail .sl.on').getAttribute('href')).toBe('#tema/2/simple/datos');
+  });
+
+  it('Descuento tiene un apartado de varias letras: remesa y fecha focal, enlazado desde sus fases y la fórmula 17', () => {
+    navegar('#tema/2/descuento/letras');
+    expect($('.t2-letras h1').textContent).toBe('Varias letras con fechas distintas');
+    expect($('[data-remesa-ej]')).not.toBeNull();
+    expect($('[data-focal-ej]')).not.toBeNull();
+    expect($$('.t2-letras-anim .mo-svg').length).toBe(2);
+    expect($('.t2-recorrido li.on').textContent).toContain('Varias letras');
+    for (const fase of ['datos', 'practica']) {
+      navegar(`#tema/2/descuento/${fase}`);
+      expect($('.t2-letras-enlace').getAttribute('href')).toBe('#tema/2/descuento/letras');
+    }
+    // La animación de la fórmula 17 es la remesa de tres letras.
+    navegar('#tema/2/f/descuento-remesa');
+    expect($('[data-laboratorio] [data-escena]').dataset.escena).toBe('descuento-remesa');
+    expect($('[data-laboratorio] .mo-svg').getAttribute('aria-label') ?? $('[data-laboratorio] .mo-svg').textContent).toContain('tres letras');
   });
 
   it('la ficha de una fórmula es un laboratorio: cuaderno, animación y calculadora que comparten el ejercicio', () => {

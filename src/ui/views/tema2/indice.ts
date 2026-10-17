@@ -5,7 +5,7 @@
  * termina con su práctica (A, B y D). El temario completo está en el Sumario. Con un ejercicio
  * delante se empieza por A (identificar); quien empieza de cero tiene aquí mismo las fórmulas.
  */
-import { hrefAcademia, hrefAsignatura, hrefFase } from '../../../app/router.ts';
+import { hrefAcademia, hrefAsignatura, hrefFase, hrefLetras } from '../../../app/router.ts';
 import type { EstadoEstudio } from '../../../app/store.ts';
 import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../../../content/academia.ts';
 import { BLOQUES, formulaPorId, formulasDe, type BloqueId } from '../../../content/temas/tema-02/formulas.ts';
@@ -99,7 +99,8 @@ function practicaParte(b: BloqueId): string {
   return `<nav class="ed-parte-practica" aria-label="Practicar esta parte"><span>Con un ejercicio de esta parte</span>
     <a href="${hrefFase(b, 'datos')}"><b>A</b> Identificar los datos</a>
     <a href="${hrefFase(b, 'elegir')}"><b>B</b> Elegir la fórmula</a>
-    <a href="${hrefFase(b, 'practica')}"><b>D</b> Resolver en papel</a></nav>`;
+    <a href="${hrefFase(b, 'practica')}"><b>D</b> Resolver en papel</a>${b === 'descuento' ? `
+    <a href="${hrefLetras()}"><b>+</b> Varias letras (examen)</a>` : ''}</nav>`;
 }
 
 function memoriza(b: BloqueId): string {

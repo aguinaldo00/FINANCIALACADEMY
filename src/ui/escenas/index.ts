@@ -36,7 +36,7 @@ export const LISTA_ESCENAS: readonly Escena[] = [
   escenaTae,
   escenaDescuentoComercial,
   escenaDescuentoRacional,
-  escenaRemesa,
+  escenaRemesaTres,
   escenaDescuentoCompuestoRacional,
   escenaDescuentoCompuestoComercial,
 ];
@@ -44,4 +44,4 @@ export const LISTA_ESCENAS: readonly Escena[] = [
 export const ESCENAS: Readonly<Record<string, Escena>> = Object.fromEntries(LISTA_ESCENAS.map((e) => [e.id, e]));
 
 /** Escenas que no son de una fórmula concreta (explicaciones y ejemplos de examen). */
-export const ESCENAS_EXTRA: readonly Escena[] = [escenaRemesaTres, escenaFechaFocal];
+export const ESCENAS_EXTRA: readonly Escena[] = [escenaRemesa, escenaFechaFocal];

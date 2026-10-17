@@ -521,3 +521,19 @@
   .t2-lt-punto::before{top:3px;left:3px}
   .t2-lt-punto em{grid-column:1/-1}
 }
+/* Descuento · Varias letras (examen): enlace destacado y apartado propio. */
+.t2-letras-enlace{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;margin:16px 0;padding:14px 18px;border:1px solid color-mix(in srgb,var(--oro) 55%,transparent);border-radius:var(--radio);background:var(--bg3);color:var(--ink);text-decoration:none}
+.t2-letras-enlace b{font:var(--p-fuerte) 1.02rem/1.3 var(--f-texto)}
+.t2-letras-enlace span{grid-column:1;color:var(--mut);font-size:.9rem}
+.t2-letras-enlace i{grid-column:2;grid-row:1/3;font-style:normal;font-size:1.4rem;color:var(--oro)}
+.t2-letras-enlace:hover,.t2-letras-enlace:focus-visible{border-color:var(--oro)}
+.t2-recorrido-extra b{color:var(--oro)}
+.t2-letras-indice{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.t2-letras-indice a{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line2);border-radius:999px;color:var(--ink);text-decoration:none;font-size:.9rem}
+.t2-letras-indice b{color:var(--oro)}
+.t2-letras-sec{margin:28px 0;scroll-margin-top:80px}
+.t2-letras-sec>h2{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;font:var(--p-titulo) var(--t-h3)/1.2 var(--f-titulo);color:var(--ink)}
+.t2-letras-sec>h2 span{color:var(--oro);font-family:var(--f-cifra);font-size:1rem}
+.t2-letras-sec>p{max-width:72ch;margin:0 0 10px;color:var(--mut);line-height:1.55}
+.t2-letras-sec .t2-letras-ej{color:var(--ink)}
+.t2-letras-anim{max-width:720px;margin:14px 0 18px}

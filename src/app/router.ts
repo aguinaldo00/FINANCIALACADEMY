@@ -8,7 +8,9 @@ import { BLOQUES, formulaPorId, type BloqueId } from '../content/temas/tema-02/f
 export type PantallaTema2 =
   | { tipo: 'indice'; bloque: BloqueId | null }
   | { tipo: 'formula'; id: string }
-  | { tipo: 'fase'; bloque: BloqueId; fase: Exclude<FaseTema2, 'formulas'> };
+  | { tipo: 'fase'; bloque: BloqueId; fase: Exclude<FaseTema2, 'formulas'> }
+  /** Apartado de Descuento con los ejercicios de examen de varias letras (remesas y fecha focal). */
+  | { tipo: 'letras'; bloque: 'descuento' };
 
 export type Ruta =
   | { vista: 'inicio'; scrollArriba: boolean }
@@ -92,6 +94,7 @@ function pantallaTema2(partes: string[]): { pantalla: PantallaTema2; scrollArrib
   }
   const bloque = BLOQUES.find((x) => x.id === a)?.id;
   if (!bloque) return indice(null);
+  if (bloque === 'descuento' && b === 'letras') return { pantalla: { tipo: 'letras', bloque }, scrollArriba: true };
   const fase = FASES_TEMA2.find((f) => f.id === b)?.id;
   if (!fase || fase === 'formulas') return indice(bloque);
   return { pantalla: { tipo: 'fase', bloque, fase }, scrollArriba: true };
@@ -106,6 +109,7 @@ export const hrefTema2 = () => '#tema/2';
 export const hrefBloqueTema2 = (bloque: BloqueId) => `#tema/2/${bloque}`;
 export const hrefFormula = (id: string) => `#tema/2/f/${id}`;
 export const hrefFase = (bloque: BloqueId, fase: FaseTema2) => (fase === 'formulas' ? hrefBloqueTema2(bloque) : `#tema/2/${bloque}/${fase}`);
+export const hrefLetras = () => '#tema/2/descuento/letras';
 export const hrefSeccion = (seccionId: string) => `#s/${seccionId}`;
 export const hrefConcepto = (conceptoId: string) => `#c/${conceptoId}`;
 export const hrefExamen = () => '#examen';
