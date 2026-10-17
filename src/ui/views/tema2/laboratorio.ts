@@ -174,7 +174,8 @@ export function htmlLaboratorio(id: string): string {
   const escena = ESCENAS[id];
   const calcula = Boolean(LABORATORIOS[id]);
   const hayCaso = Boolean(escena?.caso && calcula);
-  return `<div class="lab" data-laboratorio="${id}" data-modo="digital" data-ejercicio="${hayCaso ? 'animacion' : 'propio'}" role="region" aria-label="Cuadro de mando">
+  // Sin laboratorio (cuaderno libre: fórmulas 13 y 17), la animación va en el centro, como en el caso de la animación.
+  return `<div class="lab" data-laboratorio="${id}"${calcula ? '' : ' data-libre'} data-modo="digital" data-ejercicio="${hayCaso ? 'animacion' : 'propio'}" role="region" aria-label="Cuadro de mando">
     <div class="lab-barra">
       ${calcula ? `<div class="lab-ejercicios" role="group" aria-label="Qué ejercicio resolver">
         ${hayCaso ? '<button type="button" data-lab-ejercicio="animacion">Caso de la animación</button>' : ''}
