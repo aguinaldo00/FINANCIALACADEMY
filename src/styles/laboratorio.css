@@ -101,6 +101,8 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
   grid-template-columns:minmax(0,1.25fr) minmax(300px,.9fr);
   grid-template-areas:"barra barra" "papel calc" "escena escena"}
 .lab[data-laboratorio]:not([data-ejercicio="animacion"]) .lab-centro{display:contents}
+/* Con la animación debajo, la calculadora no acompaña al scroll: si no, bajaba y la tapaba. */
+.lab[data-laboratorio]:not([data-ejercicio="animacion"]) .lab-calculadora{position:relative;top:auto}
 .lab[data-laboratorio]:not([data-ejercicio="animacion"]) .lab-escena{grid-area:escena;position:relative;top:auto}
 .lab[data-laboratorio]:not([data-ejercicio="animacion"]) .lab-papel-marco{grid-area:papel;display:none}
 .lab[data-laboratorio]:not([data-ejercicio="animacion"])[data-modo="analogico"] .lab-papel-marco{display:grid}
@@ -140,6 +142,15 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 /* Los datos con su cifra en peso fuerte y sin partirse; la pregunta, en su propia línea */
 .lab-caso-datos{color:var(--mut)}
 .lab-caso-dato{white-space:nowrap;color:var(--ink)}
+/* Enunciado redactado: cada dato subrayado con el rotulador de su color (el texto sigue en tinta clara). */
+.lab-marca{color:var(--ink);font-weight:var(--p-fuerte);white-space:nowrap;background:linear-gradient(color-mix(in srgb,var(--m) 50%,transparent),color-mix(in srgb,var(--m) 50%,transparent)) no-repeat 0 92%/100% .36em;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 .08em}
+.lab-marca.s-c0{--m:var(--s-c0)}.lab-marca.s-cn{--m:var(--s-cn)}.lab-marca.s-I{--m:var(--s-I)}.lab-marca.s-i{--m:var(--s-i)}.lab-marca.s-n{--m:var(--s-n)}.lab-marca.s-m{--m:var(--s-m)}.lab-marca.s-D{--m:var(--s-D)}
+.lab-marca-pide{text-decoration:underline 1.5px dashed var(--m);text-underline-offset:.24em;text-decoration-skip-ink:none}
+.lab-marca-pide.s-c0{--m:var(--s-c0)}.lab-marca-pide.s-cn{--m:var(--s-cn)}.lab-marca-pide.s-I{--m:var(--s-I)}.lab-marca-pide.s-i{--m:var(--s-i)}.lab-marca-pide.s-n{--m:var(--s-n)}.lab-marca-pide.s-m{--m:var(--s-m)}.lab-marca-pide.s-D{--m:var(--s-D)}
+.lab-marca-pide:not(.lab-marca){color:var(--ink)}
+.lab-opciones{grid-area:periodos;display:flex;flex-wrap:wrap;gap:10px;min-width:0}
+.lab-opciones:not(:has(>:not([hidden]))){display:none}
+.lab-opciones .lab-periodos{grid-area:auto}
 .lab-caso-dato b{font-weight:var(--p-fuerte)}
 .lab-caso-pide{display:block;margin-top:.12em;color:var(--ink)}
 .lab-caso .lab-otro{grid-area:otro;align-self:end;justify-self:end;white-space:nowrap}
