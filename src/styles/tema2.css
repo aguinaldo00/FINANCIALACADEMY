@@ -369,7 +369,7 @@
 .t2-lectura{margin:0 0 48px;padding:clamp(20px,3vw,34px);border:1px solid var(--line2);border-radius:var(--radio-g);background:var(--bg2)}
 .t2-lectura-cab h2{margin:4px 0 8px;font:400 var(--t-h2)/1.1 var(--f-titulo)}
 .t2-lectura-cab p:last-child{margin:0;max-width:62ch;color:var(--mut)}
-.t2-lectura-pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:14px;margin:24px 0;padding:0;list-style:none}
+.t2-lectura-pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px;margin:24px 0;padding:0;list-style:none}
 .t2-lectura-pasos li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
 .t2-lectura-n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--oro);color:var(--oro-tinta);font:700 1.1rem/1 "Big Shoulders Display",var(--f-texto)}
 .t2-lectura-pasos h3{margin:4px 0 6px;font:600 1.05rem/1.25 var(--f-texto)}
@@ -448,3 +448,30 @@
   .t2-simex-cal{right:0;bottom:0;left:0;width:auto;max-height:70vh;border-radius:var(--radio-g) var(--radio-g) 0 0}
   .t2-simex-campos{grid-template-columns:minmax(0,1fr)}
 }
+/* El pagaré del ejemplo en una línea de tiempo y sus cantidades */
+.t2-historia{margin:0 0 18px;padding:16px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-historia figcaption{margin-bottom:12px;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--oro2)}
+.t2-historia-linea{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-bottom:14px}
+.t2-historia-punto{display:grid;justify-items:center;gap:2px;font-size:1.6rem}
+.t2-historia-punto b{font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.t2-historia-punto span{font:400 .78rem/1.2 var(--f-texto);color:var(--mut)}
+.t2-historia-tramo{display:grid;justify-items:center;gap:4px;padding-top:6px;border-top:2px dashed var(--oro3);font-size:.82rem;color:var(--mut);text-align:center}
+.t2-historia-tramo small{font-size:.82rem}
+.t2-cantidades{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;margin:0}
+.t2-cantidades>div{padding:10px 12px;border-left:3px solid var(--line2);background:var(--bg2);border-radius:0 8px 8px 0}
+.t2-cantidades dt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:1.1rem}
+.t2-cantidades dt span{font:600 .9rem/1.2 var(--f-texto);color:var(--ink)}
+.t2-cantidades dt b{margin-left:auto;font:600 .9rem/1.2 var(--f-cifra);color:var(--oro2)}
+.t2-cantidades dd{margin:6px 0 0;font-size:.86rem;line-height:1.45;color:var(--mut)}
+/* Comercial frente a racional */
+.t2-cr-cambia{margin:12px 0;color:var(--ink);font-size:.95rem}
+.t2-cr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+.t2-cr-col{padding:14px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-cr-col h3{margin:0 0 6px;font:600 1rem/1.2 var(--f-texto)}
+.t2-cr-col p{margin:0 0 8px;font-size:.9rem;line-height:1.5;color:var(--mut)}
+.t2-cr-col .t2-cr-fx{font-size:1.2rem;color:var(--ink)}
+.t2-cr-col .t2-lectura-ej{margin:0;padding-left:10px;border-left:2px solid var(--oro3);color:var(--ink)}
+.t2-cr-sub{margin:14px 0 6px;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--oro2)}
+.t2-cr-pistas{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:.92rem;color:var(--mut)}
+@media (max-width:600px){.t2-historia-linea{grid-template-columns:minmax(0,1fr);justify-items:center}.t2-historia-tramo{border-top:0;border-left:2px dashed var(--oro3);padding:4px 0 4px 10px}}
+.t2-historia-punto .fx{font-size:1.5rem}

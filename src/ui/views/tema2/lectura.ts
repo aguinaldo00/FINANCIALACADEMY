@@ -1,11 +1,13 @@
 /*
- * «Cómo leer un enunciado»: primera tarjeta de A · Identificar. El método de cuatro preguntas, el
- * diccionario de expresiones, las palabras trampa y dos ejercicios con enunciados del generador (no
+ * «Cómo leer un enunciado»: primera tarjeta de A · Identificar. Va de entender la historia a elegir la
+ * fórmula: el método de cuatro preguntas con un pagaré de ejemplo, sus cantidades en una línea de
+ * tiempo, qué cambia entre descuento comercial y racional, la ayuda para interpretar expresiones, las
+ * palabras trampa y dos ejercicios con enunciados del generador (no
  * se acaban): «Lectura rápida» (solo qué te piden, 10 seguidos y cronometrados) y «Marca tú el
  * enunciado» (cada dato a su símbolo; al acertar toma su color). Lo único que se guarda es la mejor
  * marca de la lectura rápida, en este navegador.
  */
-import { DICCIONARIO, PASOS_LECTURA, TRAMPAS } from '../../../content/temas/tema-02/lectura.ts';
+import { CANTIDADES_DESCUENTO, COMERCIAL_RACIONAL, DICCIONARIO, PASOS_LECTURA, TRAMPAS } from '../../../content/temas/tema-02/lectura.ts';
 import { formulasDe, type BloqueId } from '../../../content/temas/tema-02/formulas.ts';
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
 import { generarEjercicio } from '../../../domain/tema2/generador.ts';
@@ -41,12 +43,30 @@ export function htmlLectura(bloque: BloqueId): string {
     <header class="t2-lectura-cab">
       <p class="t2-ceja">Antes de identificar</p>
       <h2 id="t2-lectura-tit">Cómo leer un enunciado</h2>
-      <p>No se falla en la cuenta: se falla antes, al leer. Hazte siempre estas cuatro preguntas, en este orden.</p>
+      <p>No se falla en la cuenta: se falla antes, al leer. Primero entiende qué pasa; después pon nombre a cada cantidad; al final, elige la fórmula. Siempre en este orden.</p>
     </header>
     <ol class="t2-lectura-pasos">${PASOS_LECTURA.map((p, k) => `<li><span class="t2-lectura-n">${k + 1}</span><div><h3>${escaparHtml(p.pregunta)}</h3><p>${textoT2(p.hacer)}</p><p class="t2-lectura-ej">${textoT2(p.ejemplo)}</p></div></li>`).join('')}</ol>
-    <details class="t2-pliegue t2-lectura-pliegue"><summary>Diccionario: qué símbolo es cada expresión</summary>
+
+    <figure class="t2-historia" aria-labelledby="t2-historia-tit">
+      <figcaption id="t2-historia-tit">El pagaré del ejemplo, en el tiempo</figcaption>
+      <div class="t2-historia-linea" aria-hidden="true">
+        <div class="t2-historia-punto"><b>Hoy</b><span>la empresa recibe</span>${formulaHtml('E')}</div>
+        <div class="t2-historia-tramo"><span>45 días antes del vencimiento</span><small>el banco se queda ${formulaHtml('D')}</small></div>
+        <div class="t2-historia-punto"><b>Vencimiento</b><span>el cliente paga</span>${formulaHtml('N')}</div>
+      </div>
+      <dl class="t2-cantidades">${CANTIDADES_DESCUENTO.map((c) => `<div><dt>${c.simbolo ? formulaHtml(c.simbolo) : ''}<span>${escaparHtml(c.nombre)}</span><b>${escaparHtml(c.valor)}</b></dt><dd>${textoT2(c.que)}</dd></div>`).join('')}</dl>
+    </figure>
+
+    <details class="t2-pliegue t2-lectura-pliegue"${bloque === 'descuento' ? ' open' : ''}><summary>Descuento comercial o racional: qué cambia y cómo reconocerlo</summary>
+      <p class="t2-cr-cambia">${escaparHtml(COMERCIAL_RACIONAL.cambia)}</p>
+      <div class="t2-cr">${COMERCIAL_RACIONAL.procedimientos.map((p) => `<div class="t2-cr-col"><h3>${escaparHtml(p.nombre)}</h3><p>${textoT2(p.sobre)}</p><p class="t2-cr-tipo">Usa el ${textoT2(p.tipo)}.</p><p class="t2-cr-fx">${formulaHtml(p.formula)}</p><p class="t2-lectura-ej">${escaparHtml(p.calculo)}</p></div>`).join('')}</div>
+      <p class="t2-cr-cambia">${escaparHtml(COMERCIAL_RACIONAL.conclusion)}</p>
+      <h3 class="t2-cr-sub">Cómo saber cuál toca</h3>
+      <ul class="t2-cr-pistas">${COMERCIAL_RACIONAL.reconocer.map((r) => `<li>${textoT2(r)}</li>`).join('')}</ul>
+    </details>
+    <details class="t2-pliegue t2-lectura-pliegue"><summary>Ayuda para interpretar: qué símbolo es cada expresión y por qué</summary>
       <div class="t2-dicc">${DICCIONARIO.map((g) => `<div class="t2-dicc-grupo"><h3>${escaparHtml(g.grupo)}</h3><ul>${g.expresiones.map((e) =>
-        `<li><span class="t2-dicc-texto">«${escaparHtml(e.texto)}»</span><span class="t2-dicc-sim">→ ${formulaHtml(e.simbolo)}</span>${e.nota ? `<small>${escaparHtml(e.nota)}</small>` : ''}</li>`).join('')}</ul></div>`).join('')}</div>
+        `<li><span class="t2-dicc-texto">«${escaparHtml(e.texto)}»</span><span class="t2-dicc-sim">→ ${formulaHtml(e.simbolo)}</span><small>${escaparHtml(e.porque)}</small></li>`).join('')}</ul></div>`).join('')}</div>
     </details>
     <details class="t2-pliegue t2-lectura-pliegue"><summary>Palabras que cambian el ejercicio</summary>
       <ul class="t2-trampas">${TRAMPAS.map((t) => `<li><b>${escaparHtml(t.frase)}</b><span>${textoT2(t.ojo)}</span></li>`).join('')}</ul>
