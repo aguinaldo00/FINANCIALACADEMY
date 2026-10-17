@@ -9,6 +9,7 @@ import {
   escenaDescuentoRacional,
   escenaRemesa,
 } from './descuento.ts';
+import { escenaRemesaTres } from './remesa.ts';
 import { escenaCapitalInicialSimple } from './simpleCapitalInicial.ts';
 import { escenaFraccionadoSimple } from './simpleFraccionado.ts';
 import { escenaInteresesSimple } from './simpleIntereses.ts';
@@ -40,3 +41,6 @@ export const LISTA_ESCENAS: readonly Escena[] = [
 ];
 
 export const ESCENAS: Readonly<Record<string, Escena>> = Object.fromEntries(LISTA_ESCENAS.map((e) => [e.id, e]));
+
+/** Escenas que no son de una fórmula concreta (explicaciones y ejemplos de examen). */
+export const ESCENAS_EXTRA: readonly Escena[] = [escenaRemesaTres];

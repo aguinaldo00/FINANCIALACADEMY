@@ -8,6 +8,8 @@ import { FORMULAS_TEMA2, formulaPorId, formulasDe } from '../../../content/temas
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
 import { htmlConversor, montarConversor, preguntaInicial, regimenDeFicha } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
+import { escenaRemesaTres } from '../../escenas/remesa.ts';
+import { montarReproductor } from '../../motion/reproductor.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
 import { DERIVACIONES } from './indice.ts';
@@ -58,6 +60,11 @@ export function htmlFicha(id: string): string {
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}
+    ${f.id === 'descuento-remesa' ? `<section class="t2-remesa" aria-labelledby="t2-remesa-tit">
+      <h2 id="t2-remesa-tit">Así es en el examen: tres letras con fechas distintas</h2>
+      <p>Cada letra tiene su propio tiempo (los días que faltan desde el descuento hasta su vencimiento) y se liquida por separado; al final se suman los descuentos, las comisiones y los gastos.</p>
+      <div data-remesa-anim></div>
+    </section>` : ''}
     ${pizarraHtml(f.id)}
     ${CON_CONVERSOR.has(f.id) ? htmlConversor(preguntaInicial(f.id), regimenDeFicha(f.id)) : ''}
     <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
@@ -112,7 +119,9 @@ export function htmlFicha(id: string): string {
 export function montarFicha(raiz: HTMLElement): () => void {
   const pararLaboratorio = montarLaboratorio(raiz);
   const pararConversor = montarConversor(raiz);
-  const parar = () => { pararLaboratorio(); pararConversor(); };
+  const animRemesa = raiz.querySelector<HTMLElement>('[data-remesa-anim]');
+  const pararRemesa = animRemesa ? montarReproductor(animRemesa, escenaRemesaTres) : () => {};
+  const parar = () => { pararLaboratorio(); pararConversor(); pararRemesa(); };
   const alPulsar = (e: Event) => {
     const boton = (e.target as Element | null)?.closest<HTMLButtonElement>('[data-t2-ver-error]');
     if (!boton) return;

@@ -123,7 +123,7 @@ export const LECTURAS: Readonly<Record<'simple' | 'compuesta' | 'descuento', Lec
       },
       {
         pregunta: '¿Qué cantidad es cada cifra?',
-        hacer: 'Pon cada número en su sitio de la historia: ¿es lo que pone el papel y se cobra el último día, lo que llega hoy o lo que se queda el banco? Fíjate también en el tiempo: si el tipo es por año y el plazo va en días, pasa los días a años.',
+        hacer: 'Pon cada número en su sitio de la historia: ¿es lo que pone el papel y se cobra el último día, lo que llega hoy o lo que se queda el banco? El tiempo son los días que faltan desde el día del descuento hasta el vencimiento. Si te dan fechas, cuéntalos: del 10 de marzo al 19 de abril son 21 días de marzo + 19 de abril = 40 días. Y como el tipo es anual, pasa los días a años.',
         ejemplo: '6.000 € es lo que pone el papel y se cobraría el día 45: es el nominal, $N$. Los 45 días, con año comercial (360 días), son 45/360 de año: $n$ = 45/360. El 5 % anual es lo que cobra el banco por cada año de adelanto.',
       },
       {

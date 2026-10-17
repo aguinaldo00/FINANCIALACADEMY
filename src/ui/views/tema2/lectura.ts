@@ -15,6 +15,8 @@ import { LABORATORIOS } from '../../../domain/tema2/laboratorio.ts';
 import { claseSimbolo } from '../../matematica/formula.ts';
 import { formatoReloj } from '../../components/relojExamen.ts';
 import { marcarSiglas } from '../../components/siglas.ts';
+import { escenaRemesaTres } from '../../escenas/remesa.ts';
+import { montarReproductor } from '../../motion/reproductor.ts';
 import { escaparHtml, formulaHtml, textoT2 } from './comun.ts';
 import { marcarEnunciado, type EnunciadoMarcado } from './enunciadoMarcado.ts';
 import { PALETA } from './fases.ts';
@@ -61,7 +63,12 @@ export function htmlLectura(bloque: BloqueId): string {
       <dl class="t2-cantidades">${h.cantidades.map((c) => `<div><dt>${c.simbolo ? formulaHtml(c.simbolo) : ''}<span>${escaparHtml(c.nombre)}</span><b>${escaparHtml(c.valor)}</b></dt><dd>${textoT2(c.que)}</dd></div>`).join('')}</dl>
     </figure>
 
-${bloque === 'descuento' ? `    <details class="t2-pliegue t2-lectura-pliegue" open><summary>Descuento comercial o racional: qué cambia y cómo reconocerlo</summary>
+${bloque === 'descuento' ? `    <section class="t2-remesa" aria-labelledby="t2-remesa-tit">
+      <h3 id="t2-remesa-tit">En el examen: varias letras a la vez</h3>
+      <p>Lo normal es una remesa: varias letras que se llevan al banco el mismo día y vencen en fechas distintas (por ejemplo, a 40, 50 y 300 días). Cada letra tiene su propio tiempo y se descuenta por separado; al final se suma todo.</p>
+      <div data-remesa-anim></div>
+    </section>
+` : ''}${bloque === 'descuento' ? `    <details class="t2-pliegue t2-lectura-pliegue" open><summary>Descuento comercial o racional: qué cambia y cómo reconocerlo</summary>
       <p class="t2-cr-cambia">${escaparHtml(COMERCIAL_RACIONAL.cambia)}</p>
       <div class="t2-cr">${COMERCIAL_RACIONAL.procedimientos.map((p) => `<div class="t2-cr-col"><h3>${escaparHtml(p.nombre)}</h3><p>${textoT2(p.sobre)}</p><p class="t2-cr-tipo">Usa el ${textoT2(p.tipo)}.</p><p class="t2-cr-fx">${formulaHtml(p.formula)}</p><p class="t2-lectura-ej">${escaparHtml(p.calculo)}</p></div>`).join('')}</div>
       <p class="t2-cr-cambia">${escaparHtml(COMERCIAL_RACIONAL.conclusion)}</p>
@@ -100,6 +107,8 @@ ${bloque === 'descuento' ? `    <details class="t2-pliegue t2-lectura-pliegue" o
 export function montarLectura(raiz: HTMLElement, bloque: BloqueId): () => void {
   const caja = raiz.querySelector<HTMLElement>('.t2-lectura');
   if (!caja) return () => {};
+  const animRemesa = caja.querySelector<HTMLElement>('[data-remesa-anim]');
+  const pararRemesa = animRemesa ? montarReproductor(animRemesa, escenaRemesaTres) : () => {};
   // Palabras del glosario (pagaré, nominal, vencimiento…): la primera vez que salen, se pueden pulsar para ver qué significan.
   marcarSiglas(caja, caja, 2, '.t2-lectura-pasos, .t2-cantidades, .t2-cr-cambia, .t2-cr-col, .t2-cr-pistas, .t2-dicc, .t2-trampas');
   const $ = <T extends HTMLElement>(sel: string) => caja.querySelector<T>(sel)!;
@@ -215,6 +224,7 @@ export function montarLectura(raiz: HTMLElement, bloque: BloqueId): () => void {
   caja.addEventListener('click', alPulsar);
   return () => {
     window.clearInterval(reloj);
+    pararRemesa();
     caja.removeEventListener('click', alPulsar);
   };
 }

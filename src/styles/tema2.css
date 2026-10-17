@@ -482,3 +482,21 @@
 .t2-cr-pistas{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:.92rem;color:var(--mut)}
 @media (max-width:600px){.t2-historia-linea{grid-template-columns:minmax(0,1fr);justify-items:center}.t2-historia-tramo{border-top:0;border-left:2px dashed var(--oro3);padding:4px 0 4px 10px}}
 .t2-historia-punto .fx{font-size:1.5rem}
+/* Remesa de tres letras (escenas/remesa.ts): barra de cada letra de HOY a su vencimiento */
+.mo-svg .rem-barra{fill:currentColor;fill-opacity:.32;stroke:currentColor;stroke-width:1.5}
+.t2-remesa{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-remesa h3,.t2-remesa h2{margin:0 0 4px;font:600 1.05rem/1.25 var(--f-texto)}
+.t2-remesa>p{margin:0 0 12px;color:var(--mut);font-size:.92rem;line-height:1.5}
+.t2-remesa .mo{max-width:720px}
+/* Remesa de tres letras (D · Practicar, Descuento): una fila por letra, que se parte en móvil. */
+.t2-rem-tabla{display:grid;gap:10px;margin:12px 0}
+.t2-rem-fila{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radio)}
+.t2-rem-fila legend{padding:0 6px;font-weight:600;color:var(--ink)}
+.t2-rem-fila legend small{margin-left:6px;font-weight:400;color:var(--mut)}
+.t2-rem-campo{display:grid;gap:4px;min-width:0;font-size:.85rem;color:var(--mut)}
+.t2-rem-campo .lab-campo{width:100%;min-width:0}
+.t2-rem-campo .lab-campo[aria-invalid="true"]{border-color:var(--r)}
+.t2-rem-campo .lab-campo.t2-rem-bien{border-color:var(--g)}
+.t2-rem-total{display:flex;flex-wrap:wrap;align-items:end;gap:10px}
+.t2-rem-total .t2-rem-campo{flex:1 1 220px}
+@media (max-width:560px){.t2-rem-fila{grid-template-columns:1fr 1fr}.t2-rem-fila .t2-rem-campo:first-of-type{grid-column:1/-1}}
