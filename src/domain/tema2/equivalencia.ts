@@ -1,18 +1,21 @@
 /*
  * Equivalencia de capitales en una fecha focal X: varias letras con vencimientos distintos se llevan
  * todas a X para sumarlas o compararlas (por ejemplo, para sustituirlas por una sola letra que vence
- * en X). Cada letra tiene su propio intervalo, t = |vencimiento − X| / base:
+ * en X). Cada letra tiene su propio tiempo, n = |vencimiento − X| / base:
  *   - si vence ANTES de X, su capital se lleva HACIA DELANTE (se capitaliza);
  *   - si vence DESPUÉS de X, se lleva HACIA ATRÁS (se descuenta).
- * La ley la fija el enunciado; aquí solo se usan las de las fórmulas del tema:
- *   simple-comercial: delante C · (1 + t · i), atrás N · (1 − t · d);
- *   simple-racional:  delante C · (1 + t · i), atrás C / (1 + t · i);
- *   compuesta:        delante C · (1 + i)^t,   atrás C · (1 + i)^−t.
+ * La ley la fija el enunciado (el temario no da una por defecto); solo se usan fórmulas del tema:
+ *   simple-comercial:    delante C₀ · (1 + n · i) (f. 2), atrás N · (1 − n · d) (f. 15);
+ *   simple-racional:     delante C₀ · (1 + n · i) (f. 2), atrás Cₙ / (1 + n · i) (f. 3 y 16);
+ *   compuesta-racional:  delante C₀ · (1 + i)^n (f. 7),   atrás Cₙ · (1 + i)^−n (f. 9 y 18);
+ *   compuesta-comercial: delante C₀ · (1 + i)^n (f. 7),   atrás N · (1 − d)^n (f. 19).
  * Cada valor se redondea al céntimo. Determinista: la misma semilla da el mismo ejercicio.
  */
 import { fechaDescuento, sumarDias, type Fecha } from './remesa.ts';
 
-export type Metodo = 'simple-comercial' | 'simple-racional' | 'compuesta';
+export type Metodo = 'simple-comercial' | 'simple-racional' | 'compuesta-racional' | 'compuesta-comercial';
+
+export const esCompuesta = (m: Metodo) => m === 'compuesta-racional' || m === 'compuesta-comercial';
 export type Sentido = 'delante' | 'atras' | 'igual';
 
 export interface CapitalFocal {
@@ -30,12 +33,13 @@ export interface LineaFocal extends CapitalFocal {
 
 const centimos = (v: number) => Math.round(v * 100 + 1e-9) / 100;
 
-export function trasladar(capital: number, t: number, sentido: Sentido, metodo: Metodo, tipo: number): number {
-  if (sentido === 'igual' || t === 0) return capital;
-  if (sentido === 'delante') return centimos(metodo === 'compuesta' ? capital * (1 + tipo) ** t : capital * (1 + t * tipo));
-  if (metodo === 'simple-comercial') return centimos(capital * (1 - t * tipo));
-  if (metodo === 'simple-racional') return centimos(capital / (1 + t * tipo));
-  return centimos(capital * (1 + tipo) ** -t);
+export function trasladar(capital: number, n: number, sentido: Sentido, metodo: Metodo, tipo: number): number {
+  if (sentido === 'igual' || n === 0) return capital;
+  if (sentido === 'delante') return centimos(esCompuesta(metodo) ? capital * (1 + tipo) ** n : capital * (1 + n * tipo));
+  if (metodo === 'simple-comercial') return centimos(capital * (1 - n * tipo));
+  if (metodo === 'simple-racional') return centimos(capital / (1 + n * tipo));
+  if (metodo === 'compuesta-comercial') return centimos(capital * (1 - tipo) ** n);
+  return centimos(capital * (1 + tipo) ** -n);
 }
 
 export function valorEnFocal(capitales: readonly CapitalFocal[], focal: number, metodo: Metodo, tipo: number, base: 360 | 365): { lineas: LineaFocal[]; total: number } {
@@ -103,7 +107,7 @@ export function generarFocal(semilla: number): EjercicioFocal {
   const giro = entre(0, 2);
   const ordenados = [...vences.slice(giro), ...vences.slice(0, giro)];
   const capitales = ordenados.map((vence) => ({ nominal: entre(8, 80) * 100, vence }));
-  const metodo = (['simple-comercial', 'simple-racional', 'compuesta'] as const)[entre(0, 2)]!;
+  const metodo = (['simple-comercial', 'simple-racional', 'compuesta-racional', 'compuesta-comercial'] as const)[entre(0, 3)]!;
   return {
     hoy,
     focal: sumarDias(hoy, diasFocal),
@@ -112,6 +116,6 @@ export function generarFocal(semilla: number): EjercicioFocal {
     capitales,
     metodo,
     tipo: entre(30, 90) / 1000,
-    base: metodo === 'compuesta' ? 365 : azar() < 0.5 ? 360 : 365,
+    base: esCompuesta(metodo) ? 365 : azar() < 0.5 ? 360 : 365,
   };
 }

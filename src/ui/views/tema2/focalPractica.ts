@@ -5,8 +5,8 @@
  * días hasta X y con la ley que dice el enunciado. Se comprueba fila a fila y el nominal de la letra
  * nueva. Las cifras salen de src/domain/tema2/equivalencia.ts; el número lo hace reproducible.
  */
-import { generarFocal, trasladar, valorEnFocal, type EjercicioFocal, type LineaFocal, type Metodo, type Sentido } from '../../../domain/tema2/equivalencia.ts';
-import { textoFecha } from '../../../domain/tema2/remesa.ts';
+import { esCompuesta, generarFocal, trasladar, valorEnFocal, type EjercicioFocal, type LineaFocal, type Metodo, type Sentido } from '../../../domain/tema2/equivalencia.ts';
+import { textoFecha, type Fecha } from '../../../domain/tema2/remesa.ts';
 import { escaparHtml, formulaHtml } from './comun.ts';
 import { leerNumero } from './fases.ts';
 import { DADO, desglose, eur } from './remesaPractica.ts';
@@ -16,11 +16,28 @@ const pct = (v: number) => `${new Intl.NumberFormat('de-DE', { maximumFractionDi
 const coma = (v: number) => String(v).replace('.', ',');
 const plano = (v: number) => eur(v).replace(',00 €', '').replace(' €', '');
 
+const anio = (base: number) => (base === 360 ? 'año comercial (360 días)' : 'año civil (365 días)');
+/** Lo que dice el enunciado sobre la ley de cada sentido: el temario no fija una por defecto. */
 const LEY: Record<Metodo, (tipo: string, base: number) => string> = {
-  'simple-comercial': (tipo, base) => `Se opera en régimen simple al ${tipo}, con año ${base === 360 ? 'comercial (360 días)' : 'civil (365 días)'}: las letras que vencen antes de la nueva fecha se capitalizan a interés simple y las que vencen después se descuentan con descuento comercial.`,
-  'simple-racional': (tipo, base) => `Se opera en régimen simple al ${tipo}, con año ${base === 360 ? 'comercial (360 días)' : 'civil (365 días)'}: las letras que vencen antes de la nueva fecha se capitalizan a interés simple y las que vencen después se actualizan con descuento racional.`,
-  compuesta: (tipo) => `Se opera en régimen compuesto al ${tipo} anual, con año de 365 días: capitalización compuesta hacia delante y descuento compuesto hacia atrás.`,
+  'simple-comercial': (tipo, base) => `Régimen simple, ${anio(base)}: las letras que vencen antes de la nueva fecha se capitalizan a interés simple al ${tipo} y las que vencen después se descuentan con descuento comercial simple al ${tipo}.`,
+  'simple-racional': (tipo, base) => `Régimen simple, ${anio(base)}: las letras que vencen antes de la nueva fecha se capitalizan a interés simple al ${tipo} y las que vencen después se descuentan con descuento racional simple al ${tipo}.`,
+  'compuesta-racional': (tipo, base) => `Régimen compuesto, ${anio(base)}: las letras que vencen antes de la nueva fecha se capitalizan a interés compuesto al ${tipo} y las que vencen después se descuentan con descuento compuesto racional al ${tipo}.`,
+  'compuesta-comercial': (tipo, base) => `Régimen compuesto, ${anio(base)}: las letras que vencen antes de la nueva fecha se capitalizan a interés compuesto al ${tipo} y las que vencen después se descuentan con descuento compuesto comercial al ${tipo}.`,
 };
+
+/** La fórmula del temario que toca en cada sentido, con su número. */
+const FORMULA: Record<Metodo, Record<'delante' | 'atras', { nombre: string; fx: string }>> = {
+  'simple-comercial': { delante: { nombre: 'capitalización simple (fórmula 2)', fx: 'C_n = C_0 · (1 + n · i)' }, atras: { nombre: 'descuento comercial simple: el efectivo (fórmula 15)', fx: 'E = N · (1 - n · d)' } },
+  'simple-racional': { delante: { nombre: 'capitalización simple (fórmula 2)', fx: 'C_n = C_0 · (1 + n · i)' }, atras: { nombre: 'descuento racional simple (fórmulas 3 y 16)', fx: 'C_0 = \\frac{C_n}{1 + n · i}' } },
+  'compuesta-racional': { delante: { nombre: 'capitalización compuesta (fórmula 7)', fx: 'C_n = C_0 · (1 + i)^n' }, atras: { nombre: 'descuento compuesto racional (fórmulas 9 y 18)', fx: 'C_0 = C_n · (1 + i)^{-n}' } },
+  'compuesta-comercial': { delante: { nombre: 'capitalización compuesta (fórmula 7)', fx: 'C_n = C_0 · (1 + i)^n' }, atras: { nombre: 'descuento compuesto comercial: el efectivo (fórmula 19)', fx: 'E = N · (1 - d)^n' } },
+};
+
+/** Por qué cada sentido lleva su operación. */
+const POR_QUE = {
+  delante: 'vence antes de X: ese dinero se cobraría antes de la fecha de la letra nueva y, hasta X, produce intereses. Por eso se capitaliza y vale más.',
+  atras: 'vence después de X: pagarla en X es pagarla antes de su vencimiento. Por eso se descuenta y vale menos.',
+} as const;
 
 interface Focal extends EjercicioFocal {
   semilla: number;
@@ -34,18 +51,36 @@ export function focalDe(semilla: number): Focal {
   const { lineas, total } = valorEnFocal(e.capitales, e.diasFocal, e.metodo, e.tipo, e.base);
   const conAnio = (k: number) => e.vencimientos[k]!.anio !== e.hoy.anio;
   const lista = e.capitales.map((c, k) => `letra ${k + 1} de ${plano(c.nominal)} € que vence el ${textoFecha(e.vencimientos[k]!, conAnio(k))}`).join('; ');
-  const enunciado = `Hoy, ${textoFecha(e.hoy)}, una empresa debe tres letras: ${lista}. Acuerda con su acreedor sustituirlas por una sola letra que vencerá el ${textoFecha(e.focal, e.focal.anio !== e.hoy.anio)}. ${LEY[e.metodo](pct(e.tipo), e.base)} ¿Cuál será el nominal de la nueva letra?`;
+  const enunciado = `Hoy, ${textoFecha(e.hoy)}, una empresa debe tres letras: ${lista}. Acuerda con su acreedor sustituirlas por una sola letra equivalente que vencerá el ${textoFecha(e.focal, e.focal.anio !== e.hoy.anio)}. ${LEY[e.metodo](pct(e.tipo), e.base)} ¿Cuál será el nominal de la nueva letra?`;
   return { ...e, semilla, lineas, total, enunciado };
 }
 
 /** La cuenta de una letra con sus números, como se escribe en el cuaderno. */
 function cuenta(f: Focal, l: LineaFocal): string {
-  const t = `${l.dias}/${f.base}`;
+  const n = `${l.dias}/${f.base}`;
   const i = coma(f.tipo);
-  if (l.sentido === 'delante') return f.metodo === 'compuesta' ? `${plano(l.nominal)} · (1 + ${i})^{${t}}` : `${plano(l.nominal)} · (1 + ${t} · ${i})`;
-  if (f.metodo === 'simple-comercial') return `${plano(l.nominal)} · (1 - ${t} · ${i})`;
-  if (f.metodo === 'simple-racional') return `${plano(l.nominal)} / (1 + ${t} · ${i})`;
-  return `${plano(l.nominal)} · (1 + ${i})^{-${t}}`;
+  if (l.sentido === 'delante') return esCompuesta(f.metodo) ? `${plano(l.nominal)} · (1 + ${i})^{${n}}` : `${plano(l.nominal)} · (1 + ${n} · ${i})`;
+  if (f.metodo === 'simple-comercial') return `${plano(l.nominal)} · (1 - ${n} · ${i})`;
+  if (f.metodo === 'simple-racional') return `\\frac{${plano(l.nominal)}}{1 + ${n} · ${i}}`;
+  if (f.metodo === 'compuesta-comercial') return `${plano(l.nominal)} · (1 - ${i})^{${n}}`;
+  return `${plano(l.nominal)} · (1 + ${i})^{-${n}}`;
+}
+
+/**
+ * La línea temporal del ejercicio: hoy, los tres vencimientos y X, en orden. Con `traslados`, cada
+ * letra lleva su flecha hacia X y sus días.
+ */
+function lineaTemporal(f: Focal, traslados: boolean): string {
+  const fecha = (x: Fecha) => escaparHtml(textoFecha(x, x.anio !== f.hoy.anio));
+  const puntos = [
+    { dia: 0, html: `<li class="t2-lt-punto t2-lt-hoy"><b>Hoy</b><span>${fecha(f.hoy)}</span></li>` },
+    { dia: f.diasFocal, html: `<li class="t2-lt-punto t2-lt-x"><b>X</b><span>${fecha(f.focal)}</span><small>letra nueva</small></li>` },
+    ...f.lineas.map((l, k) => ({
+      dia: l.vence,
+      html: `<li class="t2-lt-punto t2-lt-${l.sentido}"><b>Letra ${k + 1}</b><span>${fecha(f.vencimientos[k]!)}</span><small>${eur(l.nominal)}</small>${traslados ? `<em>${l.sentido === 'delante' ? `${l.dias} días → hasta X` : `← ${l.dias} días hasta X`}</em>` : ''}</li>`,
+    })),
+  ].sort((a, b) => a.dia - b.dia);
+  return `<ol class="t2-lt" aria-label="Línea temporal: las fechas en orden">${puntos.map((p) => p.html).join('')}</ol>`;
 }
 
 export function htmlFocalPractica(): string {
@@ -53,8 +88,16 @@ export function htmlFocalPractica(): string {
     `<label class="t2-rem-campo"><span>${etiqueta}</span><input class="lab-campo" inputmode="decimal" autocomplete="off" data-foc="${nombre}:${k}" placeholder="${pista}"></label>`;
   return `<article class="t2-practica t2-aleatorio t2-rem-ej" data-focal-ej aria-labelledby="t2-foc-tit">
     <header><span class="t2-ej-num" aria-hidden="true">X</span><h2 class="t2-aleatorio-tit" id="t2-foc-tit">Varias letras a una fecha focal</h2><p class="t2-ej-fuente" data-foc-origen></p></header>
-    <p class="t2-instruccion">Sustituir varias letras por una: todas se llevan a la fecha de la letra nueva (la fecha focal X). Las que vencen antes de X van hacia delante; las que vencen después, hacia atrás. Cada una con sus días.</p>
+    <p class="t2-instruccion">Para sustituir varias letras por una, todas se llevan a la misma fecha: la de la letra nueva (la fecha focal X). Solo ahí se pueden sumar.</p>
+    <ol class="t2-foc-pasos">
+      <li><b>Línea temporal.</b> Coloca hoy, X y cada vencimiento en orden.</li>
+      <li><b>Sentido.</b> Lo que queda antes de X va hacia delante (se capitaliza); lo que queda después, hacia atrás (se descuenta).</li>
+      <li><b>Tiempo.</b> Los días entre el vencimiento de cada letra y X (no desde hoy): n = días / base.</li>
+      <li><b>Operación.</b> La ley que dice el enunciado para cada sentido.</li>
+      <li><b>Suma.</b> Los tres valores en X: ese es el nominal de la letra nueva.</li>
+    </ol>
     <p class="t2-enunciado" data-foc-enunciado></p>
+    <div data-foc-linea></div>
     <form class="t2-rem-tabla" data-foc-form>
       ${LETRAS.map((k) => `<fieldset class="t2-rem-fila" data-foc-fila="${k}"><legend>Letra ${k + 1} <small data-foc-nominal="${k}"></small></legend>
         ${campo(k, 'dias', 'Días hasta X', 'p. ej. 40')}
@@ -68,7 +111,7 @@ export function htmlFocalPractica(): string {
     </form>
     <p class="t2-feedback" aria-live="polite" data-foc-feedback></p>
     <div class="t2-pistas">
-      <button type="button" class="btn-control" data-foc-pista="eje">Pista: dibuja el eje</button>
+      <button type="button" class="btn-control" data-foc-pista="eje">Pista: los traslados en la línea</button>
       <button type="button" class="btn-control" data-foc-pista="solucion" disabled>Ver la solución</button>
       <button type="button" class="btn-secundario" data-foc-otra>${DADO}Otro ejercicio</button>
     </div>
@@ -90,17 +133,19 @@ function revisar(f: Focal, campo: string, texto: string, l: LineaFocal): string 
     return 'son los días entre el vencimiento de esta letra y la fecha focal X (no desde hoy)';
   }
   const cerca = (a: number, b: number, tol = 0.011) => Math.abs(a - b) <= tol;
-  if (campo === 'total') return cerca(v, f.total, 0.05) ? null : 'suma los valores de las tres letras ya llevados a X';
+  if (campo === 'total') return cerca(v, f.total, 0.05) ? null : 'suma los valores de las tres letras ya llevados a X (no los nominales)';
   if (cerca(v, l.valor)) return null;
   const otro: Sentido = l.sentido === 'delante' ? 'atras' : 'delante';
   if (cerca(v, trasladar(l.nominal, l.dias / f.base, otro, f.metodo, f.tipo))) return `la has movido al revés: ${antesDespues}`;
-  if (l.sentido === 'atras' && f.metodo !== 'compuesta') {
-    const otraLey: Metodo = f.metodo === 'simple-comercial' ? 'simple-racional' : 'simple-comercial';
-    if (cerca(v, trasladar(l.nominal, l.dias / f.base, 'atras', otraLey, f.tipo))) return `el enunciado dice descuento ${f.metodo === 'simple-comercial' ? 'comercial: N · (1 − t · d)' : 'racional: C / (1 + t · i)'}`;
+  if (l.sentido === 'atras') {
+    const otraLey: Record<Metodo, Metodo> = { 'simple-comercial': 'simple-racional', 'simple-racional': 'simple-comercial', 'compuesta-racional': 'compuesta-comercial', 'compuesta-comercial': 'compuesta-racional' };
+    if (cerca(v, trasladar(l.nominal, l.dias / f.base, 'atras', otraLey[f.metodo], f.tipo))) return `el enunciado dice ${FORMULA[f.metodo].atras.nombre}`;
   }
+  const otroRegimen: Metodo = esCompuesta(f.metodo) ? 'simple-comercial' : 'compuesta-racional';
+  if (l.sentido === 'delante' && cerca(v, trasladar(l.nominal, l.dias / f.base, 'delante', otroRegimen, f.tipo))) return `el enunciado dice régimen ${esCompuesta(f.metodo) ? 'compuesto' : 'simple'}: ${FORMULA[f.metodo].delante.nombre}`;
   if (cerca(v, trasladar(l.nominal, l.dias / (f.base === 360 ? 365 : 360), l.sentido, f.metodo, f.tipo))) return `el enunciado dice año de ${f.base} días`;
   if (cerca(v, trasladar(l.nominal, f.diasFocal / f.base, l.sentido, f.metodo, f.tipo)) || cerca(v, trasladar(l.nominal, l.vence / f.base, l.sentido, f.metodo, f.tipo))) return 'el tiempo de cada letra es el que hay entre su vencimiento y X, no el que hay desde hoy';
-  return 'revisa la cuenta: t = días / base y la ley que dice el enunciado';
+  return `revisa la cuenta: n = días / ${f.base} y ${FORMULA[f.metodo][l.sentido === 'delante' ? 'delante' : 'atras'].nombre}`;
 }
 
 export function montarFocalPractica(raiz: HTMLElement): () => void {
@@ -110,6 +155,7 @@ export function montarFocalPractica(raiz: HTMLElement): () => void {
   const form = $<HTMLFormElement>('[data-foc-form]');
   const feedback = $('[data-foc-feedback]');
   const eje = $('[data-foc-eje]');
+  const linea = $('[data-foc-linea]');
   const solucion = $('[data-foc-solucion]');
   const botonSolucion = $<HTMLButtonElement>('[data-foc-pista="solucion"]');
   let f = focalDe(Math.floor(Math.random() * 99991) + 1);
@@ -121,9 +167,8 @@ export function montarFocalPractica(raiz: HTMLElement): () => void {
     form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-foc]').forEach((i) => { i.value = ''; i.removeAttribute('aria-invalid'); i.classList.remove('t2-rem-bien'); });
     feedback.textContent = '';
     feedback.className = 't2-feedback';
-    // El eje: las fechas en orden, con X en su sitio.
-    const puntos = [...f.lineas.map((l, k) => ({ dia: l.vence, texto: `Letra ${k + 1} (${textoFecha(f.vencimientos[k]!, f.vencimientos[k]!.anio !== f.hoy.anio)})` })), { dia: f.diasFocal, texto: `<b>X</b> (${textoFecha(f.focal, f.focal.anio !== f.hoy.anio)})` }].sort((a, b) => a.dia - b.dia);
-    eje.innerHTML = `<p>Dibuja una línea de tiempo y coloca las fechas en orden: ${puntos.map((p) => p.texto).join(' → ')}. Lo que queda a la izquierda de X va hacia delante; lo que queda a la derecha, hacia atrás. Los días de cada letra se cuentan desde su vencimiento hasta X, no desde hoy.</p>`;
+    linea.innerHTML = lineaTemporal(f, false);
+    eje.innerHTML = `${lineaTemporal(f, true)}<p>Lo que queda a la izquierda de X va hacia delante; lo que queda a la derecha, hacia atrás. Los días de cada letra van de su vencimiento a X, no desde hoy.</p>`;
     eje.hidden = true;
     solucion.hidden = true;
     botonSolucion.disabled = true;
@@ -131,10 +176,15 @@ export function montarFocalPractica(raiz: HTMLElement): () => void {
       ${f.lineas.map((l, k) => {
         const v = f.vencimientos[k]!;
         const dias = l.sentido === 'delante' ? desglose(v, f.focal) : desglose(f.focal, v);
-        return `<li><b>Letra ${k + 1}</b> (${eur(l.nominal)}, vence el ${escaparHtml(textoFecha(v, v.anio !== f.hoy.anio))}): ${l.sentido === 'delante' ? 'antes' : 'después'} de X, ${dias} = ${l.dias} días → ${l.sentido === 'delante' ? 'hacia delante' : 'hacia atrás'}: ${formulaHtml(cuenta(f, l))} = ${eur(l.valor)}</li>`;
+        const sentido = l.sentido === 'delante' ? 'delante' : 'atras';
+        const fx = FORMULA[f.metodo][sentido];
+        return `<li><b>Letra ${k + 1}</b> (${eur(l.nominal)}, vence el ${escaparHtml(textoFecha(v, v.anio !== f.hoy.anio))})
+          <p>${sentido === 'delante' ? '<b>Hacia delante.</b> ' : '<b>Hacia atrás.</b> '}${escaparHtml(POR_QUE[sentido][0]!.toUpperCase() + POR_QUE[sentido].slice(1))}</p>
+          <p>Tiempo: ${dias} = ${l.dias} días → n = ${l.dias}/${f.base}.</p>
+          <p>Operación: ${escaparHtml(fx.nombre)}, ${formulaHtml(fx.fx)} → ${formulaHtml(cuenta(f, l))} = <b>${eur(l.valor)}</b></p></li>`;
       }).join('')}
     </ol>
-    <p class="t2-resultado">Nominal de la letra nueva = ${f.lineas.map((l) => eur(l.valor)).join(' + ')} = <b>${eur(f.total)}</b></p>`;
+    <p class="t2-resultado">Ya están las tres en X: nominal de la letra nueva = ${f.lineas.map((l) => eur(l.valor)).join(' + ')} = <b>${eur(f.total)}</b></p>`;
   };
 
   const alEnviar = (e: Event) => {

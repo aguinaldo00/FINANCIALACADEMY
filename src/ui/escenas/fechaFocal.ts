@@ -22,14 +22,14 @@ export const escenaFechaFocal: Escena = {
   id: 'fecha-focal',
   titulo: 'Llevar varias letras a una fecha focal',
   duracion: 24,
-  descripcion: `Tres letras con vencimientos distintos se llevan a la misma fecha X. La que vence ${antes.map((l) => l.dias).join(' y ')} días antes de X se capitaliza; las que vencen ${despues.map((l) => l.dias).join(' y ')} días después se descuentan. En X suman ${eur(R.total)}.`,
+  descripcion: `Tres letras con vencimientos distintos se llevan a la misma fecha X (régimen simple al ${pctTipo}, año de ${base} días). La que vence ${antes.map((l) => l.dias).join(' y ')} días antes de X se capitaliza; las que vencen ${despues.map((l) => l.dias).join(' y ')} días después se descuentan. En X suman ${eur(R.total)}.`,
   capitulos: [
     { t: 0, texto: `Tres letras (${capitales.map((c) => eur(c.nominal)).join(', ')}), cada una con su vencimiento. Así no se pueden sumar: cada euro está en una fecha distinta.` },
-    { t: 3.2, texto: 'Se elige una fecha focal X (la del enunciado: hoy, la de un pago o la de la letra nueva). Todo se lleva a esa fecha.' },
-    { t: 6.4, texto: `Cada letra tiene su propio tiempo: los días entre su vencimiento y X. Aquí ${R.lineas.map((l) => `${l.dias} días ${l.sentido === 'delante' ? 'antes' : 'después'}`).join(', ')}.` },
-    { t: 10.4, texto: `La que vence antes de X va hacia delante: se capitaliza, $C · (1 + t · i)$ al ${pctTipo}. ${eur(antes[0]!.nominal)} → ${eur(antes[0]!.valor)}.` },
-    { t: 14.6, texto: `Las que vencen después de X van hacia atrás: se descuentan, $N · (1 - t · d)$. ${despues.map((l) => `${eur(l.nominal)} → ${eur(l.valor)}`).join(' y ')}.` },
-    { t: 19.8, texto: `Ya están todas en X: ahora sí se suman. ${R.lineas.map((l) => eur(l.valor)).join(' + ')} = ${eur(R.total)}.` },
+    { t: 3.2, texto: 'La fecha focal X es la que da el enunciado (por ejemplo, la de la única letra que las sustituye). Todas las letras se llevan a esa fecha.' },
+    { t: 6.4, texto: `Cada letra tiene su propio tiempo: los días entre su vencimiento y X, no desde hoy. Aquí ${R.lineas.map((l) => `${l.dias} días ${l.sentido === 'delante' ? 'antes' : 'después'}`).join(', ')}; n = días / ${base}.` },
+    { t: 10.4, texto: `La que vence antes de X va hacia delante: ese dinero llega antes y, hasta X, produce intereses. Se capitaliza, $C_n = C_0 · (1 + n · i)$ al ${pctTipo}: ${eur(antes[0]!.nominal)} → ${eur(antes[0]!.valor)}.` },
+    { t: 14.6, texto: `Las que vencen después de X van hacia atrás: pagarlas en X es pagarlas antes de su vencimiento. Aquí, con descuento comercial, $E = N · (1 - n · d)$: ${despues.map((l) => `${eur(l.nominal)} → ${eur(l.valor)}`).join(' y ')}.` },
+    { t: 19.8, texto: `Ya están todas en X: ahora sí se suman. ${R.lineas.map((l) => eur(l.valor)).join(' + ')} = ${eur(R.total)}, el nominal de la letra única que vence en X.` },
   ],
   montar(l) {
     const MAX = Math.max(...capitales.map((c) => c.vence)) + 20;
@@ -50,9 +50,9 @@ export const escenaFechaFocal: Escena = {
       tramoLinea: l.el('line', { class: 'mo-guia', y1: EJE + 66 + k * 30, y2: EJE + 66 + k * 30, x1: Math.min(x(ln.vence), xf), x2: Math.min(x(ln.vence), xf) }),
       tramoTexto: new Rotulo(l, `${ln.sentido === 'delante' ? '' : '← '}${ln.dias} días${ln.sentido === 'delante' ? ' →' : ''}`, 'mo-cifra mo-cifra-peq s-n', 'middle'),
     }));
-    const fxDelante = l.formula('C · (1 + t · i)', { x: 360, y: 80, tam: 32 });
-    const fxAtras = l.formula('N · (1 - t · d)', { x: 360, y: 80, tam: 32 });
-    const total = new Rotulo(l, `En X: ${eur(R.total)}`, 'mo-cifra s-cn', 'middle');
+    const fxDelante = l.formula('C_n = C_0 · (1 + n · i)', { x: 400, y: 80, tam: 30 });
+    const fxAtras = l.formula('E = N · (1 - n · d)', { x: 400, y: 80, tam: 30 });
+    const total = new Rotulo(l, `Letra única en X: ${eur(R.total)}`, 'mo-cifra s-cn', 'start');
 
     return (t) => {
       l.camara(360, 300, 1);
@@ -85,7 +85,7 @@ export const escenaFechaFocal: Escena = {
       fxDelante.construir(t, 10.6, { escalon: 0.06 });
       fxAtras.opacidad(ventana(t, 14.9, 20.1, 0.3));
       fxAtras.construir(t, 15.0, { escalon: 0.06 });
-      total.pintar(xf, 80, tramo(t, 20.1, 20.6));
+      total.pintar(xf - 90, 80, tramo(t, 20.1, 20.6));
     };
   },
 };

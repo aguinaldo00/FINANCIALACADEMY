@@ -71,7 +71,7 @@ ${bloque === 'descuento' ? `    <section class="t2-remesa" aria-labelledby="t2-r
     </section>
     <section class="t2-remesa" aria-labelledby="t2-focal-tit">
       <h3 id="t2-focal-tit">En el examen: llevar varias letras a una misma fecha (fecha focal)</h3>
-      <p>Para sustituir varias letras por una, o para compararlas, todas se llevan a la misma fecha X. Las que vencen después de X se llevan hacia atrás (se descuentan); las que vencen antes, hacia delante (se capitalizan). Cada una con sus días hasta X y con la ley que diga el enunciado.</p>
+      <p>Para sustituir varias letras por una, o para compararlas, todas se llevan a la misma fecha X. Las que vencen después de X se llevan hacia atrás (se descuentan); las que vencen antes, hacia delante (se capitalizan). Cada una con sus días hasta X. Qué ley se usa (simple o compuesta, descuento comercial o racional) lo dice el enunciado; el ejemplo usa simple con descuento comercial.</p>
       <div data-focal-anim></div>
     </section>
 ` : ''}${bloque === 'descuento' ? `    <details class="t2-pliegue t2-lectura-pliegue" open><summary>Descuento comercial o racional: qué cambia y cómo reconocerlo</summary>
