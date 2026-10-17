@@ -128,7 +128,7 @@ export function escenaConversionTipo(p: PeticionTipo): Escena {
       const etProp = new Rotulo(l, `en proporción: ${pct(c.proporcional)} → ${num(finalProp)} €`, 'mo-rotulo', 'end');
 
       const regla = new Etiqueta(l, compuesta
-        ? `${iA} = (1 + ${num(p.tipo, 6)})^{\\frac{${c.mDe}}{${c.mA}}} - 1 = "${pct(c.resultado)}"`
+        ? `${iA} = (1 + ${num(p.tipo, 6)})^{${c.mDe}/${c.mA}} - 1 = "${pct(c.resultado)}"`
         : `${iA} = ${num(p.tipo, 6)} · \\frac{${c.mDe}}{${c.mA}} = "${pct(c.resultado)}"`, 28);
 
       const fijarCamino = (el: SVGPathElement, d: string, opacidad: number) => {

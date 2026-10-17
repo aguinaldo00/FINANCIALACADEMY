@@ -1,8 +1,9 @@
 /*
- * Fase A · Índice de fórmulas del Tema 2, con la identidad editorial: apertura con la ruta A → D y la
+ * Fase C · Índice de fórmulas del Tema 2, con la identidad editorial: apertura con la ruta A → D y la
  * animación de la fórmula 1, una barra del capítulo que se queda arriba al bajar y las tres partes:
  * Simple y Compuesta como estrella (la madre y sus ramas) y Descuento como matriz. Cada parte
- * termina con su práctica (B, C y D). El temario completo está en el Sumario.
+ * termina con su práctica (A, B y D). El temario completo está en el Sumario. Con un ejercicio
+ * delante se empieza por A (identificar); quien empieza de cero tiene aquí mismo las fórmulas.
  */
 import { hrefAcademia, hrefAsignatura, hrefFase } from '../../../app/router.ts';
 import type { EstadoEstudio } from '../../../app/store.ts';
@@ -95,9 +96,9 @@ function cabParte(k: number, b: (typeof BLOQUES)[number], cita: string): string 
 }
 
 function practicaParte(b: BloqueId): string {
-  return `<nav class="ed-parte-practica" aria-label="Practicar esta parte"><span>Cuando la entiendas, practícala</span>
-    <a href="${hrefFase(b, 'datos')}"><b>B</b> Identificar los datos</a>
-    <a href="${hrefFase(b, 'elegir')}"><b>C</b> Elegir la fórmula</a>
+  return `<nav class="ed-parte-practica" aria-label="Practicar esta parte"><span>Con un ejercicio de esta parte</span>
+    <a href="${hrefFase(b, 'datos')}"><b>A</b> Identificar los datos</a>
+    <a href="${hrefFase(b, 'elegir')}"><b>B</b> Elegir la fórmula</a>
     <a href="${hrefFase(b, 'practica')}"><b>D</b> Resolver en papel</a></nav>`;
 }
 
@@ -114,9 +115,9 @@ function barraCapitulo(): string {
   return `<nav class="ed-barra-cap" aria-label="Capítulo II">
     <p class="ed-barra-cap-tit"><span>II</span>Cálculo financiero</p>
     <ol class="ed-barra-fases">
-      <li class="on"><a href="#tema/2" aria-current="step"><b>A</b> Comprender</a></li>
-      <li><a href="${hrefFase('simple', 'datos')}"><b>B</b> Identificar</a></li>
-      <li><a href="${hrefFase('simple', 'elegir')}"><b>C</b> Elegir</a></li>
+      <li><a href="${hrefFase('simple', 'datos')}"><b>A</b> Identificar</a></li>
+      <li><a href="${hrefFase('simple', 'elegir')}"><b>B</b> Elegir</a></li>
+      <li class="on"><a href="#tema/2" aria-current="step"><b>C</b> Comprender</a></li>
       <li><a href="${hrefFase('simple', 'practica')}"><b>D</b> En papel</a></li>
     </ol>
     <ol class="ed-barra-partes">${BLOQUES.map((b, k) => `<li><a href="${hrefBloqueTema2(b.id)}" data-parte="${b.id}"><span>${ROMANOS[k]}</span>${escaparHtml(b.titulo.replace('Capitalización ', ''))}</a></li>`).join('')}</ol>
@@ -134,17 +135,18 @@ export function htmlIndice(estado: EstadoEstudio): string {
       <div class="ed-t2-titulo">
         <p class="ed-volanta ed-volanta-tinta"><i></i>Capítulo II · ${escaparHtml(tema02.fuente)}</p>
         <h1 class="ed-titular-papel" id="ed-t2-titular">${escaparHtml(tema02.titulo).replace('cálculo financiero', '<em>cálculo financiero</em>')}</h1>
-        <p class="ed-entradilla">El dinero no vale lo mismo hoy que dentro de un año. Este capítulo enseña a medir esa diferencia: primero entendiendo cada fórmula y después usándola solo, en papel.</p>
-        <ol class="ed-ruta" aria-label="Cómo se estudia este capítulo">
-          <li class="on"><span class="ed-ruta-paso"><b>A</b><span>Comprender<small>cada fórmula, con su animación</small></span></span><small class="ed-ruta-aqui">Estás aquí</small></li>
-          <li><a href="${hrefFase('simple', 'datos')}"><b>B</b><span>Identificar<small>los datos del enunciado</small></span></a></li>
-          <li><a href="${hrefFase('simple', 'elegir')}"><b>C</b><span>Elegir<small>la fórmula adecuada</small></span></a></li>
+        <p class="ed-entradilla">El dinero no vale lo mismo hoy que dentro de un año. Este capítulo enseña a medir esa diferencia: qué datos te dan, qué fórmula toca, por qué funciona y cómo se resuelve en papel.</p>
+        <ol class="ed-ruta" aria-label="Cómo se resuelve un ejercicio">
+          <li><a href="${hrefFase('simple', 'datos')}"><b>A</b><span>Identificar<small>los datos del enunciado</small></span></a></li>
+          <li><a href="${hrefFase('simple', 'elegir')}"><b>B</b><span>Elegir<small>la fórmula adecuada</small></span></a></li>
+          <li class="on"><span class="ed-ruta-paso"><b>C</b><span>Comprender<small>cada fórmula, con su animación</small></span></span><small class="ed-ruta-aqui">Estás aquí</small></li>
           <li><a href="${hrefFase('simple', 'practica')}"><b>D</b><span>Practicar<small>en papel, sin ayuda</small></span></a></li>
         </ol>
+        <p class="ed-ruta-nota"><b>¿Tienes un ejercicio delante?</b> Empieza por <a href="${hrefFase('simple', 'datos')}">A · Identificar los datos</a>. <b>¿Empiezas de cero?</b> Quédate aquí: abajo están todas las fórmulas, cada una con su animación.</p>
       </div>
       <figure class="ed-t2-pantalla">
         <div class="ed-reproductor" data-reproductor="simple-intereses"></div>
-        <figcaption><b>Empieza aquí.</b> Fórmula 1 · Intereses totales: el capital, el tipo y las cosechas.</figcaption>
+        <figcaption><b>Empieza aquí.</b> Fórmula 1 · Intereses totales: la semilla, el tipo y los tomates.</figcaption>
       </figure>
     </section>
 
@@ -174,9 +176,9 @@ export function htmlIndice(estado: EstadoEstudio): string {
       ${practicaParte('descuento')}`)}
 
     <footer class="ed-siguiente">
-      <p class="ed-volanta ed-volanta-tinta">Cuando hayas visto las fórmulas</p>
-      <a href="${hrefFase('simple', 'datos')}"><b>B</b> Identificar los datos <span aria-hidden="true">→</span></a>
-      <p class="ed-siguiente-nota">Después: <a href="${hrefFase('simple', 'elegir')}">C · Elegir la fórmula</a> y <a href="${hrefFase('simple', 'practica')}">D · Resolver en papel</a>, parte por parte.</p>
+      <p class="ed-volanta ed-volanta-tinta">Cuando entiendas las fórmulas</p>
+      <a href="${hrefFase('simple', 'practica')}"><b>D</b> Resolver en papel <span aria-hidden="true">→</span></a>
+      <p class="ed-siguiente-nota">Con cada ejercicio, el mismo orden: <a href="${hrefFase('simple', 'datos')}">A · Identificar los datos</a>, <a href="${hrefFase('simple', 'elegir')}">B · Elegir la fórmula</a>, C · Comprenderla (esta página) y D · Resolver en papel, parte por parte.</p>
     </footer>
   </div>
   ${sumarioEditorial(gf, estado)}

@@ -1,8 +1,8 @@
 /*
- * Fases B, C y D del Tema 2 sobre los mismos enunciados (src/content/temas/tema-02/ejercicios.ts):
- *  B · Identificar los datos: se pulsa un fragmento del enunciado y se le asigna su símbolo. El
+ * Fases A, B y D del Tema 2 sobre los mismos enunciados (src/content/temas/tema-02/ejercicios.ts):
+ *  A · Identificar los datos: se pulsa un fragmento del enunciado y se le asigna su símbolo. El
  *      fragmento toma el color del símbolo y pasa a la tabla de datos con su valor y su significado.
- *  C · Elegir la fórmula: con los datos ya identificados, se elige entre fórmulas del índice y se
+ *  B · Elegir la fórmula: con los datos ya identificados, se elige entre fórmulas del índice y se
  *      explica por qué esa sí y por qué las otras no.
  *  D · Practicar en papel: la web solo comprueba el resultado; las ayudas se retiran por niveles y
  *      la solución completa no aparece hasta haberlo intentado.
@@ -42,7 +42,7 @@ export function fragmentos(ej: EjercicioTema2): (DatoEnunciado & { inicio: numbe
   return todos.map((d) => ({ ...d, inicio: ej.enunciado.indexOf(d.texto) })).sort((a, b) => a.inicio - b.inicio);
 }
 
-/** Enunciado con los fragmentos como botones (fase B) o ya marcados con su color (fase C). */
+/** Enunciado con los fragmentos como botones (fase A) o ya marcados con su color (fase B). */
 function enunciadoHtml(ej: EjercicioTema2, modo: 'botones' | 'marcado'): string {
   let html = '';
   let cursor = 0;

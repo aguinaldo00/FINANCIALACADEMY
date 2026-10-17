@@ -25,7 +25,8 @@
 .fx .fx-txt{font-size:.92em;color:var(--ink);margin:0 .14em}
 .fx .fx-op{font-family:var(--f-texto);font-weight:300;color:var(--mut)}
 .fx .fx-bin{margin:0 .28em}
-.fx .fx-fn{font-family:var(--f-texto);font-style:normal;margin-right:.08em}
+.fx .fx-bin.fx-div,.fx sup .fx-bin.fx-div{margin:0 .05em}
+.fx .fx-fn{font-family:var(--f-texto);font-style:normal;margin-right:.18em}
 .fx-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .14em;font-size:.92em}
 .fx-frac-n,.fx-frac-d{display:inline-flex;align-items:center;padding:0 .2em;line-height:1.25}
 .fx-frac-n{border-bottom:1.5px solid currentColor;padding-bottom:.08em}
@@ -288,7 +289,8 @@
 .t2-extra{padding:20px 22px;border:1px dashed var(--line2);border-radius:var(--radio-g);margin-bottom:18px}
 .t2-extra h2{font-size:1.35rem}
 .t2-extra>p{color:var(--mut)}
-.t2-continuar{display:flex;justify-content:flex-end;margin-top:32px}
+.t2-continuar{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:12px 22px;margin-top:32px}
+.t2-continuar-atajo{color:var(--mut);font-weight:600;text-underline-offset:4px}
 
 /* Menú lateral del Tema 2 */
 .t2-rail-bloque{margin-bottom:4px}
