@@ -364,3 +364,87 @@
 .t2-aleatorio .t2-pistas svg{width:16px;height:16px;vertical-align:-3px;margin-right:6px}
 .t2-guiados-tit{margin:28px 0 4px;font:var(--p-fuerte) 1.2rem/1.2 var(--f-titulo);color:var(--ink)}
 
+
+/* ── Cómo leer un enunciado (A · Identificar) ── */
+.t2-lectura{margin:0 0 48px;padding:clamp(20px,3vw,34px);border:1px solid var(--line2);border-radius:var(--radio-g);background:var(--bg2)}
+.t2-lectura-cab h2{margin:4px 0 8px;font:400 var(--t-h2)/1.1 var(--f-titulo)}
+.t2-lectura-cab p:last-child{margin:0;max-width:62ch;color:var(--mut)}
+.t2-lectura-pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:14px;margin:24px 0;padding:0;list-style:none}
+.t2-lectura-pasos li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-lectura-n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--oro);color:var(--oro-tinta);font:700 1.1rem/1 "Big Shoulders Display",var(--f-texto)}
+.t2-lectura-pasos h3{margin:4px 0 6px;font:600 1.05rem/1.25 var(--f-texto)}
+.t2-lectura-pasos p{margin:0 0 8px;font-size:.92rem;line-height:1.5;color:var(--mut)}
+.t2-lectura-pasos .t2-lectura-ej{margin:0;padding-left:10px;border-left:2px solid var(--oro3);color:var(--ink)}
+.t2-lectura-pliegue{margin-top:10px}
+.t2-dicc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px 28px;padding:12px 0 4px}
+.t2-dicc-grupo h3{margin:0 0 8px;font:600 .74rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--oro2)}
+.t2-dicc-grupo ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.t2-dicc-grupo li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;font-size:.92rem}
+.t2-dicc-texto{color:var(--ink)}
+.t2-dicc-sim{font-size:1.1rem;white-space:nowrap}
+.t2-dicc-grupo small{grid-column:1/-1;color:var(--tenue);font-size:.8rem}
+.t2-trampas{display:grid;gap:10px;margin:12px 0 4px;padding:0;list-style:none}
+.t2-trampas li{display:grid;gap:3px;padding:10px 12px;border-left:3px solid var(--r);background:var(--bg3);border-radius:0 8px 8px 0;font-size:.92rem}
+.t2-trampas b{color:var(--ink)}
+.t2-trampas span{color:var(--mut)}
+.t2-lectura-juegos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px;margin-top:22px}
+.t2-lectura-juego{display:grid;align-content:start;gap:12px;padding:18px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-lectura-juego h3{margin:0;font:600 1.1rem/1.25 var(--f-texto)}
+.t2-lectura-juego h3 small{display:block;margin-top:3px;color:var(--tenue);font-weight:400;font-size:.8rem}
+.t2-lectura-estado{margin:0;color:var(--mut);font-size:.92rem}
+.t2-lectura-marca{margin:0;color:var(--oro2);font-size:.86rem}
+.t2-lectura-marca:empty{display:none}
+.t2-lectura-juego .t2-enunciado{margin:0;font:400 1.1rem/1.6 var(--f-titulo)}
+.t2-lectura-juego>button{justify-self:start}
+.t2-sim-bien{border-color:var(--g)!important;background:color-mix(in srgb,var(--g) 18%,var(--bg3))!important}
+.t2-sim-mal{border-color:var(--r)!important;background:color-mix(in srgb,var(--r) 18%,var(--bg3))!important}
+
+/* ── Simulacro de examen (D · Practicar en papel) ── */
+.t2-simex{margin-top:56px;padding:clamp(20px,3vw,34px);border:1px solid var(--line2);border-radius:var(--radio-g);background:var(--bg2)}
+.t2-simex-cab h2{margin:4px 0 8px;font:400 var(--t-h2)/1.1 var(--f-titulo)}
+.t2-simex-cab p:last-child{margin:0;max-width:62ch;color:var(--mut)}
+.t2-simex-config{display:flex;flex-wrap:wrap;align-items:end;gap:16px 28px;margin-top:22px}
+.t2-simex-config[hidden],.t2-simex-examen[hidden],.t2-simex-resultado[hidden]{display:none}
+.t2-simex-config fieldset{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;border:0}
+.t2-simex-config legend{margin-bottom:8px;font:600 .74rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.t2-simex-check{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:.92rem}
+.t2-simex-historial{flex-basis:100%;margin:0;color:var(--oro2);font-size:.86rem}
+.t2-simex-historial:empty{display:none}
+.t2-simex-examen{display:grid;gap:18px;margin-top:22px}
+.t2-simex-barra{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;position:sticky;top:70px;z-index:5;padding:10px 0;background:var(--bg2);box-shadow:0 10px 12px -10px rgba(0,0,0,.6)}
+.t2-simex-barra .lab-reloj{justify-self:auto}
+.t2-simex-num{margin:0;color:var(--tenue);font-size:.86rem}
+.t2-simex-mesa{display:block}
+.t2-simex-lista{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.t2-simex-ej{padding:18px;border:1px solid var(--line);border-radius:var(--radio);background:var(--bg3)}
+.t2-simex-ej:focus-within{border-color:var(--oro3)}
+.t2-simex-n{margin:0 0 6px;font:600 .74rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.18em;text-transform:uppercase;color:var(--oro2)}
+.t2-simex-enunciado{margin:0 0 14px;font:400 1.12rem/1.55 var(--f-titulo)}
+.t2-simex-campos{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;align-items:start}
+.t2-simex-campos>label,.t2-simex-formula{display:grid;gap:6px;min-width:0}
+.t2-simex-campos>label>span:first-child,.t2-simex-formula>span:first-child{font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.t2-simex-campos .lab-campo{width:100%;min-height:52px;box-sizing:border-box}
+.t2-simex-campos input.lab-campo{padding:11px 14px;border:1px solid var(--line2);border-radius:10px;background:#2b241d;color:var(--ink);font:500 1.05rem/1.3 var(--f-texto)}
+.t2-simex-campos input.lab-campo:focus{outline:2px solid var(--oro2);outline-offset:1px}
+.t2-simex-calboton{margin-left:auto}
+/* Calculadora flotante: abajo a la derecha, por encima de los enunciados; en móvil, como hoja inferior. */
+.t2-simex-cal{position:fixed;right:18px;bottom:18px;z-index:60;width:min(340px,calc(100vw - 36px));max-height:calc(100vh - 120px);overflow:auto;padding:14px;border:1px solid var(--line2);border-radius:var(--radio-g);background:var(--bg3);box-shadow:0 24px 60px -20px rgba(0,0,0,.9)}
+.t2-simex-cal[hidden]{display:none}
+.t2-simex-pie{display:flex;align-items:center;gap:18px}
+.t2-simex-resultado{margin-top:22px}
+.t2-simex-resultado h3{margin:0 0 10px;font:400 var(--t-h2)/1.1 var(--f-titulo)}
+.t2-simex-resultado h3 small{display:block;margin-top:6px;color:var(--mut);font:400 .95rem/1.3 var(--f-texto)}
+.t2-simex-consejo{max-width:68ch;color:var(--mut)}
+.t2-simex-consejo b{color:var(--ink)}
+.t2-simex-tabla{overflow-x:auto;margin:16px 0}
+.t2-simex-tabla table{width:100%;border-collapse:collapse;font-size:.92rem}
+.t2-simex-tabla th,.t2-simex-tabla td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.t2-simex-tabla thead th{color:var(--mut);font:600 .72rem/1 "Barlow Condensed",var(--f-texto);letter-spacing:.14em;text-transform:uppercase}
+.t2-simex-tabla small{display:block;margin-top:4px}
+.t2-simex-tabla small a{color:var(--mut)}
+.t2-simex-bien td:nth-child(2) b{color:var(--g)}
+.t2-simex-mal td:nth-child(2) b{color:var(--r)}
+@media (max-width:980px){
+  .t2-simex-cal{right:0;bottom:0;left:0;width:auto;max-height:70vh;border-radius:var(--radio-g) var(--radio-g) 0 0}
+  .t2-simex-campos{grid-template-columns:minmax(0,1fr)}
+}

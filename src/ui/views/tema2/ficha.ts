@@ -10,6 +10,7 @@ import { htmlConversor, montarConversor, preguntaInicial, regimenDeFicha } from 
 import { simbolosDe } from '../../matematica/formula.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
+import { DERIVACIONES } from './indice.ts';
 
 function lista(items: string[]): string {
   return `<ul>${items.map((x) => `<li>${textoT2(x)}</li>`).join('')}</ul>`;
@@ -43,6 +44,8 @@ export function htmlFicha(id: string): string {
   const siguiente = FORMULAS_TEMA2[k + 1];
   const claves = [...new Set([...simbolosDe(f.expresion), ...(f.variantes ?? []).flatMap((v) => simbolosDe(v.expresion))])];
   const calcula = f.calcula ? simbolo(f.calcula) : null;
+  // La fórmula madre de la que sale esta (si sale de otra), para ver su animación.
+  const origen = DERIVACIONES[f.bloque].find((d) => d.hacia === f.id);
   return `<div class="tema-matematica t2 t2-ficha" data-formula="${f.id}">
     <nav class="t2-volver"><a href="${hrefBloqueTema2(f.bloque)}">← ${escaparHtml(b.titulo)} · índice de fórmulas</a></nav>
     <header class="t2-ficha-cabecera">
@@ -51,6 +54,7 @@ export function htmlFicha(id: string): string {
         <h1>${escaparHtml(f.nombre)}</h1>
       </div>
       ${cartulinaHtml(f.expresion, 97 + f.numero * 31)}
+      ${origen ? `<a class="t2-de-donde" href="${hrefFormula(origen.desde)}" title="Abre la fórmula ${formulaPorId(origen.desde)!.numero} y su animación">Ver de dónde sale: fórmula ${formulaPorId(origen.desde)!.numero} <small>(${escaparHtml(origen.como)})</small></a>` : ''}
       <a class="t2-practicar" href="${hrefFase(f.bloque, 'datos')}">Practicar</a>
     </header>
     ${htmlLaboratorio(f.id)}

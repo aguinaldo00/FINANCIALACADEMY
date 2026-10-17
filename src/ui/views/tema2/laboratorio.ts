@@ -18,7 +18,9 @@ import { generarEjercicio, nuevaSemilla, type PeriodicidadEjercicio } from '../.
 import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud } from '../../../domain/tema2/laboratorio.ts';
 import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
 import { htmlHoja, montarHoja, refrescarHoja, simboloDeNombre } from '../../components/hojaCalculo.ts';
-import { htmlRelojExamen, minutosGuardados, montarRelojExamen } from '../../components/relojExamen.ts';
+import { montarSelectoresFormula, selectorFormulasHtml, sincronizarSelectoresFormula } from '../../components/selectorFormulas.ts';
+import { formatoReloj, htmlRelojExamen, minutosGuardados, montarRelojExamen } from '../../components/relojExamen.ts';
+import { anotarFallo, anotarTiempo, CONSEJO_FALLO, diagnosticar, NOMBRE_FALLO } from '../../../domain/tema2/diagnostico.ts';
 import { expandir } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
 import { formulaTexto, simbolosDe } from '../../matematica/formula.ts';
@@ -31,6 +33,7 @@ type Modo = 'digital' | 'analogico';
 type Ejercicio = 'animacion' | 'practica' | 'examen' | 'examen-real' | 'propio';
 const CLAVE_MODO = 'fa-lab-modo';
 const CLAVE_PERIODOS = 'fa-lab-todos-periodos';
+const CLAVE_REDACTADO = 'fa-lab-enunciado-redactado';
 const claveEstado = (id: string) => `fa-lab:${id}`;
 
 /** Datos que pide la fórmula: los de su laboratorio o, si no calcula una incógnita, todos sus símbolos. */
@@ -120,7 +123,7 @@ function selectorIncognita(id: string): string {
 /** Desplegable con las 19 fórmulas del tema, por bloques: se elige la que se va a usar sin salir de la página. */
 function selectorFormula(): string {
   const grupos = BLOQUES.map((b) => `<optgroup label="${escaparHtml(b.titulo)}">${FORMULAS_TEMA2.filter((f) => f.bloque === b.id).map((f) => `<option value="${f.id}">Nº ${f.numero} — ${escaparHtml(formulaTexto(f.expresion))}</option>`).join('')}</optgroup>`).join('');
-  return `<select class="lab-campo lab-campo-formula" data-campo="formula" data-lab-formula-select aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select>
+  return `${selectorFormulasHtml(`<select class="lab-campo lab-campo-formula" data-campo="formula" data-lab-formula-select aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select>`)}
     <input class="lab-campo" type="text" data-campo="formula" data-lab-formula-text aria-label="Fórmula escrita" placeholder="Escribe la fórmula que usarás" autocomplete="off" spellcheck="false" hidden><p class="lab-formula-elegida" data-lab-formula-elegida></p>`;
 }
 
@@ -164,6 +167,9 @@ function enunciado(id: string, datos: Readonly<Record<string, string>>, periodic
   return `<span class="lab-caso-datos">Te dan ${lista}.</span> <span class="lab-caso-pide">Calcula ${formulaHtml(inc)}, ${escaparHtml((simbolo(inc)?.nombre ?? inc).toLowerCase())}.</span>`;
 }
 
+export { enunciadoColoreado } from './enunciadoMarcado.ts';
+import { enunciadoColoreado } from './enunciadoMarcado.ts';
+
 export function htmlLaboratorio(id: string): string {
   const escena = ESCENAS[id];
   const calcula = Boolean(LABORATORIOS[id]);
@@ -181,12 +187,20 @@ export function htmlLaboratorio(id: string): string {
         <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
         ${calcula ? htmlRelojExamen() : ''}
         <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
+        <div class="lab-opciones">
         <label class="lab-periodos" data-lab-periodos-control hidden>
           <input type="checkbox" role="switch" data-lab-todos-periodos aria-label="Incluir varios periodos de interés">
           <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
           <span class="lab-periodos-texto"><b>Todos los tipos de interés</b><small>Alterna anual, semestral, cuatrimestral, trimestral, mensual y diario</small></span>
         </label>
+        <label class="lab-periodos lab-redactado" data-lab-redactado-control hidden>
+          <input type="checkbox" role="switch" data-lab-redactado aria-label="Enunciado redactado">
+          <span class="lab-periodos-interruptor" aria-hidden="true"><span></span></span>
+          <span class="lab-periodos-texto"><b>Enunciado redactado</b><small>Como en el examen, con cada dato en su color</small></span>
+        </label>
+        </div>
         <button type="button" class="lab-pista" data-lab-pista hidden>Ver una pista</button>
+        <button type="button" class="lab-mini lab-compartir" data-lab-compartir hidden title="Copia un enlace que abre este mismo ejercicio (para hacerlo toda la clase a la vez)">Copiar enlace a este ejercicio</button>
         <p class="lab-pista-texto" data-lab-pista-texto hidden></p>
         <button type="button" class="lab-boton lab-otro" data-lab-otro hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/></svg>Generar otro ejercicio</button>
       </div>
@@ -197,13 +211,13 @@ export function htmlLaboratorio(id: string): string {
     </div>
     <section class="lab-panel lab-cuaderno" aria-labelledby="lab-cuaderno-tit">
       <header class="lab-panel-cab"><h2 id="lab-cuaderno-tit"><span>01</span>Hoja de cálculo</h2>
-        <button type="button" class="lab-mini" data-lab-limpiar>Borrar</button></header>
+        <span class="lab-cab-acciones"><button type="button" class="lab-mini" data-lab-imprimir title="Imprime el enunciado y el cuaderno, o guárdalos como PDF">Imprimir / PDF</button><button type="button" class="lab-mini" data-lab-limpiar>Borrar</button></span></header>
       <div data-lab-hoja-sitio></div>
     </section>
     <div class="lab-centro">
       <div class="lab-papel-marco" data-lab-papel-marco>
         <div class="lab-papel-pliegue"><div class="lab-papel" data-lab-papel aria-hidden="true">
-          <header class="lab-panel-cab"><h2><span>02</span>Cuaderno de papel</h2><button type="button" class="lab-mini" data-lab-limpiar>Borrar el cuaderno</button></header>
+          <header class="lab-panel-cab"><h2><span>02</span>Cuaderno de papel</h2><span class="lab-cab-acciones"><button type="button" class="lab-mini" data-lab-imprimir title="Imprime el enunciado y el cuaderno, o guárdalos como PDF">Imprimir / PDF</button><button type="button" class="lab-mini" data-lab-limpiar>Borrar el cuaderno</button></span></header>
           ${pasos(id, true)}
         </div></div>
       </div>
@@ -219,6 +233,7 @@ export function htmlLaboratorio(id: string): string {
         <div class="lab-crt-apagado" aria-hidden="true"><span>SIN SEÑAL</span></div>
       </figure>
     </div>
+    <button type="button" class="lab-ir-calc" data-lab-ir-calc>Calculadora ↓</button>
     <section class="lab-panel lab-calculadora" aria-labelledby="lab-cal-tit">
       <header class="lab-panel-cab"><h2 id="lab-cal-tit"><span>03</span>Calculadora</h2></header>
       ${htmlCalculadora()}
@@ -236,10 +251,24 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   const caso = definicion ? escena?.caso : undefined;
   const datos = datosDe(id);
   const paradas: (() => void)[] = [];
+  // Selector de fórmulas del cuaderno de papel (el de la hoja digital lo monta la hoja).
+  const papelFormula = lab.querySelector<HTMLElement>('[data-lab-papel]');
+  if (papelFormula) paradas.push(montarSelectoresFormula(papelFormula));
 
   // Estado compartido por los dos modos, guardado por fórmula.
   let estado: Record<string, string> = {};
   try { estado = JSON.parse(localStorage.getItem(claveEstado(id)) ?? '{}') as Record<string, string>; } catch { estado = {}; }
+  // Enlace a un ejercicio concreto (el que comparte la profesora): «#tema/2/f/<id>?ejercicio=examen-real&n=12345».
+  // Abre ese ejercicio con el cuaderno limpio; el resto de la página sigue igual.
+  const consulta = new URLSearchParams(location.hash.split('?')[1]?.split('#')[0] ?? '');
+  const compartido = consulta.get('ejercicio');
+  if (compartido && ['practica', 'examen', 'examen-real'].includes(compartido) && Number(consulta.get('n')) > 0) {
+    estado = { ejercicio: compartido, semilla: String(Math.trunc(Number(consulta.get('n')))) };
+    if (consulta.get('periodos') === '1') try { localStorage.setItem(CLAVE_PERIODOS, 'true'); } catch { /* sin almacenamiento */ }
+    try { localStorage.setItem(claveEstado(id), JSON.stringify(estado)); } catch { /* sin almacenamiento */ }
+  }
+  let redactado = true;
+  try { redactado = localStorage.getItem(CLAVE_REDACTADO) !== 'false'; } catch { redactado = true; }
   let todosLosPeriodos = false;
   try { todosLosPeriodos = localStorage.getItem(CLAVE_PERIODOS) === 'true'; } catch { todosLosPeriodos = false; }
   const guardar = () => { try { localStorage.setItem(claveEstado(id), JSON.stringify(estado)); } catch { /* sin almacenamiento: se trabaja igual */ } };
@@ -325,10 +354,17 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     const d = datosEnunciado();
     const periodicidad = periodicidadEnunciado();
     otro.hidden = e !== 'practica' && e !== 'examen' && e !== 'examen-real';
+    const compartir = lab.querySelector<HTMLElement>('[data-lab-compartir]');
+    if (compartir) { compartir.hidden = otro.hidden; compartir.textContent = 'Copiar enlace a este ejercicio'; }
     pista.hidden = e !== 'examen';
     pistaTexto.hidden = true;
     controlPeriodos.hidden = e !== 'practica' && e !== 'examen' && e !== 'examen-real';
     togglePeriodos.checked = todosLosPeriodos;
+    const controlRedactado = lab.querySelector<HTMLElement>('[data-lab-redactado-control]');
+    if (controlRedactado) controlRedactado.hidden = e !== 'animacion' && e !== 'practica';
+    const toggleRedactado = lab.querySelector<HTMLInputElement>('[data-lab-redactado]');
+    if (toggleRedactado) toggleRedactado.checked = redactado;
+    const conColor = (datosEj: Readonly<Record<string, string>>, p?: PeriodicidadEjercicio) => (redactado ? enunciadoColoreado(id, datosEj, p) : null) ?? enunciado(id, datosEj, p);
     const examenManual = e === 'examen-real' && lab.dataset.modo === 'analogico';
     const datosFijos = lab.querySelector<HTMLElement>('[data-lab-datos-fijos]');
     const datosManuales = lab.querySelector<HTMLElement>('[data-lab-datos-manuales]');
@@ -341,15 +377,16 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     if (incSelect) incSelect.hidden = examenManual;
     if (incTexto) incTexto.hidden = !examenManual;
     if (formulaSelect) formulaSelect.hidden = examenManual;
+    sincronizarSelectoresFormula(lab);
     if (formulaTexto) formulaTexto.hidden = !examenManual;
     if (examenManual) pintarFilasManual();
     if (e === 'animacion') {
       origen.textContent = 'El caso de la animación';
-      texto.innerHTML = enunciado(id, d!);
+      texto.innerHTML = conColor(d!);
       nota.textContent = '';
     } else if (e === 'practica') {
       origen.textContent = `Ejercicio aleatorio nº ${semilla()} · generado al azar`;
-      texto.innerHTML = enunciado(id, d!, periodicidad);
+      texto.innerHTML = conColor(d!, periodicidad);
       nota.textContent = 'La animación enseña su caso de ejemplo; tu ejercicio tiene otros datos.';
     } else if (e === 'examen') {
       // Práctica con enunciado redactado y una única pista opcional.
@@ -372,6 +409,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   const pintarFormulaElegida = () => {
     const f = estado.formula ? formulaPorId(estado.formula) : undefined;
     lab.querySelectorAll<HTMLElement>('[data-lab-formula-elegida]').forEach((p) => { p.innerHTML = f ? formulaHtml(f.expresion) : ''; });
+    sincronizarSelectoresFormula(lab);
   };
 
   /*
@@ -472,9 +510,31 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     }
     const todo = Object.values(notas).every((n) => n.bien);
     pararReloj();
+    // Qué tipo de fallo es (lectura, elección, unidades o cálculo), con el ejercicio del enunciado.
+    let diagnostico = '';
+    if (enunciadoDatos && notas.resultado && !notas.resultado.bien && (estado.resultado ?? '').trim()) {
+      const tipo = diagnosticar({
+        lecturaBien: notas.datos.bien && notas.incognita.bien,
+        formulaBien: notas.formula ? notas.formula.bien : null,
+        resultado: estado.resultado ?? '',
+      }, definicion, enunciadoDatos, ejercicio() === 'animacion' ? undefined : periodicidadEnunciado());
+      if (tipo) {
+        anotarFallo(tipo);
+        diagnostico = ` Tipo de fallo: ${NOMBRE_FALLO[tipo].toLowerCase()}. ${CONSEJO_FALLO[tipo]}`;
+      }
+    }
+    // Examen real resuelto bien: se anota el tiempo y se compara con la vez anterior.
+    let tiempo = '';
+    if (notas.resultado?.bien && ejercicio() === 'examen-real' && estado['reloj:inicio'] && !estado['reloj:anotado']) {
+      const segundos = Math.round((Number(estado['reloj:fin'] ?? Date.now()) - Number(estado['reloj:inicio'])) / 1000);
+      const antes = anotarTiempo(id, segundos);
+      estado['reloj:anotado'] = '1';
+      guardar();
+      tiempo = antes ? ` Tiempo: ${formatoReloj(segundos)} (antes: ${formatoReloj(antes.ultimo)}; tu mejor: ${formatoReloj(Math.min(antes.mejor, segundos))}).` : ` Tiempo: ${formatoReloj(segundos)}. Es tu primera marca en esta fórmula.`;
+    }
     lab.querySelectorAll<HTMLElement>('[data-lab-revision]').forEach((r) => {
       r.className = `lab-revision ${todo ? 'lab-bien' : 'lab-mal'}`;
-      r.textContent = todo ? 'Todo el cuaderno está bien.' : 'Hay pasos por revisar: están marcados en el cuaderno.';
+      r.textContent = (todo ? 'Todo el cuaderno está bien.' : 'Hay pasos por revisar: están marcados en el cuaderno.') + diagnostico + tiempo;
     });
   };
 
@@ -575,6 +635,13 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   };
 
   const alCambiarPeriodos = (ev: Event) => {
+    const interruptor = (ev.target as Element).closest<HTMLInputElement>('[data-lab-redactado]');
+    if (interruptor) {
+      redactado = interruptor.checked;
+      try { localStorage.setItem(CLAVE_REDACTADO, String(redactado)); } catch { /* sin almacenamiento */ }
+      pintarEjercicio();
+      return;
+    }
     const control = (ev.target as Element).closest<HTMLInputElement>('[data-lab-todos-periodos]');
     if (!control) return;
     todosLosPeriodos = control.checked;
@@ -626,6 +693,15 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
       refrescarHoja(lab, leerEstado);
       limpiarRevision();
     } else if (b.hasAttribute('data-lab-comprobar')) revisar();
+    else if (b.hasAttribute('data-lab-imprimir')) window.print();
+    // Botón de móvil: baja a la calculadora (el hash no se toca: es la ruta de la página).
+    else if (b.hasAttribute('data-lab-ir-calc')) lab.querySelector('.lab-calculadora')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    else if (b.hasAttribute('data-lab-compartir')) {
+      const enlace = `${location.origin}${location.pathname}#tema/2/f/${id}?ejercicio=${ejercicio()}&n=${semilla()}${todosLosPeriodos ? '&periodos=1' : ''}`;
+      const hecho = () => { b.textContent = 'Enlace copiado ✓'; };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(enlace).then(hecho, () => window.prompt('Copia este enlace:', enlace));
+      else window.prompt('Copia este enlace:', enlace);
+    }
   };
   lab.addEventListener('click', alPulsar);
   lab.addEventListener('change', alCambiarPeriodos);

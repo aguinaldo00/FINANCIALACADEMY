@@ -48,8 +48,10 @@ export function resolverRuta(hash: string, tema: Tema): Ruta {
   }
   if (h === 'tema/2' || h.startsWith('tema/2/') || h.startsWith('tema/2#')) {
     // Un segundo «#» es un ancla dentro de la pantalla (un ejercicio concreto): no se vuelve arriba.
-    const [camino, ancla] = h.split('#');
-    const r = pantallaTema2(camino!.split('/').slice(2));
+    const [conConsulta, ancla] = h.split('#');
+    // «?ejercicio=…&n=…» (enlace a un ejercicio concreto) lo lee el laboratorio; aquí no cuenta.
+    const camino = conConsulta!.split('?')[0]!;
+    const r = pantallaTema2(camino.split('/').slice(2));
     return { vista: 'tema2', pantalla: r.pantalla, scrollArriba: r.scrollArriba && !ancla };
   }
 

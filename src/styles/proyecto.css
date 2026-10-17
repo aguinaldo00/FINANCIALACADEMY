@@ -81,12 +81,9 @@
 .pr-pregunta-link:hover{color:var(--oro2)}
 .pr-pregunta-link span{color:var(--oro2)}
 .pr-indice a{flex:0 0 auto}
-.pr-historia-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,5vw,72px);border-top:1px solid var(--line2)}
-.pr-hito{padding-top:20px}
-.pr-hito-numero,.pr-que-es-destacada>span,.pr-que-es-tarjeta>span{color:var(--oro2);font:600 .72rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}
-.pr-hito-numero i{padding-inline:5px;color:var(--tenue);font-style:normal}
-.pr-hito p,.pr-origen-texto p,.pr-que-es-destacada p,.pr-que-es-tarjeta p,.pr-futuro-texto p{margin:14px 0 0;color:var(--mut);font:400 1rem/1.75 var(--f-texto)}
-.pr-hito p,.pr-origen-texto p,.pr-futuro-texto p{max-width:66ch}
+.pr-que-es-destacada>span,.pr-que-es-tarjeta>span{color:var(--oro2);font:600 .72rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}
+.pr-origen-texto p,.pr-que-es-destacada p,.pr-que-es-tarjeta p,.pr-futuro-texto p{margin:14px 0 0;color:var(--mut);font:400 1rem/1.75 var(--f-texto)}
+.pr-origen-texto p,.pr-futuro-texto p{max-width:66ch}
 .pr-origen-pregunta{max-width:850px;margin:24px 0 0;color:var(--oro2);font:400 clamp(1.6rem,3vw,2.5rem)/1.25 var(--f-titulo)}
 .pr-origen-pregunta span{color:var(--ink);white-space:nowrap;font-size:.9em}
 .pr-origen-pregunta sub{font-size:.58em}
@@ -122,7 +119,7 @@
   .pr-formula{font-size:clamp(2.35rem,10.5vw,3.5rem)}
   .pr-indice{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;overscroll-behavior-inline:contain}
   .pr-indice::-webkit-scrollbar{display:none}
-  .pr-historia-grid,.pr-origen-texto,.pr-que-es-destacada,.pr-futuro-texto{grid-template-columns:minmax(0,1fr)}
+  .pr-origen-texto,.pr-que-es-destacada,.pr-futuro-texto{grid-template-columns:minmax(0,1fr)}
   .pr-que-es-destacada{gap:14px}
   .pr-que-es-grid{grid-template-columns:minmax(0,1fr)}
   .pr-cierre{padding-left:18px}

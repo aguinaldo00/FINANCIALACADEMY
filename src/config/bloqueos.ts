@@ -1,5 +1,5 @@
 // Interruptor de zonas cerradas de momento. Para reabrir 'Sobre el proyecto', pon false.
-export const PROYECTO_BLOQUEADO = true;
+export const PROYECTO_BLOQUEADO = false;
 
 // Oculta todos los enlaces a #proyecto (portada, barra de Academia, menu lateral...).
 if (PROYECTO_BLOQUEADO && typeof document !== 'undefined') {
