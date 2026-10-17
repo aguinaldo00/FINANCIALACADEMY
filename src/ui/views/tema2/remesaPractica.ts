@@ -9,7 +9,7 @@ import { desgloseDias, fechaDescuento, generarRemesa, liquidarRemesa, sumarDias,
 import { escaparHtml, formulaHtml, hrefFormula } from './comun.ts';
 import { leerNumero } from './fases.ts';
 
-const eur = (v: number) => `${new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)} €`;
+export const eur = (v: number) => `${new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)} €`;
 const pct = (v: number) => `${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 }).format(v * 100)} %`;
 const LETRAS = [0, 1, 2] as const;
 const ORDENES = [[1, 2, 0], [2, 0, 1], [0, 2, 1], [1, 0, 2], [2, 1, 0], [0, 1, 2]] as const;
@@ -38,10 +38,10 @@ export function remesaDe(semilla: number): Remesa {
   return { semilla, descuento, vencimientos, liquidacion, base: c.base, d: c.d, enunciado };
 }
 
-const DADO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="15" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><circle cx="9" cy="15" r="1.5" fill="currentColor"/></svg>';
+export const DADO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="15" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><circle cx="9" cy="15" r="1.5" fill="currentColor"/></svg>';
 
 /** Los días mes a mes; los meses enteros del medio, juntos: «21 (abril) + 245 (mayo a diciembre) + 1 (enero)». */
-function desglose(desde: Fecha, hasta: Fecha): string {
+export function desglose(desde: Fecha, hasta: Fecha): string {
   const p = desgloseDias(desde, hasta);
   const trozos = p.length > 3
     ? [p[0]!, { mes: `${p[1]!.mes} a ${p[p.length - 2]!.mes}`, dias: p.slice(1, -1).reduce((a, x) => a + x.dias, 0) }, p[p.length - 1]!]

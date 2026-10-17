@@ -146,3 +146,10 @@ Narración provisional con la voz del dispositivo, usando la Web Speech API (`sp
   - Windows: Helena, Laura o Pablo; en Edge, las voces «Natural» online, que suenan mejor.
   - Android y Samsung: el motor de voz del teléfono.
   - Apple: las voces en español del sistema (Mónica, Jorge…). Las voces de Siri no suelen estar disponibles para páginas web.
+
+## Equivalencia de capitales con fecha focal (17/10)
+- Los apuntes (`docs/fuentes/tema-02`) nombran la equivalencia y la sustitución de capitales, pero no el
+  método del libro para llevar varias letras a una fecha focal. De momento, cada enunciado dice la ley:
+  simple (capitalización simple hacia delante y descuento comercial o racional hacia atrás) o compuesta.
+- Pendiente: un ejercicio resuelto del libro para confirmar qué ley se usa por defecto en régimen simple
+  y si la fecha focal suele ser hoy, la de la letra nueva u otra. Código: `src/domain/tema2/equivalencia.ts`.

@@ -16,6 +16,7 @@ import { claseSimbolo } from '../../matematica/formula.ts';
 import { formatoReloj } from '../../components/relojExamen.ts';
 import { marcarSiglas } from '../../components/siglas.ts';
 import { escenaRemesaTres } from '../../escenas/remesa.ts';
+import { escenaFechaFocal } from '../../escenas/fechaFocal.ts';
 import { montarReproductor } from '../../motion/reproductor.ts';
 import { escaparHtml, formulaHtml, textoT2 } from './comun.ts';
 import { marcarEnunciado, type EnunciadoMarcado } from './enunciadoMarcado.ts';
@@ -68,6 +69,11 @@ ${bloque === 'descuento' ? `    <section class="t2-remesa" aria-labelledby="t2-r
       <p>Lo normal es una remesa: varias letras que se llevan al banco el mismo día y vencen en fechas distintas (por ejemplo, a 40, 50 y 300 días). Cada letra tiene su propio tiempo y se descuenta por separado; al final se suma todo.</p>
       <div data-remesa-anim></div>
     </section>
+    <section class="t2-remesa" aria-labelledby="t2-focal-tit">
+      <h3 id="t2-focal-tit">En el examen: llevar varias letras a una misma fecha (fecha focal)</h3>
+      <p>Para sustituir varias letras por una, o para compararlas, todas se llevan a la misma fecha X. Las que vencen después de X se llevan hacia atrás (se descuentan); las que vencen antes, hacia delante (se capitalizan). Cada una con sus días hasta X y con la ley que diga el enunciado.</p>
+      <div data-focal-anim></div>
+    </section>
 ` : ''}${bloque === 'descuento' ? `    <details class="t2-pliegue t2-lectura-pliegue" open><summary>Descuento comercial o racional: qué cambia y cómo reconocerlo</summary>
       <p class="t2-cr-cambia">${escaparHtml(COMERCIAL_RACIONAL.cambia)}</p>
       <div class="t2-cr">${COMERCIAL_RACIONAL.procedimientos.map((p) => `<div class="t2-cr-col"><h3>${escaparHtml(p.nombre)}</h3><p>${textoT2(p.sobre)}</p><p class="t2-cr-tipo">Usa el ${textoT2(p.tipo)}.</p><p class="t2-cr-fx">${formulaHtml(p.formula)}</p><p class="t2-lectura-ej">${escaparHtml(p.calculo)}</p></div>`).join('')}</div>
@@ -109,6 +115,8 @@ export function montarLectura(raiz: HTMLElement, bloque: BloqueId): () => void {
   if (!caja) return () => {};
   const animRemesa = caja.querySelector<HTMLElement>('[data-remesa-anim]');
   const pararRemesa = animRemesa ? montarReproductor(animRemesa, escenaRemesaTres) : () => {};
+  const animFocal = caja.querySelector<HTMLElement>('[data-focal-anim]');
+  const pararFocal = animFocal ? montarReproductor(animFocal, escenaFechaFocal) : () => {};
   // Palabras del glosario (pagaré, nominal, vencimiento…): la primera vez que salen, se pueden pulsar para ver qué significan.
   marcarSiglas(caja, caja, 2, '.t2-lectura-pasos, .t2-cantidades, .t2-cr-cambia, .t2-cr-col, .t2-cr-pistas, .t2-dicc, .t2-trampas');
   const $ = <T extends HTMLElement>(sel: string) => caja.querySelector<T>(sel)!;
@@ -225,6 +233,7 @@ export function montarLectura(raiz: HTMLElement, bloque: BloqueId): () => void {
   return () => {
     window.clearInterval(reloj);
     pararRemesa();
+    pararFocal();
     caja.removeEventListener('click', alPulsar);
   };
 }
