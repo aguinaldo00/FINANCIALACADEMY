@@ -14,6 +14,7 @@ import { generarEjercicio } from '../../../domain/tema2/generador.ts';
 import { LABORATORIOS } from '../../../domain/tema2/laboratorio.ts';
 import { claseSimbolo } from '../../matematica/formula.ts';
 import { formatoReloj } from '../../components/relojExamen.ts';
+import { marcarSiglas } from '../../components/siglas.ts';
 import { escaparHtml, formulaHtml, textoT2 } from './comun.ts';
 import { marcarEnunciado, type EnunciadoMarcado } from './enunciadoMarcado.ts';
 import { PALETA } from './fases.ts';
@@ -96,6 +97,8 @@ export function htmlLectura(bloque: BloqueId): string {
 export function montarLectura(raiz: HTMLElement, bloque: BloqueId): () => void {
   const caja = raiz.querySelector<HTMLElement>('.t2-lectura');
   if (!caja) return () => {};
+  // Palabras del glosario (pagaré, nominal, vencimiento…): la primera vez que salen, se pueden pulsar para ver qué significan.
+  marcarSiglas(caja, caja, 2, '.t2-lectura-pasos, .t2-cantidades, .t2-cr-cambia, .t2-cr-col, .t2-cr-pistas, .t2-dicc, .t2-trampas');
   const $ = <T extends HTMLElement>(sel: string) => caja.querySelector<T>(sel)!;
 
   /* ---------------------------------------------------------------- lectura rápida */
