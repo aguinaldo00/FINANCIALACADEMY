@@ -5,9 +5,9 @@ import { fijar } from '../motion/lienzo.ts';
 
 /*
  * Fórmula 3 · C₀ = Cₙ / (1 + n · i)
- * Se conoce el final y se viaja hacia atrás. Por cada euro de semilla hay 1 + n · i euros al final,
- * así que la columna se mide en «semillas»: 1,21. Dividir deshace multiplicar: el factor cruza el
- * igual y pasa abajo. La parte azul vuelve al año 0 y llena el hueco de la semilla.
+ * Se conoce el final y se viaja hacia atrás. Por cada euro invertido hay 1 + n · i euros al final,
+ * así que la columna mide 1,21 veces el capital inicial. Dividir deshace multiplicar: el factor
+ * cruza el igual y pasa abajo. La parte azul vuelve al año 0 y llena el hueco del capital inicial.
  */
 
 const TIPO = 0.07;
@@ -24,14 +24,14 @@ export const escenaCapitalInicialSimple: Escena = {
   id: 'simple-capital-inicial',
   titulo: 'Capital inicial en capitalización simple',
   duracion: 18.1,
-  descripcion: 'Se conoce el montante de 12.100 € a 3 años al 7 %. La columna mide 1,21 veces la semilla; al dividir entre 1 + n · i se recupera la semilla de 10.000 € en el año 0.',
+  descripcion: 'Se conoce el montante de 12.100 € a 3 años al 7 %. Cada euro invertido se convierte en 1,21 €; al dividir entre 1 + n · i se recupera el capital inicial de 10.000 € en el año 0.',
   caso: { C_n: '12.100 €', n: '3', i: '7 %' },
   capitulos: [
     { t: 0, texto: 'Ahora conoces el final: $C_n$ = 12.100 € dentro de $n$ = 3 años, al $i$ = 7 % anual.' },
-    { t: 2.8, lectura: 4.9, texto: '¿Qué semilla hizo falta? Hay que volver al año 0, donde está la incógnita, $C_0$.' },
-    { t: 5.6, texto: 'Por cada euro de semilla, al final hay 1 + $n · i$ = 1 + 3 · 0,07 = 1,21 euros.' },
-    { t: 9, texto: 'Dividir deshace multiplicar: el factor $(1 + n · i)$ pasa al otro lado dividiendo.' },
-    { t: 13.2, texto: '$C_0$ = 12.100 / 1,21 = 10.000 €: la parte de la semilla vuelve al origen.' },
+    { t: 2.8, lectura: 4.9, texto: '¿Cuánto hubo que invertir? Hay que volver al año 0, donde está la incógnita, $C_0$.' },
+    { t: 5.6, texto: 'Cada euro invertido hoy se convierte al final en 1 + $n · i$ = 1 + 3 · 0,07 = 1,21 euros.' },
+    { t: 9, texto: 'Así que $C_n = C_0 · (1 + n · i)$. Para dejar $C_0$ solo, el factor $(1 + n · i)$ que multiplica pasa al otro lado dividiendo.' },
+    { t: 13.2, texto: '$C_0$ = 12.100 / 1,21 = 10.000 €: el capital inicial vuelve al año 0.' },
   ],
   montar(l) {
     suelo(l, SUELO);
@@ -47,7 +47,7 @@ export const escenaCapitalInicialSimple: Escena = {
     const llave2 = new Llave(l, 's-I');
     const etCn = new Etiqueta(l, 'C_n = "12.100 €"', 26);
     const et1 = new Rotulo(l, '1', 'mo-cifra s-c0', 'end');
-    const et1b = new Rotulo(l, 'euro de semilla', 'mo-rotulo', 'end');
+    const et1b = new Rotulo(l, 'euro invertido', 'mo-rotulo', 'end');
     const et2 = new Etiqueta(l, 'n · i = "0,21"', 20, 'derecha');
     const etTotal = new Etiqueta(l, '1 + n · i = "1,21"', 24, 'derecha');
     const etC0 = new Etiqueta(l, 'C_0 = "10.000 €"', 26);
@@ -59,7 +59,7 @@ export const escenaCapitalInicialSimple: Escena = {
     return (tReal) => {
       // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
       const t = retener(tReal, 12.6, 0.6);
-      const cx = claves(t, [[0, XF - 40], [2.8, XF - 40], [4.8, 320], [5.6, 470], [9.0, 470], [10.0, 380]]);
+      const cx = claves(t, [[0, XF - 40], [2.8, XF - 40], [4.8, 350], [5.6, 470], [9.0, 470], [10.0, 380]]);
       const cy = claves(t, [[0, 300], [2.8, 300], [4.8, 330], [5.6, 300], [9.0, 300], [10.0, 190]]);
       const z = claves(t, [[0, 1.25], [2.8, 1.25], [4.8, 1.0], [5.6, 1.15], [9.0, 1.15], [10.0, 0.8]]);
       l.camara(cx, cy, z);
@@ -81,9 +81,10 @@ export const escenaCapitalInicialSimple: Escena = {
         fijar(c, { transform: `translate(${x} ${SUELO - 36})`, opacity: pViaje * Math.sin(Math.PI * fase) });
       });
       const pVuelve = tramo(t, 12.9, 14.4, curvas.suave);
-      hueco.pintar(X0, SUELO, ALTO_C0, ANCHO + 6, tramo(t, 3.6, 4.4), 1 - tramo(t, 9.0, 9.6));
+      // El hueco del año 0 se ve mientras se viaja hacia él; al acercarse la cámara a la columna quedaría cortado.
+      hueco.pintar(X0, SUELO, ALTO_C0, ANCHO + 6, tramo(t, 3.6, 4.4) * (1 - tramo(t, 5.6, 6.0)), 1 - tramo(t, 9.0, 9.6));
 
-      // Medida en semillas: la parte azul (1) y la verde (n · i = 0,21).
+      // Medida por euro invertido: la parte azul (1) y la verde (n · i = 0,21).
       const xC0 = mezclar(XF, X0, pVuelve);
       parteC0.pintar(xC0, SUELO, ALTO_C0 * mezclar(0.96, 1, pDivide), pDivide);
       parteI.pintar(XF, SUELO - ALTO_C0, N * H, pDivide * (1 - 0.6 * pVuelve));
@@ -94,7 +95,8 @@ export const escenaCapitalInicialSimple: Escena = {
       et1.pintar(xr - 24, SUELO - ALTO_C0 / 2 + 8, ventana(t, 6.8, 12.8));
       et1b.pintar(xr - 24, SUELO - ALTO_C0 / 2 + 32, ventana(t, 7.0, 12.8) * 0.9);
       et2.pintar(xr - 20, SUELO - ALTO_C0 - (N * H) / 2 + 7, ventana(t, 7.4, 12.8));
-      etTotal.pintar(xr - 20, SUELO - alto - 62, ventana(t, 8.0, 12.8));
+      // Se retira cuando llega la fórmula despejada (ocuparía su sitio).
+      etTotal.pintar(xr - 20, SUELO - alto - 62, ventana(t, 8.0, 10.6));
 
       // El factor cruza el igual.
       const centro = (f: typeof l1, clave: string, vez = 0) => {

@@ -1,7 +1,8 @@
 /*
  * Piezas de papel recortado de la identidad editorial: bloques con volumen y sombra, etiquetas que
- * «caen» sobre el papel, notas escritas a mano, flechas discontinuas y una planta como metáfora del
- * capital. Las usa la animación de la fórmula 1 (escenas/simpleIntereses.ts).
+ * «caen» sobre el papel, notas escritas a mano, flechas discontinuas y la metáfora de la fórmula 1 (la
+ * semilla es C₀, los tomates de cada año son los intereses). La metáfora solo la usa esa animación
+ * (escenas/simpleIntereses.ts); las etiquetas, notas y flechas las comparten otras.
  */
 import { fijar, type Lienzo, situar, SVG_NS } from './lienzo.ts';
 import { nuevaSemilla, rectanguloRecortado, temblor } from './papel.ts';
@@ -18,47 +19,49 @@ export function caida(p: number, giroFinal = 0): { escala: number; giro: number;
   };
 }
 
-/* ------------------------------------------------------------------- bloque de capital */
+/* -------------------------------------------------------------------- semilla de capital */
 
-/** El capital como un bloque de papel con volumen (frente, tapa y lateral). */
-export class Bloque {
+/** Contorno de una semilla (un huevo de punta suave) centrada en (cx, cy), de ancho w y alto h. */
+function contornoSemilla(cx: number, cy: number, w: number, h: number): string {
+  const p = (dx: number, dy: number) => `${(cx + dx * w).toFixed(1)} ${(cy + dy * h).toFixed(1)}`;
+  return `M${p(0, -0.5)} C${p(0.4, -0.48)} ${p(0.5, -0.12)} ${p(0.5, 0.08)} C${p(0.5, 0.34)} ${p(0.28, 0.5)} ${p(0, 0.5)}`
+    + ` C${p(-0.28, 0.5)} ${p(-0.5, 0.34)} ${p(-0.5, 0.08)} C${p(-0.5, -0.12)} ${p(-0.4, -0.48)} ${p(0, -0.5)} Z`;
+}
+
+/**
+ * El capital inicial como la semilla de la metáfora de la fórmula 1: cae sobre el papel, se asienta
+ * y de ella brota la planta. Solo la usa esa animación (la metáfora no se extiende a otras fórmulas).
+ */
+export class SemillaCapital {
   readonly g: SVGGElement;
-  private readonly sombra: SVGPathElement;
-  private readonly frente: SVGPathElement;
-  private readonly tapa: SVGPathElement;
-  private readonly lado: SVGPathElement;
-  private readonly tajada: SVGPathElement;
   readonly semilla = nuevaSemilla();
-  constructor(private readonly l: Lienzo, readonly x: number, readonly y: number, readonly ancho: number, readonly alto: number, clase: string) {
-    this.g = l.grupo({ class: `ref-bloque ${clase}` });
-    this.sombra = l.el('path', { class: 'ref-sombra' }, this.g);
-    this.lado = l.el('path', { class: 'ref-bloque-lado' }, this.g);
-    this.tapa = l.el('path', { class: 'ref-bloque-tapa' }, this.g);
-    this.frente = l.el('path', { class: 'ref-bloque-frente' }, this.g);
-    this.tajada = l.el('path', { class: 'ref-tajada s-i' }, this.g);
-    const { x: x0, y: y0 } = this;
-    const fondo = 18;
-    const subida = 12;
-    fijar(this.frente, { d: rectanguloRecortado(x0, y0, ancho, alto, this.semilla, 1.2) });
-    fijar(this.sombra, { d: rectanguloRecortado(x0 + 6, y0 + 8, ancho + fondo, alto, this.semilla + 1, 1.5) });
-    fijar(this.tapa, { d: `M${x0} ${y0} L${x0 + fondo} ${y0 - subida} L${x0 + ancho + fondo} ${y0 - subida} L${x0 + ancho} ${y0} Z` });
-    fijar(this.lado, { d: `M${x0 + ancho} ${y0} L${x0 + ancho + fondo} ${y0 - subida} L${x0 + ancho + fondo} ${y0 + alto - subida} L${x0 + ancho} ${y0 + alto} Z` });
+  private readonly cx: number;
+  private readonly base: number;
+  constructor(private readonly l: Lienzo, x: number, y: number, ancho: number, alto: number, clase: string) {
+    this.g = l.grupo({ class: `ref-bloque ref-semilla ${clase}` });
+    this.cx = x + ancho / 2;
+    this.base = y + alto;
+    const cy = y + alto / 2;
+    const d = contornoSemilla(this.cx, cy, ancho, alto);
+    l.el('path', { d, class: 'ref-sombra', transform: 'translate(6 8)' }, this.g);
+    l.el('path', { d, class: 'ref-semilla-cuerpo' }, this.g);
+    // Volumen: el lado en sombra y un brillo arriba a la izquierda; la costura, como en una semilla real.
+    const q = (dx: number, dy: number) => `${(this.cx + dx * ancho).toFixed(1)} ${(cy + dy * alto).toFixed(1)}`;
+    l.el('path', { d: `M${q(0, -0.5)} C${q(0.4, -0.48)} ${q(0.5, -0.12)} ${q(0.5, 0.08)} C${q(0.5, 0.34)} ${q(0.28, 0.5)} ${q(0, 0.5)} C${q(0.3, 0.3)} ${q(0.34, -0.2)} ${q(0, -0.5)} Z`, class: 'ref-semilla-sombra' }, this.g);
+    l.el('ellipse', { cx: this.cx - ancho * 0.22, cy: cy - alto * 0.2, rx: ancho * 0.1, ry: alto * 0.17, class: 'ref-semilla-brillo', transform: `rotate(18 ${this.cx - ancho * 0.22} ${cy - alto * 0.2})` }, this.g);
+    l.el('path', { d: `M${q(0.02, -0.46)} C${q(0.16, -0.2)} ${q(0.14, 0.2)} ${q(0.04, 0.46)}`, class: 'ref-semilla-costura', fill: 'none' }, this.g);
   }
-  /** Caída desde arriba con aplastamiento al tocar el suelo; `tajada` dibuja la parte i del bloque. */
-  pintar(t: number, inicio: number, tajada: number, tipo: number, resalte = 0): void {
+  /** Caída desde arriba con aplastamiento al tocar el suelo (como las piezas de papel). */
+  pintar(t: number, inicio: number, resalte = 0): void {
     const p = tramo(t, inicio, inicio + 0.5, curvas.entrada);
     const impacto = tramo(t, inicio + 0.5, inicio + 1.0);
     const aplasta = Math.sin(Math.PI * impacto) * (1 - impacto * 0.4);
     const dy = mezclar(-190, 0, p);
-    const cx = this.x + this.ancho / 2;
-    const base = this.y + this.alto;
     const tb = temblor(this.semilla, this.l.instante, 0.7);
     fijar(this.g, {
-      transform: `translate(${cx + tb.dx} ${base + dy}) scale(${(1 + 0.08 * aplasta + resalte * 0.03).toFixed(3)} ${(1 - 0.1 * aplasta + resalte * 0.03).toFixed(3)}) translate(${-cx} ${-base})`,
+      transform: `translate(${this.cx + tb.dx} ${this.base + dy}) scale(${(1 + 0.08 * aplasta + resalte * 0.03).toFixed(3)} ${(1 - 0.1 * aplasta + resalte * 0.03).toFixed(3)}) translate(${-this.cx} ${-this.base})`,
       opacity: t < inicio ? 0 : null,
     });
-    const h = this.alto * tipo * tajada;
-    fijar(this.tajada, { d: h > 0.2 ? rectanguloRecortado(this.x + 1, this.y, this.ancho - 2, h, this.semilla + 2, 0.5) : '', opacity: tajada > 0 ? 1 : 0 });
   }
 }
 
@@ -104,7 +107,7 @@ export class Planta {
   }
 }
 
-/** Árbol de una cosecha: tronco, copa y frutos. Todos iguales: la cosecha de cada año es la misma. */
+/** La tomatera de un año: tallo, hojas y tomates. Todas iguales: los intereses de cada año son los mismos. */
 export class Arbol {
   readonly g: SVGGElement;
   private readonly tronco: SVGPathElement;
@@ -119,14 +122,16 @@ export class Arbol {
       l.el('path', { d: HOJA, class: 'ref-hoja-sombra', transform: 'translate(2 3)' }, hg);
       l.el('path', { d: HOJA, class: 'ref-hoja-cuerpo' }, hg);
       l.el('path', { d: NERVIO, class: 'ref-nervio' }, hg);
-      // Copa por encima de la etiqueta de la cosecha (que se coloca a media altura del tronco).
+      // Copa por encima de la etiqueta del año (que se coloca a media altura del tronco).
       this.copa.push({ g: hg, t: k * 0.04, giro, x: x + dx * 0.45, y: suelo - 72 + (dy + 76) * 0.6, escala: 0.95 });
     });
+    // Los tomates: los intereses de ese año. Su número es solo dibujo; lo que valen lo dice la etiqueta.
     const frutos: [number, number][] = [[-16, -62], [12, -70], [-2, -50], [20, -52]];
     frutos.forEach(([dx, dy], k) => {
-      const c = l.grupo({ class: 'ref-fruto s-cn' }, this.g);
-      l.el('circle', { r: 7, class: 'ref-fruto-cuerpo' }, c);
-      l.el('circle', { r: 2, cx: -2.2, cy: -2.4, class: 'ref-fruto-brillo' }, c);
+      const c = l.grupo({ class: 'ref-fruto ref-tomate' }, this.g);
+      l.el('circle', { r: 8, class: 'ref-fruto-cuerpo' }, c);
+      l.el('circle', { r: 2.2, cx: -2.6, cy: -2.4, class: 'ref-fruto-brillo' }, c);
+      l.el('path', { d: 'M0 -8.5 L2.6 -11 L1.6 -7.4 L5 -8.4 L1.8 -6 M0 -8.5 L-2.6 -11 L-1.6 -7.4 L-5 -8.4 L-1.8 -6', class: 'ref-tomate-caliz s-I', fill: 'none' }, c);
       this.frutos.push({ c, x: x + dx, y: suelo - 72 + (dy + 60) * 0.7, t: k * 0.09 });
     });
   }

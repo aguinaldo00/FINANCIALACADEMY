@@ -4,8 +4,8 @@ import { arco, claves, curvas, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Fórmula 4 · i = (Cₙ − C₀) / (n · C₀)
- * Se conocen la semilla y el montante. Lo que ha crecido (Cₙ − C₀) se reparte entre los n años y
- * una de esas cosechas se compara con la semilla: la proporción es el tipo.
+ * Se conocen el capital inicial y el montante. Lo que ha crecido (Cₙ − C₀) se reparte entre los n
+ * años y los intereses de un año se comparan con el capital inicial: la proporción es el tipo.
  */
 
 const TIPO = 0.07;
@@ -22,13 +22,13 @@ export const escenaTipoSimple: Escena = {
   id: 'simple-tipo',
   titulo: 'Tipo de interés en capitalización simple',
   duracion: 19,
-  descripcion: 'Con C₀ = 10.000 € y Cₙ = 12.100 € en 3 años, lo crecido (2.100 €) se reparte en 3 cosechas de 700 €; cada una es 0,07 de la semilla: i = (Cₙ − C₀) / (n · C₀) = 7 %.',
+  descripcion: 'Con C₀ = 10.000 € y Cₙ = 12.100 € en 3 años, lo crecido (2.100 €) se reparte en 3 años: 700 € de intereses al año, que son 0,07 del capital inicial: i = (Cₙ − C₀) / (n · C₀) = 7 %.',
   caso: { C_0: '10.000 €', C_n: '12.100 €', n: '3' },
   capitulos: [
-    { t: 0, texto: 'Conoces la semilla y el montante: $C_0$ = 10.000 € hoy y $C_n$ = 12.100 € a los 3 años. Falta el tipo.' },
-    { t: 2.8, texto: 'Lo que ha crecido es la diferencia: $C_n - C_0$ = 2.100 €. Son los intereses $I$.' },
-    { t: 6.2, lectura: 9.05, texto: 'Repartido entre los $n$ = 3 años, cada año ha dado 2.100 / 3 = 700 €.' },
-    { t: 9.4, lectura: 12.65, texto: 'Una cosecha comparada con la semilla: 700 / 10.000 = 0,07. Esa proporción es el tipo.' },
+    { t: 0, texto: 'Conoces lo invertido y lo que tienes al final: $C_0$ = 10.000 € hoy y $C_n$ = 12.100 € a los 3 años. Falta el tipo.' },
+    { t: 2.8, texto: 'Lo que ha crecido es la diferencia: $C_n - C_0$ = 2.100 €. Son los intereses $I$ de los 3 años.' },
+    { t: 6.2, lectura: 9.05, texto: 'En simple cada año da lo mismo: entre los $n$ = 3 años, 2.100 / 3 = 700 € de intereses al año.' },
+    { t: 9.4, lectura: 12.65, texto: 'Los intereses de un año comparados con el capital inicial: 700 / 10.000 = 0,07. Esa proporción es el tipo.' },
     { t: 13.0, texto: 'Tipo de interés: $i = \\frac{C_n - C_0}{n · C_0}$. Sale en tanto por uno y en la unidad de $n$: 0,07 anual = 7 %.' },
   ],
   montar(l) {
@@ -68,7 +68,7 @@ export const escenaTipoSimple: Escena = {
       etC0.pintar(X0, SUELO - ALTO_C0 - 22, tramo(t, 1.0, 1.6));
       etCn.pintar(XF, SUELO - altoN - 22, tramo(t, 1.2, 1.8) * (1 - 0.6 * tramo(t, 9.4, 10)));
 
-      // La semilla se copia sobre la columna: lo que sobresale es lo crecido.
+      // El capital inicial se copia sobre la columna: lo que sobresale es lo crecido.
       const pCopia = tramo(t, 3.0, 4.4, curvas.suave);
       const posCopia = arco({ x: X0, y: SUELO }, { x: XF, y: SUELO }, pCopia, 0.18);
       fantasma.pintar(posCopia.x, posCopia.y, ALTO_C0, ventana(t, 3.0, 6.6, 0.3));
@@ -85,7 +85,7 @@ export const escenaTipoSimple: Escena = {
         const desde = { x: XF, y: SUELO - ALTO_C0 - k * H };
         const hasta = { x: eje.x(k) + PASO / 2, y: SUELO };
         const q = arco(desde, hasta, p, 0.3);
-        // El primero viaja después junto a la semilla para medirse con ella.
+        // El primero viaja después junto al capital inicial para medirse con él.
         const pMide = k === 0 ? tramo(t, 9.8, 11.0, curvas.suave) : 0;
         const medir = { x: X0 + ANCHO + 14, y: SUELO - ALTO_C0 + H };
         const r = k === 0 && pMide > 0 ? arco(q, medir, pMide, 0.2) : q;

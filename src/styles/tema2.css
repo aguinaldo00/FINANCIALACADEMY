@@ -101,8 +101,6 @@
 .mo-regla-marca{stroke:var(--tinta);stroke-width:1.4}
 .mo-regla-marca.larga{stroke-width:2.4}
 .mo-regla-texto{fill:var(--tinta-suave);font-family:"Barlow Condensed",var(--f-texto);font-weight:600}
-.mo-semilla-cuerpo{fill:currentColor}
-.mo-semilla-linea{stroke:var(--tinta);stroke-opacity:.5;stroke-width:1.4}
 .mo-hueco-cuerpo{fill:var(--tinta);fill-opacity:.04;stroke:var(--tinta);stroke-width:1.8;stroke-dasharray:7 6}
 .mo-hueco-signo{fill:var(--tinta);font:800 40px "Big Shoulders Display",var(--f-texto)}
 .mo-flecha{stroke:var(--tinta);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -322,10 +320,10 @@
 
 /* ------------------------------------------- piezas de papel recortado (motion/piezas.ts) */
 .ref-sombra{fill:var(--bg2);fill-opacity:.22}
-.ref-bloque-frente{fill:currentColor}
-.ref-bloque-tapa{fill:color-mix(in srgb,currentColor 62%,#fff)}
-.ref-bloque-lado{fill:color-mix(in srgb,currentColor 70%,#0d1321)}
-.ref-tajada{fill:currentColor}
+.ref-semilla-cuerpo{fill:currentColor}
+.ref-semilla-sombra{fill:var(--bg2);fill-opacity:.2}
+.ref-semilla-brillo{fill:#fff;fill-opacity:.22}
+.ref-semilla-costura{stroke:var(--bg2);stroke-opacity:.3;stroke-width:2;stroke-linecap:round}
 .ref-bloque .fx-sim,.ref-bloque .fx-sub{fill:#fff!important}
 .ref-bloque .fx-marca{display:none}
 .ref-bloque-cifra{fill:#fff!important;font:700 22px "Big Shoulders Display","Barlow Condensed",sans-serif;letter-spacing:.02em}
@@ -336,6 +334,8 @@
 .ref-nervio{stroke:var(--bg2);stroke-opacity:.35;stroke-width:1;fill:none}
 .ref-fruto-cuerpo{fill:currentColor;stroke:var(--bg2);stroke-width:1.4}
 .ref-fruto-brillo{fill:#fff;fill-opacity:.7}
+.ref-tomate .ref-fruto-cuerpo{fill:var(--r)}
+.ref-tomate-caliz{stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ref-eje{stroke:var(--bg2);stroke-width:2.6;stroke-linecap:round}
 .ref-marca{stroke:var(--bg2);stroke-width:2.6;stroke-linecap:round}
 .mo-svg .ref-ano{fill:var(--bg2);font:600 15px "Barlow Condensed",sans-serif;letter-spacing:.16em}

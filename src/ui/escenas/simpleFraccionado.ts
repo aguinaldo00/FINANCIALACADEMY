@@ -5,9 +5,9 @@ import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Fórmula 6 · iₘ = i / m   e   I = C₀ · iₘ · n · m
- * Si el año se parte en m trozos, en simple la cosecha anual se reparte a partes iguales y el tipo
+ * Si el año se parte en m trozos, en simple el interés de un año se reparte a partes iguales y el tipo
  * también: es proporcional. En n años hay n · m periodos: el tiempo se cuenta en la unidad de iₘ.
- * Al juntar las 36 cosechas mensuales sale la misma franja que con años: 2.100 €.
+ * Al juntar los 36 intereses mensuales sale la misma franja que con años: 2.100 €.
  */
 
 const C0 = 10_000;
@@ -16,7 +16,7 @@ const X0 = 120;
 const ANO = 480; // ancho de un año en el mundo
 const Y = 380;
 const ESC = 0.08; // px por euro
-const ALTO = C0 * TIPO * ESC; // cosecha de un año
+const ALTO = C0 * TIPO * ESC; // interés de un año
 const Y_TIPO = 236;
 const GAP = 5;
 
@@ -24,11 +24,11 @@ export const escenaFraccionadoSimple: Escena = {
   id: 'simple-fraccionado',
   titulo: 'Fraccionamiento del año en capitalización simple',
   duracion: 21,
-  descripcion: 'Una cosecha anual de 700 € (10.000 € al 7 %) se reparte en m partes iguales y el tipo también: iₘ = i / m. En 3 años hay 36 meses; iₘ = 0,07 / 12 = 0,005833 al mes, y las 36 cosechas de 58,33 € de interés (10.000 · 0,005833) suman 2.100 €, como con años: I = C₀ · iₘ · n · m.',
+  descripcion: 'El interés de un año, 700 € (10.000 € al 7 %), se reparte en m partes iguales y el tipo también: iₘ = i / m. En 3 años hay 36 meses; iₘ = 0,07 / 12 = 0,005833 al mes, y los 36 intereses mensuales de 58,33 € (10.000 · 0,005833) suman 2.100 €, como con años: I = C₀ · iₘ · n · m.',
   caso: { i: '7 %', m: '12' },
   capitulos: [
-    { t: 0, texto: 'Con $C_0$ = 10.000 € al $i$ = 7 % anual, la cosecha de un año es $C_0 · i$ = 700 €.' },
-    { t: 2.8, texto: 'Si el año se divide en $m$ partes, la cosecha (los euros de interés) se reparte a partes iguales: $m$ = 2, 4, 12.' },
+    { t: 0, texto: 'Con $C_0$ = 10.000 € al $i$ = 7 % anual, los intereses de un año son $C_0 · i$ = 700 €.' },
+    { t: 2.8, texto: 'Si el año se divide en $m$ partes iguales (semestres, trimestres, meses), esos 700 € se reparten a partes iguales: $m$ = 2, 4, 12.' },
     { t: 7.2, lectura: 10.4, texto: 'El tipo se reparte igual. En simple es proporcional: $i_m = \\frac{i}{m}$, y para meses $i_{12}$ = 0,07 / 12 = 0,005833 al mes.' },
     { t: 10.6, texto: 'En $n$ = 3 años hay $n · m$ = 36 meses: el tiempo se cuenta en la unidad del tipo.' },
     { t: 14, lectura: 17.4, texto: '$I = C_0 · i_m · n · m$ = 10.000 · (0,07 / 12) · 36 = 2.100 €. Lo mismo que contando en años.' },
@@ -69,7 +69,7 @@ export const escenaFraccionadoSimple: Escena = {
 
       const fueraCerca = 1 - tramo(t, 10.4, 10.9);
       etC0.pintar(X0, 132, tramo(t, 0.2, 0.8) * fueraCerca);
-      // m vigente: 1 → 2 → 4 → 12 (cada cambio se reparte la cosecha).
+      // m vigente: 1 → 2 → 4 → 12 (cada cambio se reparte el interés del año).
       const m = t < 3.0 ? 1 : t < 4.4 ? 2 : t < 5.8 ? 4 : 12;
       const pCorte = t < 3.0 ? 1 : tramo(t, m === 2 ? 3.0 : m === 4 ? 4.4 : 5.8, (m === 2 ? 3.0 : m === 4 ? 4.4 : 5.8) + 0.8, curvas.salida);
       reglasAno.forEach((r) => r.pintar((r.op.divisiones === m ? 1 : 0) * tramo(t, 0, 0.6) * fueraCerca, 1, 0));

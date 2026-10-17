@@ -112,7 +112,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
       { id: 'simple-tiempo', texto: 'Con I = Cₙ − C₀, se despeja n.' },
       { id: 'simple-fraccionado', texto: 'La misma fórmula con iₘ y n · m.' },
     ],
-    consejos: ['Se lee «capital por tiempo por tipo». Todas las fórmulas de simple salen de esta y de Cₙ = C₀ + I.', 'Cada periodo produce lo mismo, C₀ · i: los intereses totales son esa cosecha repetida n veces.'],
+    consejos: ['Se lee «capital por tiempo por tipo». Todas las fórmulas de simple salen de esta y de Cₙ = C₀ + I.', 'Cada periodo produce lo mismo, C₀ · i: los intereses totales son esa cantidad sumada n veces.'],
     errores: [
       { mal: 'I = 15.000 · 3 · 3', bien: 'El tipo va en tanto por uno: 3 % → 0,03. I = 15.000 · 3 · 0,03 = 1.350 €.' },
       { mal: 'Tipo anual con n = 18 (meses)', bien: 'n en la unidad del tipo: 18 meses = 1,5 años.' },
@@ -264,7 +264,7 @@ export const FORMULAS_TEMA2: readonly EntradaFormula[] = [
     cuando: ['Te piden lo que produce el capital en compuesta.'],
     reconocer: 'Te dan C₀, i y n en compuesta → te piden los intereses.',
     relaciones: [{ id: 'compuesta-montante', texto: 'Es Cₙ − C₀ con C₀ factor común.' }],
-    consejos: ['El corchete es el factor menos la semilla: lo que pasa de 1 por cada euro.'],
+    consejos: ['El corchete es el factor menos 1 (el euro invertido): lo que se gana por cada euro.'],
     errores: [{ mal: 'I = C₀ · i · n en compuesta', bien: 'Eso es de simple. En compuesta, I = Cₙ − C₀.' }],
     ejemplo: { fuente: 'Caso resuelto', texto: 'I = 4.500 · (1,03⁷ − 1) = 1.034,43 €.' },
   },

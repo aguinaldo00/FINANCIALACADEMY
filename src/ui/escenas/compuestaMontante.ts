@@ -4,7 +4,7 @@ import { arco, claves, curvas, mezclar, retener, tramo, ventana } from '../motio
 
 /*
  * Compuesta · Cₙ = C₀ · (1 + i)ⁿ
- * Misma semilla y mismo tipo que en simple, pero cada cosecha se vuelve a sembrar: el capital de
+ * Mismo capital y mismo tipo que en simple, pero los intereses de cada año se suman al capital: el capital de
  * cada año es la base del siguiente. Se ve como una escalera de multiplicaciones por (1 + i); las
  * alturas de simple quedan como contornos para comparar.
  */
@@ -27,9 +27,9 @@ export const escenaMontanteCompuesta: Escena = {
   descripcion: 'Con 10.000 € al 7 % compuesto, cada año se multiplica el capital por 1,07: 10.700, 11.449 y 12.250,43 €. Tres multiplicaciones: Cₙ = C₀ · (1 + i)ⁿ. En simple serían 12.100 €.',
   caso: { C_0: '10.000 €', i: '7 %', n: '3' },
   capitulos: [
-    { t: 0, texto: 'En compuesta, cada cosecha se vuelve a sembrar: el capital de cada año es la semilla del siguiente.' },
+    { t: 0, texto: 'En compuesta, los intereses de cada año se suman al capital: lo que hay al final de un año es la base del siguiente.' },
     { t: 2.6, lectura: 5.2, texto: 'Año 1: $C_1 = C_0 · (1 + i)$ = 10.000 · 1,07 = 10.700 €.' },
-    { t: 5.4, lectura: 8, texto: 'Año 2: la cosecha se calcula sobre 10.700 €, no sobre 10.000: 749 €. $C_2$ = 11.449 €.' },
+    { t: 5.4, lectura: 8, texto: 'Año 2: los intereses se calculan sobre 10.700 €, no sobre 10.000: 10.700 · 0,07 = 749 €. $C_2$ = 11.449 €.' },
     { t: 8.2, lectura: 10.75, texto: 'Año 3: 11.449 · 1,07 = 12.250,43 €. Cada año se multiplica por $(1 + i)$.' },
     { t: 11, texto: 'Tres multiplicaciones por $(1 + i)$: $C_n = C_0 · (1 + i)^n$. El exponente cuenta los periodos.' },
     { t: 15.3, texto: 'En simple (contornos) serían 12.100 €. En compuesta, 12.250,43 €: el interés también produce interés.' },
@@ -39,7 +39,7 @@ export const escenaMontanteCompuesta: Escena = {
     const eje = new Eje(l, { x0: X0, paso: PASO, y: SUELO, periodos: N, unidad: 'años' });
     const simples = Array.from({ length: N + 1 }, () => new Capsula(l, { clase: 's-cn mo-contorno', ancho: ANCHO + 14, relleno: 0 }));
     const bases = Array.from({ length: N + 1 }, (_, k) => new Capsula(l, { clase: k === 0 ? 's-c0' : 's-cn', ancho: ANCHO, relleno: 0.2 }));
-    const cosechas = Array.from({ length: N }, () => new Capsula(l, { clase: 's-I', ancho: ANCHO, relleno: 0.5 }));
+    const trozos = Array.from({ length: N }, () => new Capsula(l, { clase: 's-I', ancho: ANCHO, relleno: 0.5 }));
     const pulsos = Array.from({ length: N }, () => new Pulso(l, 's-i'));
     const saltos = Array.from({ length: N }, () => new Salto(l, 's-i', '× 1,07'));
     const nivel = new Guia(l, 'mo-guia s-cn');
@@ -79,8 +79,8 @@ export const escenaMontanteCompuesta: Escena = {
         const pos = arco({ x: xa, y: SUELO }, { x: xb, y: SUELO }, pc, 0.0);
         bases[k + 1]!.pintar(pos.x, SUELO, altoA, tramo(t, t0 + 0.3, t0 + 0.5));
         const pg = tramo(t, t0 + 1.2, t0 + 2.0, curvas.muelle);
-        cosechas[k]!.pintar(xb, SUELO - altoA, capital(k) * TIPO * ESC * pg, tramo(t, t0 + 1.2, t0 + 1.4) * (1 - tramo(t, t0 + 2.4, t0 + 2.8)));
-        // Al cerrar el año, la cosecha pasa a formar parte del capital (se resiembra).
+        trozos[k]!.pintar(xb, SUELO - altoA, capital(k) * TIPO * ESC * pg, tramo(t, t0 + 1.2, t0 + 1.4) * (1 - tramo(t, t0 + 2.4, t0 + 2.8)));
+        // Al cerrar el año, los intereses pasan a formar parte del capital.
         if (t > t0 + 2.4) bases[k + 1]!.pintar(xb, SUELO, mezclar(altoA, capital(k + 1) * ESC, tramo(t, t0 + 2.4, t0 + 2.8)), 1);
         pulsos[k]!.pintar({ x: mezclar(xa, xb, tramo(t, t0 + 0.6, t0 + 1.3)), y: SUELO - mezclar(altoA, altoA, 0) - 6 - Math.sin(Math.PI * tramo(t, t0 + 0.6, t0 + 1.3)) * 30 }, ventana(t, t0 + 0.6, t0 + 1.4, 0.1));
         intereses[k]!.pintar(xb + ANCHO / 2 + 8, SUELO - altoA - 2, ventana(t, t0 + 1.6, t0 + 3.4));

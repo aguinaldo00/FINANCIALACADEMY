@@ -245,7 +245,9 @@ export class Rotulo {
       w = 0;
     }
     if (w <= 0) w = texto.length * 10;
-    else {
+    // Solo se guarda la medida con las fuentes ya cargadas: antes, la fuente de reserva da otro ancho
+    // y el trazo de rotulador quedaba más largo o más corto que la cifra.
+    else if (typeof document === 'undefined' || !document.fonts || document.fonts.status === 'loaded') {
       this.anchoMedido = w;
       this.textoMedido = texto;
     }
@@ -314,21 +316,6 @@ export class Regla {
     fijar(this.base, { x2: mezclar(this.op.x0, this.op.x1, Math.min(1, marcas * 1.05)) });
     fijar(this.barra, { x2: this.x(avance), opacity: avance > 0 ? 1 : 0 });
     situar(this.g, 0, 0, 1, opacidad);
-  }
-}
-
-/** Glifo de la semilla (no es una medida: acompaña a C₀ cuando la escena no lo dibuja a escala). */
-export class Semilla {
-  readonly g: SVGGElement;
-  constructor(l: Lienzo, padre?: Element) {
-    this.g = l.grupo({ class: 'mo-semilla s-c0' }, padre);
-    l.el('path', { d: 'M0 -26 C16 -16 18 8 0 22 C-18 8 -16 -16 0 -26 Z', class: 'mo-capsula-sombra', transform: 'translate(3 4)' }, this.g);
-    l.el('path', { d: 'M0 -26 C16 -16 18 8 0 22 C-18 8 -16 -16 0 -26 Z', class: 'mo-semilla-cuerpo' }, this.g);
-    l.el('path', { d: 'M0 -18 C5 -6 5 8 0 15', class: 'mo-semilla-linea', fill: 'none' }, this.g);
-  }
-  pintar(x: number, y: number, opacidad: number, escala = 1): void {
-    const g = golpe(opacidad);
-    situar(this.g, x, y, escala * g.escala, opacidad, g.giro);
   }
 }
 

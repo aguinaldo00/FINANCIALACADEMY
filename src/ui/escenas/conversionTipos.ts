@@ -13,7 +13,7 @@ import { curvas, tramo } from '../motion/tiempo.ts';
  * capital al mismo sitio en el mismo tiempo. Se sigue 1 € durante un año sobre el calendario:
  *   1. La pregunta y el calendario.
  *   2. La escalera del tipo de partida: un peldaño por periodo. En simple todos suben lo mismo
- *      (cada periodo cosecha sobre el mismo euro); en compuesta cada uno sube más que el anterior.
+ *      (el interés de cada periodo se calcula sobre el mismo euro); en compuesta cada uno sube más que el anterior.
  *   3. La meta: donde acaba esa escalera al cabo del año.
  *   4. La escalera del tipo buscado, con sus periodos, tiene que llegar a la misma meta: de ahí sale
  *      el tipo (repartir en simple; raíz en compuesta).
@@ -88,7 +88,7 @@ export function escenaConversionTipo(p: PeticionTipo): Escena {
     { t: 0, texto: `¿Qué tipo ${a.adjetivo} equivale a un ${pct(p.tipo)} ${de.adjetivo}, ${regimenTexto}? Equivalentes: llevan el mismo capital al mismo sitio en el mismo tiempo. Seguimos 1 € durante un año.` },
     { t: 3.2, texto: compuesta
       ? `En compuesta, cada ${de.singular} multiplica lo que hay por ${num(1 + p.tipo, 6)}: cada peldaño sube más que el anterior. En un año: ${num(1 + p.tipo, 6)}^${c.mDe} = ${num(c.factorAño)}.`
-      : `En simple, cada ${de.singular} cosecha ${pct(p.tipo)} del mismo euro: todos los peldaños suben igual. En un año: 1 + ${c.mDe} · ${num(p.tipo, 6)} = ${num(c.factorAño)}.` },
+      : `En simple, cada ${de.singular} da un ${pct(p.tipo)} del mismo euro inicial: todos los peldaños suben igual. En un año: 1 + ${c.mDe} · ${num(p.tipo, 6)} = ${num(c.factorAño)}.` },
     { t: 7.4, texto: `Esa es la meta: ${num(c.factorAño)} € al cabo del año. El tipo ${a.adjetivo} tiene que llegar al mismo sitio en ${c.mA} ${c.mA === 1 ? a.singular : a.plural}: ${compuesta ? `$(1 + ${iA})^{${c.mA}} = (1 + ${iDe})^{${c.mDe}}$` : `$${iA} · ${c.mA} = ${iDe} · ${c.mDe}$`}.` },
     { t: 11.0, texto: compuesta
       ? `En compuesta, $(1 + ${iA})^{${c.mA}}$ = ${num(c.factorAño)}: ${c.mA === 1 ? 'basta restar 1' : `se despeja con la raíz de índice ${c.mA}`}. $${iA}$ = ${pct(c.resultado)} ${a.adjetivo}.`
@@ -97,7 +97,7 @@ export function escenaConversionTipo(p: PeticionTipo): Escena {
       ? (Math.abs(finalProp - c.factorAño) < 1e-12
         ? 'Aquí repartir en proporción coincide, porque es el mismo periodo.'
         : `Repartir en proporción daría ${pct(c.proporcional)}: en compuesta ${seQuedaCorto ? 'no llega' : 'se pasa'} (${num(finalProp)} en vez de ${num(c.factorAño)}). Por eso en compuesta no se divide.`)
-      : `En simple repartir en proporción es exacto: cada periodo cosecha sobre el mismo capital. ${pct(p.tipo)} · ${num(c.mDe)}/${num(c.mA)} = ${pct(c.resultado)}.` },
+      : `En simple repartir en proporción es exacto: el interés de cada periodo se calcula sobre el mismo capital. ${pct(p.tipo)} · ${num(c.mDe)}/${num(c.mA)} = ${pct(c.resultado)}.` },
   ];
 
   return {

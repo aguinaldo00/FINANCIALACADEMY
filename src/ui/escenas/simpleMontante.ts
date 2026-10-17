@@ -4,8 +4,8 @@ import { arco, claves, curvas, mezclar, retener, tramo, ventana } from '../motio
 
 /*
  * Fórmula 2 · Cₙ = C₀ · (1 + n · i)
- * La semilla sale de la tierra y viaja al final del tiempo; las n cosechas se apilan encima.
- * La columna es el montante: C₀ + I. Como cada cosecha es C₀ · i, C₀ aparece en los dos sumandos
+ * El capital inicial sale del año 0 y viaja al final del tiempo; los intereses de los n años se
+ * apilan encima. La columna es el montante: C₀ + I. Como los intereses de cada año son C₀ · i, C₀ aparece en los dos sumandos
  * y sale factor común. La deducción se escribe paso a paso con las piezas de la línea anterior.
  */
 
@@ -23,13 +23,13 @@ export const escenaMontanteSimple: Escena = {
   id: 'simple-montante',
   titulo: 'Capital final o montante en capitalización simple',
   duracion: 19.5,
-  descripcion: 'La semilla de 10.000 € y las tres cosechas de 700 € forman una columna de 12.100 €: Cₙ = C₀ + I = C₀ · (1 + n · i).',
+  descripcion: 'El capital inicial de 10.000 € y los intereses de los tres años (3 · 700 €) forman una columna de 12.100 €: Cₙ = C₀ + I = C₀ · (1 + n · i).',
   caso: { C_0: '10.000 €', n: '3', i: '7 %' },
   capitulos: [
-    { t: 0, texto: 'El montante $C_n$ es todo lo que hay al final: la semilla $C_0$ más las cosechas, $I$.' },
-    { t: 2.6, texto: 'La semilla sale de la tierra y las cosechas se apilan encima: $C_n = C_0 + I$ = 12.100 €.' },
-    { t: 7.7, texto: 'Cada cosecha es $C_0 · i$, así que las $n$ cosechas son $I = C_0 · n · i$.' },
-    { t: 11.3, lectura: 14.25, texto: '$C_0$ está en los dos sumandos: sale factor común y queda $C_n = C_0 · (1 + n · i)$.' },
+    { t: 0, texto: 'El montante $C_n$ es todo lo que tienes al final: el capital inicial, $C_0$, más los intereses, $I$.' },
+    { t: 2.6, texto: 'El capital llega entero al final y los intereses de cada año se ponen encima: $C_n = C_0 + I$ = 10.000 + 2.100 = 12.100 €.' },
+    { t: 7.7, texto: 'Los intereses de cada año son $C_0 · i$; en $n$ años, $I = C_0 · n · i$ (fórmula 1). Se sustituye $I$ en la suma.' },
+    { t: 11.3, lectura: 14.25, texto: '$C_0$ está en los dos sumandos: se saca factor común y queda $C_n = C_0 · (1 + n · i)$.' },
     { t: 14.9, texto: 'Con los datos: $C_n$ = 10.000 · (1 + 3 · 0,07) = 10.000 · 1,21 = 12.100 €.' },
   ],
   montar(l) {
@@ -37,16 +37,16 @@ export const escenaMontanteSimple: Escena = {
     const eje = new Eje(l, { x0: X0, paso: PASO, y: SUELO, periodos: N, periodos_rotulo: (k) => `año ${k}` });
     // El montante es un papel de oro detrás de la pila (se dibuja antes para quedar debajo).
     const contorno = new Capsula(l, { clase: 's-cn', ancho: ANCHO_COL + 12, relleno: 0.4 });
-    const semilla = new Capsula(l, { clase: 's-c0', ancho: ANCHO_COL - 8, relleno: 0.2 });
-    const cosechas = Array.from({ length: N }, () => new Capsula(l, { clase: 's-I', ancho: PASO, relleno: 0.4 }));
+    const capital = new Capsula(l, { clase: 's-c0', ancho: ANCHO_COL - 8, relleno: 0.2 });
+    const intereses = Array.from({ length: N }, () => new Capsula(l, { clase: 's-I', ancho: PASO, relleno: 0.4 }));
     const llaveC0 = new Llave(l, 's-c0');
     const llaveI = new Llave(l, 's-I');
     const etCn = new Etiqueta(l, 'C_n = "12.100 €"', 26);
     const etC0 = new Etiqueta(l, 'C_0', 28, 'derecha');
     const etI = new Etiqueta(l, 'I', 28, 'derecha');
     const etI2 = new Etiqueta(l, 'C_0 · n · i', 22, 'derecha');
-    const etSemilla = new Rotulo(l, '10.000 €', 'mo-cifra mo-cifra-peq s-c0', 'end');
-    const etCosecha = new Rotulo(l, '3 · 700 €', 'mo-cifra mo-cifra-peq s-I', 'end');
+    const etCapital = new Rotulo(l, '10.000 €', 'mo-cifra mo-cifra-peq s-c0', 'end');
+    const etIntereses = new Rotulo(l, '3 · 700 €', 'mo-cifra mo-cifra-peq s-I', 'end');
 
     const l1 = l.formula('C_n = C_0 + I', { x: 40, y: 110, tam: 32, alinear: 'izquierda' });
     const l2 = l.formula('C_n = C_0 + C_0 · n · i', { x: 40, y: 170, tam: 32, alinear: 'izquierda' });
@@ -66,15 +66,15 @@ export const escenaMontanteSimple: Escena = {
       const aparece = tramo(t, 0, 0.6);
       eje.pintar(1, aparece);
 
-      // La semilla: de colgar bajo tierra en el año 0 a estar de pie al final del año 3.
+      // El capital: de colgar bajo el eje en el año 0 a estar de pie al final del año 3.
       const pSube = tramo(t, 2.7, 4.6, curvas.suave);
       const desde = { x: X0, y: SUELO + 12 + ALTO_C0 };
       const hasta = { x: XF, y: SUELO };
       const pos = arco(desde, hasta, pSube, 0.12);
-      semilla.pintar(pos.x, pos.y, ALTO_C0, aparece);
+      capital.pintar(pos.x, pos.y, ALTO_C0, aparece);
 
-      // Las cosechas dejan su año y se apilan encima de la semilla.
-      cosechas.forEach((c, k) => {
+      // Los intereses de cada año dejan su año y se apilan encima del capital.
+      intereses.forEach((c, k) => {
         const p = tramo(t, 3.3 + k * 0.3, 4.9 + k * 0.3, curvas.suave);
         const origen = { x: eje.x(k) + PASO / 2, y: SUELO };
         const destino = { x: XF, y: SUELO - ALTO_C0 - k * H };
@@ -91,11 +91,11 @@ export const escenaMontanteSimple: Escena = {
       llaveC0.vertical(SUELO, SUELO - ALTO_C0, xl, -14, tramo(t, 5.3, 5.8));
       llaveI.vertical(SUELO - ALTO_C0, SUELO - ALTO_C0 - N * H, xl, -10, tramo(t, 5.3, 5.8));
       etC0.pintar(xl - 24, SUELO - ALTO_C0 / 2 + 6, tramo(t, 5.4, 6.0));
-      etSemilla.pintar(xl - 24, SUELO - ALTO_C0 / 2 + 34, tramo(t, 5.6, 6.2));
+      etCapital.pintar(xl - 24, SUELO - ALTO_C0 / 2 + 34, tramo(t, 5.6, 6.2));
       const cambio = tramo(t, 7.0, 7.6);
       etI.pintar(xl - 22, SUELO - ALTO_C0 - (N * H) / 2 + 9, tramo(t, 5.4, 6.0) * (1 - cambio));
       etI2.pintar(xl - 22, SUELO - ALTO_C0 - (N * H) / 2 + 8, cambio);
-      etCosecha.pintar(xl - 22, SUELO - ALTO_C0 - (N * H) / 2 - 22, tramo(t, 7.6, 8.2));
+      etIntereses.pintar(xl - 22, SUELO - ALTO_C0 - (N * H) / 2 - 22, tramo(t, 7.6, 8.2));
 
       // La deducción, línea a línea: cada línea se construye con las piezas de la anterior.
       const centro = (f: typeof l1, clave: string, vez = 0) => {

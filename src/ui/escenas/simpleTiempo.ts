@@ -1,19 +1,19 @@
 import type { Escena } from '../motion/reproductor.ts';
-import { Capsula, Etiqueta, Hueco, Llave, Pulso, Regla, Rotulo, Semilla } from '../motion/motivos.ts';
+import { Capsula, Etiqueta, Hueco, Llave, Pulso, Regla, Rotulo } from '../motion/motivos.ts';
 import { fijar } from '../motion/lienzo.ts';
 import { claves, curvas, mezclar, tramo, ventana } from '../motion/tiempo.ts';
 
 /*
  * Fórmula 5 · n = (Cₙ − C₀) / (i · C₀)   (caso práctico 13 del libro)
- * Hay que conseguir Cₙ − C₀ = 500 € de intereses y cada año la semilla da C₀ · i = 180 €. ¿Cuántas
- * cosechas caben? 2,78. La parte decimal también es tiempo: se amplía el año a 12 meses y el mes a
+ * Hay que conseguir Cₙ − C₀ = 500 € de intereses y cada año el capital da C₀ · i = 180 €. ¿Cuántos
+ * años caben? 2,78. La parte decimal también es tiempo: se amplía el año a 12 meses y el mes a
  * 30 días, como hace el libro: 2 años, 9 meses y 11 días.
  */
 
 const ESCALA = 0.4; // px por euro en el depósito de intereses
 const OBJETIVO = 500;
-const COSECHA = 180;
-const N = OBJETIVO / COSECHA; // 2,777…
+const INTERES_ANUAL = 180;
+const N = OBJETIVO / INTERES_ANUAL; // 2,777…
 const XD = 450; // depósito
 const BASE_D = 262;
 const AX0 = 70;
@@ -26,19 +26,18 @@ export const escenaTiempoSimple: Escena = {
   id: 'simple-tiempo',
   titulo: 'Tiempo en capitalización simple',
   duracion: 21.5,
-  descripcion: '6.000 € al 3 % para llegar a 6.500 €. Hay que reunir 500 € con cosechas de 180 €: caben 2,78. Ampliando, 0,78 años son 9,36 meses y 0,36 meses son 10,8 días: 2 años, 9 meses y 11 días.',
+  descripcion: '6.000 € al 3 % para llegar a 6.500 €. Hay que reunir 500 € de intereses a 180 € por año: caben 2,78 años. Ampliando, 0,78 años son 9,36 meses y 0,36 meses son 10,8 días: 2 años, 9 meses y 11 días.',
   caso: { C_0: '6.000 €', C_n: '6.500 €', i: '3 %' },
   capitulos: [
-    { t: 0, texto: 'Semilla $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: $C_n$ = 6.500 €. ¿Cuánto tiempo?' },
+    { t: 0, texto: 'Capital inicial $C_0$ = 6.000 € al $i$ = 3 % anual. Objetivo: llegar a $C_n$ = 6.500 €. ¿Cuánto tiempo hace falta?' },
     { t: 2.8, texto: 'Hay que reunir $C_n - C_0$ = 500 € de intereses.' },
-    { t: 5.2, lectura: 7.55, texto: 'Cada año la semilla da $C_0 · i$ = 6.000 · 0,03 = 180 €.' },
-    { t: 7.8, texto: '¿Cuántas cosechas caben? 500 / 180 = 2,78: dos años enteros y 0,78 de otro.' },
+    { t: 5.2, lectura: 7.55, texto: 'Cada año el capital da $C_0 · i$ = 6.000 · 0,03 = 180 € de intereses (siempre lo mismo, en simple).' },
+    { t: 7.8, texto: '¿Cuántos años de 180 € caben en 500 €? 500 / 180 = 2,78: dos años enteros y 0,78 de otro.' },
     { t: 11.4, texto: 'Los decimales también son tiempo: 0,78 años · 12 = 9,36 meses.' },
     { t: 14.6, lectura: 17.4, texto: 'Y 0,36 meses · 30 = 10,8 días, que se redondean a 11 (se cuentan meses de 30 días).' },
     { t: 17.6, texto: 'Tiempo: $n = \\frac{C_n - C_0}{i · C_0}$ = 2,78 años = 2 años, 9 meses y 11 días.' },
   ],
   montar(l) {
-    const semilla = new Semilla(l);
     const etC0 = new Etiqueta(l, 'C_0 = "6.000 €"', 24, 'izquierda');
     const etTipo = new Etiqueta(l, 'i = "3 % anual"', 22, 'izquierda');
     const etCn = new Etiqueta(l, 'C_n = "6.500 €"', 22, 'izquierda');
@@ -47,7 +46,7 @@ export const escenaTiempoSimple: Escena = {
     const pulso = new Pulso(l, 's-c0');
     const unidades = [0, 1, 2].map(() => new Capsula(l, { clase: 's-I', ancho: 90, relleno: 0.42 }));
     const etUnidades = [0, 1, 2].map((k) => new Rotulo(l, k < 2 ? '180 €' : '0,78 · 180 €', 'mo-cifra mo-cifra-peq s-I', 'start'));
-    const etUnaCosecha = new Etiqueta(l, 'C_0 · i = "180 €"', 20, 'izquierda');
+    const etUnAno = new Etiqueta(l, 'C_0 · i = "180 €"', 20, 'izquierda');
     const llaveDep = new Llave(l, 's-I');
 
     const anos = new Regla(l, { x0: AX0, x1: AX1, y: Y_ANOS, divisiones: 3, clase: 's-n', rotulo: (k) => String(k), tamRotulo: 18 });
@@ -72,33 +71,35 @@ export const escenaTiempoSimple: Escena = {
       l.camara(cx, cy, z);
       l.foco(claves(t, [[0, 220], [2.8, 520], [7.8, 400], [11.4, 360], [18, 360]]), claves(t, [[0, 220], [11.4, 330], [15, 420], [18.6, 340]]), 300);
 
-      const salida = 1 - tramo(t, 17.2, 18.0);
-      semilla.pintar(96, 120, tramo(t, 0.2, 0.9) * salida, mezclar(0.7, 1, tramo(t, 0.2, 0.9, curvas.muelle)));
-      etC0.pintar(130, 112, tramo(t, 0.5, 1.1) * salida);
-      etTipo.pintar(130, 148, tramo(t, 0.9, 1.5) * salida);
-      etCn.pintar(130, 184, tramo(t, 1.3, 1.9) * salida);
+      // Los datos se retiran cuando la cámara baja a los días (quedarían cortados arriba).
+      const salida = 1 - tramo(t, 14.6, 15.1);
+      etC0.pintar(96, 112, tramo(t, 0.2, 0.8) * salida);
+      etTipo.pintar(96, 148, tramo(t, 0.6, 1.2) * salida);
+      etCn.pintar(96, 184, tramo(t, 1.0, 1.6) * salida);
 
       const alto = OBJETIVO * ESCALA;
-      deposito.pintar(XD, BASE_D, alto, 96, tramo(t, 3.0, 3.8) * salida, 1 - tramo(t, 8.0, 8.4));
+      // El depósito se retira cuando la cámara baja a ampliar los decimales (ya no cabe en el encuadre).
+      const dep = 1 - tramo(t, 11.4, 11.9);
+      deposito.pintar(XD, BASE_D, alto, 96, tramo(t, 3.0, 3.8) * dep, 1 - tramo(t, 8.0, 8.4));
       llaveDep.vertical(BASE_D, BASE_D - alto, XD - 58, -12, 0);
-      etObj.pintar(XD, BASE_D - alto - 18, tramo(t, 3.6, 4.2) * salida);
+      etObj.pintar(XD, BASE_D - alto - 18, tramo(t, 3.6, 4.2) * dep);
 
-      // Cada año, una cosecha de 180 € sale de la semilla y cae en el depósito.
+      // Cada año, 180 € de intereses caen en el depósito.
       const inicios = [5.6, 8.2, 9.4];
       unidades.forEach((u, k) => {
         const t0 = inicios[k]!;
         const parte = k < 2 ? 1 : N - 2;
-        const altoU = COSECHA * ESCALA * parte;
-        const base = BASE_D - k * COSECHA * ESCALA;
+        const altoU = INTERES_ANUAL * ESCALA * parte;
+        const base = BASE_D - k * INTERES_ANUAL * ESCALA;
         const p = tramo(t, t0 + 0.6, t0 + 1.2, curvas.salida);
-        u.pintar(XD, base, altoU * p, tramo(t, t0 + 0.55, t0 + 0.7) * salida, 90);
-        etUnidades[k]!.pintar(XD + 58, base - altoU / 2 + 6, tramo(t, t0 + 1.0, t0 + 1.4) * salida * (k === 0 ? tramo(t, 7.9, 8.2) : 1));
+        u.pintar(XD, base, altoU * p, tramo(t, t0 + 0.55, t0 + 0.7) * dep, 90);
+        etUnidades[k]!.pintar(XD + 58, base - altoU / 2 + 6, tramo(t, t0 + 1.0, t0 + 1.4) * dep * (k === 0 ? tramo(t, 7.9, 8.2) : 1));
       });
       const pv = tramo(t, 5.6, 6.2, curvas.suave);
-      pulso.pintar({ x: mezclar(106, XD, pv), y: mezclar(120, BASE_D - 20, pv) - Math.sin(Math.PI * pv) * 60 }, ventana(t, 5.5, 6.3, 0.1));
-      etUnaCosecha.pintar(XD + 58, BASE_D - 30, ventana(t, 6.2, 7.9));
+      pulso.pintar({ x: mezclar(150, XD, pv), y: mezclar(112, BASE_D - 20, pv) - Math.sin(Math.PI * pv) * 60 }, ventana(t, 5.5, 6.3, 0.1));
+      etUnAno.pintar(XD + 58, BASE_D - 30, ventana(t, 6.2, 7.9));
 
-      // Regla de años: avanza con cada cosecha hasta 2,78.
+      // Regla de años: avanza con cada año de intereses hasta 2,78.
       const avanceAnos = claves(t, [[5.6, 0], [6.8, 1], [8.2, 1], [9.4, 2], [9.4, 2], [10.6, N]], curvas.suave);
       anos.pintar(tramo(t, 5.2, 6.0), tramo(t, 5.2, 6.0), avanceAnos);
       etAnos.pintar(AX1 + 20, Y_ANOS + 30, tramo(t, 5.6, 6.0));
@@ -123,8 +124,8 @@ export const escenaTiempoSimple: Escena = {
         origenes: {
           n: l.aPantalla({ x: anos.x(N), y: Y_ANOS - 26 }),
           C_n: l.aPantalla({ x: XD - 40, y: BASE_D - alto - 24 }),
-          C_0: [l.aPantalla({ x: XD + 10, y: BASE_D - alto - 24 }), l.aPantalla({ x: 150, y: 104 })],
-          i: l.aPantalla({ x: 140, y: 140 }),
+          C_0: [l.aPantalla({ x: XD + 10, y: BASE_D - alto - 24 }), l.aPantalla({ x: 116, y: 104 })],
+          i: l.aPantalla({ x: 106, y: 140 }),
         },
       });
       resultado.opacidad(tramo(t, 19.3, 19.4));
