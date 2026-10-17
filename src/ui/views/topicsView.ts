@@ -1,5 +1,5 @@
 import type { PantallaTema2, Ruta } from '../../app/router.ts';
-import { hrefAcademia, hrefAsignatura, hrefBloqueTema2, hrefFase, hrefFormula, hrefTema2 } from '../../app/router.ts';
+import { hrefAcademia, hrefAsignatura, hrefBloqueTema2, hrefFase, hrefFormula, hrefLetras, hrefTema2 } from '../../app/router.ts';
 import { buscarAsignatura, ID_GESTION_FINANCIERA } from '../../content/academia.ts';
 import { montarEditorial, navegacionEditorial, sumarioEditorial } from '../components/editorial.ts';
 import { BLOQUES, formulaPorId, formulasDe, type BloqueId } from '../../content/temas/tema-02/formulas.ts';
@@ -12,8 +12,7 @@ import { bloque as datosBloque, pestanasBloque, recorridoFases } from './tema2/c
 import { htmlElegir, htmlIdentificar, htmlPractica, montarFase } from './tema2/fases.ts';
 import { htmlLectura, montarLectura } from './tema2/lectura.ts';
 import { htmlSimulacroT2, montarSimulacroT2 } from './tema2/simulacro.ts';
-import { htmlRemesaPractica, montarRemesaPractica } from './tema2/remesaPractica.ts';
-import { htmlFocalPractica, montarFocalPractica } from './tema2/focalPractica.ts';
+import { htmlLetras, montarLetras, tarjetaLetras } from './tema2/letras.ts';
 import { htmlFicha, montarFicha } from './tema2/ficha.ts';
 import { htmlIndice, montarIndice } from './tema2/indice.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
@@ -36,7 +35,7 @@ export function detenerTemaDos(): void {
   pantallaMontada = '';
 }
 
-const clavePantalla = (p: PantallaTema2) => (p.tipo === 'formula' ? `f:${p.id}` : p.tipo === 'fase' ? `${p.bloque}:${p.fase}` : 'indice');
+const clavePantalla = (p: PantallaTema2) => (p.tipo === 'formula' ? `f:${p.id}` : p.tipo === 'fase' ? `${p.bloque}:${p.fase}` : p.tipo === 'letras' ? 'letras' : 'indice');
 
 const INTRO_FASE = {
   datos: 'Con un ejercicio delante, lo primero es leer el enunciado y dar a cada dato su símbolo. Aquí no se calcula nada.',
@@ -84,7 +83,7 @@ function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): stri
       ${recorridoFases(bloque, fase)}
       ${pestanasBloque(bloque, fase)}
     </header>
-    ${fase === 'datos' ? htmlLectura(bloque) + htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque, bloque === 'descuento' ? htmlRemesaPractica() + htmlFocalPractica() + extraAntes : extraAntes) + htmlSimulacroT2()}
+    ${fase === 'datos' ? htmlLectura(bloque) + htmlIdentificar(bloque) : fase === 'elegir' ? htmlElegir(bloque) : htmlPractica(bloque, bloque === 'descuento' ? tarjetaLetras() + extraAntes : extraAntes) + htmlSimulacroT2()}
     ${extraDespues}
     <nav class="t2-continuar">${continuar}</nav>
   </div>`;
@@ -93,6 +92,7 @@ function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): stri
 function tituloPantalla(p: PantallaTema2): string {
   if (p.tipo === 'formula') return formulaPorId(p.id)!.nombre;
   if (p.tipo === 'fase') return FASES_TEMA2.find((f) => f.id === p.fase)!.titulo;
+  if (p.tipo === 'letras') return 'Varias letras con fechas distintas';
   return p.bloque ? datosBloque(p.bloque).titulo : 'Índice de fórmulas';
 }
 
@@ -104,16 +104,17 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: Estad
     // Fichas y fases: la misma navegación editorial y el mismo Sumario que el índice (sin el índice lateral oscuro).
     const gf = buscarAsignatura(ID_GESTION_FINANCIERA)!;
     const migas = [{ texto: 'Academia', href: hrefAcademia() }, { texto: gf.nombre, href: hrefAsignatura(gf.id) }, { texto: `Tema ${tema02.numero}`, href: hrefTema2() }, { texto: tituloPantalla(p) }];
-    ctx.pagina.innerHTML = `${navegacionEditorial('noche', migas)}<div class="t2-estudio">${p.tipo === 'formula' ? htmlFicha(p.id) : htmlFase(p.bloque, p.fase)}</div>${sumarioEditorial(gf, estado)}`;
+    ctx.pagina.innerHTML = `${navegacionEditorial('noche', migas)}<div class="t2-estudio">${p.tipo === 'formula' ? htmlFicha(p.id) : p.tipo === 'letras' ? htmlLetras() : htmlFase(p.bloque, p.fase)}</div>${sumarioEditorial(gf, estado)}`;
   }
   ctx.tituloMovil.textContent = `Tema ${tema02.numero} · ${tituloPantalla(p)}`;
   const paradas: (() => void)[] = [];
   if (p.tipo !== 'indice') paradas.push(montarEditorial(ctx.pagina));
   if (p.tipo === 'formula') paradas.push(montarFicha(ctx.pagina));
+  else if (p.tipo === 'letras') paradas.push(montarLetras(ctx.pagina));
   else if (p.tipo === 'fase') {
     paradas.push(montarFase(ctx.pagina, p.bloque, p.fase));
     if (p.fase === 'datos') paradas.push(montarLectura(ctx.pagina, p.bloque));
-    if (p.fase === 'practica') paradas.push(montarRemesaPractica(ctx.pagina), montarFocalPractica(ctx.pagina), montarSimulacroT2(ctx.pagina));
+    if (p.fase === 'practica') paradas.push(montarSimulacroT2(ctx.pagina));
     const ejemplo = ctx.pagina.querySelector<HTMLElement>('[data-capitalizacion-compuesta]');
     if (ejemplo) paradas.push(montarCapitalizacionCompuesta(ejemplo));
     if (ctx.pagina.querySelector('[data-mat-error], [data-mat-pregunta]')) paradas.push(montarPracticaCompuesta(ctx.pagina));
@@ -155,7 +156,10 @@ export function pintarRailTemaDos(rail: HTMLElement, ruta: RutaTema2): void {
       const on = p.tipo === 'fase' && p.bloque === b.id && p.fase === f.id;
       return `<a class="sl${on ? ' on' : ''}" href="${hrefFase(b.id, f.id)}"${on ? ' aria-current="location"' : ''}><div class="top"><span class="id">${f.letra}</span><span>${f.titulo}</span></div><small class="sl-sub">${f.subtitulo}</small></a>`;
     }).join('');
-    return `<details class="t2-rail-bloque"${abierto || !bloqueActual ? ' open' : ''}><summary class="grp"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></summary>${fases}</details>`;
+    const letras = b.id === 'descuento'
+      ? `<a class="sl${p.tipo === 'letras' ? ' on' : ''}" href="${hrefLetras()}"${p.tipo === 'letras' ? ' aria-current="location"' : ''}><div class="top"><span class="id">+</span><span>Varias letras (examen)</span></div><small class="sl-sub">Remesas y fecha focal</small></a>`
+      : '';
+    return `<details class="t2-rail-bloque"${abierto || !bloqueActual ? ' open' : ''}><summary class="grp"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></summary>${fases}${letras}</details>`;
   }).join('');
   rail.innerHTML = `${enlaceTodosLosTemas()}<a class="brand" href="${hrefTema2()}"><span class="ring tema-anillo" aria-hidden="true">${tema02.numero}</span><span><small class="brand-ante">Gestión financiera</small><b>${tema02.titulo}</b><small>Tema ${tema02.numero} · índice de fórmulas</small></span></a>
     ${grupos}`;

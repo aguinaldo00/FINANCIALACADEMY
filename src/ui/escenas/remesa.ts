@@ -17,7 +17,8 @@ const eur = (v: number) => `${new Intl.NumberFormat('de-DE', { minimumFractionDi
 const MAX_DIAS = Math.max(...letras.map((l) => l.dias));
 
 export const escenaRemesaTres: Escena = {
-  id: 'remesa-tres-letras',
+  // Es la animación de la fórmula 17: una remesa de examen, con varias letras.
+  id: 'descuento-remesa',
   titulo: 'Una remesa de tres letras',
   duracion: 23,
   descripcion: `Tres letras descontadas el mismo día que vencen a ${letras.map((l) => l.dias).join(', ')} días. Cada una tiene su propio plazo (n = días / 360), su descuento, su comisión y sus gastos. Valor líquido = ${eur(L.nominal)} − ${eur(L.descuento)} − ${eur(L.comision)} − ${eur(L.gastos)} = ${eur(L.liquido)}.`,

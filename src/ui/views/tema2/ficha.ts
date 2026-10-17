@@ -8,7 +8,8 @@ import { FORMULAS_TEMA2, formulaPorId, formulasDe } from '../../../content/temas
 import { simbolo } from '../../../content/temas/tema-02/simbolos.ts';
 import { htmlConversor, montarConversor, preguntaInicial, regimenDeFicha } from '../../components/conversorPeriodos.ts';
 import { simbolosDe } from '../../matematica/formula.ts';
-import { escenaRemesaTres } from '../../escenas/remesa.ts';
+import { escenaRemesa } from '../../escenas/descuento.ts';
+import { tarjetaLetras } from './letras.ts';
 import { montarReproductor } from '../../motion/reproductor.ts';
 import { bloque, escaparHtml, formulaHtml, hrefBloqueTema2, hrefFormula, textoT2 } from './comun.ts';
 import { cartulinaHtml, htmlLaboratorio, montarLaboratorio } from './laboratorio.ts';
@@ -61,10 +62,11 @@ export function htmlFicha(id: string): string {
     </header>
     ${htmlLaboratorio(f.id)}
     ${f.id === 'descuento-remesa' ? `<section class="t2-remesa" aria-labelledby="t2-remesa-tit">
-      <h2 id="t2-remesa-tit">Así es en el examen: tres letras con fechas distintas</h2>
-      <p>Cada letra tiene su propio tiempo (los días que faltan desde el descuento hasta su vencimiento) y se liquida por separado; al final se suman los descuentos, las comisiones y los gastos.</p>
+      <h2 id="t2-remesa-tit">Una sola letra, paso a paso</h2>
+      <p>Lo que se hace con cada letra de la remesa: del nominal se restan su descuento, su comisión y sus gastos.</p>
       <div data-remesa-anim></div>
     </section>` : ''}
+    ${f.bloque === 'descuento' ? tarjetaLetras() : ''}
     ${pizarraHtml(f.id)}
     ${CON_CONVERSOR.has(f.id) ? htmlConversor(preguntaInicial(f.id), regimenDeFicha(f.id)) : ''}
     <section class="t2-teoria" aria-labelledby="t2-teoria-tit">
@@ -120,7 +122,7 @@ export function montarFicha(raiz: HTMLElement): () => void {
   const pararLaboratorio = montarLaboratorio(raiz);
   const pararConversor = montarConversor(raiz);
   const animRemesa = raiz.querySelector<HTMLElement>('[data-remesa-anim]');
-  const pararRemesa = animRemesa ? montarReproductor(animRemesa, escenaRemesaTres) : () => {};
+  const pararRemesa = animRemesa ? montarReproductor(animRemesa, escenaRemesa) : () => {};
   const parar = () => { pararLaboratorio(); pararConversor(); pararRemesa(); };
   const alPulsar = (e: Event) => {
     const boton = (e.target as Element | null)?.closest<HTMLButtonElement>('[data-t2-ver-error]');

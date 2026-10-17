@@ -109,7 +109,7 @@ export function iniciarApp(tema: Tema, _catalogo: readonly TemaCatalogo[] = TEMA
     document.body.classList.toggle('editorial', ruta.vista === 'asignatura' || ruta.vista === 'proyecto' || indiceTemaDos);
     // Fichas de fórmula y fases B–D del Tema 2: escritorio oscuro y cálido; la ficha, a todo el ancho (laboratorio).
     const pantallaT2 = ruta.vista === 'tema2' ? ruta.pantalla.tipo : null;
-    document.body.classList.toggle('t2-escritorio', pantallaT2 === 'formula' || pantallaT2 === 'fase');
+    document.body.classList.toggle('t2-escritorio', pantallaT2 === 'formula' || pantallaT2 === 'fase' || pantallaT2 === 'letras');
     document.body.classList.toggle('t2-laboratorio', pantallaT2 === 'formula');
     seccionActual = null;
     detenerSimulacro();

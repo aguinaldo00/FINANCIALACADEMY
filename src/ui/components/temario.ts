@@ -1,4 +1,4 @@
-import { hrefBloqueTema2, hrefConcepto, hrefFase, hrefFormula, hrefSeccion } from '../../app/router.ts';
+import { hrefBloqueTema2, hrefConcepto, hrefFase, hrefFormula, hrefLetras, hrefSeccion } from '../../app/router.ts';
 import type { EstadoEstudio } from '../../app/store.ts';
 import type { TemaCatalogo } from '../../content/temas/index.ts';
 import { FASES_TEMA2 } from '../../content/temas/tema-02/index.ts';
@@ -66,7 +66,8 @@ const ARBOLES: Readonly<Record<number, ArbolTema>> = {
       // En el orden de la ruta: A y B, las fórmulas (C) y D.
       hijos: FASES_TEMA2.flatMap((f) => f.id === 'formulas'
         ? formulasDe(b.id).map((x) => ({ id: String(x.numero), titulo: x.nombre, href: hrefFormula(x.id), detalle: formulaTexto(x.expresion) }))
-        : [{ id: f.letra, titulo: f.titulo, href: hrefFase(b.id, f.id), detalle: f.subtitulo }]),
+        : [{ id: f.letra, titulo: f.titulo, href: hrefFase(b.id, f.id), detalle: f.subtitulo }])
+        .concat(b.id === 'descuento' ? [{ id: '+', titulo: 'Varias letras (examen)', href: hrefLetras(), detalle: 'Remesas y fecha focal' }] : []),
     })),
 };
 

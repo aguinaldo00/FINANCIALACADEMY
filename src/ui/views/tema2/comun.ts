@@ -1,4 +1,4 @@
-import { hrefBloqueTema2, hrefFase, hrefFormula } from '../../../app/router.ts';
+import { hrefBloqueTema2, hrefFase, hrefFormula, hrefLetras } from '../../../app/router.ts';
 import { BLOQUES, type BloqueId } from '../../../content/temas/tema-02/formulas.ts';
 import { FASES_TEMA2, type FaseTema2 } from '../../../content/temas/tema-02/index.ts';
 import { colorearSimbolos, escaparHtml } from '../../components/simbolos.ts';
@@ -30,12 +30,15 @@ export function leyendaColores(): string {
 }
 
 /** Recorrido A → D del tema; marca la fase actual. */
-export function recorridoFases(bloqueId: BloqueId | null, actual: FaseTema2 | null): string {
+export function recorridoFases(bloqueId: BloqueId | null, actual: FaseTema2 | null, enLetras = false): string {
+  const letras = bloqueId === 'descuento'
+    ? `<li class="t2-recorrido-extra${enLetras ? ' on' : ''}"><a href="${hrefLetras()}"${enLetras ? ' aria-current="step"' : ''}><b>+</b><span>Varias letras<small>Remesas y fecha focal, como en el examen</small></span></a></li>`
+    : '';
   return `<ol class="t2-recorrido" aria-label="Fases del tema">${FASES_TEMA2.map((f) => {
     const href = bloqueId ? hrefFase(bloqueId, f.id) : f.id === 'formulas' ? '#tema/2' : hrefFase('simple', f.id);
     const on = f.id === actual;
     return `<li${on ? ' class="on"' : ''}><a href="${href}"${on ? ' aria-current="step"' : ''}><b>${f.letra}</b><span>${escaparHtml(f.titulo)}<small>${escaparHtml(f.subtitulo)}</small></span></a></li>`;
-  }).join('')}</ol>`;
+  }).join('')}${letras}</ol>`;
 }
 
 /** Pestañas de bloque (simple, compuesta, descuento) para una fase. */

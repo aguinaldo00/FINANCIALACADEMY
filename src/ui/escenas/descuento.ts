@@ -141,9 +141,9 @@ export const escenaDescuentoRacional: Escena = {
   },
 };
 
-/* --------------------------------------------------------------- liquidación de una remesa */
+/* ------------------------------------------------- liquidación de una sola letra, paso a paso */
 export const escenaRemesa: Escena = {
-  id: 'descuento-remesa',
+  id: 'remesa-una-letra',
   titulo: 'Valor líquido de un descuento',
   duracion: 14.5,
   descripcion: 'Ejercicio propuesto: pagaré de 6.000 € a 45 días al 5 %, comisión del 1 % con mínimo de 10 € y 3 € de correo. Cascada: 6.000 − 37,50 − 60 − 3 = 5.899,50 €.',
