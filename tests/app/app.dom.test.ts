@@ -257,10 +257,14 @@ describe('app en el navegador', () => {
     }
   });
 
-  it('el Tema 2 va en orden: fórmulas (A), datos (B), elegir (C) y practicar (D)', () => {
+  it('el Tema 2 va en orden: datos (A), elegir (B), comprender (C) y practicar (D)', () => {
     navegar('#tema/2');
     expect($$('.ed-ruta b').map((b) => b.textContent)).toEqual(['A', 'B', 'C', 'D']);
+    expect($$('.ed-ruta b + span').map((s) => s.firstChild!.textContent)).toEqual(['Identificar', 'Elegir', 'Comprender', 'Practicar']);
+    // La portada del tema es «Comprender» (C): quien empieza de cero tiene ahí todas las fórmulas.
+    expect($('.ed-ruta li.on').textContent).toContain('Comprender');
     expect($('.ed-ruta li.on').textContent).toContain('Estás aquí');
+    expect($('.ed-ruta-nota a').getAttribute('href')).toBe('#tema/2/simple/datos');
     for (const parte of ['simple', 'compuesta', 'descuento']) {
       expect($$(`#t2-${parte} .ed-parte-practica a`).map((a) => a.getAttribute('href'))).toEqual(['datos', 'elegir', 'practica'].map((f) => `#tema/2/${parte}/${f}`));
     }

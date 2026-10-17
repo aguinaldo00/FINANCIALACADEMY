@@ -7,8 +7,8 @@ const fmt = (v: number, d = 2) => new Intl.NumberFormat('de-DE', { minimumFracti
 
 /*
  * Compuesta · I = Cₙ − C₀ = C₀ · [(1 + i)ⁿ − 1]   (caso práctico 15: 4.500 € al 3 % durante 7 años)
- * Siete escalones de × 1,03 llevan la semilla a 5.534,43 €. Medido en semillas, el montante es el
- * factor (1 + i)ⁿ = 1,2299 y los intereses son lo que pasa de 1: 0,2299 semillas.
+ * Siete escalones de × 1,03 llevan el capital inicial a 5.534,43 €. Por cada euro invertido, el
+ * montante es el factor (1 + i)ⁿ = 1,2299 y los intereses son lo que pasa de 1: 0,2299 €.
  */
 export const escenaInteresesCompuesta: Escena = {
   id: 'compuesta-intereses',
@@ -19,9 +19,9 @@ export const escenaInteresesCompuesta: Escena = {
   capitulos: [
     { t: 0, texto: '4.500 € al 3 % de interés compuesto durante 7 años.' },
     { t: 3.0, texto: 'Siete multiplicaciones por 1,03: $C_n$ = 4.500 · 1,03⁷ = 5.534,43 €.' },
-    { t: 6.0, texto: 'Los intereses son lo que hay por encima de la semilla: $I = C_n - C_0$ = 1.034,43 €.' },
-    { t: 9, lectura: 12.1, texto: 'Medido en semillas, el montante es $(1 + i)^n$ = 1,2299; los intereses, lo que pasa de 1: 0,2299.' },
-    { t: 12.2, texto: 'Por eso $I = C_0 · [(1 + i)^n - 1]$: el factor de capitalización menos la semilla.' },
+    { t: 6.0, texto: 'Los intereses son lo que hay por encima del capital inicial: $I = C_n - C_0$ = 1.034,43 €.' },
+    { t: 9, lectura: 12.1, texto: 'Por cada euro invertido, al final hay $(1 + i)^n$ = 1,03⁷ = 1,2299 €; los intereses son lo que pasa de 1: 0,2299 €.' },
+    { t: 12.2, texto: 'Por eso $I = C_0 · [(1 + i)^n - 1]$: el factor de capitalización menos 1 (el euro invertido), por el capital inicial.' },
   ],
   montar(l) {
     const C0 = 4500;
@@ -36,7 +36,7 @@ export const escenaInteresesCompuesta: Escena = {
     suelo(l, SUELO);
     const eje = new Eje(l, { x0: X0, paso: PASO, y: SUELO, periodos: N, unidad: 'años' });
     const columnas = Array.from({ length: N + 1 }, (_, k) => new Capsula(l, { clase: k === 0 ? 's-c0' : 's-cn', ancho: ANCHO, relleno: 0.4 }));
-    const semillaFinal = new Capsula(l, { clase: 's-c0', ancho: ANCHO, relleno: 0.3 });
+    const capitalInicial = new Capsula(l, { clase: 's-c0', ancho: ANCHO, relleno: 0.3 });
     const interes = new Capsula(l, { clase: 's-I', ancho: ANCHO, relleno: 0.5 });
     const guia = new Guia(l, 'mo-guia s-c0');
     const llave1 = new Llave(l, 's-c0');
@@ -45,8 +45,8 @@ export const escenaInteresesCompuesta: Escena = {
     const etC0 = new Etiqueta(l, 'C_0 = "4.500 €"', 20);
     const etCn = new Etiqueta(l, 'C_n = "5.534,43 €"', 22);
     const etI = new Etiqueta(l, 'I = "1.034,43 €"', 20, 'derecha');
-    const etUno = new Rotulo(l, '1 semilla', 'mo-cifra mo-cifra-peq s-c0', 'end');
-    const etFactor = new Etiqueta(l, '(1 + i)^n = "1,2299"', 20, 'derecha');
+    const etUno = new Rotulo(l, '1 por euro', 'mo-cifra mo-cifra-peq s-c0', 'end');
+    const etFactor = new Etiqueta(l, '(1 + i)^n = "1,2299"', 20);
     const etResto = new Etiqueta(l, '(1 + i)^n - 1 = "0,2299"', 18, 'derecha');
 
     const l1 = l.formula('I = C_n - C_0', { x: 360, y: 70, tam: 32 });
@@ -55,7 +55,7 @@ export const escenaInteresesCompuesta: Escena = {
 
     return (t) => {
       const xN = X0 + N * PASO;
-      l.camara(claves(t, [[0, 360], [6, 360], [7.4, 470], [12, 470], [13.2, 360]]), claves(t, [[0, 340], [6, 340], [7.4, 330], [12, 330], [13.2, 230]]), claves(t, [[0, 1.0], [6, 1.0], [7.4, 1.5], [12, 1.5], [13.2, 0.9]]));
+      l.camara(claves(t, [[0, 360], [6, 360], [7.4, 470], [12, 470], [13.2, 360]]), claves(t, [[0, 340], [6, 340], [7.4, 318], [12, 318], [13.2, 230]]), claves(t, [[0, 1.0], [6, 1.0], [7.4, 1.5], [12, 1.5], [13.2, 0.9]]));
       l.foco(claves(t, [[0, 140], [3, 400], [6, 560], [13, 360]]), 320, 300);
       eje.pintar(tramo(t, 0, 0.8));
       columnas.forEach((c, k) => {
@@ -63,12 +63,13 @@ export const escenaInteresesCompuesta: Escena = {
         c.pintar(eje.x(k), SUELO, cap(k) * ESC * tramo(t, t0, t0 + 0.5, curvas.salida), tramo(t, t0, t0 + 0.2) * (k > 0 && k < N ? 1 - 0.55 * tramo(t, 6, 6.6) : 1));
         if (k > 0) saltos[k - 1]!.pintar({ x: eje.x(k - 1) + 6, y: SUELO - cap(k - 1) * ESC - 6 }, { x: eje.x(k) - 6, y: SUELO - cap(k) * ESC - 6 }, tramo(t, t0 - 0.05, t0 + 0.45), 1 - tramo(t, 6, 6.6), 22);
       });
-      etC0.pintar(X0, SUELO - C0 * ESC - 18, tramo(t, 0.8, 1.4) * (1 - tramo(t, 6, 6.4)));
+      // Por encima del primer salto (×1,03), para que no se pisen.
+      etC0.pintar(X0, SUELO - C0 * ESC - 46, tramo(t, 0.8, 1.4) * (1 - tramo(t, 6, 6.4)));
       etCn.pintar(xN - 30, SUELO - cap(N) * ESC - 20, tramo(t, 5.4, 5.8));
 
-      // La semilla se superpone a la última columna: lo que sobresale son los intereses.
+      // El capital inicial se superpone a la última columna: lo que sobresale son los intereses.
       const pS = tramo(t, 6.2, 7.2, curvas.suave);
-      semillaFinal.pintar(mezclar(X0, xN, pS), SUELO, C0 * ESC, ventana(t, 6.2, 18, 0.3));
+      capitalInicial.pintar(mezclar(X0, xN, pS), SUELO, C0 * ESC, ventana(t, 6.2, 18, 0.3));
       guia.pintar(X0, SUELO - C0 * ESC, xN, SUELO - C0 * ESC, tramo(t, 6.4, 7.2), 1 - tramo(t, 9.0, 9.4));
       interes.pintar(xN, SUELO - C0 * ESC, (cap(N) - C0) * ESC, tramo(t, 7.2, 7.6));
       const xl = xN - ANCHO / 2 - 10;
@@ -77,7 +78,8 @@ export const escenaInteresesCompuesta: Escena = {
       etI.pintar(xl - 20, SUELO - C0 * ESC - ((cap(N) - C0) * ESC) / 2 + 6, tramo(t, 7.6, 8.1) * (1 - tramo(t, 9.0, 9.4)));
       etResto.pintar(xl - 20, SUELO - C0 * ESC - ((cap(N) - C0) * ESC) / 2 + 6, tramo(t, 9.6, 10.1));
       etUno.pintar(xl - 20, SUELO - (C0 * ESC) / 2 + 6, tramo(t, 9.3, 9.8));
-      etFactor.pintar(xN + 90, SUELO - cap(N) * ESC - 44, tramo(t, 10.2, 10.8) * (1 - tramo(t, 12.2, 12.6)));
+      // Encima de Cₙ: todo el montante, medido por euro invertido.
+      etFactor.pintar(xN - 30, SUELO - cap(N) * ESC - 52, tramo(t, 10.2, 10.8) * (1 - tramo(t, 12.2, 12.6)));
 
       l1.opacidad(tramo(t, 12.3, 12.4) * mezclar(1, 0.45, tramo(t, 13.2, 13.6)));
       l1.construir(t, 12.4, { origenes: { I: l.aPantalla({ x: xl - 80, y: SUELO - C0 * ESC - 30 }), C_n: l.aPantalla({ x: xN - 30, y: SUELO - cap(N) * ESC - 26 }), C_0: l.aPantalla({ x: xl - 60, y: SUELO - (C0 * ESC) / 2 }) } });
@@ -123,7 +125,7 @@ export const escenaCapitalInicialCompuesta: Escena = {
     const columnas = Array.from({ length: N + 1 }, (_, k) => new Capsula(l, { clase: k === 0 ? 's-cn' : k === N ? 's-c0' : 's-c0', ancho: ANCHO, relleno: 0.4 }));
     const saltos = Array.from({ length: N }, (_, k) => new Salto(l, 's-i', k === 0 ? '÷1,07' : ''));
     const etCn = new Etiqueta(l, 'C_n = "9.000 €"', 22);
-    const etPrimera = new Rotulo(l, `${fmt(atras(1))} €`, 'mo-cifra mo-cifra-peq s-c0');
+    const etPrimera = new Rotulo(l, `${fmt(atras(1))} €`, 'mo-cifra mo-cifra-peq s-c0', 'end');
     const etC0 = new Etiqueta(l, 'C_0 = "5.238,08 €"', 22);
     const etCuenta = new Rotulo(l, '', 'mo-cifra s-n', 'middle');
     const formula = l.formula('C_0 = C_n · (1 + i)^{-n}', { x: 360, y: 92, tam: 46 });
@@ -134,7 +136,7 @@ export const escenaCapitalInicialCompuesta: Escena = {
       // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
       const t = retener(tReal, 13, 0.7);
       const xDe = (k: number) => eje.x(N - k); // k años antes del final
-      l.camara(claves(t, [[0, 520], [2.8, 520], [5.6, 420], [9.4, 300], [10, 360]]), claves(t, [[0, 340], [9.4, 340], [10.2, 300]]), claves(t, [[0, 1.4], [2.8, 1.4], [5.6, 1.15], [9.4, 1.0], [10.2, 0.95]]));
+      l.camara(claves(t, [[0, 520], [2.8, 520], [5.6, 420], [9.4, 340], [10, 360]]), claves(t, [[0, 340], [9.4, 340], [10.2, 300]]), claves(t, [[0, 1.4], [2.8, 1.4], [5.6, 1.15], [9.4, 1.0], [10.2, 0.95]]));
       l.foco(claves(t, [[0, 600], [5.6, 420], [9.6, 140], [11, 360]]), 330, 300);
       eje.pintar(1, tramo(t, 0, 0.6));
       columnas.forEach((c, k) => {
@@ -144,8 +146,9 @@ export const escenaCapitalInicialCompuesta: Escena = {
         c.pintar(xDe(k), SUELO, atras(k) * ESC * mezclar(k ? 1.07 : 0.6, 1, p), tramo(t, t0, t0 + 0.2) * (k > 1 && k < N ? 1 - 0.4 * tramo(t, 9.6, 10) : 1));
         if (k > 0) saltos[k - 1]!.pintar({ x: xDe(k - 1) - 6, y: SUELO - atras(k - 1) * ESC - 6 }, { x: xDe(k) + 6, y: SUELO - atras(k) * ESC - 6 }, tramo(t, t0 - 0.3, t0 + 0.2), 1 - 0.6 * tramo(t, 9.6, 10), 26);
       });
-      etCn.pintar(xDe(0), SUELO - CN * ESC - 22, tramo(t, 0.6, 1.2));
-      etPrimera.pintar(xDe(1), SUELO - atras(1) * ESC - 40, ventana(t, 3.6, 5.8));
+      // Cₙ por encima de las flechas de dividir; la primera cifra, a la izquierda de su columna.
+      etCn.pintar(xDe(0), SUELO - CN * ESC + claves(t, [[0, -24], [2.9, -24], [3.3, -54]]), tramo(t, 0.6, 1.2));
+      etPrimera.pintar(xDe(1) - ANCHO / 2 - 8, SUELO - atras(1) * ESC + 22, ventana(t, 3.6, 5.8));
       const cuenta = Math.max(0, Math.min(N, t < 3.2 ? 0 : t < 5.8 ? 1 : 2 + Math.floor((t - 5.8) / 0.55)));
       etCuenta.pintar(360, 560, ventana(t, 3.4, 9.8), `${cuenta} ${cuenta === 1 ? 'división' : 'divisiones'} entre 1,07`);
       etC0.pintar(xDe(N), SUELO - atras(N) * ESC - 22, tramo(t, 9.6, 10.2));
@@ -200,12 +203,12 @@ export const escenaTiempoCompuesta: Escena = {
     const etN = new Rotulo(l, 'n = 1,62', 'mo-cifra s-n', 'middle');
     const marcas = [0, 1, 2].map((k) => new Rotulo(l, `${k} ${k === 1 ? 'año' : 'años'}`, 'mo-eje-texto', 'middle'));
     const formula = l.formula('n = \\frac{log(C_n / C_0)}{log(1 + i)}', { x: 360, y: 92, tam: 40 });
-    const sust = l.formula('n = \\frac{log 1,1667}{log 1,1} = "1,62 años"', { x: 360, y: 548, tam: 24 });
+    const sust = l.formula('n = \\frac{log 1,1667}{log 1,1} = "1,62 años"', { x: 360, y: 556, tam: 24 });
 
     return (tReal) => {
       // Retenciones: lo que acaba tarde termina mientras el resto espera (ver retener en tiempo.ts).
       const t = retener(tReal, 13.8, 0.7);
-      l.camara(360, claves(t, [[0, 300], [10, 300], [11, 330]]), claves(t, [[0, 1], [10, 1], [11, 0.92]]));
+      l.camara(360, claves(t, [[0, 300], [10, 300], [11, 342]]), claves(t, [[0, 1], [10, 1], [11, 0.9]]));
       l.foco(360, 320, 320);
       // Mezcla de escala normal (0) a logarítmica (1): las alturas de los escalones se igualan.
       const lg = tramo(t, 6.8, 8.6, curvas.suave);
@@ -240,8 +243,9 @@ export const escenaTiempoCompuesta: Escena = {
       formula.construir(tReal, 10.5, { origenes: { n: l.aPantalla({ x: g.px(n), y: g.op.y0 + 50 }), C_n: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 20 }), C_0: l.aPantalla({ x: g.px(2.25) - 110, y: mapa(META) - 10 }), i: l.aPantalla({ x: g.px(1) + 40, y: mapa(1.05) }) } });
       sust.opacidad(tramo(t, 12.4, 12.5));
       sust.construir(t, 12.5, { escalon: 0.04 });
-      if (t >= 13.8) etN.pintar(g.px(n), g.op.y0 + 58, 1, '1 año, 7 meses y 13 días');
-      else etN.pintar(g.px(n), g.op.y0 + 58, tramo(t, 11.2, 11.8), 'n = 1,62');
+      // Por debajo de los rótulos del eje (1 AÑO, 2 AÑOS), para no pisarlos.
+      if (t >= 13.8) etN.pintar(g.px(n), g.op.y0 + 72, 1, '1 año, 7 meses y 13 días');
+      else etN.pintar(g.px(n), g.op.y0 + 72, tramo(t, 11.2, 11.8), 'n = 1,62');
     };
   },
 };
@@ -255,12 +259,12 @@ export const escenaTipoCompuesta: Escena = {
   id: 'compuesta-tipo',
   titulo: 'Tipo de interés en capitalización compuesta',
   duracion: 15,
-  descripcion: '50.000 € se convierten en 52.000 € en 6 años: el factor total 1,04 se reparte en 6 factores iguales de 1,006558. i = (Cₙ / C₀)^(1/n) − 1 = 0,006558.',
+  descripcion: '50.000 € se convierten en 52.000 € en 6 años: el factor total 1,04 se reparte en 6 factores iguales de 1,006558. i = (Cₙ / C₀)^{1/n} − 1 = 0,006558.',
   caso: { C_0: '50.000 €', C_n: '52.000 €', n: '6' },
   capitulos: [
     { t: 0, texto: '50.000 € se convierten en 52.000 € en 6 años, en compuesta. Han crecido 52.000 / 50.000 = 1,04 veces.' },
     { t: 3.2, texto: 'Ese 1,04 es el producto de 6 factores iguales: $(1 + i)^6$ = 1,04.' },
-    { t: 6.6, lectura: 9.65, texto: 'Repartir un producto en partes iguales es hacer la raíz: 1 + $i$ = 1,04^(1/6) = 1,006558.' },
+    { t: 6.6, lectura: 9.65, texto: 'Repartir un producto en 6 factores iguales es hacer la raíz sexta: $1 + i = 1,04^{1/6}$ = 1,006558.' },
     { t: 10.2, texto: '$i = (\\frac{C_n}{C_0})^{1/n} - 1$ = 0,006558, un 0,66 % anual. Raíz de índice $n$, no cuadrada.' },
   ],
   montar(l) {
@@ -274,8 +278,9 @@ export const escenaTipoCompuesta: Escena = {
     const saltos = Array.from({ length: N }, () => new Salto(l, 's-i', '×1,006558'));
     const etTotal = new Rotulo(l, '×1,04', 'mo-cifra s-cn', 'start');
     const etPartes = new Rotulo(l, 'ESCALA LOGARÍTMICA · 6 escalones iguales', 'mo-rotulo-claro', 'start');
-    const etIgual = new Rotulo(l, '(1 + i)⁶ = 1,04', 'mo-cifra mo-cifra-peq s-i', 'start');
-    const etRaiz = new Rotulo(l, '1 + i = 1,04^(1/6) = 1,006558', 'mo-cifra mo-cifra-peq s-i', 'start');
+    const etEscalon = new Rotulo(l, 'cada escalón: ×1,006558', 'mo-cifra mo-cifra-peq s-i', 'start');
+    const etIgual = new Etiqueta(l, '(1 + i)^6 = "1,04"', 19, 'izquierda');
+    const etRaiz = new Etiqueta(l, '1 + i = 1,04^{1/6} = "1,006558"', 19, 'izquierda');
     const eje = new Eje(l, { x0: X0, paso: (X1 - X0) / N, y: Y0, periodos: N, unidad: 'años' });
     const formula = l.formula('i = (\\frac{C_n}{C_0})^{1/n} - 1', { x: 360, y: 100, tam: 42 });
     const sust = l.formula('i = 1,04^{1/6} - 1 = "0,006558"', { x: 360, y: 528, tam: 24 });
@@ -294,8 +299,10 @@ export const escenaTipoCompuesta: Escena = {
         const baseFin = Y0 - (k * ALTO) / N;
         const x = mezclar(X1 + 70, xk, p);
         tr.pintar(x, mezclar(Y0 - (k * ALTO) / N, baseFin, p), ALTO / N, tramo(t, t0, t0 + 0.2), 48);
-        saltos[k]!.pintar({ x: X0 + (k * (X1 - X0)) / N + 8, y: baseFin + 4 }, { x: X0 + ((k + 1) * (X1 - X0)) / N - 8, y: baseFin - ALTO / N + 4 }, tramo(t, 7.2 + k * 0.25, 7.8 + k * 0.25), 1, 18, k === 0 ? '×1,006558' : '');
+        saltos[k]!.pintar({ x: X0 + (k * (X1 - X0)) / N + 8, y: baseFin + 4 }, { x: X0 + ((k + 1) * (X1 - X0)) / N - 8, y: baseFin - ALTO / N + 4 }, tramo(t, 7.2 + k * 0.25, 7.8 + k * 0.25), 1, 18, '');
       });
+      // El factor de cada escalón, arriba a la izquierda (sobre los escalones se pisaba con las flechas).
+      etEscalon.pintar(X0, Y0 - ALTO - 4, tramo(t, 7.6, 8.1) * (1 - tramo(t, 10.0, 10.3)));
       etIgual.pintar(X0, Y0 + 66, ventana(t, 5.4, 10.4));
       etRaiz.pintar(X0, Y0 + 96, tramo(t, 7.4, 8.0));
       formula.opacidad(tramo(t, 10.3, 10.4));

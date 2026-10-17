@@ -56,17 +56,17 @@ const ARBOLES: Readonly<Record<number, ArbolTema>> = {
         })),
       };
     }),
-  // Tema 2: cada bloque del temario con sus fórmulas (fase A) y sus fases de práctica (B, C y D).
+  // Tema 2: cada bloque del temario con sus fórmulas (fase C) y sus fases de práctica (A, B y D).
   2: () =>
     BLOQUES.map((b) => ({
       id: '',
       titulo: b.titulo,
       href: hrefBloqueTema2(b.id),
       detalle: b.apartado,
-      hijos: [
-        ...formulasDe(b.id).map((f) => ({ id: String(f.numero), titulo: f.nombre, href: hrefFormula(f.id), detalle: formulaTexto(f.expresion) })),
-        ...FASES_TEMA2.filter((f) => f.id !== 'formulas').map((f) => ({ id: f.letra, titulo: f.titulo, href: hrefFase(b.id, f.id), detalle: f.subtitulo })),
-      ],
+      // En el orden de la ruta: A y B, las fórmulas (C) y D.
+      hijos: FASES_TEMA2.flatMap((f) => f.id === 'formulas'
+        ? formulasDe(b.id).map((x) => ({ id: String(x.numero), titulo: x.nombre, href: hrefFormula(x.id), detalle: formulaTexto(x.expresion) }))
+        : [{ id: f.letra, titulo: f.titulo, href: hrefFase(b.id, f.id), detalle: f.subtitulo }]),
     })),
 };
 

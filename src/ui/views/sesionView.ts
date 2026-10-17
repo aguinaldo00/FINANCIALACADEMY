@@ -10,6 +10,7 @@ import { ocultarNombre } from '../../domain/recall.ts';
 import { resaltarAviso } from '../format.ts';
 import type { ContextoVista } from './context.ts';
 import { iconoUi } from '../../icons/ui.ts';
+import { escaparHtml } from '../components/simbolos.ts';
 
 const TAMANOS = [10, 15, 25];
 const MOTIVO: Record<MotivoSesion, string> = {
@@ -55,7 +56,7 @@ export function pintarSesion(ctx: ContextoVista, estado: EstadoEstudio, practica
   ctx.pagina.innerHTML = `<div class="ses" data-sesion><header class="sh"><div class="kick"><span class="pill k">${iconoUi('diana')} Estudiar hoy</span>${racha_ ? `<span class="pill">${iconoUi('llama')} Racha de ${racha_} ${racha_ === 1 ? 'día' : 'días'}</span>` : ''}${hechasHoy ? `<span class="pill">${hechasHoy} respuestas hoy</span>` : ''}</div><h1>Tu sesión de hoy</h1><p>Preguntas mezcladas de todo el tema: primero lo que fallaste, después lo que toca repasar y lo nuevo que más cae en el examen. Antes de cada corrección, di cómo de seguro estás.</p></header>
 <section class="ses-plan"><ul class="ses-resumen">${etiqueta('repaso', r.repaso)}${etiqueta('espaciada', r.espaciada)}${etiqueta('nueva', r.nueva)}${etiqueta('identifica', r.identifica)}${etiqueta('tarjeta', r.tarjeta)}</ul>
 <div class="ses-ops"><fieldset><legend>Duración</legend>${TAMANOS.map((n) => `<label class="sim-op"><input type="radio" name="ses-n" value="${n}"${n === tamano ? ' checked' : ''}><span>${n}<small>≈ ${n} min</small></span></label>`).join('')}</fieldset>
-<label class="ses-fecha"><span>Fecha del examen</span><input type="date" data-ses-fecha value="${p.fechaExamen ?? ''}" min="${hoy}">${p.fechaExamen ? '<button type="button" class="fc-btn" data-ses-borrar>Borrar</button>' : ''}</label></div>
+<label class="ses-fecha"><span>Fecha del examen</span><input type="date" data-ses-fecha value="${escaparHtml(p.fechaExamen ?? '')}" min="${hoy}">${p.fechaExamen ? '<button type="button" class="fc-btn" data-ses-borrar>Borrar</button>' : ''}</label></div>
 <p class="ses-examen">${examen}</p>
 <button type="button" class="ab q ses-empezar" data-ses-empezar ${items.length ? '' : 'disabled'}>Empezar (${items.length})</button></section>
 <div class="ses-juego" data-ses-juego hidden></div></div>`;

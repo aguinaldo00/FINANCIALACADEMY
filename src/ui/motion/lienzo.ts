@@ -3,7 +3,7 @@
  * cámara para las fórmulas), una cámara con encuadre y zoom, y fórmulas maquetadas pieza a pieza
  * para que cada símbolo pueda viajar desde el elemento de la escena que representa.
  */
-import { analizarFormula, claseSimbolo, type Nodo } from '../matematica/formula.ts';
+import { analizarFormula, claseSimbolo, type Nodo, parentesisGrandes } from '../matematica/formula.ts';
 import { asegurarGrano, nuevaSemilla, rectanguloRecortado, ruido, trazoRotulador } from './papel.ts';
 import { arco, curvas, limitar, mezclar, tramo } from './tiempo.ts';
 
@@ -270,12 +270,20 @@ export class FormulaSvg {
     let ancho = 0;
     let sube = tam * 0.72;
     let baja = tam * 0.22;
-    for (const n of fila) {
+    const grandes = parentesisGrandes(fila);
+    fila.forEach((n, k) => {
+      const inicio = this.cursor;
       const caja = this.colocarNodo(n, tam, x + ancho, y);
+      // Paréntesis que abrazan una fracción: se estiran para que la abarquen.
+      const p = this.piezas[inicio];
+      if (p?.texto && grandes.has(k)) {
+        const cy = -tam * 0.3;
+        fijar(p.texto, { transform: `translate(0 ${cy}) scale(1 1.7) translate(0 ${-cy})` });
+      }
       ancho += caja.ancho;
       sube = Math.max(sube, caja.sube);
       baja = Math.max(baja, caja.baja);
-    }
+    });
     return { ancho, sube, baja };
   }
 
@@ -306,8 +314,11 @@ export class FormulaSvg {
       return { ancho, sube: tam * 0.3 + hueco + num.sube + num.baja, baja: Math.max(0, hueco + den.sube + den.baja - tam * 0.3) };
     }
     const p = this.piezas[this.cursor++]!;
-    const binario = n.tipo === 'op' && /^[=+−·×÷≈<>→/]$/.test(n.texto);
-    const margen = binario ? tam * (n.texto === '·' ? 0.18 : 0.28) : n.tipo === 'txt' ? tam * 0.14 : 0;
+    // Márgenes: las operaciones respiran; el signo de un número (−n) y la barra de dividir en línea
+    // (1/n en un exponente) van más juntos, y una función (log) se separa de su argumento.
+    const binario = n.tipo === 'op' && !n.unario && /^[=+−·×÷≈<>→/]$/.test(n.texto);
+    const margen = binario ? tam * (n.texto === '·' ? 0.18 : n.texto === '/' ? 0.08 : 0.28) : n.tipo === 'txt' ? tam * 0.14 : 0;
+    const tras = n.tipo === 'fn' ? tam * 0.16 : 0;
     const w = this.medir(p);
     p.x = x + margen;
     p.y = y;
@@ -316,7 +327,7 @@ export class FormulaSvg {
       const sub = n.tipo === 'sim' && n.sub ? tam * 0.16 : 0;
       fijar(p.marca, { d: trazoRotulador(-tam * 0.08, w + tam * 0.06, -tam * 0.24 + sub / 2, tam * 0.72 + sub, this.semilla + this.cursor) });
     }
-    return { ancho: w + margen * 2, sube: tam * 0.72, baja: tam * (n.tipo === 'sim' && n.sub ? 0.38 : 0.22) };
+    return { ancho: w + margen * 2 + tras, sube: tam * 0.72, baja: tam * (n.tipo === 'sim' && n.sub ? 0.38 : 0.22) };
   }
 
   /** Mide y coloca todas las piezas (se repite al cargar las fuentes). */

@@ -35,9 +35,9 @@ export function detenerTemaDos(): void {
 const clavePantalla = (p: PantallaTema2) => (p.tipo === 'formula' ? `f:${p.id}` : p.tipo === 'fase' ? `${p.bloque}:${p.fase}` : 'indice');
 
 const INTRO_FASE = {
-  datos: 'Antes de calcular, cada dato del enunciado tiene que tener su símbolo. Aquí no se calcula nada.',
-  elegir: 'En el examen nadie te dice qué fórmula toca. Con los datos identificados, elige y comprueba por qué.',
-  practica: 'Ahora sí: en papel, con calculadora y con cada vez menos ayuda.',
+  datos: 'Con un ejercicio delante, lo primero es leer el enunciado y dar a cada dato su símbolo. Aquí no se calcula nada.',
+  elegir: 'En el examen nadie te dice qué fórmula toca. Con los datos identificados, mira qué te dan y qué te piden, elige la fórmula y comprueba por qué es esa.',
+  practica: 'Ahora sí: en papel, con calculadora y con cada vez menos ayuda. Si una fórmula no te cuadra, vuelve a C y mira su animación.',
 } as const;
 
 function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): string {
@@ -65,10 +65,12 @@ function htmlFase(bloque: BloqueId, fase: 'datos' | 'elegir' | 'practica'): stri
     : '';
   const siguiente = FASES_TEMA2[FASES_TEMA2.findIndex((x) => x.id === fase) + 1];
   const bloqueSiguiente = BLOQUES[BLOQUES.findIndex((x) => x.id === bloque) + 1];
+  // Tras elegir, C (comprender) es el paso siguiente, pero quien ya entiende la fórmula puede ir a D.
+  const atajo = siguiente?.id === 'formulas' ? `<a class="t2-continuar-atajo" href="${hrefFase(bloque, 'practica')}">Ya la entiendo: D · Practicar en papel</a>` : '';
   const continuar = siguiente
-    ? `<a class="btn-principal" href="${hrefFase(bloque, siguiente.id)}">${siguiente.letra} · ${siguiente.titulo}</a>`
+    ? `${atajo}<a class="btn-principal" href="${hrefFase(bloque, siguiente.id)}">${siguiente.letra} · ${siguiente.titulo}</a>`
     : bloqueSiguiente
-      ? `<a class="btn-principal" href="${hrefBloqueTema2(bloqueSiguiente.id)}">Siguiente bloque: ${escaparHtml(bloqueSiguiente.titulo)}</a>`
+      ? `<a class="btn-principal" href="${hrefFase(bloqueSiguiente.id, FASES_TEMA2[0].id)}">Siguiente bloque: ${escaparHtml(bloqueSiguiente.titulo)}</a>`
       : `<a class="btn-principal" href="${hrefTema2()}">Volver al índice de fórmulas</a>`;
   return `<div class="tema-matematica t2 t2-fase-pagina">
     <header class="t2-cabecera t2-cabecera-fase">
@@ -120,7 +122,8 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: Estad
 function desplazar(ctx: ContextoVista, p: PantallaTema2): void {
   const ancla = location.hash.includes('#t2-') ? location.hash.slice(location.hash.lastIndexOf('#')) : '';
   if (p.tipo === 'indice' && p.bloque) ctx.pagina.querySelector(`#t2-${p.bloque}`)?.scrollIntoView({ block: 'start' });
-  else if (ancla) ctx.pagina.querySelector(ancla)?.scrollIntoView({ block: 'start' });
+  // El ancla viene de la URL: se busca por id (un ancla mal escrita no es un selector válido y rompería la página).
+  else if (ancla) document.getElementById(ancla.slice(1))?.scrollIntoView({ block: 'start' });
 }
 
 /** Si la pantalla pedida ya está montada, solo se desplaza (no se pierde lo hecho). Devuelve si lo ha hecho. */
@@ -140,11 +143,13 @@ export function pintarRailTemaDos(rail: HTMLElement, ruta: RutaTema2): void {
       const on = p.tipo === 'formula' && p.id === f.id;
       return `<a class="sl t2-sl${on ? ' on' : ''}" href="${hrefFormula(f.id)}"${on ? ' aria-current="location"' : ''}><div class="top"><span class="id">${f.numero}</span><span>${escaparHtml(f.nombre)}</span></div></a>`;
     }).join('');
-    const fases = FASES_TEMA2.filter((f) => f.id !== 'formulas').map((f) => {
+    // En el orden de la ruta: A y B, las fórmulas (C) y D.
+    const fases = FASES_TEMA2.map((f) => {
+      if (f.id === 'formulas') return formulas;
       const on = p.tipo === 'fase' && p.bloque === b.id && p.fase === f.id;
       return `<a class="sl${on ? ' on' : ''}" href="${hrefFase(b.id, f.id)}"${on ? ' aria-current="location"' : ''}><div class="top"><span class="id">${f.letra}</span><span>${f.titulo}</span></div><small class="sl-sub">${f.subtitulo}</small></a>`;
     }).join('');
-    return `<details class="t2-rail-bloque"${abierto || !bloqueActual ? ' open' : ''}><summary class="grp"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></summary>${formulas}${fases}</details>`;
+    return `<details class="t2-rail-bloque"${abierto || !bloqueActual ? ' open' : ''}><summary class="grp"><a href="${hrefBloqueTema2(b.id)}">${escaparHtml(b.titulo)}</a></summary>${fases}</details>`;
   }).join('');
   rail.innerHTML = `${enlaceTodosLosTemas()}<a class="brand" href="${hrefTema2()}"><span class="ring tema-anillo" aria-hidden="true">${tema02.numero}</span><span><small class="brand-ante">Gestión financiera</small><b>${tema02.titulo}</b><small>Tema ${tema02.numero} · índice de fórmulas</small></span></a>
     ${grupos}`;

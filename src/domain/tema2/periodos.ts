@@ -106,7 +106,7 @@ export interface ConversionTipo {
 /**
  * Pasa un tipo de interés de una unidad de tiempo a otra. Dos tipos son equivalentes si llevan el
  * mismo capital al mismo sitio en el mismo tiempo (un año):
- *  - en simple, la cosecha de cada periodo es proporcional a lo que dura: iₐ · mₐ = i · m;
+ *  - en simple, el interés de cada periodo es proporcional a lo que dura: iₐ · mₐ = i · m;
  *  - en compuesta, cada periodo crece sobre el anterior: (1 + iₐ)^mₐ = (1 + i)^m.
  * Entre dos fracciones del año (trimestral → cuatrimestral) es la misma igualdad pasando por el año.
  */

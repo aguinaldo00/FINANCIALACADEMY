@@ -122,7 +122,7 @@ export function pasosTipo(tipo: number, de: Unidad, a: Unidad, regimen: RegimenT
     return [
       'La regla en simple: dos tipos son equivalentes si rinden lo mismo en un año, <i>i<sub>a</sub></i> · <i>m<sub>a</sub></i> = <i>i</i> · <i>m</i>. Por eso se divide o se multiplica.',
       cabe,
-      'En simple cada periodo cosecha sobre el mismo capital: lo que rinde el año se <b>reparte en proporción</b>.',
+      'En simple el interés de cada periodo se calcula sobre el mismo capital: lo que rinde el año se <b>reparte en proporción</b>.',
       ...(c.mDe === 1 ? [] : [`Lo que rinde el año: ${pct(tipo)} × ${num(c.mDe)} = <b>${pct(tipo * c.mDe)}</b>.`]),
       c.mA === 1 ? `Ese es el tipo anual: ${final}.` : `Repártelo entre ${num(c.mA)}: ${pct(tipo * c.mDe)} ÷ ${num(c.mA)} = ${final}.`,
     ];
@@ -193,7 +193,7 @@ export function regimenDeFicha(idFormula: string): Regimen | null {
 
 const ENTRADA: Record<Regimen | 'ambos', string> = {
   ambos: 'Cualquier unidad del tema a cualquier otra: años, semestres, cuatrimestres, trimestres, meses y días (año comercial o civil). Una <b>duración</b> solo cambia cómo se mide el tiempo; un <b>tipo de interés</b> cambia cuánto rinde cada periodo, y ahí importa si es simple o compuesta.',
-  simple: 'Una <b>duración</b> solo cambia cómo se mide el tiempo: 1 semestre son 1,5 cuatrimestres. Un <b>tipo de interés</b>, en simple, se reparte en proporción, porque cada periodo cosecha sobre el mismo capital: iₐ · mₐ = i · m.',
+  simple: 'Una <b>duración</b> solo cambia cómo se mide el tiempo: 1 semestre son 1,5 cuatrimestres. Un <b>tipo de interés</b>, en simple, se reparte en proporción, porque el interés de cada periodo se calcula sobre el mismo capital: iₐ · mₐ = i · m.',
   compuesta: 'Una <b>duración</b> se pasa igual que en simple: el tiempo es el mismo (1 semestre son 1,5 cuatrimestres). Un <b>tipo de interés</b>, en compuesta, <b>no se reparte</b>: cada periodo crece sobre lo acumulado, así que se busca el tipo que llega al mismo sitio en el mismo tiempo: (1 + iₐ)<sup>mₐ</sup> = (1 + i)<sup>m</sup>. Un tipo <b>nominal</b> (TIN, Jₘ) sí se divide, pero solo entre sus periodos de capitalización: Jₘ / m es el tipo de cada periodo; de ahí a la TAE, en compuesta.',
 };
 

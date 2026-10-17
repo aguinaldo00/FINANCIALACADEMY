@@ -293,9 +293,10 @@ export const escenaDescuentoCompuestoComercial: Escena = {
     const etN = new Etiqueta(l, 'N = "2.000 €"', 20);
     const etE = new Etiqueta(l, 'E = "1.470,18 €"', 20);
     const llaveD = new Llave(l, 's-D');
-    const etD = new Etiqueta(l, 'D_c = "529,82 €"', 20, 'centro');
     const formula = l.formula('E = N · (1 - d)^n', { x: 360, y: 88, tam: 44 });
-    const descuento = l.formula('D_c = N · [1 - (1 - d)^n]', { x: 360, y: 156, tam: 30 });
+    // El importe va en la misma línea que la fórmula del descuento (suelto, se pisaba con las flechas).
+    const descuento = l.formula('D_c = N · [1 - (1 - d)^n] = "529,82 €"', { x: 318, y: 156, tam: 24 });
+    const etD = new Etiqueta(l, 'D_c', 22, 'derecha');
     return (t) => {
       const xDe = (k: number) => eje.x(N - k);
       l.camara(360, claves(t, [[0, 330], [9.6, 330], [10.4, 310]]), 1);
@@ -311,12 +312,13 @@ export const escenaDescuentoCompuestoComercial: Escena = {
       });
       simples.forEach((s, k) => s.pintar(xDe(k), SUELO, (NOM - NOM * D * k) * ESC, k === 0 ? 0 : tramo(t, 10.6, 11.2)));
       etN.pintar(xDe(0), SUELO - NOM * ESC - 46, tramo(t, 0.8, 1.4));
-      etE.pintar(xDe(N), SUELO - v(N) * ESC - 52, tramo(t, 6.8, 7.4));
+      // Bajo el eje, junto a HOY: encima se pisaba con la primera flecha de ×0,95.
+      etE.pintar(xDe(N), SUELO + 58, tramo(t, 6.8, 7.4));
       const xl = xDe(N) - 32;
       llaveD.vertical(SUELO - v(N) * ESC, SUELO - NOM * ESC, xl, -10, tramo(t, 10.0, 10.5));
-      etD.pintar(X0 + 40, SUELO - NOM * ESC - 34, tramo(t, 10.2, 10.8));
+      etD.pintar(xl - 18, SUELO - ((v(N) + NOM) / 2) * ESC + 8, tramo(t, 10.3, 10.8));
       formula.opacidad(tramo(t, 6.8, 6.9));
-      formula.construir(t, 6.9, { origenes: { E: l.aPantalla({ x: xDe(N), y: SUELO - v(N) * ESC - 60 }), N: l.aPantalla({ x: xDe(0), y: SUELO - NOM * ESC - 54 }), d: l.aPantalla({ x: xDe(1), y: SUELO - v(1) * ESC - 40 }), n: l.aPantalla({ x: 360, y: SUELO + 30 }) } });
+      formula.construir(t, 6.9, { origenes: { E: l.aPantalla({ x: xDe(N), y: SUELO + 50 }), N: l.aPantalla({ x: xDe(0), y: SUELO - NOM * ESC - 54 }), d: l.aPantalla({ x: xDe(1), y: SUELO - v(1) * ESC - 40 }), n: l.aPantalla({ x: 360, y: SUELO + 30 }) } });
       descuento.opacidad(tramo(t, 10.0, 10.1));
       descuento.construir(t, 10.1, { origenes: { D_c: l.aPantalla({ x: X0, y: SUELO - NOM * ESC - 40 }) } });
     };

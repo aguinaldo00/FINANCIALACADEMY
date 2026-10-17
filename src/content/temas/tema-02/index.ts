@@ -15,14 +15,15 @@ export const tema02: TemaMatematica = {
 };
 
 /**
- * Cómo se estudia el tema: A, el índice de fórmulas (comprenderlas); B, identificar los datos del
- * enunciado; C, elegir la fórmula; D, resolver en papel con ayudas que se retiran.
- * El id es el segmento de la ruta `#tema/2/<bloque>/<fase>` (la fase A es el índice).
+ * Cómo se resuelve un ejercicio del tema: A, identificar los datos del enunciado; B, elegir la
+ * fórmula; C, comprenderla (el índice de fórmulas, con sus animaciones); D, resolver en papel con
+ * ayudas que se retiran. «Comprender» sigue siendo la portada del tema, para quien empieza de cero.
+ * El id es el segmento de la ruta `#tema/2/<bloque>/<fase>` (la fase C es el índice).
  */
 export const FASES_TEMA2 = [
-  { id: 'formulas', letra: 'A', titulo: 'Las fórmulas', subtitulo: 'Qué es cada símbolo y por qué funciona' },
-  { id: 'datos', letra: 'B', titulo: 'Identificar los datos', subtitulo: 'Del enunciado al símbolo' },
-  { id: 'elegir', letra: 'C', titulo: 'Elegir la fórmula', subtitulo: 'Qué te dan y qué te piden' },
+  { id: 'datos', letra: 'A', titulo: 'Identificar los datos', subtitulo: 'Del enunciado al símbolo' },
+  { id: 'elegir', letra: 'B', titulo: 'Elegir la fórmula', subtitulo: 'Qué te dan y qué te piden' },
+  { id: 'formulas', letra: 'C', titulo: 'Comprender la fórmula', subtitulo: 'Qué es cada símbolo y por qué funciona' },
   { id: 'practica', letra: 'D', titulo: 'Practicar en papel', subtitulo: 'Cada vez con menos ayuda' },
 ] as const;
 

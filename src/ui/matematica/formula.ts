@@ -16,7 +16,7 @@ import { escaparHtml } from '../components/simbolos.ts';
 export type Nodo =
   | { tipo: 'sim'; clave: string; base: string; sub: string }
   | { tipo: 'num'; texto: string }
-  | { tipo: 'op'; texto: string }
+  | { tipo: 'op'; texto: string; unario?: boolean }
   | { tipo: 'txt'; texto: string }
   | { tipo: 'fn'; texto: string }
   | { tipo: 'frac'; num: Nodo[]; den: Nodo[] }
@@ -90,7 +90,12 @@ export function analizarFormula(fuente: string): Nodo[] {
         fila.push({ tipo: 'sup', base, exp });
         continue;
       }
-      fila.push(atomo());
+      const n = atomo();
+      // Un menos sin nada delante, o tras otro operador o un paréntesis abierto, es un signo (−n, (−1)):
+      // va pegado a lo que sigue, sin los márgenes de una resta.
+      const previo = fila.at(-1);
+      if (n.tipo === 'op' && n.texto === '−' && (!previo || (previo.tipo === 'op' && previo.texto !== ')'))) n.unario = true;
+      fila.push(n);
     }
     return fila;
   }
@@ -114,7 +119,7 @@ function nodoHtml(n: Nodo): string {
     case 'num': return `<span class="fx-num">${escaparHtml(n.texto)}</span>`;
     case 'fn': return `<span class="fx-fn">${n.texto}</span>`;
     case 'txt': return `<span class="fx-txt">${escaparHtml(n.texto)}</span>`;
-    case 'op': return OPERADORES_BINARIOS.has(n.texto) ? `<span class="fx-op fx-bin">${escaparHtml(n.texto)}</span>` : `<span class="fx-op">${escaparHtml(n.texto)}</span>`;
+    case 'op': return OPERADORES_BINARIOS.has(n.texto) && !n.unario ? `<span class="fx-op fx-bin${n.texto === '/' ? ' fx-div' : ''}">${escaparHtml(n.texto)}</span>` : `<span class="fx-op">${escaparHtml(n.texto)}</span>`;
     case 'sup': return `${nodoHtml(n.base)}<sup>${filaHtml(n.exp)}</sup>`;
     case 'frac': return n.den.length
       ? `<span class="fx-frac"><span class="fx-frac-n">${filaHtml(n.num)}</span><span class="fx-frac-d">${filaHtml(n.den)}</span></span>`
@@ -122,7 +127,31 @@ function nodoHtml(n: Nodo): string {
   }
 }
 
-const filaHtml = (fila: Nodo[]): string => fila.map(nodoHtml).join('');
+/**
+ * Posiciones de los paréntesis de una fila que encierran una fracción: se dibujan más altos para
+ * abarcarla, como en el papel. Un «)» puede ser la base de un exponente: (Cₙ / C₀)^{1/n}.
+ */
+export function parentesisGrandes(fila: Nodo[]): Set<number> {
+  const texto = (n: Nodo) => (n.tipo === 'op' ? n.texto : n.tipo === 'sup' && n.base.tipo === 'op' ? n.base.texto : '');
+  const grandes = new Set<number>();
+  const abiertos: number[] = [];
+  fila.forEach((n, k) => {
+    if (texto(n) === '(') abiertos.push(k);
+    else if (texto(n) === ')') {
+      const desde = abiertos.pop();
+      if (desde !== undefined && fila.slice(desde + 1, k).some((x) => x.tipo === 'frac' && x.den.length > 0)) {
+        grandes.add(desde);
+        grandes.add(k);
+      }
+    }
+  });
+  return grandes;
+}
+
+const filaHtml = (fila: Nodo[]): string => {
+  const grandes = parentesisGrandes(fila);
+  return fila.map((n, k) => (grandes.has(k) ? nodoHtml(n).replace('<span class="fx-op">', '<span class="fx-op fx-paren">') : nodoHtml(n))).join('');
+};
 
 /** Fórmula en HTML coloreado, con su lectura en texto para lectores de pantalla. */
 export function formulaHtml(fuente: string, clase = ''): string {
@@ -140,7 +169,7 @@ function nodoTexto(n: Nodo): string {
   switch (n.tipo) {
     case 'sim': return n.base + (n.sub ? aIndice(n.sub, SUB) ?? n.sub : '');
     case 'num': case 'fn': case 'txt': return n.texto;
-    case 'op': return OPERADORES_BINARIOS.has(n.texto) ? ` ${n.texto} ` : n.texto;
+    case 'op': return OPERADORES_BINARIOS.has(n.texto) && !n.unario ? ` ${n.texto} ` : n.texto;
     case 'sup': {
       const exp = filaTexto(n.exp).replace(/\s+/g, '');
       return nodoTexto(n.base) + (aIndice(exp, SUP) ?? `^(${exp})`);

@@ -333,7 +333,7 @@ export const EJERCICIOS_TEMA2: readonly EjercicioTema2[] = [
     incognita: { texto: '¿cuál es el tipo equivalente', clave: 'i_m', valor: 'tipo mensual' },
     formula: 'compuesta-equivalentes',
     opciones: ['simple-fraccionado', 'compuesta-equivalentes', 'compuesta-tipo', 'compuesta-tae'],
-    porQue: 'En compuesta un tipo equivalente no se divide: iₘ = (1 + i)^(1/m) − 1.',
+    porQue: 'En compuesta un tipo equivalente no se divide: $i_m = (1 + i)^{1/m} - 1$.',
     porQueNo: { 'simple-fraccionado': 'Dividir 10 % / 12 solo vale en simple; en compuesta se pasaría de largo (1,1047 en vez de 1,10).' },
     nivel: 3,
     respuesta: { valor: 0.007974, tipo: 'tanto', tolerancia: 0.00001, texto: 'i₁₂ = 0,007974 → 0,7974 % mensual' },

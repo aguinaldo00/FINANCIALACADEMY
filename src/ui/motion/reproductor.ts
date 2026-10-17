@@ -42,7 +42,7 @@ export interface Escena {
   montar(lienzo: Lienzo): (t: number) => void;
 }
 
-/** Subtítulo con fórmulas coloreadas: "Cada cosecha es $C_0 · i$". */
+/** Subtítulo con fórmulas coloreadas: "Los intereses de un año son $C_0 · i$". */
 export function textoConFormulas(texto: string): string {
   return texto
     .split(/(\$[^$]+\$)/g)

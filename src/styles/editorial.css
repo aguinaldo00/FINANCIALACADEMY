@@ -247,6 +247,9 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-ruta span{display:grid;gap:2px;font:600 .95rem/1.15 var(--f-texto)}
 .ed-ruta small{font:400 .78rem/1.25 var(--f-texto);color:var(--ed-tinta-suave)}
 .ed-ruta a:hover span{text-decoration:underline}
+.ed-ruta-nota{margin:18px 0 0;max-width:62ch;font:400 .92rem/1.45 var(--f-texto);color:var(--ed-tinta-suave)}
+.ed-ruta-nota b{color:var(--ed-tinta);font-weight:600}
+.ed-ruta-nota a{color:var(--ed-tinta);font-weight:600}
 .ed-ruta .ed-ruta-aqui{display:inline-block;margin-top:10px;padding:3px 7px;background:var(--ed-tinta);color:var(--ink);font:600 .68rem/1.2 "Barlow Condensed",var(--f-texto);letter-spacing:.2em;text-transform:uppercase}
 .ed-t2-pantalla{position:relative;margin:0}
 .ed-t2-pantalla::before,.ed-t2-pantalla::after{content:"";position:absolute;z-index:3;width:110px;height:28px;background:rgba(242,212,143,.6);top:-12px}
@@ -264,18 +267,19 @@ body.editorial .page{max-width:none;margin:0;padding:0}
 .ed-pagina-papel .mo-cap-barra{background:rgba(13,19,33,.14)}
 .ed-pagina-papel .mo-cap-barra i{background:var(--ed-tinta)}
 
-.ed-contenido{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.1fr);margin:0 var(--ed-margen);border-top:2px solid var(--ed-tinta);border-bottom:1px solid var(--ed-tinta)}
+.ed-contenido{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 var(--ed-margen);border-top:2px solid var(--ed-tinta);border-bottom:1px solid var(--ed-tinta)}
 .ed-contenido>a{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:22px 22px 24px 0;margin-right:22px;border-right:1px solid var(--ed-regla);text-decoration:none}
 .ed-contenido>a:hover .ed-contenido-tit{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
 .ed-contenido-num{font:italic 300 2.6rem/.9 var(--f-titulo);color:var(--oro3)}
 .ed-contenido-tit{display:grid;gap:6px;font:500 1.15rem/1.15 var(--f-titulo)}
 .ed-contenido-tit small{font:400 .82rem/1.35 var(--f-texto);color:var(--ed-tinta-suave)}
 .ed-contenido-pag{font:700 1.4rem/1 "Big Shoulders Display",var(--f-texto)}
-.ed-clave{padding:22px 0 20px}
-.ed-clave .ed-volanta{margin-bottom:12px;font-size:.72rem}
-.ed-clave ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;margin:0;padding:0;list-style:none}
-.ed-clave li{display:flex;align-items:baseline;gap:8px;font-size:1.05rem}
-.ed-clave li span:not(.fx):not(.fx *){font:400 .8rem var(--f-texto);color:var(--ed-tinta-suave)}
+/* Clave de colores: una fila propia bajo las tres partes, a tamaño de lectura. */
+.ed-clave{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:14px 34px;padding:22px 0 24px;border-top:1px solid var(--ed-regla)}
+.ed-clave .ed-volanta{margin:0;font-size:.82rem}
+.ed-clave ul{display:flex;flex-wrap:wrap;gap:12px 34px;margin:0;padding:0;list-style:none}
+.ed-clave li{display:flex;align-items:baseline;gap:10px;font-size:1.7rem}
+.ed-clave li span:not(.fx):not(.fx *){font:500 1.02rem var(--f-texto);color:var(--ed-tinta)}
 
 .ed-parte{padding:110px var(--ed-margen) 40px;scroll-margin-top:70px}
 .ed-parte+.ed-parte{border-top:1px solid var(--ed-regla)}
@@ -399,6 +403,9 @@ body.editorial .page{max-width:none;margin:0;padding:0}
   .ed-recorte-papel{width:86%;left:0}
   .ed-anotada ul{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ed-ruta{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 0}
+  .ed-clave{grid-template-columns:minmax(0,1fr)}
+  .ed-clave ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+  .ed-clave li{font-size:1.5rem}
   /* Móvil: la relación y la miniatura arriba; la fórmula, debajo y a todo el ancho */
   .ed-estrella-ramas li{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"rama mini" "nodo nodo";gap:8px 14px;align-items:end}
   .ed-estrella-ramas .ed-rama{grid-area:rama}

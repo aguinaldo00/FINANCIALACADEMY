@@ -12,13 +12,13 @@ export const escenaEquivalentes: Escena = {
   id: 'compuesta-equivalentes',
   titulo: 'Tantos equivalentes en capitalización compuesta',
   duracion: 17.6,
-  descripcion: 'Un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^(1/m) − 1.',
+  descripcion: 'Un salto anual de ×1,10 y doce saltos mensuales de ×1,007974 llegan al mismo capital. Dividir 10 % / 12 llega a 1,1047, más lejos: iₘ = (1 + i)^{1/m} − 1.',
   caso: { i: '10 %', m: '12' },
   capitulos: [
     { t: 0, texto: 'Tipo anual del 10 %. ¿Qué tipo mensual es equivalente en compuesta?' },
     { t: 2.8, texto: 'Un salto anual: cada euro se convierte en 1,10 €.' },
     { t: 5.2, texto: 'Doce saltos mensuales tienen que llegar al mismo sitio: $1 + i = (1 + i_m)^{12}$.' },
-    { t: 9.6, texto: 'Por eso $i_m = (1 + i)^{1/m} - 1$: $i_{12}$ = 1,10^(1/12) − 1 = 0,7974 % al mes.' },
+    { t: 9.6, texto: 'Despejando, $i_m = (1 + i)^{1/m} - 1$. Con $m$ = 12: $i_{12} = 1,10^{1/12} - 1$ = 0,007974 = 0,7974 % al mes.' },
     { t: 13, texto: 'Dividir 10 % / 12 = 0,8333 % se pasa: llega a 1,1047. En compuesta el tipo no se divide.' },
   ],
   montar(l) {
@@ -82,13 +82,13 @@ export const escenaComparacion: Escena = {
   id: 'compuesta-comparacion',
   titulo: 'Simple frente a compuesta según el plazo',
   duracion: 16.5,
-  descripcion: 'La recta de simple y la curva de compuesta se cortan en n = 1. Con menos de un año, simple da más (con 5.000 € al 3 % durante 195 días: 5.080,14 € frente a 5.079,59 €); con más de un año, compuesta.',
+  descripcion: 'La recta de simple y la curva de compuesta se cortan en n = 1. Con menos de un año, simple da más (con 5.000 € al 3 % durante 195 días: 5.080,14 € frente a 5.079,59 €); con más de un año, compuesta: 1 + n · i < (1 + i)ⁿ si i > 0 y n > 1.',
   capitulos: [
     { t: 0, texto: 'Mismo capital y mismo tipo: ¿qué da más, simple o compuesta? Depende del plazo.' },
     { t: 2.8, texto: 'Simple crece en línea recta, $C_0 · (1 + n · i)$; compuesta, en curva, $C_0 · (1 + i)^n$.' },
     { t: 6.4, lectura: 9.2, texto: 'Antes del año la recta va por encima: con menos de un año, simple da más.' },
-    { t: 9.4, texto: 'En $n$ = 1 dan lo mismo. Después gana la compuesta, y la diferencia crece cada año.' },
-    { t: 12.4, texto: '5.000 € al 3 % durante 195 días. Simple: 5.080,14 €. Compuesta: 5.079,59 €.' },
+    { t: 9.4, lectura: 12.2, texto: 'En $n$ = 1 dan lo mismo. Con más de un año gana la compuesta: $1 + n · i < (1 + i)^n$ si $i$ > 0 y $n$ > 1.' },
+    { t: 12.4, texto: '5.000 € al 3 % durante 195 días ($n$ = 195/365, menos de un año). Simple: 5.080,14 €. Compuesta: 5.079,59 €. Gana la simple.' },
   ],
   montar(l) {
     const I = 0.4;
@@ -104,6 +104,8 @@ export const escenaComparacion: Escena = {
     const etAntes = new Rotulo(l, 'SIMPLE DA MÁS', 'mo-rotulo-claro', 'middle');
     const etDespues = new Rotulo(l, 'COMPUESTA DA MÁS', 'mo-rotulo-claro', 'middle');
     const aviso = new Rotulo(l, 'Gráfica con un tipo del 40 % para que se vea la forma', 'mo-rotulo', 'start');
+    const desigualdad = l.formula('1 + n · i < (1 + i)^n', { x: 360, y: 82, tam: 36 });
+    const condicion = new Rotulo(l, 'si i > 0 y n > 1 año', 'mo-rotulo', 'middle');
     const caso1 = l.formula('C_n "simple" = "5.080,14 €"', { x: 360, y: 84, tam: 28 });
     const caso2 = l.formula('C_n "compuesta" = "5.079,59 €"', { x: 360, y: 134, tam: 28 });
     return (t) => {
@@ -122,6 +124,11 @@ export const escenaComparacion: Escena = {
       etDespues.pintar(g.px(1.65), g.py(1.12), tramo(t, 10.4, 11.0));
       fijar(corte, { cx: g.px(1), cy: g.py(1 + I), opacity: tramo(t, 9.6, 10.0) });
       aviso.pintar(g.op.x0, g.op.y0 + 70, tramo(t, 3.4, 4.0) * (1 - zoom));
+      // n > 1: la desigualdad de la fórmula 13, mientras la zona de la compuesta está marcada.
+      const fuera = 1 - tramo(t, 12.3, 12.6);
+      desigualdad.opacidad(tramo(t, 10.4, 10.5) * fuera);
+      desigualdad.construir(t, 10.5, { escalon: 0.05 });
+      condicion.pintar(360, 124, tramo(t, 11.2, 11.6) * fuera);
       caso1.opacidad(tramo(t, 12.6, 12.7));
       caso1.construir(t, 12.7, { origenes: { C_n: l.aPantalla({ x: g.px(0.5), y: g.py(1.2) }) } });
       caso2.opacidad(tramo(t, 13.4, 13.5));
