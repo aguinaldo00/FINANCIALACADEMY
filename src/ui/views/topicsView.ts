@@ -122,7 +122,8 @@ export function pintarTemaDos(ctx: ContextoVista, ruta: RutaTema2, estado: Estad
 function desplazar(ctx: ContextoVista, p: PantallaTema2): void {
   const ancla = location.hash.includes('#t2-') ? location.hash.slice(location.hash.lastIndexOf('#')) : '';
   if (p.tipo === 'indice' && p.bloque) ctx.pagina.querySelector(`#t2-${p.bloque}`)?.scrollIntoView({ block: 'start' });
-  else if (ancla) ctx.pagina.querySelector(ancla)?.scrollIntoView({ block: 'start' });
+  // El ancla viene de la URL: se busca por id (un ancla mal escrita no es un selector válido y rompería la página).
+  else if (ancla) document.getElementById(ancla.slice(1))?.scrollIntoView({ block: 'start' });
 }
 
 /** Si la pantalla pedida ya está montada, solo se desplaza (no se pierde lo hecho). Devuelve si lo ha hecho. */
