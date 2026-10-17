@@ -2,16 +2,16 @@ import { hrefAcademia, hrefFormula, hrefInicio, hrefNormativa, hrefProyecto, hre
 import { montarEditorial, navegacionEditorial } from '../components/editorial.ts';
 import type { ContextoVista } from './context.ts';
 
-/** Historia, propósito, guía y recursos del proyecto. */
+/** Sobre el proyecto: por qué existe, qué es, guía rápida, hacia dónde va, contacto y apoyo. */
 export function pintarProyecto(ctx: ContextoVista): () => void {
   ctx.tituloMovil.textContent = 'Sobre el proyecto';
   ctx.pagina.innerHTML = `<div class="ed-pagina ed-pagina-noche pr-proyecto">
   ${navegacionEditorial('noche', [{ texto: 'Academia', href: hrefAcademia() }, { texto: 'Sobre el proyecto' }], { sumario: false, proyecto: false })}
   <header class="pr-hero pr-hero-personal" id="arriba">
     <div class="pr-hero-texto">
-      <p class="ed-volanta">Financial Academy · El creador</p>
-      <h1 class="ed-titular"><span>Sobre mí</span></h1>
-      <p class="ed-entradilla">Me llamo Georgi Angelov, aunque en Villarcayo casi todos me conocen como Pepe. Tengo 21 años y estoy en segundo de Administración y Finanzas.</p>
+      <p class="ed-volanta">Financial Academy · Sobre el proyecto</p>
+      <h1 class="ed-titular"><span>Sobre el proyecto</span></h1>
+      <p class="ed-entradilla">Georgi Angelov (Pepe) · 21 años · 2.º de Administración y Finanzas. Proyecto personal de estudio.</p>
       <div class="ed-cta">
         <a class="ed-boton" href="${hrefAcademia()}"><small>Explora la herramienta</small>Elegir un mundo</a>
         <a class="ed-enlace" href="${hrefProyecto('origen')}">Por qué existe ↓</a>
@@ -21,52 +21,33 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
       <p class="ed-volanta">La pregunta que lo empezó todo</p>
       <p class="pr-formula" aria-label="C sub cero por uno más i por n">C<sub>0</sub> · (<span class="pr-formula-uno">1</span> + i · n)</p>
       <h2 id="pr-pregunta-titulo">¿De dónde sale el 1?</h2>
-      <a class="pr-pregunta-link" href="${hrefProyecto('origen')}">Descubre la historia <span aria-hidden="true">↗</span></a>
+      <a class="pr-pregunta-link" href="${hrefProyecto('origen')}">Por qué existe <span aria-hidden="true">↗</span></a>
     </aside>
   </header>
 
   <nav class="pr-indice" aria-label="Apartados de Sobre el proyecto">
-    <a href="${hrefProyecto('historia')}">De dónde vengo</a>
     <a href="${hrefProyecto('origen')}">Por qué existe</a>
     <a href="${hrefProyecto('academia')}">Qué es</a>
-    <a href="${hrefProyecto('futuro')}">Hacia dónde va</a>
     <a href="${hrefProyecto('guia')}">Guía</a>
+    <a href="${hrefProyecto('futuro')}">Hacia dónde va</a>
     <a href="${hrefProyecto('contacto')}">Contacto</a>
-    <a href="${hrefProyecto('apoyo')}">Apoyo</a>
   </nav>
-
-  <section class="pr-seccion pr-historia" id="historia" aria-labelledby="pr-historia-titulo">
-    <header class="pr-seccion-cab">
-      <p class="ed-volanta">01 · El camino hasta aquí</p>
-      <h2 id="pr-historia-titulo">De dónde vengo</h2>
-    </header>
-    <div class="pr-historia-grid">
-      <article class="pr-hito">
-        <span class="pr-hito-numero">01 <i>·</i> Antes del ciclo</span>
-        <p>Antes del ciclo trabajé de lo que salía y estudié atención sociosanitaria. Luego empecé el grado medio de Gestión Administrativa. Como se me quedaba corto, preparé por mi cuenta la prueba de acceso a grado superior mientras seguía trabajando y estudiando. Lo hice con un método propio: los exámenes de otros años son públicos, así que los analicé para ver qué se repetía y practiqué justo eso. Aprobé.</p>
-      </article>
-      <article class="pr-hito">
-        <span class="pr-hito-numero">02 <i>·</i> De reparar a crear</span>
-        <p>Siempre me ha gustado entender cómo funcionan las cosas. Empecé reparando ordenadores, consolas y aparatos electrónicos. El año pasado di el salto al software: aprendí Python en un curso de Samsung y, por mi cuenta, desarrollo web y diseño. Este año he decidido usar todo eso en algo real.</p>
-      </article>
-    </div>
-  </section>
 
   <section class="pr-seccion pr-origen" id="origen" aria-labelledby="pr-origen-titulo">
     <header class="pr-seccion-cab">
-      <p class="ed-volanta">02 · El origen</p>
+      <p class="ed-volanta">01 · El origen</p>
       <h2 id="pr-origen-titulo">Por qué existe</h2>
     </header>
     <p class="pr-origen-pregunta">Todo empezó con una pregunta: ¿de dónde sale el 1 en <a class="pr-formula-ficha" href="${hrefFormula('simple-montante')}" aria-label="Abrir la ficha de la fórmula de capital final o montante en interés simple"><span>C<sub>0</sub> · (1 + i · n)</span></a>?</p>
     <div class="pr-origen-texto">
-      <p>En clase y en el libro las fórmulas llegan ya hechas. Hay letras por todas partes, logaritmos, tiempos que no se ven y muchos conceptos nuevos de golpe, todo en texto corrido. Se aprende a aplicar la fórmula, no a entenderla. Y casi no hay contenido actual que lo explique de otra forma.</p>
-      <p>Además, a mí el papel no me funciona: me cuesta escribir y no consigo ordenarme. Con Excel, en cambio, nunca he tenido problemas. Así que decidí construir la herramienta que me habría gustado tener desde el principio.</p>
+      <p>En clase y en el libro las fórmulas suelen llegar ya hechas. Hay letras, logaritmos y tiempos que no se ven, todo en texto corrido. Se aprende a colocar números en la fórmula, no a entender qué representa cada parte.</p>
+      <p>Financial Academy nace para cambiar eso: ver la fórmula, cambiar los datos y practicar en el mismo sitio.</p>
     </div>
   </section>
 
   <section class="pr-seccion pr-que-es" id="academia" aria-labelledby="pr-academia-titulo">
     <header class="pr-seccion-cab">
-      <p class="ed-volanta">03 · La herramienta</p>
+      <p class="ed-volanta">02 · La herramienta</p>
       <h2 id="pr-academia-titulo">Qué es Financial Academy</h2>
       <p>Financial Academy es una web para estudiar Gestión Financiera. De momento tiene dos temas: el sistema financiero español (teoría) y la matemática financiera (cálculo).</p>
     </header>
@@ -74,7 +55,7 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
       <span>01 / ENTENDER</span>
       <div>
         <h3>La fórmula está junto al ejercicio</h3>
-        <p>Lo que más me enorgullece es esto: la fórmula no está en una página y el ejercicio en otra. Trabajas con ella mientras cambias los datos y ves qué le ocurre al capital, al tiempo y al interés. Explicación y práctica conviven en la misma pantalla: puedes calcular a la vez que el profesor explica, sin saltar entre pestañas ni copiar enunciados.</p>
+        <p>La fórmula no está en una página y el ejercicio en otra. Trabajas con ella mientras cambias los datos y ves qué le ocurre al capital, al tiempo y al interés. Explicación y práctica conviven en la misma pantalla: puedes calcular a la vez que el profesor explica, sin saltar entre pestañas ni copiar enunciados.</p>
       </div>
     </article>
     <div class="pr-que-es-grid">
@@ -110,7 +91,7 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
 
   <section class="pr-seccion pr-guia" id="guia" aria-labelledby="pr-guia-titulo">
     <header class="pr-seccion-cab">
-      <p class="ed-volanta">04 · Una guía rápida</p>
+      <p class="ed-volanta">03 · Una guía rápida</p>
       <h2 id="pr-guia-titulo">Empieza a tu manera</h2>
       <p>La web reúne dos recorridos distintos. Puedes entrar por una asignatura o ir directo a un recurso de estudio.</p>
     </header>
@@ -123,29 +104,28 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
 
   <section class="pr-seccion pr-futuro" id="futuro" aria-labelledby="pr-futuro-titulo">
     <header class="pr-seccion-cab">
-      <p class="ed-volanta">05 · Lo que viene</p>
+      <p class="ed-volanta">04 · Lo que viene</p>
       <h2 id="pr-futuro-titulo">Hacia dónde va</h2>
     </header>
     <div class="pr-futuro-texto">
-      <p>Ahora es gratis para mi clase. Mi idea es sumar el resto de asignaturas del ciclo y que siga siendo gratis para quien estudia. Para que el proyecto pueda crecer, quiero ofrecerlo a centros, academias y empresas de formación que quieran usarlo con sus alumnos.</p>
-      <p>Todavía no sé a qué me dedicaré. Me interesan campos muy distintos, de las finanzas a la biotecnología. Lo que sí sé es que muchas formas de enseñar se pueden mejorar, y este proyecto es mi manera de intentarlo.</p>
+      <p>Ahora es gratis para estudiar, y la idea es que siga siendo útil para quien estudia. Si a centros, academias o profesores les interesa usarla en clase, se puede adaptar.</p>
     </div>
     <blockquote class="pr-cierre">
-      <p>Detrás de esta web hay muchas horas: diseñar el método, programar, crear las animaciones, escribir las explicaciones e inventar los tipos de ejercicio. Si te ayuda a entender algo que antes solo memorizabas, habrá merecido la pena.</p>
+      <p>Detrás hay muchas horas de método, código, animaciones y ejercicios. Si te ayuda a entender algo que antes solo memorizabas, habrá merecido la pena.</p>
     </blockquote>
   </section>
 
   <section class="pr-contacto" id="contacto" aria-labelledby="pr-contacto-titulo">
     <div>
-      <p class="ed-volanta">06 · Colaboraciones</p>
+      <p class="ed-volanta">05 · Colaboraciones</p>
       <h2 id="pr-contacto-titulo">¿Te interesa para tu centro?</h2>
-      <p>¿Eres un centro, un profesor o una empresa y te interesa? Escríbeme.</p>
+      <p>¿Eres centro, profesor o empresa y te interesa? Escríbeme.</p>
     </div>
     <a class="pr-contacto-enlace" href="mailto:jorgeangelov2020@gmail.com">jorgeangelov2020@gmail.com <span aria-hidden="true">↗</span></a>
   </section>
 
   <section class="pr-apoyo" id="apoyo" aria-labelledby="pr-apoyo-titulo">
-    <div><p class="ed-volanta">07 · Apoyo</p><h2 id="pr-apoyo-titulo">Ayuda a que el proyecto siga creciendo</h2><p>Si esta herramienta te está sirviendo, puedes apoyar al creador a través de Buy Me a Coffee.</p></div>
+    <div><p class="ed-volanta">06 · Apoyo</p><h2 id="pr-apoyo-titulo">Si te está sirviendo</h2><p>Si esta herramienta te está sirviendo, puedes apoyar el proyecto invitándome a un café. Es totalmente voluntario.</p></div>
     <a class="ed-boton" href="https://buymeacoffee.com/pepitofinanzas" target="_blank" rel="noopener noreferrer"><small>Apoyo voluntario</small>Invítame a un café ↗</a>
   </section>
 
