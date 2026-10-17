@@ -127,7 +127,31 @@ function nodoHtml(n: Nodo): string {
   }
 }
 
-const filaHtml = (fila: Nodo[]): string => fila.map(nodoHtml).join('');
+/**
+ * Posiciones de los paréntesis de una fila que encierran una fracción: se dibujan más altos para
+ * abarcarla, como en el papel. Un «)» puede ser la base de un exponente: (Cₙ / C₀)^{1/n}.
+ */
+export function parentesisGrandes(fila: Nodo[]): Set<number> {
+  const texto = (n: Nodo) => (n.tipo === 'op' ? n.texto : n.tipo === 'sup' && n.base.tipo === 'op' ? n.base.texto : '');
+  const grandes = new Set<number>();
+  const abiertos: number[] = [];
+  fila.forEach((n, k) => {
+    if (texto(n) === '(') abiertos.push(k);
+    else if (texto(n) === ')') {
+      const desde = abiertos.pop();
+      if (desde !== undefined && fila.slice(desde + 1, k).some((x) => x.tipo === 'frac' && x.den.length > 0)) {
+        grandes.add(desde);
+        grandes.add(k);
+      }
+    }
+  });
+  return grandes;
+}
+
+const filaHtml = (fila: Nodo[]): string => {
+  const grandes = parentesisGrandes(fila);
+  return fila.map((n, k) => (grandes.has(k) ? nodoHtml(n).replace('<span class="fx-op">', '<span class="fx-op fx-paren">') : nodoHtml(n))).join('');
+};
 
 /** Fórmula en HTML coloreado, con su lectura en texto para lectores de pantalla. */
 export function formulaHtml(fuente: string, clase = ''): string {

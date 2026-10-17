@@ -18,6 +18,7 @@ import { generarEjercicio, nuevaSemilla, type PeriodicidadEjercicio } from '../.
 import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud } from '../../../domain/tema2/laboratorio.ts';
 import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
 import { htmlHoja, montarHoja, refrescarHoja, simboloDeNombre } from '../../components/hojaCalculo.ts';
+import { htmlRelojExamen, minutosGuardados, montarRelojExamen } from '../../components/relojExamen.ts';
 import { expandir } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
 import { formulaTexto, simbolosDe } from '../../matematica/formula.ts';
@@ -178,6 +179,7 @@ export function htmlLaboratorio(id: string): string {
       </div>` : ''}
       <div class="lab-caso" role="region" aria-label="Enunciado del ejercicio">
         <p class="lab-caso-volanta" data-lab-caso-origen>${calcula ? '' : 'Cuaderno libre'}</p>
+        ${calcula ? htmlRelojExamen() : ''}
         <p class="lab-caso-texto" data-lab-caso-texto>${calcula ? '' : 'Esta fórmula compara o liquida importes: usa el cuaderno y la calculadora con tus datos.'}</p>
         <label class="lab-periodos" data-lab-periodos-control hidden>
           <input type="checkbox" role="switch" data-lab-todos-periodos aria-label="Incluir varios periodos de interés">
@@ -372,6 +374,37 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     lab.querySelectorAll<HTMLElement>('[data-lab-formula-elegida]').forEach((p) => { p.innerHTML = f ? formulaHtml(f.expresion) : ''; });
   };
 
+  /*
+   * Reloj del examen real: arranca solo al abrir un examen (cada ejercicio nuevo empieza de cero) y
+   * se para al comprobar o calcular el resultado. Inicio, minutos y final se guardan con el cuaderno.
+   */
+  const reloj = lab.querySelector('[data-lab-reloj]') ? montarRelojExamen(lab, (minutos) => {
+    if (ejercicio() !== 'examen-real') return;
+    estado['reloj:minutos'] = String(minutos);
+    estado['reloj:inicio'] = String(Date.now());
+    delete estado['reloj:fin'];
+    guardar();
+    sincronizarReloj();
+  }) : null;
+  if (reloj) paradas.push(() => reloj.desmontar());
+  function sincronizarReloj(): void {
+    if (!reloj) return;
+    if (ejercicio() !== 'examen-real') return reloj.ocultar();
+    if (!estado['reloj:inicio']) {
+      estado['reloj:inicio'] = String(Date.now());
+      estado['reloj:minutos'] = String(minutosGuardados());
+      guardar();
+    }
+    const fin = estado['reloj:fin'] ? Number(estado['reloj:fin']) : undefined;
+    reloj.mostrar(Number(estado['reloj:inicio']), Number(estado['reloj:minutos']) || minutosGuardados(), fin);
+  }
+  function pararReloj(): void {
+    if (!reloj || ejercicio() !== 'examen-real' || estado['reloj:fin'] || !estado['reloj:inicio']) return;
+    estado['reloj:fin'] = String(Date.now());
+    guardar();
+    reloj.parar();
+  }
+
   const limpiarRevision = () => {
     lab.querySelectorAll<HTMLElement>('[data-paso]').forEach((li) => { delete li.dataset.revision; });
     lab.querySelectorAll<HTMLElement>('[data-nota]').forEach((n) => { n.textContent = ''; });
@@ -438,6 +471,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
       lab.querySelectorAll<HTMLElement>(`[data-nota="${paso}"]`).forEach((p) => { p.textContent = n.texto; });
     }
     const todo = Object.values(notas).every((n) => n.bien);
+    pararReloj();
     lab.querySelectorAll<HTMLElement>('[data-lab-revision]').forEach((r) => {
       r.className = `lab-revision ${todo ? 'lab-bien' : 'lab-mal'}`;
       r.textContent = todo ? 'Todo el cuaderno está bien.' : 'Hay pasos por revisar: están marcados en el cuaderno.';
@@ -463,6 +497,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     leer: leerEstado,
     objetivo: () => (definicion ? { incognita: definicion.incognita, datos: datosEnunciado(), examen: ejercicio() === 'examen-real' } : null),
     alCalcular: (texto) => {
+      pararReloj();
       estado.resultado = texto;
       campos('resultado').forEach((c) => { c.value = texto; });
       guardar();
@@ -474,6 +509,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   for (const [nombre, valor] of Object.entries(estado)) campos(nombre).forEach((c) => { c.value = valor; });
   pintarFormulaElegida();
   pintarEjercicio();
+  sincronizarReloj();
 
   const alEscribir = (e: Event) => {
     const c = (e.target as Element).closest<HTMLInputElement>('[data-campo]');
@@ -533,6 +569,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     estado.semilla = String(s);
     guardar();
     pintarEjercicio();
+    sincronizarReloj();
     if (anterior !== 'examen-real' && e === 'examen-real') animarCartulina(true);
     else if (anterior === 'examen-real' && e !== 'examen-real') animarCartulina(false);
   };
@@ -580,7 +617,9 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     else if (b.hasAttribute('data-lab-abrir-papel')) abrirPapel(!lab.classList.contains('lab-papel-abierto'));
     else if (b.hasAttribute('data-lab-ampliar') && escena) expandir(figura, { tipo: 'escena', escena, volanta: `Fórmula ${formulaPorId(id)!.numero} · Laboratorio` });
     else if (b.hasAttribute('data-lab-limpiar')) {
-      estado = { ejercicio: ejercicio(), semilla: String(semilla()), ...(estado['hoja:modo'] ? { 'hoja:modo': estado['hoja:modo'] } : {}) };
+      // Borrar el cuaderno no reinicia el reloj del examen.
+      const reloj = Object.fromEntries(Object.entries(estado).filter(([k]) => k.startsWith('reloj:')));
+      estado = { ejercicio: ejercicio(), semilla: String(semilla()), ...(estado['hoja:modo'] ? { 'hoja:modo': estado['hoja:modo'] } : {}), ...reloj };
       guardar();
       lab.querySelectorAll<HTMLInputElement>('[data-campo]').forEach((c) => { c.value = ''; });
       pintarFormulaElegida();

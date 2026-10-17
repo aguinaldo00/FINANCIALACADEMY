@@ -26,6 +26,7 @@
 .fx .fx-op{font-family:var(--f-texto);font-weight:300;color:var(--mut)}
 .fx .fx-bin{margin:0 .28em}
 .fx .fx-bin.fx-div,.fx sup .fx-bin.fx-div{margin:0 .05em}
+.fx .fx-paren{display:inline-block;transform:scaleY(1.7);transform-origin:50% 55%}
 .fx .fx-fn{font-family:var(--f-texto);font-style:normal;margin-right:.18em}
 .fx-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .14em;font-size:.92em}
 .fx-frac-n,.fx-frac-d{display:inline-flex;align-items:center;padding:0 .2em;line-height:1.25}

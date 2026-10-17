@@ -3,7 +3,7 @@
  * cámara para las fórmulas), una cámara con encuadre y zoom, y fórmulas maquetadas pieza a pieza
  * para que cada símbolo pueda viajar desde el elemento de la escena que representa.
  */
-import { analizarFormula, claseSimbolo, type Nodo } from '../matematica/formula.ts';
+import { analizarFormula, claseSimbolo, type Nodo, parentesisGrandes } from '../matematica/formula.ts';
 import { asegurarGrano, nuevaSemilla, rectanguloRecortado, ruido, trazoRotulador } from './papel.ts';
 import { arco, curvas, limitar, mezclar, tramo } from './tiempo.ts';
 
@@ -270,12 +270,20 @@ export class FormulaSvg {
     let ancho = 0;
     let sube = tam * 0.72;
     let baja = tam * 0.22;
-    for (const n of fila) {
+    const grandes = parentesisGrandes(fila);
+    fila.forEach((n, k) => {
+      const inicio = this.cursor;
       const caja = this.colocarNodo(n, tam, x + ancho, y);
+      // Paréntesis que abrazan una fracción: se estiran para que la abarquen.
+      const p = this.piezas[inicio];
+      if (p?.texto && grandes.has(k)) {
+        const cy = -tam * 0.3;
+        fijar(p.texto, { transform: `translate(0 ${cy}) scale(1 1.7) translate(0 ${-cy})` });
+      }
       ancho += caja.ancho;
       sube = Math.max(sube, caja.sube);
       baja = Math.max(baja, caja.baja);
-    }
+    });
     return { ancho, sube, baja };
   }
 
