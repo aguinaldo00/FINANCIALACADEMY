@@ -1,8 +1,10 @@
 /*
  * Reloj del «Examen real» del laboratorio: una cuenta atrás que arranca sola al abrir el examen,
  * como en el aula. Se calcula con la hora de inicio (no sumando segundos), así que no se desajusta
- * si la pestaña se queda en segundo plano y sigue donde iba al recargar la página. En el último
- * minuto cambia de color; al llegar a cero no corta el ejercicio: avisa y cuenta el tiempo extra.
+ * si la pestaña se queda en segundo plano y sigue donde iba al recargar la página. Para que se sienta
+ * examen: cada minuto cumplido se ilumina en rojo un momento («quedan 9 min»), en el último cuarto
+ * del tiempo pasa a ámbar y en el último minuto a rojo; al llegar a cero no corta el ejercicio: avisa
+ * y cuenta el tiempo extra.
  * Al comprobar el resultado se para y enseña cuánto se ha tardado.
  */
 /** Minutos que se pueden elegir por ejercicio (el de en medio es el que se usa por defecto). */
@@ -17,13 +19,29 @@ export function formatoReloj(segundos: number): string {
 
 /**
  * Fase del reloj según lo que queda: normal, mitad (los 12 s siguientes a pasar la mitad, para un aviso
- * suave), último minuto, agotado.
+ * suave), último cuarto del tiempo, último minuto, agotado.
  */
-export function faseReloj(quedan: number, total = Infinity): 'normal' | 'mitad' | 'ultimo' | 'agotado' {
+export function faseReloj(quedan: number, total = Infinity): 'normal' | 'mitad' | 'cuarto' | 'ultimo' | 'agotado' {
   if (quedan <= 0) return 'agotado';
   if (quedan <= 60) return 'ultimo';
   const usados = total - quedan;
-  return usados >= total / 2 && usados < total / 2 + 12 ? 'mitad' : 'normal';
+  if (usados >= total / 2 && usados < total / 2 + 12) return 'mitad';
+  return Number.isFinite(total) && quedan <= total / 4 ? 'cuarto' : 'normal';
+}
+
+/** Segundos que dura el toque rojo de cada minuto cumplido. */
+const TOQUE = 2.5;
+
+/**
+ * Minutos que quedan si se acaba de cumplir un minuto (en los TOQUE segundos siguientes), para el toque
+ * rojo; si no, null. En exámenes de más de 20 minutos (el simulacro), cada 5 minutos. No suena al
+ * empezar ni en el último minuto (que ya va en rojo).
+ */
+export function toqueReloj(quedan: number, total: number): number | null {
+  if (quedan <= 60 || quedan > total - TOQUE) return null;
+  const paso = total > 20 * 60 ? 300 : 60;
+  const resto = quedan % paso;
+  return resto === 0 || resto > paso - TOQUE ? Math.round(quedan / 60) : null;
 }
 
 export function minutosGuardados(clave = CLAVE_DURACION, opciones: readonly number[] = DURACIONES_EXAMEN, defecto = 10): number {
@@ -73,12 +91,17 @@ export function montarRelojExamen(raiz: HTMLElement, alCambiarMinutos: (minutos:
     const quedan = total - usados;
     const fase = fin !== undefined ? 'parado' : faseReloj(quedan, total);
     caja.dataset.fase = fase;
+    const toque = fin === undefined ? toqueReloj(quedan, total) : null;
+    caja.toggleAttribute('data-toque', toque !== null);
     if (fin !== undefined) {
       cifra.textContent = formatoReloj(usados);
       estado.textContent = quedan >= 0 ? 'has tardado' : `has tardado (${formatoReloj(-quedan).replace('+', '')} de más)`;
     } else {
       cifra.textContent = formatoReloj(Math.ceil(quedan));
-      estado.textContent = fase === 'agotado' ? 'tiempo agotado · llevas de más' : fase === 'mitad' ? 'mitad del tiempo · ¿tienes la fórmula?' : 'quedan';
+      estado.textContent = fase === 'agotado' ? 'tiempo agotado · llevas de más'
+        : fase === 'mitad' ? 'mitad del tiempo · ¿tienes la fórmula?'
+        : toque !== null ? `quedan ${toque} min`
+        : fase === 'ultimo' ? 'último minuto' : 'quedan';
     }
     // Avisos para lectores de pantalla, una vez por fase.
     if (fase !== faseAnunciada) {
