@@ -11,7 +11,7 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
     <div class="pr-hero-texto">
       <p class="ed-volanta">Financial Academy · Sobre el proyecto</p>
       <h1 class="ed-titular"><span>Sobre el proyecto</span></h1>
-      <p class="ed-entradilla">Georgi Angelov (Pepe) · 21 años · 2.º de Administración y Finanzas. Proyecto personal de estudio.</p>
+      <p class="ed-entradilla">Georgi Angelov (Pepe) · 2.º de Administración y Finanzas. Proyecto personal de estudio.</p>
       <div class="ed-cta">
         <a class="ed-boton" href="${hrefAcademia()}"><small>Explora la herramienta</small>Elegir un mundo</a>
         <a class="ed-enlace" href="${hrefProyecto('origen')}">Por qué existe ↓</a>
@@ -121,7 +121,10 @@ export function pintarProyecto(ctx: ContextoVista): () => void {
       <h2 id="pr-contacto-titulo">¿Te interesa para tu centro?</h2>
       <p>¿Eres centro, profesor o empresa y te interesa? Escríbeme.</p>
     </div>
-    <a class="pr-contacto-enlace" href="mailto:jorgeangelov2020@gmail.com">jorgeangelov2020@gmail.com <span aria-hidden="true">↗</span></a>
+    <div class="pr-contacto-enlaces">
+      <a class="pr-contacto-enlace" href="mailto:jorgeangelov2020@gmail.com">jorgeangelov2020@gmail.com <span aria-hidden="true">↗</span></a>
+      <a class="pr-contacto-enlace" href="https://www.linkedin.com/in/georgi-angelov-583742440" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+    </div>
   </section>
 
   <section class="pr-apoyo" id="apoyo" aria-labelledby="pr-apoyo-titulo">

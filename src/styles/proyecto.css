@@ -36,7 +36,8 @@
 .pr-funcion>b{position:absolute;right:26px;bottom:22px;color:var(--oro2);font-weight:400}
 .pr-contacto,.pr-apoyo{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.65fr);align-items:center;gap:34px;padding:94px var(--pr-margen);margin-top:100px;border-block:1px solid var(--line)}
 .pr-contacto h2,.pr-apoyo h2{max-width:20ch}
-.pr-contacto-enlace{justify-self:end;color:var(--oro2);font:500 clamp(1rem,1.7vw,1.3rem)/1.4 var(--f-texto);text-decoration:none;text-underline-offset:5px}
+.pr-contacto-enlaces{display:flex;flex-wrap:wrap;gap:8px 28px;justify-self:end}
+.pr-contacto-enlace{color:var(--oro2);font:500 clamp(1rem,1.7vw,1.3rem)/1.4 var(--f-texto);text-decoration:none;text-underline-offset:5px}
 .pr-contacto-enlace:hover{text-decoration:underline}
 .pr-contacto-enlace span{padding-left:8px}
 .pr-apoyo{margin-top:0;background:radial-gradient(ellipse 45% 110% at 85% 50%,rgba(224,178,94,.09),transparent 75%),var(--bg2)}
@@ -51,7 +52,7 @@
   .pr-pasos{grid-template-columns:minmax(0,1fr)}
   .pr-paso,.pr-paso+.pr-paso{padding:20px 0;border-left:0}
   .pr-contacto,.pr-apoyo{grid-template-columns:minmax(0,1fr);padding-block:72px}
-  .pr-contacto-enlace,.pr-apoyo .ed-boton{justify-self:start}
+  .pr-contacto-enlaces,.pr-apoyo .ed-boton{justify-self:start}
 }
 @media(max-width:600px){
   .pr-hero{padding-top:116px;padding-bottom:58px;gap:34px}
