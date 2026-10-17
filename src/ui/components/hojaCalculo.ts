@@ -16,6 +16,7 @@ import { calcular, formatear, formatearExacto } from '../../domain/tema2/expresi
 import { type DatoLab, LABORATORIOS, leerDato, type Magnitud, mostrar } from '../../domain/tema2/laboratorio.ts';
 import { formulaTexto } from '../matematica/formula.ts';
 import { escaparHtml, formulaHtml } from '../views/tema2/comun.ts';
+import { montarSelectoresFormula, selectorFormulasHtml, sincronizarSelectoresFormula } from './selectorFormulas.ts';
 
 /* ------------------------------------------------------------------ sustitución */
 
@@ -151,7 +152,7 @@ const campoHtml = (nombre: string, etiqueta: string, pista: string, valor = '') 
 /** Las 19 fórmulas, por bloques. */
 function selectorFormulas(prefijo: string): string {
   const grupos = BLOQUES.map((b) => `<optgroup label="${escaparHtml(b.titulo)}">${FORMULAS_TEMA2.filter((f) => f.bloque === b.id).map((f) => `<option value="${f.id}">Nº ${f.numero} — ${escaparHtml(formulaTexto(f.expresion))}</option>`).join('')}</optgroup>`).join('');
-  return `<select id="${prefijo}-formula" class="lab-campo hoja-select" data-campo="formula"><option value="">Elige la fórmula…</option>${grupos}</select>`;
+  return selectorFormulasHtml(`<select id="${prefijo}-formula" class="lab-campo hoja-select" data-campo="formula"><option value="">Elige la fórmula…</option>${grupos}</select>`, `${prefijo}-formula-boton`);
 }
 
 /** Filas de datos de una fórmula (modo guiado). */
@@ -208,7 +209,7 @@ export function htmlHoja(prefijo: string, leer: (campo: string) => string = () =
     </div>
     ${guiaHtml()}
     <section class="hoja-seccion" data-hoja-seccion="guiada"${modo === 'guiada' ? '' : ' hidden'}>
-      <div class="hoja-formula"><label for="${prefijo}-formula"><b>1</b> Fórmula</label>${selectorFormulas(prefijo)}
+      <div class="hoja-formula"><label for="${prefijo}-formula-boton"><b>1</b> Fórmula</label>${selectorFormulas(prefijo)}
         <p class="lab-formula-elegida" data-lab-formula-elegida></p></div>
       <p class="hoja-paso"><b>2</b> Sus datos</p>
       <table class="hoja"><thead><tr><th scope="col">Dato</th><th scope="col">Valor</th><th scope="col"><span class="sr">Unidad</span></th></tr></thead><tbody data-hoja-filas>${filasGuiadas(formula, leer)}</tbody></table>
@@ -249,6 +250,7 @@ export function montarHoja(raiz: HTMLElement, o: OpcionesHoja = {}): () => void 
   const hoja = raiz.querySelector<HTMLElement>('[data-hoja]');
   if (!hoja) return () => {};
   const leer = o.leer ?? (() => '');
+  const pararSelector = montarSelectoresFormula(hoja);
   const $ = <T extends HTMLElement>(sel: string) => hoja.querySelector<T>(sel)!;
   const salida = $('[data-lab-hoja-salida]');
   const nota = $('[data-lab-hoja-nota]');
@@ -258,10 +260,12 @@ export function montarHoja(raiz: HTMLElement, o: OpcionesHoja = {}): () => void 
   const formulaElegida = () => valor('formula');
   const select = $<HTMLSelectElement>('select[data-campo="formula"]');
   select.value = leer('formula');
+  sincronizarSelectoresFormula(hoja);
 
   const pintarFormula = () => {
     const f = formulaElegida() ? formulaPorId(formulaElegida()) : undefined;
     $('[data-lab-formula-elegida]').innerHTML = f ? formulaHtml(f.expresion) : '';
+    sincronizarSelectoresFormula(hoja);
   };
   const pintarFilas = () => { $('[data-hoja-filas]').innerHTML = filasGuiadas(formulaElegida(), (c) => valor(c)); };
   pintarFormula();
@@ -393,6 +397,7 @@ export function montarHoja(raiz: HTMLElement, o: OpcionesHoja = {}): () => void 
   hoja.addEventListener('input', alCambiar);
   hoja.addEventListener('change', alCambiar);
   return () => {
+    pararSelector();
     hoja.removeEventListener('click', alPulsar);
     hoja.removeEventListener('input', alCambiar);
     hoja.removeEventListener('change', alCambiar);
@@ -407,6 +412,7 @@ export function refrescarHoja(raiz: HTMLElement, leer: (campo: string) => string
   select.value = leer('formula');
   const f = select.value ? formulaPorId(select.value) : undefined;
   hoja.querySelector<HTMLElement>('[data-lab-formula-elegida]')!.innerHTML = f ? formulaHtml(f.expresion) : '';
+  sincronizarSelectoresFormula(hoja);
   hoja.querySelector<HTMLElement>('[data-hoja-filas]')!.innerHTML = filasGuiadas(select.value, leer);
   hoja.querySelector<HTMLElement>('[data-hoja-pro-filas]')!.innerHTML = filasProHtml(numeroFilasPro(leer), leer);
   hoja.querySelector<HTMLElement>('[data-lab-hoja-salida]')!.hidden = true;

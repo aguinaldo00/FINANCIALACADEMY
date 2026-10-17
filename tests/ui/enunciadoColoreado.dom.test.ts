@@ -37,3 +37,28 @@ describe('enunciado redactado con colores', () => {
     }
   });
 });
+
+describe('selector de fórmulas', () => {
+  it('las partes del tema empiezan plegadas y elegir una fórmula cambia el <select> y el botón', async () => {
+    const { montarSelectoresFormula, selectorFormulasHtml } = await import('../../src/ui/components/selectorFormulas.ts');
+    const raiz = document.createElement('div');
+    raiz.innerHTML = selectorFormulasHtml('<select class="x" data-campo="formula"><option value="">—</option><option value="simple-tiempo">5</option><option value="compuesta-tiempo">10</option></select>');
+    document.body.append(raiz);
+    const parar = montarSelectoresFormula(raiz);
+    let cambios = 0;
+    raiz.addEventListener('change', () => cambios++);
+    raiz.querySelector<HTMLButtonElement>('[data-selfx-boton]')!.click();
+    expect(raiz.querySelector<HTMLElement>('[data-selfx-panel]')!.hidden).toBe(false);
+    expect([...raiz.querySelectorAll('details')].every((d) => !d.open)).toBe(true);
+    raiz.querySelector<HTMLButtonElement>('[data-selfx-valor="compuesta-tiempo"]')!.click();
+    expect(raiz.querySelector('select')!.value).toBe('compuesta-tiempo');
+    expect(cambios).toBe(1);
+    expect(raiz.querySelector('[data-selfx-elegida]')!.textContent).toContain('Tiempo');
+    expect(raiz.querySelector<HTMLElement>('[data-selfx-panel]')!.hidden).toBe(true);
+    // Al volver a abrir, solo está desplegada la parte de la fórmula elegida.
+    raiz.querySelector<HTMLButtonElement>('[data-selfx-boton]')!.click();
+    expect([...raiz.querySelectorAll<HTMLDetailsElement>('details')].filter((d) => d.open).map((d) => d.dataset.selfxBloque)).toEqual(['compuesta']);
+    parar();
+    raiz.remove();
+  });
+});

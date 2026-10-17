@@ -18,6 +18,7 @@ import { generarEjercicio, nuevaSemilla, type PeriodicidadEjercicio } from '../.
 import { comprobar, esperado, LABORATORIOS, leerDato, type Magnitud } from '../../../domain/tema2/laboratorio.ts';
 import { htmlCalculadora, montarCalculadora } from '../../components/calculadora.ts';
 import { htmlHoja, montarHoja, refrescarHoja, simboloDeNombre } from '../../components/hojaCalculo.ts';
+import { montarSelectoresFormula, selectorFormulasHtml, sincronizarSelectoresFormula } from '../../components/selectorFormulas.ts';
 import { htmlRelojExamen, minutosGuardados, montarRelojExamen } from '../../components/relojExamen.ts';
 import { expandir } from '../../components/reproductorExpandido.ts';
 import { ESCENAS } from '../../escenas/index.ts';
@@ -121,7 +122,7 @@ function selectorIncognita(id: string): string {
 /** Desplegable con las 19 fórmulas del tema, por bloques: se elige la que se va a usar sin salir de la página. */
 function selectorFormula(): string {
   const grupos = BLOQUES.map((b) => `<optgroup label="${escaparHtml(b.titulo)}">${FORMULAS_TEMA2.filter((f) => f.bloque === b.id).map((f) => `<option value="${f.id}">Nº ${f.numero} — ${escaparHtml(formulaTexto(f.expresion))}</option>`).join('')}</optgroup>`).join('');
-  return `<select class="lab-campo lab-campo-formula" data-campo="formula" data-lab-formula-select aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select>
+  return `${selectorFormulasHtml(`<select class="lab-campo lab-campo-formula" data-campo="formula" data-lab-formula-select aria-label="Fórmula que vas a usar"><option value="">Elige la fórmula…</option>${grupos}</select>`)}
     <input class="lab-campo" type="text" data-campo="formula" data-lab-formula-text aria-label="Fórmula escrita" placeholder="Escribe la fórmula que usarás" autocomplete="off" spellcheck="false" hidden><p class="lab-formula-elegida" data-lab-formula-elegida></p>`;
 }
 
@@ -304,6 +305,9 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   const caso = definicion ? escena?.caso : undefined;
   const datos = datosDe(id);
   const paradas: (() => void)[] = [];
+  // Selector de fórmulas del cuaderno de papel (el de la hoja digital lo monta la hoja).
+  const papelFormula = lab.querySelector<HTMLElement>('[data-lab-papel]');
+  if (papelFormula) paradas.push(montarSelectoresFormula(papelFormula));
 
   // Estado compartido por los dos modos, guardado por fórmula.
   let estado: Record<string, string> = {};
@@ -416,6 +420,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
     if (incSelect) incSelect.hidden = examenManual;
     if (incTexto) incTexto.hidden = !examenManual;
     if (formulaSelect) formulaSelect.hidden = examenManual;
+    sincronizarSelectoresFormula(lab);
     if (formulaTexto) formulaTexto.hidden = !examenManual;
     if (examenManual) pintarFilasManual();
     if (e === 'animacion') {
@@ -447,6 +452,7 @@ export function montarLaboratorio(raiz: HTMLElement): () => void {
   const pintarFormulaElegida = () => {
     const f = estado.formula ? formulaPorId(estado.formula) : undefined;
     lab.querySelectorAll<HTMLElement>('[data-lab-formula-elegida]').forEach((p) => { p.innerHTML = f ? formulaHtml(f.expresion) : ''; });
+    sincronizarSelectoresFormula(lab);
   };
 
   /*
