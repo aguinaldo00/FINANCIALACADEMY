@@ -15,6 +15,9 @@ describe('reloj del examen real', () => {
     expect(faseReloj(61)).toBe('normal');
     expect(faseReloj(60)).toBe('ultimo');
     expect(faseReloj(0)).toBe('agotado');
+    // Aviso suave al pasar la mitad (12 s).
+    expect(faseReloj(300, 600)).toBe('mitad');
+    expect(faseReloj(285, 600)).toBe('normal');
   });
 
   it('cuenta hacia atrás desde la hora de inicio y se para al comprobar', () => {

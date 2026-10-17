@@ -1,6 +1,15 @@
 # Ideas para las siguientes fases (17/10/2026)
 
-Propuestas para decidir. Ninguna está hecha salvo lo marcado como «ya está». Cada idea se apoya en
+**Estado (17/10, tarde): hecho todo lo de esta lista**, salvo lo marcado como «pendiente». Dónde está cada cosa:
+- Cómo leer un enunciado: primera tarjeta de A · Identificar (`src/ui/views/tema2/lectura.ts`, textos en `src/content/temas/tema-02/lectura.ts`).
+- Simulacro cronometrado con calculadora de examen: al final de D · Practicar en papel (`src/ui/views/tema2/simulacro.ts`).
+- Diagnóstico de fallos, tiempos por fórmula y simulacros: `src/domain/tema2/diagnostico.ts`; se ven en «Mi progreso».
+- Aviso a mitad de tiempo en el reloj; «Ver de dónde sale» en cada fórmula derivada; «Imprimir / PDF» en el cuaderno;
+  «Copiar enlace a este ejercicio» (modo profesora); laboratorio centrado en pantallas > 1700 px; botón «Calculadora ↓» en
+  móvil; rótulos pequeños de las animaciones ocultos en pantallas estrechas.
+- Pendiente: ¿deben contar en el dominio el simulacro y la práctica? (ver `decisiones-pendientes.md`). Tema 3: necesita apuntes y permiso.
+
+Propuestas originales: Cada idea se apoya en
 algo que ya existe en la web, para no duplicar.
 
 ## 1. «Cómo leer un enunciado» (nueva sección, antes de A · Identificar)

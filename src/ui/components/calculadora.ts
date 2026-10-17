@@ -26,6 +26,8 @@ export interface HtmlCalculadora {
   enviar?: string;
   /** Aspecto analógico: pantalla de cristal líquido y teclas de mesa. */
   analogica?: boolean;
+  /** Calculadora de examen: solo pantalla y teclas, sin explicación ni envío al cuaderno. */
+  examen?: boolean;
 }
 
 export function htmlCalculadora(o: HtmlCalculadora = {}): string {
@@ -42,11 +44,11 @@ export function htmlCalculadora(o: HtmlCalculadora = {}): string {
       <p class="cal-error" data-cal-error hidden></p>
     </div>
     <div class="cal-teclas">${TECLAS.map((k) => `<button type="button" class="cal-tecla ${k.clase ?? ''}" data-cal-tecla="${escaparHtml(k.inserta ?? k.t)}"${k.accion ? ` data-cal-accion="${k.accion}"` : ''}${k.etiqueta ? ` aria-label="${escaparHtml(k.etiqueta)}"` : ''}>${escaparHtml(k.t)}</button>`).join('')}</div>
-    <div class="cal-acciones">
+    ${o.examen ? '' : `<div class="cal-acciones">
       <button type="button" class="cal-accion cal-accion-explicar" data-cal-explicar aria-expanded="false"><svg class="cal-icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Explícame este cálculo paso a paso</button>
       <button type="button" class="cal-accion cal-accion-enviar" data-cal-enviar>${escaparHtml(o.enviar ?? 'Enviar al cuaderno')} <span aria-hidden="true">→</span></button>
     </div>
-    <ol class="cal-explicacion" data-cal-explicacion hidden></ol>
+    <ol class="cal-explicacion" data-cal-explicacion hidden></ol>`}
   </div>`;
 }
 
@@ -63,8 +65,9 @@ export function montarCalculadora(raiz: HTMLElement, opciones: OpcionesCalculado
   const entrada = cal.querySelector<HTMLInputElement>('[data-cal-entrada]')!;
   const resultado = cal.querySelector<HTMLElement>('[data-cal-resultado]')!;
   const error = cal.querySelector<HTMLElement>('[data-cal-error]')!;
-  const explicacion = cal.querySelector<HTMLOListElement>('[data-cal-explicacion]')!;
-  const botonExplicar = cal.querySelector<HTMLButtonElement>('[data-cal-explicar]')!;
+  // En la calculadora de examen no hay explicación: se usan elementos sueltos que no se ven.
+  const explicacion = cal.querySelector<HTMLOListElement>('[data-cal-explicacion]') ?? document.createElement('ol');
+  const botonExplicar = cal.querySelector<HTMLButtonElement>('[data-cal-explicar]') ?? document.createElement('button');
   const ansEl = cal.querySelector<HTMLElement>('[data-cal-ans]')!;
   let ans = 0;
   /** Decimales que se ven (FIX, como en la calculadora de examen); el valor interno es completo. */

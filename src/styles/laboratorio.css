@@ -126,6 +126,8 @@ body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:none}
 .lab-reloj-estado{font:600 .72rem/1.1 "Barlow Condensed",var(--f-texto);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
 .lab-reloj-duracion select{appearance:none;-webkit-appearance:none;margin:0;padding:5px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg3);color:var(--ink);font:500 .78rem/1 var(--f-texto);cursor:pointer}
 .lab-reloj-duracion select:disabled{opacity:.55;cursor:default}
+.lab-reloj[data-fase="mitad"]{border-color:var(--oro3)}
+.lab-reloj[data-fase="mitad"] .lab-reloj-estado{color:var(--oro2)}
 .lab-reloj[data-fase="ultimo"]{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro) inset}
 .lab-reloj[data-fase="ultimo"] .lab-reloj-cifra{color:var(--oro2)}
 .lab-reloj[data-fase="agotado"]{border-color:var(--r);background:color-mix(in srgb,var(--r) 16%,rgba(0,0,0,.3))}
@@ -776,3 +778,29 @@ select.hoja-select:hover{background-color:#342b22}
 .lab-papel .selfx-elegida .selfx-num{background:rgba(42,33,24,.1);color:var(--lab-tinta)}
 /* Con el panel abierto, su tarjeta pasa por encima de la siguiente (la calculadora, en móvil). */
 .lab-panel:has(.selfx-abierto),.lab-papel-marco:has(.selfx-abierto),.lab-cuaderno:has(.selfx-abierto){position:relative;z-index:30}
+
+/* Acciones de la cabecera del cuaderno (imprimir y borrar) y enlace para compartir el ejercicio. */
+.lab-cab-acciones{display:inline-flex;flex-wrap:wrap;gap:6px 14px;justify-content:flex-end}
+.lab-compartir{grid-column:1/-1;justify-self:start}
+/* Pantallas muy anchas: el laboratorio no se estira más allá de una mesa cómoda. */
+@media (min-width:1700px){body.t2-laboratorio .tema-matematica.t2.t2-ficha{max-width:1560px;margin-inline:auto}}
+/* Móvil: un atajo flotante a la calculadora (queda debajo del cuaderno). */
+.lab-ir-calc{display:none}
+@media (max-width:760px){
+  .lab-ir-calc{display:inline-flex;position:fixed;border:0;cursor:pointer;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:50;padding:10px 16px;border-radius:999px;background:var(--oro);color:var(--oro-tinta);font:600 .9rem/1 var(--f-texto);text-decoration:none;box-shadow:0 10px 24px -8px rgba(0,0,0,.8)}
+}
+/* Imprimir o guardar en PDF: solo el enunciado y el cuaderno, en negro sobre blanco. */
+@media print{
+  body.t2-escritorio{background:#fff!important;color:#000!important}
+  body.t2-escritorio::before,.ed-nav,.ed-barra-cap,.ed-sumario,.rail,.topbar,.t2-volver,.lab-cartulina,.t2-practicar,.lab-ejercicios,.lab-modo,.lab-opciones,.lab-otro,.lab-compartir,.lab-reloj,.lab-escena,.lab-calculadora,.lab-ir-calc,.lab-cab-acciones,.pizarra,.t2-teoria,.conv,.lab-papel-acciones,[data-capa-sumario]{display:none!important}
+  .lab-caso,.lab-panel,.lab-papel{background:#fff!important;box-shadow:none!important;color:#000!important;border:1px solid #999}
+  .lab-caso *,.lab-panel *{color:#000!important}
+  .lab[data-laboratorio]{display:block!important}
+}
+/* «Ver de dónde sale»: enlace a la fórmula madre, bajo el título de la ficha. */
+.t2-de-donde{grid-column:1/-1;grid-row:2;justify-self:start;color:var(--oro2);font:500 .95rem/1.3 var(--f-texto);text-underline-offset:4px}
+.t2-de-donde small{color:var(--mut);font-size:.82rem}
+/* Rótulos pequeños de las animaciones (los significados bajo la fórmula): en pantallas estrechas no se
+   leen; lo mismo lo dice el subtítulo. */
+@media (max-width:600px){.mo-svg .ref-significado,.mo-svg .ref-guia-fx{display:none}}
+.t2-ficha:has(.lab[data-laboratorio][data-ejercicio="examen-real"]) .t2-de-donde{visibility:hidden}

@@ -7,6 +7,10 @@ import { colorBloque, nombreCortoBloque } from '../blockColors.ts';
 import { ETIQUETA_CONFIANZA } from '../components/conceptPanels.ts';
 import type { ContextoVista } from './context.ts';
 import { iconoUi } from '../../icons/ui.ts';
+import { fallosGuardados, NOMBRE_FALLO, simulacrosGuardados, tiemposGuardados, type TipoFallo } from '../../domain/tema2/diagnostico.ts';
+import { formulaPorId } from '../../content/temas/tema-02/formulas.ts';
+import { formatoReloj } from '../components/relojExamen.ts';
+import { escaparHtml } from '../components/simbolos.ts';
 
 const DIAS_CALENDARIO = 28;
 const pct = (r: Recuento | undefined) => (r && r.total ? Math.round((r.aciertos / r.total) * 100) : null);
@@ -16,6 +20,22 @@ const pct = (r: Recuento | undefined) => (r && r.total ? Math.round((r.aciertos 
  * espaciada), calibración de la confianza, acierto por bloque y evolución de los simulacros.
  * Todo sale de la práctica guardada; el dominio de "Compruébalo" se ve en el índice.
  */
+/** Tema 2: tipos de fallo, tiempos del examen real y simulacros cronometrados (se guardan aparte). */
+function graficasTema2(): string {
+  const fallos = fallosGuardados();
+  const totalFallos = Object.values(fallos).reduce((a, b) => a + b, 0);
+  const tiempos = Object.entries(tiemposGuardados());
+  const sims = simulacrosGuardados().slice(-10);
+  if (!totalFallos && !tiempos.length && !sims.length) return '';
+  const maxF = Math.max(1, ...Object.values(fallos));
+  const filasFallos = (Object.keys(NOMBRE_FALLO) as TipoFallo[]).map((t) => `<div class="ex-fila"><span class="ex-et">${NOMBRE_FALLO[t]}</span><div class="ex-pista"><i class="ex-barra prob" style="width:${Math.max((fallos[t] / maxF) * 100, 0.6)}%;--c:var(--r)"></i><b class="ex-val">${fallos[t]}</b></div></div>`).join('');
+  const filasTiempos = tiempos.map(([id, t]) => `<div class="ex-fila"><span class="ex-et">Nº ${formulaPorId(id)?.numero ?? '?'} · ${escaparHtml(formulaPorId(id)?.nombre ?? id)}</span><div class="ex-pista"><b class="ex-val">mejor ${formatoReloj(t.mejor)} · último ${formatoReloj(t.ultimo)} <small>(${t.veces})</small></b></div></div>`).join('');
+  const filasSims = sims.map((x) => `<div class="ex-fila"><span class="ex-et">${x.fecha.split('-').reverse().slice(0, 2).join('/')}</span><div class="ex-pista"><i class="ex-barra prob" style="width:${Math.max(x.nota * 10, 0.6)}%;--c:var(--g)"></i><b class="ex-val">${x.nota.toFixed(1).replace('.', ',')} <small>(${formatoReloj(x.segundos)})</small></b></div></div>`).join('');
+  return `${totalFallos ? `<figure class="ex-graf"><figcaption><h3>Tema 2 · dónde fallas</h3><small>Fallos por tipo (laboratorio y simulacros)</small></figcaption><div class="ex-plot">${filasFallos}</div></figure>` : ''}
+${tiempos.length ? `<figure class="ex-graf"><figcaption><h3>Tema 2 · tus tiempos</h3><small>Examen real resuelto bien, por fórmula</small></figcaption><div class="ex-plot">${filasTiempos}</div></figure>` : ''}
+${sims.length ? `<figure class="ex-graf"><figcaption><h3>Tema 2 · simulacros</h3><small>Nota sobre 10 y tiempo empleado</small></figcaption><div class="ex-plot">${filasSims}</div></figure>` : ''}`;
+}
+
 export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practica: EstadoPractica): void {
   ctx.tituloMovil.textContent = 'Mi progreso';
   const p = practica.practica;
@@ -27,7 +47,8 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
   const r = racha(p, hoy);
   const dias = p.fechaExamen ? diasEntre(hoy, p.fechaExamen) : null;
 
-  if (!total && !p.simulacros.length) {
+  const tema2 = graficasTema2();
+  if (!total && !p.simulacros.length && !tema2) {
     ctx.pagina.innerHTML = `<div class="prog"><header class="sh"><div class="kick"><span class="pill k">${iconoUi('progreso')} Mi progreso</span></div><h1>Aún no hay datos</h1><p>Haz tu primera sesión de estudio: aquí verás tu racha, lo que ya tienes fijado en la memoria y si tu seguridad es fiable.</p></header><a class="ab q" href="${hrefSesion()}">${iconoUi('diana')} Empezar a estudiar hoy</a></div>`;
     return;
   }
@@ -105,5 +126,6 @@ export function pintarProgreso(ctx: ContextoVista, estado: EstadoEstudio, practi
 <figure class="ex-graf"><figcaption><h3>¿Es fiable tu seguridad?</h3><small>% de aciertos según lo seguro que estabas</small></figcaption><div class="ex-plot">${filasCal}</div><p class="sim-cal-nota">${lectura}</p></figure>
 <figure class="ex-graf"><figcaption><h3>Acierto por bloque</h3><small>En la práctica (sesiones, repaso y simulacros)</small></figcaption><div class="ex-plot">${filasBloque}</div></figure>
 <figure class="ex-graf"><figcaption><h3>Simulacros</h3><small>Nota sobre 10 · últimos ${sims.length || ''}</small></figcaption>${simulacros}</figure>
+${tema2}
 </div><p class="home-practica"><a class="principal" href="${hrefSesion()}">${iconoUi('diana')} Estudiar hoy</a></p></div>`;
 }

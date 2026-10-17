@@ -15,24 +15,30 @@ export function formatoReloj(segundos: number): string {
   return `${segundos < 0 ? '+' : ''}${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-/** Fase del reloj según lo que queda: normal, último minuto, agotado. */
-export function faseReloj(quedan: number): 'normal' | 'ultimo' | 'agotado' {
-  return quedan <= 0 ? 'agotado' : quedan <= 60 ? 'ultimo' : 'normal';
+/**
+ * Fase del reloj según lo que queda: normal, mitad (los 12 s siguientes a pasar la mitad, para un aviso
+ * suave), último minuto, agotado.
+ */
+export function faseReloj(quedan: number, total = Infinity): 'normal' | 'mitad' | 'ultimo' | 'agotado' {
+  if (quedan <= 0) return 'agotado';
+  if (quedan <= 60) return 'ultimo';
+  const usados = total - quedan;
+  return usados >= total / 2 && usados < total / 2 + 12 ? 'mitad' : 'normal';
 }
 
-export function minutosGuardados(): number {
+export function minutosGuardados(clave = CLAVE_DURACION, opciones: readonly number[] = DURACIONES_EXAMEN, defecto = 10): number {
   let v = 0;
-  try { v = Number(localStorage.getItem(CLAVE_DURACION)); } catch { v = 0; }
-  return (DURACIONES_EXAMEN as readonly number[]).includes(v) ? v : 10;
+  try { v = Number(localStorage.getItem(clave)); } catch { v = 0; }
+  return opciones.includes(v) ? v : defecto;
 }
 
-export function htmlRelojExamen(): string {
+export function htmlRelojExamen(opciones: readonly number[] = DURACIONES_EXAMEN, etiqueta = 'Minutos por ejercicio'): string {
   return `<div class="lab-reloj" data-lab-reloj hidden role="timer" aria-label="Tiempo del examen">
     <span class="lab-reloj-icono" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v4.2l2.6 1.6M9.5 3.5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
     <span class="lab-reloj-cifra" data-lab-reloj-cifra>10:00</span>
     <span class="lab-reloj-estado" data-lab-reloj-estado>quedan</span>
-    <label class="lab-reloj-duracion"><span class="sr">Minutos por ejercicio</span>
-      <select data-lab-reloj-minutos>${DURACIONES_EXAMEN.map((m) => `<option value="${m}">${m} min</option>`).join('')}</select></label>
+    <label class="lab-reloj-duracion"><span class="sr">${etiqueta}</span>
+      <select data-lab-reloj-minutos>${opciones.map((m) => `<option value="${m}">${m} min</option>`).join('')}</select></label>
     <span class="sr" aria-live="assertive" data-lab-reloj-aviso></span>
   </div>`;
 }
@@ -49,7 +55,7 @@ export interface RelojExamen {
  * Monta el reloj en `raiz` (que contiene el HTML de htmlRelojExamen). `alCambiarMinutos` se llama
  * cuando el alumno elige otra duración: el laboratorio decide si reinicia el ejercicio.
  */
-export function montarRelojExamen(raiz: HTMLElement, alCambiarMinutos: (minutos: number) => void): RelojExamen {
+export function montarRelojExamen(raiz: HTMLElement, alCambiarMinutos: (minutos: number) => void, clave = CLAVE_DURACION): RelojExamen {
   const caja = raiz.querySelector<HTMLElement>('[data-lab-reloj]')!;
   const cifra = caja.querySelector<HTMLElement>('[data-lab-reloj-cifra]')!;
   const estado = caja.querySelector<HTMLElement>('[data-lab-reloj-estado]')!;
@@ -65,25 +71,25 @@ export function montarRelojExamen(raiz: HTMLElement, alCambiarMinutos: (minutos:
     const ahora = fin ?? Date.now();
     const usados = Math.max(0, (ahora - inicio) / 1000);
     const quedan = total - usados;
-    const fase = fin !== undefined ? 'parado' : faseReloj(quedan);
+    const fase = fin !== undefined ? 'parado' : faseReloj(quedan, total);
     caja.dataset.fase = fase;
     if (fin !== undefined) {
       cifra.textContent = formatoReloj(usados);
       estado.textContent = quedan >= 0 ? 'has tardado' : `has tardado (${formatoReloj(-quedan).replace('+', '')} de más)`;
     } else {
       cifra.textContent = formatoReloj(Math.ceil(quedan));
-      estado.textContent = fase === 'agotado' ? 'tiempo agotado · llevas de más' : 'quedan';
+      estado.textContent = fase === 'agotado' ? 'tiempo agotado · llevas de más' : fase === 'mitad' ? 'mitad del tiempo · ¿tienes la fórmula?' : 'quedan';
     }
     // Avisos para lectores de pantalla, una vez por fase.
     if (fase !== faseAnunciada) {
       faseAnunciada = fase;
-      aviso.textContent = fase === 'ultimo' ? 'Queda un minuto.' : fase === 'agotado' ? 'Tiempo agotado.' : '';
+      aviso.textContent = fase === 'ultimo' ? 'Queda un minuto.' : fase === 'agotado' ? 'Tiempo agotado.' : fase === 'mitad' ? 'Llevas la mitad del tiempo.' : '';
     }
   };
 
   const alCambiar = () => {
     const m = Number(selector.value);
-    try { localStorage.setItem(CLAVE_DURACION, String(m)); } catch { /* sin almacenamiento */ }
+    try { localStorage.setItem(clave, String(m)); } catch { /* sin almacenamiento */ }
     alCambiarMinutos(m);
   };
   selector.addEventListener('change', alCambiar);
